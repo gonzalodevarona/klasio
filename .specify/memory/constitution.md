@@ -75,7 +75,27 @@ These rules are enforced in the domain layer, not in controllers or DB triggers:
 - Attendance marking window: from 30 min before class start until class end time.
 - Class cancellation by professor sets session to `CANCELLED` — no hours deducted, registered spots released.
 
-## VIII. Tech Stack (Fixed)
+## VIII. Design Patterns
+
+Use design patterns **only when the problem they solve is actually present**. Never apply a pattern speculatively or to signal sophistication. The bar is: "is this the simplest solution that handles the real complexity here?"
+
+Patterns that are likely warranted in this codebase and when to reach for them:
+
+| Pattern | When to use in Klasio |
+|---|---|
+| **Strategy** | Membership modality behavior (hours-based vs. classes-per-week) — swap algorithms without conditionals |
+| **Observer / Domain Events** | Decouple side effects (send email, update audit log) from core use cases — e.g., `MembershipActivated`, `AttendanceMarked`, `PaymentValidated` |
+| **Factory / Factory Method** | Constructing complex aggregates (e.g., `Membership.create(...)`) with invariant validation at creation time |
+| **Repository** | Already mandated by hexagonal architecture — one per aggregate root |
+| **Decorator** | Cross-cutting concerns on use cases (logging, metrics) without polluting business logic |
+| **State** | Membership lifecycle (`PENDING → ACTIVE → INACTIVE / EXPIRED`) when transitions carry behavior |
+| **Template Method** | Shared notification flow (membership expiry, payment rejection) with per-event customization |
+
+**Anti-patterns to avoid**: Singleton abuse, Service Locator, God classes masquerading as services, patterns applied just to satisfy a checklist.
+
+If you find yourself writing a pattern and the code becomes harder to read without a clear benefit — remove it.
+
+## IX. Tech Stack (Fixed)
 
 | Layer | Technology |
 |---|---|

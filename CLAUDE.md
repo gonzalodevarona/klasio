@@ -123,6 +123,22 @@ Added a cancellation status check before triggering the deduction logic.
 Closes #47
 ```
 
+## Design Patterns
+
+Use design patterns **only when the problem they solve is actually present**. Never apply a pattern speculatively. The bar is: is this the simplest solution that handles the real complexity here?
+
+Patterns likely warranted in this codebase:
+
+- **Strategy** — membership modality behavior (hours-based vs. classes-per-week).
+- **Observer / Domain Events** — decouple side effects (email, audit log) from use cases: `MembershipActivated`, `AttendanceMarked`, `PaymentValidated`.
+- **Factory** — constructing aggregates (e.g., `Membership.create(...)`) with invariant validation at creation time.
+- **Repository** — mandated by hexagonal architecture, one per aggregate root.
+- **Decorator** — cross-cutting concerns (logging, metrics) on use cases without polluting business logic.
+- **State** — membership lifecycle (`PENDING → ACTIVE → INACTIVE / EXPIRED`) when transitions carry behavior.
+- **Template Method** — shared notification flow with per-event customization.
+
+If applying a pattern makes the code harder to read without a clear benefit, remove it.
+
 ## Dependencies and Library Versions
 
 Always use the latest LTS version of any library or dependency unless:
