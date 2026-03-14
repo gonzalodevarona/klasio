@@ -127,7 +127,7 @@ Closes #47
 
 Use design patterns **only when the problem they solve is actually present**. Never apply a pattern speculatively. The bar is: is this the simplest solution that handles the real complexity here?
 
-Patterns likely warranted in this codebase:
+The full catalog of applicable patterns is not limited — any pattern from the GoF, enterprise, or architectural catalogs is valid if it genuinely fits. [refactoring.guru](https://refactoring.guru/design-patterns) is the reference. The following are examples of patterns likely warranted in this codebase, not an exhaustive list:
 
 - **Strategy** — membership modality behavior (hours-based vs. classes-per-week).
 - **Observer / Domain Events** — decouple side effects (email, audit log) from use cases: `MembershipActivated`, `AttendanceMarked`, `PaymentValidated`.
