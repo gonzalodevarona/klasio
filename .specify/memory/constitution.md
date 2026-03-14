@@ -79,9 +79,9 @@ These rules are enforced in the domain layer, not in controllers or DB triggers:
 
 Use design patterns **only when the problem they solve is actually present**. Never apply a pattern speculatively or to signal sophistication. The bar is: "is this the simplest solution that handles the real complexity here?"
 
-Patterns that are likely warranted in this codebase and when to reach for them:
+The full catalog of applicable patterns is not limited — any pattern from the GoF, enterprise, or architectural catalogs is valid if it genuinely fits. [refactoring.guru](https://refactoring.guru/design-patterns) is the reference. The following are examples of patterns likely warranted in this codebase, not an exhaustive list:
 
-| Pattern | When to use in Klasio |
+| Pattern | Example use in Klasio |
 |---|---|
 | **Strategy** | Membership modality behavior (hours-based vs. classes-per-week) — swap algorithms without conditionals |
 | **Observer / Domain Events** | Decouple side effects (send email, update audit log) from core use cases — e.g., `MembershipActivated`, `AttendanceMarked`, `PaymentValidated` |
