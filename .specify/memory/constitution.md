@@ -1,50 +1,135 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+---
+name: Klasio Constitution
+description: Architectural principles and non-negotiable constraints for the Klasio platform
+type: project
+---
 
-## Core Principles
+# Klasio Constitution
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+## I. Architecture: Hexagonal (Ports & Adapters)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+The backend is structured as a hexagonal architecture. Business logic lives in the **domain layer** and is completely decoupled from frameworks, databases, and external services.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+- **Domain**: entities, value objects, domain services, domain events. Zero framework dependencies.
+- **Application**: use cases (one class per use case), ports (interfaces). Orchestrates domain, never contains business rules.
+- **Infrastructure**: adapters — Spring controllers, JPA repositories, S3 clients, email senders, schedulers. Implements ports.
+- **No leakage rule**: infrastructure types (JPA entities, HTTP request/response objects) must never appear in the domain or application layer. Map at the boundary.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+Every module follows this structure: `auth`, `tenant`, `program`, `student`, `membership`, `payment`, `attendance`.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+## II. Test-Driven Development (NON-NEGOTIABLE)
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+TDD is mandatory on every feature:
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+1. Write the failing test first.
+2. Write the minimum code to pass it.
+3. Refactor. Never change tests to accommodate broken code.
+4. Unit test coverage ≥ 70% on the business/application layer.
+5. Integration tests required for: persistence adapters, API endpoints, domain event flows, and the membership expiration scheduler.
+6. Test doubles (mocks/stubs) are permitted in unit tests but integration tests must hit real infrastructure (real DB, real S3-compatible storage).
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## III. SOLID
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- **S** — One use case per class. One reason to change.
+- **O** — Extend behavior via new adapters or decorators, not by modifying existing use cases.
+- **L** — All port implementations must be substitutable without changing application logic.
+- **I** — Ports are narrow. A `MembershipRepository` port only exposes what the membership use cases need.
+- **D** — Use cases depend on port interfaces, never on concrete adapters.
+
+## IV. KISS & DRY
+
+- **KISS**: default to the simplest solution that satisfies the requirement. No speculative abstractions.
+- **DRY**: shared domain logic (e.g., hour deduction, expiration check) lives in a single domain service, never duplicated across use cases.
+- Three similar lines of code is acceptable. A premature abstraction is not.
+- No utility classes that grow into catch-all buckets.
+
+## V. Multitenancy & Data Isolation
+
+- Every database table includes a `tenant_id` column.
+- PostgreSQL Row Level Security (RLS) policy enforces tenant isolation at the DB layer as a safety net.
+- Every repository method accepts and filters by `tenant_id`. No query may omit it.
+- The `tenant_id` is resolved from the authenticated JWT at the API boundary and propagated via a request-scoped context — never passed as a user-supplied parameter in request bodies.
+- Adding a new tenant requires zero code changes or restarts — tenant configuration is data, not config.
+
+## VI. Security
+
+- TLS 1.2+ on all endpoints. No plain HTTP in any environment.
+- Passwords hashed with bcrypt, salt factor ≥ 12.
+- JWT + refresh tokens for auth. Stateless access tokens (≤ 8h). Refresh tokens rotated on use.
+- RBAC enforced on every API endpoint via a declarative annotation/filter — never ad-hoc if/else role checks inside use cases.
+- Roles: `SUPERADMIN > ADMIN > MANAGER > PROFESSOR > STUDENT`. Each role only sees endpoints and data within its scope.
+- Student sensitive data (EPS, ID document, minor tutor data) subject to field-level access restriction — only `ADMIN` and `SUPERADMIN` can read/write identity number and document type.
+- Audit log for every critical action (membership activation, payment validation, hour adjustment, attendance marking): immutable, includes actor, timestamp, before/after values. Retained 1 year minimum.
+- S3 payment proofs: pre-signed URLs only. Never expose bucket URLs directly. Max 5 MB, accept PDF/JPG/PNG only — validate MIME type server-side, not just extension.
+
+## VII. Domain Rules (Authoritative)
+
+These rules are enforced in the domain layer, not in controllers or DB triggers:
+
+- One active membership per student per program at any time.
+- Hours deducted **only** when professor (or manager) marks a student as Present — never at registration.
+- Membership expires on day 1 of the following calendar month. Remaining hours are forfeited — no carry-over.
+- Membership transitions to `INACTIVE` when `available_hours = 0`.
+- Attendance registration requires: active membership + sufficient hours + class not at capacity.
+- Cancellation allowed up to N hours before class start (default 2h, configurable per tenant). Outside window: hours may be deducted per league policy.
+- Attendance marking window: from 30 min before class start until class end time.
+- Class cancellation by professor sets session to `CANCELLED` — no hours deducted, registered spots released.
+
+## VIII. Tech Stack (Fixed)
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js (latest LTS) + TypeScript + Tailwind CSS |
+| Backend | Java 21 + Spring Boot 3 (latest patch) |
+| Database | PostgreSQL (latest stable) + RLS |
+| Auth | JWT + refresh tokens (evaluate Supabase Auth to reduce time-to-market) |
+| File storage | AWS S3 |
+| Email | Postmark |
+| Scheduler | Spring `@Scheduled` cron for daily membership expiration |
+| Cloud | AWS |
+| API spec | OpenAPI 3 / Swagger |
+
+Use latest LTS versions. Justify any deviation in the PR description.
+
+## IX. API Design
+
+- REST. Resource-oriented URLs. Plural nouns. No verbs in paths.
+- Every endpoint is tenant-scoped. Example: `/api/v1/programs` returns only programs for the authenticated user's tenant.
+- Consistent error envelope: `{ "error": { "code": "MEMBERSHIP_NOT_ACTIVE", "message": "..." } }`.
+- Pagination required on all list endpoints (cursor-based preferred; offset acceptable for admin views).
+- Breaking changes require a version bump (`/v2/`). Non-breaking additions do not.
+- Every endpoint documented in OpenAPI spec before implementation (spec-first).
+
+## X. Performance & Reliability
+
+- 95th percentile response < 2s under 500 concurrent users.
+- All DB queries on hot paths must have appropriate indexes. Query plans reviewed before merging.
+- No N+1 queries. Use joins or batch loading at the repository adapter level.
+- 99% monthly uptime target.
+- Daily automated DB backup, 30-day retention. RTO < 4h, RPO < 24h.
+
+## XI. Branching & Commit Convention
+
+**Gitflow**:
+- `main` — production only. Never commit directly.
+- `develop` — integration branch.
+- `feature/<name>` — from `develop`, merged back via PR.
+- `release/<version>` — from `develop`, merged into `main` + `develop`.
+- `hotfix/<name>` — from `main`, merged into `main` + `develop`.
+
+**Conventional Commits** — format: `<type>(<scope>): <description>`
+
+Types: `feat`, `fix`, `hotfix`, `test`, `refactor`, `chore`, `docs`, `style`, `perf`, `ci`, `revert`.
+Description: lowercase, imperative mood. Example: `feat(membership): add automatic expiration via daily cron`.
+
+## XII. v1.0 Scope (P0 only — launch blockers)
+
+Auth, multitenancy, programs/levels/professors/classes, student management, membership lifecycle (creation → activation → expiration → inactivation), payment upload/validation, attendance registration/marking, student dashboard.
+
+**Deferred to v1.1 (P1–P2):** cost modification history, student level promotion, manual hour adjustments, membership history export, manager delegation 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other practices and conventions. Every PR review must verify compliance with architecture boundaries, security rules, and domain invariants. Amendments require explicit documentation and team approval.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-14
