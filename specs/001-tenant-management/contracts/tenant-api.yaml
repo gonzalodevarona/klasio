@@ -1,0 +1,338 @@
+openapi: 3.1.0
+info:
+  title: Klasio Tenant Management API
+  version: 1.0.0
+  description: REST API for superadmin tenant (league) management operations.
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: Tenants
+    description: Tenant lifecycle management (superadmin only)
+
+paths:
+  /tenants:
+    post:
+      operationId: createTenant
+      tags: [Tenants]
+      summary: Create a new tenant (league)
+      description: |
+        Creates a new tenant with the provided information. Requires SUPERADMIN role.
+        The logo is optional and must be JPG/PNG, max 5MB.
+        A URL slug is auto-generated from the league name unless explicitly provided.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, sportDiscipline, contactEmail]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 150
+                  description: League display name
+                  example: Fútbol Bogotá
+                sportDiscipline:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Sport or discipline (free text)
+                  example: Fútbol
+                slug:
+                  type: string
+                  minLength: 3
+                  maxLength: 60
+                  pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+                  description: Optional custom URL slug. Auto-generated from name if omitted.
+                  example: futbol-bogota
+                contactEmail:
+                  type: string
+                  format: email
+                  maxLength: 255
+                  example: info@futbolbogota.co
+                contactPhone:
+                  type: string
+                  maxLength: 30
+                  example: "+57 311 234 5678"
+                contactAddress:
+                  type: string
+                  maxLength: 500
+                  example: Cra 7 #32-16, Bogotá
+                logo:
+                  type: string
+                  format: binary
+                  description: Logo image (JPG or PNG, max 5MB)
+      responses:
+        '201':
+          description: Tenant created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantDetail'
+        '400':
+          description: Validation error (missing required fields, invalid format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingField:
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: "Validation failed"
+                      details:
+                        - field: name
+                          message: "must not be blank"
+                invalidLogo:
+                  value:
+                    error:
+                      code: INVALID_FILE_TYPE
+                      message: "Logo must be JPG or PNG and no larger than 5MB"
+        '409':
+          description: Slug already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: SLUG_ALREADY_EXISTS
+                  message: "The URL identifier 'futbol-bogota' is already taken"
+                  suggestedSlug: futbol-bogota-2
+        '403':
+          description: Insufficient permissions (not a superadmin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      operationId: listTenants
+      tags: [Tenants]
+      summary: List all tenants
+      description: Returns a paginated list of all tenants. Requires SUPERADMIN role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Page number (zero-based)
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+          description: Page size
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE]
+          description: Filter by status
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: createdAt,desc
+          description: Sort field and direction (e.g., name,asc)
+      responses:
+        '200':
+          description: Paginated list of tenants
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantListResponse'
+        '403':
+          description: Insufficient permissions
+
+  /tenants/{slug}:
+    get:
+      operationId: getTenantBySlug
+      tags: [Tenants]
+      summary: Get tenant details
+      description: Returns full details for a specific tenant. Requires SUPERADMIN role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Tenant URL slug
+          example: futbol-bogota
+      responses:
+        '200':
+          description: Tenant details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantDetail'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+
+  /tenants/{slug}/deactivate:
+    post:
+      operationId: deactivateTenant
+      tags: [Tenants]
+      summary: Deactivate a tenant
+      description: |
+        Deactivates an active tenant. All active sessions for the tenant's users
+        are immediately invalidated. Requires SUPERADMIN role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Tenant URL slug
+          example: futbol-bogota
+      responses:
+        '200':
+          description: Tenant deactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantDetail'
+        '404':
+          description: Tenant not found
+        '409':
+          description: Tenant is already inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: TENANT_ALREADY_INACTIVE
+                  message: "Tenant 'futbol-bogota' is already inactive"
+        '403':
+          description: Insufficient permissions
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TenantSummary:
+      type: object
+      required: [id, slug, name, sportDiscipline, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          example: futbol-bogota
+        name:
+          type: string
+          example: Fútbol Bogotá
+        sportDiscipline:
+          type: string
+          example: Fútbol
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        createdAt:
+          type: string
+          format: date-time
+
+    TenantDetail:
+      allOf:
+        - $ref: '#/components/schemas/TenantSummary'
+        - type: object
+          properties:
+            logoUrl:
+              type: string
+              format: uri
+              description: Pre-signed URL for the logo (null if no logo)
+              nullable: true
+            contactEmail:
+              type: string
+              format: email
+            contactPhone:
+              type: string
+              nullable: true
+            contactAddress:
+              type: string
+              nullable: true
+            createdBy:
+              type: string
+              format: uuid
+            deactivatedAt:
+              type: string
+              format: date-time
+              nullable: true
+            deactivatedBy:
+              type: string
+              format: uuid
+              nullable: true
+
+    TenantListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+            suggestedSlug:
+              type: string
+              description: Present only when code is SLUG_ALREADY_EXISTS

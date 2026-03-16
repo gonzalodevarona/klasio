@@ -1,0 +1,7 @@
+klasio:
+  jwt:
+    secret: test-secret-key-for-unit-tests-minimum-256-bits-long-for-hs256
+    expiration: 86400000
+  s3:
+    bucket: klasio-logos-test
+    region: us-east-1

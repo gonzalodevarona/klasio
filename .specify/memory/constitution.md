@@ -99,7 +99,7 @@ If you find yourself writing a pattern and the code becomes harder to read witho
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js (latest LTS) + TypeScript + Tailwind CSS |
+| Frontend | Next.js (latest LTS) + TypeScript + Tailwind CSS + Vite (build tool) |
 | Backend | Java 21 + Spring Boot 3 (latest patch) |
 | Database | PostgreSQL (latest stable) + RLS |
 | Auth | JWT + refresh tokens (evaluate Supabase Auth to reduce time-to-market) |
@@ -110,6 +110,20 @@ If you find yourself writing a pattern and the code becomes harder to read witho
 | API spec | OpenAPI 3 / Swagger |
 
 Use latest LTS versions. Justify any deviation in the PR description.
+
+## IX-B. Development Environment (Fixed)
+
+| Tool | Used for |
+|---|---|
+| **IntelliJ IDEA** | Java/Spring Boot backend development (IDE) |
+| **Cursor** | Next.js/TypeScript frontend development (IDE) |
+| **Docker Desktop** | Container management (PostgreSQL, LocalStack) |
+
+All generated code, project files, and configurations must be compatible with these tools:
+- Include IntelliJ-friendly project structure (standard Maven layout, no custom build scripts that bypass IntelliJ's built-in Maven support).
+- Do not generate IDE-specific config files (`.idea/`, `.vscode/`) — let each IDE auto-detect.
+- Docker Compose files must work with Docker Desktop's compose integration (use `docker compose` v2 syntax, not legacy `docker-compose` v1).
+- Run configurations should be expressible as standard Maven goals or `npm` scripts so they work natively in both IntelliJ and Cursor without custom wrappers.
 
 ## IX. API Design
 
@@ -152,4 +166,4 @@ Auth, multitenancy, programs/levels/professors/classes, student management, memb
 
 This constitution supersedes all other practices and conventions. Every PR review must verify compliance with architecture boundaries, security rules, and domain invariants. Amendments require explicit documentation and team approval.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-14
+**Version**: 1.1.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-16

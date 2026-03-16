@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/klasio
+    username: klasio_app
+    password: klasio_pass
+  jpa:
+    show-sql: true
+
+klasio:
+  jwt:
+    secret: local-dev-secret-key-that-is-at-least-256-bits-long-for-hs256-signing
+  s3:
+    endpoint: http://localhost:4566
+    bucket: klasio-logos-dev
+    region: us-east-1
+
+logging:
+  level:
+    com.klasio: DEBUG
+    org.hibernate.SQL: DEBUG

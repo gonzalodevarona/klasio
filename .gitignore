@@ -1,5 +1,33 @@
 # macOS metadata
 .DS_Store
+Thumbs.db
 
 # JetBrains IDE files
 .idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Java / Maven
+api/target/
+*.class
+*.jar
+*.war
+
+# Node.js
+web/node_modules/
+web/.next/
+web/out/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp

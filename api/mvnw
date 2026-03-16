@@ -1,0 +1,44 @@
+#!/bin/sh
+
+set -e
+
+WRAPPER_JAR=".mvn/wrapper/maven-wrapper.jar"
+WRAPPER_PROPS=".mvn/wrapper/maven-wrapper.properties"
+MAVEN_HOME="$HOME/.m2/wrapper/dists/apache-maven-3.9.9"
+
+if [ ! -f "$WRAPPER_JAR" ]; then
+    WRAPPER_URL=$(grep wrapperUrl "$WRAPPER_PROPS" | cut -d'=' -f2-)
+    echo "Downloading Maven Wrapper..."
+    mkdir -p "$(dirname "$WRAPPER_JAR")"
+    if command -v curl > /dev/null 2>&1; then
+        curl -sL "$WRAPPER_URL" -o "$WRAPPER_JAR"
+    elif command -v wget > /dev/null 2>&1; then
+        wget -q "$WRAPPER_URL" -O "$WRAPPER_JAR"
+    fi
+fi
+
+if [ -f "$WRAPPER_JAR" ]; then
+    exec java -jar "$WRAPPER_JAR" "$@"
+fi
+
+if [ ! -d "$MAVEN_HOME" ]; then
+    DIST_URL=$(grep distributionUrl "$WRAPPER_PROPS" | cut -d'=' -f2-)
+    echo "Downloading Maven 3.9.9..."
+    mkdir -p "$MAVEN_HOME"
+    TMPFILE=$(mktemp /tmp/maven-XXXXXX.zip)
+    curl -sL "$DIST_URL" -o "$TMPFILE"
+    unzip -qo "$TMPFILE" -d "$(dirname "$MAVEN_HOME")"
+    rm "$TMPFILE"
+fi
+
+MVN_CMD="$(find "$MAVEN_HOME" -name mvn -path "*/bin/mvn" -type f 2>/dev/null | head -1)"
+if [ -z "$MVN_CMD" ]; then
+    MVN_CMD="$(find "$(dirname "$MAVEN_HOME")" -name mvn -path "*/bin/mvn" -type f 2>/dev/null | head -1)"
+fi
+
+if [ -z "$MVN_CMD" ]; then
+    echo "ERROR: Could not find Maven. Install Maven or run: brew install maven"
+    exit 1
+fi
+
+exec "$MVN_CMD" "$@"

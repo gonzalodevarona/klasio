@@ -40,13 +40,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Tech Stack
 
 - **Cloud**: AWS (primary cloud provider)
-- **Frontend**: React/Next.js + Tailwind CSS (responsive, mobile first) + TS
+- **Frontend**: React/Next.js + Tailwind CSS (responsive, mobile first) + TS + Vite (build tool)
 - **Backend**: Java 21 (Spring 3), REST APIs
 - **Database**: PostgreSQL with tenant isolation (tenant_id column with row level security policy)
 - **Auth**: JWT + refresh tokens (consider Auth0/Supabase Auth)
 - **File storage**: S3 for payment proofs (max 5MB, PDF/JPG/PNG)
 - **Email**: Postmark for transactional notifications
 - **Scheduler**: Cron for daily membership expiration checks
+
+## Development Environment
+
+- **Backend IDE**: IntelliJ IDEA — all Java/Spring Boot code is developed and run from IntelliJ. Use standard Maven goals (`spring-boot:run`, `test`, `verify`) that IntelliJ executes natively.
+- **Frontend IDE**: Cursor — all Next.js/TypeScript code is developed in Cursor. Use standard `npm` scripts (`dev`, `build`, `test`).
+- **Containers**: Docker Desktop — PostgreSQL and LocalStack run via `docker compose` (v2 syntax). Compose files must be compatible with Docker Desktop's built-in compose integration.
+- Do not generate IDE-specific config files (`.idea/`, `.vscode/`). Do not create custom run wrappers — keep everything runnable via Maven goals and npm scripts so both IDEs work out of the box.
 
 ## Non-Functional Requirements (key constraints)
 
@@ -164,3 +171,10 @@ Auth, multitenancy, programs/levels/professors, student management, membership l
 ## v1.1 Deferred (P1-P2)
 
 Cost modification history, student level promotion, manual hour adjustments, membership history export, manager delegation with 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
+
+## Active Technologies
+- Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS (001-tenant-management)
+- PostgreSQL (latest stable) with RLS, AWS S3 (logos) (001-tenant-management)
+
+## Recent Changes
+- 001-tenant-management: Added Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS
