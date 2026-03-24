@@ -4,6 +4,7 @@ import com.klasio.shared.infrastructure.security.JwtAuthenticationFilter;
 import com.klasio.shared.infrastructure.security.TenantStatusFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -47,6 +49,7 @@ public class SecurityConfig {
                                 "/dev/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/tenants/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/api/v1/programs/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.crypto.SecretKey;
@@ -50,6 +51,31 @@ public class DevTokenController {
                 "token", token,
                 "userId", userId,
                 "role", "SUPERADMIN",
+                "expiresIn", "24 hours"
+        ));
+    }
+
+    @GetMapping("/token/admin")
+    public ResponseEntity<Map<String, String>> generateAdminToken(
+            @RequestParam String tenantId,
+            @RequestParam(defaultValue = "ADMIN") String role) {
+        String userId = UUID.randomUUID().toString();
+        Instant now = Instant.now();
+
+        String token = Jwts.builder()
+                .subject(userId)
+                .claim("tenant_id", tenantId)
+                .claim("roles", List.of(role))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(24, ChronoUnit.HOURS)))
+                .signWith(secretKey)
+                .compact();
+
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "userId", userId,
+                "tenantId", tenantId,
+                "role", role,
                 "expiresIn", "24 hours"
         ));
     }
