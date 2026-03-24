@@ -172,9 +172,15 @@ Auth, multitenancy, programs/levels/professors, student management, membership l
 
 Cost modification history, student level promotion, manual hour adjustments, membership history export, manager delegation with 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
 
+## Speckit Workflow
+
+When running the **specify** phase of speckit (`/speckit.specify`), always read `functional-requirements.md` first to understand the full context of existing requirements, priorities, and implementation status before creating or updating a feature specification.
+
 ## Active Technologies
 - Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS (001-tenant-management)
 - PostgreSQL (latest stable) with RLS, AWS S3 (logos) (001-tenant-management)
+- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 3.4.3, Spring Data JPA, Spring Security 6, Flyway, Next.js 15.1, Tailwind CSS 3.4 (002-program-configuration)
+- PostgreSQL (latest stable) with RLS — first tenant-scoped table with enforced row-level policies (002-program-configuration)
 
 ## Recent Changes
 - 001-tenant-management: Added Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS

@@ -23,6 +23,22 @@ function Sidebar() {
               Tenants
             </a>
           </li>
+          <li>
+            <a
+              href="/programs"
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
+            >
+              Programs
+            </a>
+          </li>
+          <li>
+            <a
+              href="/plans"
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
+            >
+              Plans
+            </a>
+          </li>
         </ul>
       </nav>
     </aside>

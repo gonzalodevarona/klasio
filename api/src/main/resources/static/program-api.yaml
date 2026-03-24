@@ -1,0 +1,471 @@
+openapi: 3.1.0
+info:
+  title: Klasio Program Configuration API
+  version: 1.0.0
+  description: |
+    REST API for tenant program management operations.
+    Programs are tenant-scoped: the tenant is resolved from the JWT `tenant_id` claim.
+    Superadmins without a tenant claim can provide the `X-Tenant-Id` header.
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: Programs
+    description: Program lifecycle management (admin and superadmin)
+
+paths:
+  /programs:
+    post:
+      operationId: createProgram
+      tags: [Programs]
+      summary: Create a new program
+      description: |
+        Creates a new program within the authenticated user's tenant.
+        Requires ADMIN or SUPERADMIN role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTenantId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProgramRequest'
+            example:
+              name: Kids Swimming
+              modality: HOURS_BASED
+              cost: 120000
+              managerId: 550e8400-e29b-41d4-a716-446655440001
+      responses:
+        '201':
+          description: Program created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramDetail'
+        '400':
+          description: Validation error (missing fields, invalid cost, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingField:
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Validation failed
+                      details:
+                        - field: name
+                          message: must not be blank
+                negativeCost:
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Cost must be a positive value
+        '403':
+          description: Insufficient permissions (not ADMIN or SUPERADMIN)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Program name already exists in this tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PROGRAM_NAME_ALREADY_EXISTS
+                  message: "A program with name 'Kids Swimming' already exists in this tenant"
+
+    get:
+      operationId: listPrograms
+      tags: [Programs]
+      summary: List programs for the current tenant
+      description: |
+        Returns a paginated list of programs belonging to the authenticated user's tenant.
+        Accessible to ADMIN, SUPERADMIN, and MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTenantId'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Page number (zero-based)
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+          description: Page size
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE]
+          description: Filter by program status
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: createdAt,desc
+          description: "Sort field and direction (e.g., name,asc or createdAt,desc)"
+      responses:
+        '200':
+          description: Paginated list of programs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramListResponse'
+        '403':
+          description: Insufficient permissions
+
+  /programs/{programId}:
+    get:
+      operationId: getProgramById
+      tags: [Programs]
+      summary: Get program details
+      description: |
+        Returns full details for a specific program.
+        Accessible to ADMIN, SUPERADMIN, and MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTenantId'
+        - name: programId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Program UUID
+      responses:
+        '200':
+          description: Program details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramDetail'
+        '404':
+          description: Program not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PROGRAM_NOT_FOUND
+                  message: "Program not found"
+        '403':
+          description: Insufficient permissions
+
+    put:
+      operationId: updateProgram
+      tags: [Programs]
+      summary: Update program configuration
+      description: |
+        Updates a program's name, cost, and/or assigned manager.
+        The modality cannot be changed after creation.
+        Requires ADMIN or SUPERADMIN role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTenantId'
+        - name: programId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Program UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProgramRequest'
+            example:
+              name: Youth Swimming
+              cost: 130000
+              managerId: 550e8400-e29b-41d4-a716-446655440002
+      responses:
+        '200':
+          description: Program updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramDetail'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Program not found
+        '409':
+          description: Program name already exists in this tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /programs/{programId}/deactivate:
+    post:
+      operationId: deactivateProgram
+      tags: [Programs]
+      summary: Deactivate a program
+      description: |
+        Deactivates an active program. Deactivation prevents new enrollments
+        but preserves all historical data. Requires ADMIN or SUPERADMIN role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTenantId'
+        - name: programId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Program UUID
+      responses:
+        '200':
+          description: Program deactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramDetail'
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Program not found
+        '409':
+          description: Program is already inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PROGRAM_ALREADY_INACTIVE
+                  message: "Program is already inactive"
+
+  /programs/{programId}/reactivate:
+    post:
+      operationId: reactivateProgram
+      tags: [Programs]
+      summary: Reactivate a program
+      description: |
+        Reactivates a previously deactivated program. The program becomes
+        available for new enrollments again. Requires ADMIN or SUPERADMIN role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/XTenantId'
+        - name: programId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Program UUID
+      responses:
+        '200':
+          description: Program reactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramDetail'
+        '403':
+          description: Insufficient permissions
+        '404':
+          description: Program not found
+        '409':
+          description: Program is already active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PROGRAM_ALREADY_ACTIVE
+                  message: "Program is already active"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    XTenantId:
+      name: X-Tenant-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: |
+        Tenant UUID override. Only accepted from SUPERADMIN role users
+        who do not have a tenant_id in their JWT. Ignored for other roles.
+
+  schemas:
+    CreateProgramRequest:
+      type: object
+      required: [name, modality, cost, managerId]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+          description: Program display name (unique per tenant)
+          example: Kids Swimming
+        modality:
+          type: string
+          enum: [HOURS_BASED, CLASSES_PER_WEEK]
+          description: Billing modality (immutable after creation)
+          example: HOURS_BASED
+        cost:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+          description: Monthly membership cost (positive value)
+          example: 120000
+        managerId:
+          type: string
+          format: uuid
+          description: UUID of the user with MANAGER role assigned to this program
+          example: 550e8400-e29b-41d4-a716-446655440001
+
+    UpdateProgramRequest:
+      type: object
+      required: [name, cost, managerId]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+          description: Program display name (unique per tenant)
+          example: Youth Swimming
+        cost:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+          description: Monthly membership cost (positive value)
+          example: 130000
+        managerId:
+          type: string
+          format: uuid
+          description: UUID of the user with MANAGER role assigned to this program
+          example: 550e8400-e29b-41d4-a716-446655440002
+      description: |
+        Updates name, cost, and/or manager. The modality field is intentionally
+        absent because it cannot be changed after program creation.
+
+    ProgramSummary:
+      type: object
+      required: [id, name, modality, cost, managerId, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Kids Swimming
+        modality:
+          type: string
+          enum: [HOURS_BASED, CLASSES_PER_WEEK]
+        cost:
+          type: number
+          format: decimal
+          example: 120000
+        managerId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        createdAt:
+          type: string
+          format: date-time
+
+    ProgramDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProgramSummary'
+        - type: object
+          properties:
+            tenantId:
+              type: string
+              format: uuid
+            createdBy:
+              type: string
+              format: uuid
+            updatedAt:
+              type: string
+              format: date-time
+              nullable: true
+            updatedBy:
+              type: string
+              format: uuid
+              nullable: true
+
+    ProgramListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProgramSummary'
+        page:
+          type: integer
+          description: Current page number (zero-based)
+        size:
+          type: integer
+          description: Page size
+        totalElements:
+          type: integer
+          format: int64
+          description: Total number of programs matching the filter
+        totalPages:
+          type: integer
+          description: Total number of pages
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string

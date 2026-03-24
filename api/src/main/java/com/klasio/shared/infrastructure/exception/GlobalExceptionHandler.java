@@ -58,6 +58,42 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(ProgramNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProgramNotFound(ProgramNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROGRAM_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProgramNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleProgramNameAlreadyExists(ProgramNameAlreadyExistsException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROGRAM_NAME_ALREADY_EXISTS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProgramAlreadyInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleProgramAlreadyInactive(ProgramAlreadyInactiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROGRAM_ALREADY_INACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProgramAlreadyActiveException.class)
+    public ResponseEntity<ErrorResponse> handleProgramAlreadyActive(ProgramAlreadyActiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROGRAM_ALREADY_ACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProgramPlanNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProgramPlanNotFound(ProgramPlanNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("PLAN_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProgramPlanNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleProgramPlanNameAlreadyExists(ProgramPlanNameAlreadyExistsException ex) {
+        var error = new ErrorResponse.ErrorDetail("PLAN_NAME_ALREADY_EXISTS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         var error = new ErrorResponse.ErrorDetail("INVALID_FILE_TYPE", ex.getMessage());

@@ -69,6 +69,12 @@ export const api = {
       body: body instanceof FormData ? body : JSON.stringify(body),
     }),
 
+  put: <T>(path: string, body?: unknown) =>
+    request<T>(path, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+
   postForm: <T>(path: string, formData: FormData) =>
     request<T>(path, {
       method: "POST",
