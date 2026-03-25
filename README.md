@@ -13,7 +13,7 @@ klasio/
 ## Main features
 
 - **Multitenancy**: Each league operates in isolation with its own programs, students, and configuration.
-- **Program management**: Programs with levels, professors, classes, and schedules.
+- **Program management**: Programs with plans, classes (tagged by student level), professors, and schedules.
 - **Memberships**: Full lifecycle — purchase, activation, hour consumption, and automatic monthly expiration.
 - **Payments**: Proof of payment upload by students and validation by administrators.
 - **Attendance**: Students register intent, professors/managers mark attendance with automatic hour deduction.
@@ -36,7 +36,7 @@ klasio/
 ### Funcionalidades principales
 
 - **Multitenancy**: Cada liga opera de forma aislada con sus propios programas, estudiantes y configuración.
-- **Gestión de programas**: Programas con niveles, profesores, clases y horarios.
+- **Gestión de programas**: Programas con planes, clases (organizadas por nivel del estudiante), profesores y horarios.
 - **Membresías**: Ciclo completo de compra, activación, consumo de horas y expiración mensual automática.
 - **Pagos**: Subida de comprobantes por el estudiante y validación por el administrador.
 - **Asistencia**: Registro de intención por el estudiante, marcación por profesor/manager con descuento automático de horas.

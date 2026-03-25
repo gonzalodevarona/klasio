@@ -94,6 +94,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(ProfessorNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProfessorNotFound(ProfessorNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROFESSOR_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProfessorEmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleProfessorEmailAlreadyExists(ProfessorEmailAlreadyExistsException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROFESSOR_EMAIL_ALREADY_EXISTS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProfessorAlreadyActiveException.class)
+    public ResponseEntity<ErrorResponse> handleProfessorAlreadyActive(ProfessorAlreadyActiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROFESSOR_ALREADY_ACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ProfessorAlreadyInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleProfessorAlreadyInactive(ProfessorAlreadyInactiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROFESSOR_ALREADY_INACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         var error = new ErrorResponse.ErrorDetail("INVALID_FILE_TYPE", ex.getMessage());

@@ -74,7 +74,7 @@ public class TenantContextInterceptor implements HandlerInterceptor {
 
     private void setTenantContext(String tenantId) {
         try (Connection connection = dataSource.getConnection()) {
-            try (var stmt = connection.prepareStatement("SET LOCAL app.current_tenant = ?")) {
+            try (var stmt = connection.prepareStatement("SELECT set_config('app.current_tenant', ?, false)")) {
                 stmt.setString(1, tenantId);
                 stmt.execute();
             }
