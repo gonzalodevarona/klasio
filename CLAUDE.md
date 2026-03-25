@@ -9,9 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Domain Model
 
 - **Tenant (League)**: Isolated organization (sports league). All data is scoped per tenant.
-- **Programs**: Each tenant has programs (e.g., kids, youth & adults) with a modality (hours-based or classes-per-week) and cost.
-- **Levels**: Programs contain ordered levels (beginner, intermediate, advanced) each with an assigned professor.
-- **Classes**: Belong to a level, have a schedule (day/time), assigned professor, and student capacity limit.
+- **Programs**: Each tenant has programs (e.g., kids, youth & adults). Each program has plans that define modality (hours-based or classes-per-week), cost, and assigned manager.
+- **Levels**: A student attribute (beginner, intermediate, advanced) per program enrollment — not a program sub-entity. Determines which classes the student can access.
+- **Classes**: Belong to a program, tagged with a level (beginner/intermediate/advanced), have a schedule (day/time), assigned professor, and student capacity limit. Students only see classes matching their level.
 - **Memberships**: Monthly, tied to a student+program. Contain purchased hours, expire end of calendar month. Hours don't carry over.
 - **Attendance flow**: Student registers intent → Professor marks presence → System auto-deducts hours from membership.
 - **Payment flow**: Student uploads proof → Admin validates → Membership activated (directly or via manager delegation).
@@ -20,8 +20,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 1. **Superadmin** — platform-level, manages all tenants
 2. **Admin** — tenant-level, manages programs/students/payments within their league
-3. **Manager** — program-level, manages levels/professors/attendance for their program
-4. **Professor** — class/level-level, marks attendance, can cancel classes
+3. **Manager** — program-level, manages classes/professors/attendance for their program
+4. **Professor** — class-level, marks attendance, can cancel classes
 5. **Student** — registers, pays, attends classes
 6. **Tutor** — data-only role for minors' legal guardians (no platform access in v1.0)
 
@@ -166,7 +166,7 @@ Every feature or new implementation must follow Test-Driven Development strictly
 
 ## v1.0 Scope (P0 requirements)
 
-Auth, multitenancy, programs/levels/professors, student management, membership lifecycle (creation, activation, expiration, inactivation), payment upload/validation, attendance registration/marking, student dashboard.
+Auth, multitenancy, programs/classes/professors, student management (with level assignment), membership lifecycle (creation, activation, expiration, inactivation), payment upload/validation, attendance registration/marking, student dashboard.
 
 ## v1.1 Deferred (P1-P2)
 
@@ -181,6 +181,8 @@ When running the **specify** phase of speckit (`/speckit.specify`), always read 
 - PostgreSQL (latest stable) with RLS, AWS S3 (logos) (001-tenant-management)
 - Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 3.4.3, Spring Data JPA, Spring Security 6, Flyway, Next.js 15.1, Tailwind CSS 3.4 (002-program-configuration)
 - PostgreSQL (latest stable) with RLS — first tenant-scoped table with enforced row-level policies (002-program-configuration)
+- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 3.4.3, Spring Data JPA, Spring Security 6, Flyway, Next.js 15.1, Tailwind CSS 3.4, React 19, Jest 29 (003-professor-management)
+- PostgreSQL (latest stable) with RLS tenant isolation (003-professor-management)
 
 ## Recent Changes
 - 001-tenant-management: Added Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS

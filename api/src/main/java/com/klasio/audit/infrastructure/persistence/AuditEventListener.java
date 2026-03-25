@@ -9,6 +9,10 @@ import com.klasio.program.domain.event.ProgramPlanReactivated;
 import com.klasio.program.domain.event.ProgramPlanUpdated;
 import com.klasio.program.domain.event.ProgramReactivated;
 import com.klasio.program.domain.event.ProgramUpdated;
+import com.klasio.professor.domain.event.ProfessorCreated;
+import com.klasio.professor.domain.event.ProfessorDeactivated;
+import com.klasio.professor.domain.event.ProfessorReactivated;
+import com.klasio.professor.domain.event.ProfessorUpdated;
 import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -228,6 +232,101 @@ public class AuditEventListener {
                 event.reactivatedBy(),
                 "PLAN",
                 event.planId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onProfessorCreated(ProfessorCreated event) {
+        log.info("Recording audit log for professor creation: professorId={}, email={}",
+                event.professorId(), event.email());
+
+        java.util.HashMap<String, String> detailMap = new java.util.HashMap<>();
+        detailMap.put("firstName", event.firstName());
+        detailMap.put("lastName", event.lastName());
+        detailMap.put("email", event.email());
+        if (event.phoneNumber() != null) {
+            detailMap.put("phoneNumber", event.phoneNumber());
+        }
+        String details = toJson(detailMap);
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "PROFESSOR_CREATED",
+                event.createdBy(),
+                "PROFESSOR",
+                event.professorId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onProfessorUpdated(ProfessorUpdated event) {
+        log.info("Recording audit log for professor update: professorId={}", event.professorId());
+
+        java.util.HashMap<String, String> detailMap = new java.util.HashMap<>();
+        detailMap.put("firstName", event.firstName());
+        detailMap.put("lastName", event.lastName());
+        detailMap.put("email", event.email());
+        if (event.phoneNumber() != null) {
+            detailMap.put("phoneNumber", event.phoneNumber());
+        }
+        String details = toJson(detailMap);
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "PROFESSOR_UPDATED",
+                event.updatedBy(),
+                "PROFESSOR",
+                event.professorId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onProfessorDeactivated(ProfessorDeactivated event) {
+        log.info("Recording audit log for professor deactivation: professorId={}", event.professorId());
+
+        String details = toJson(Map.of(
+                "deactivatedBy", event.deactivatedBy().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "PROFESSOR_DEACTIVATED",
+                event.deactivatedBy(),
+                "PROFESSOR",
+                event.professorId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onProfessorReactivated(ProfessorReactivated event) {
+        log.info("Recording audit log for professor reactivation: professorId={}", event.professorId());
+
+        String details = toJson(Map.of(
+                "reactivatedBy", event.reactivatedBy().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "PROFESSOR_REACTIVATED",
+                event.reactivatedBy(),
+                "PROFESSOR",
+                event.professorId(),
                 event.occurredAt(),
                 details
         );

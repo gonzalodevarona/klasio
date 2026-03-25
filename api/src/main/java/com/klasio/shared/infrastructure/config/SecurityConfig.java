@@ -50,6 +50,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/v1/tenants/**").hasRole("SUPERADMIN")
                         .requestMatchers("/api/v1/programs/**").authenticated()
+                        .requestMatchers("/api/v1/professors/**").authenticated()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
