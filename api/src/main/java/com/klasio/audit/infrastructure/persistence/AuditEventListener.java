@@ -13,6 +13,12 @@ import com.klasio.professor.domain.event.ProfessorCreated;
 import com.klasio.professor.domain.event.ProfessorDeactivated;
 import com.klasio.professor.domain.event.ProfessorReactivated;
 import com.klasio.professor.domain.event.ProfessorUpdated;
+import com.klasio.programclass.domain.event.ClassCreated;
+import com.klasio.programclass.domain.event.ClassDeactivated;
+import com.klasio.programclass.domain.event.ClassReactivated;
+import com.klasio.programclass.domain.event.ClassUpdated;
+import com.klasio.programclass.domain.event.ProfessorAssignedToClass;
+import com.klasio.programclass.domain.event.ProfessorRemovedFromClass;
 import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -327,6 +333,146 @@ public class AuditEventListener {
                 event.reactivatedBy(),
                 "PROFESSOR",
                 event.professorId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onClassCreated(ClassCreated event) {
+        log.info("Recording audit log for class creation: classId={}, name={}", event.classId(), event.name());
+
+        java.util.HashMap<String, String> detailMap = new java.util.HashMap<>();
+        detailMap.put("name", event.name());
+        detailMap.put("level", event.level());
+        detailMap.put("type", event.type());
+        detailMap.put("maxStudents", String.valueOf(event.maxStudents()));
+        detailMap.put("programId", event.programId().toString());
+        if (event.professorId() != null) {
+            detailMap.put("professorId", event.professorId().toString());
+        }
+        String details = toJson(detailMap);
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "CLASS_CREATED",
+                event.createdBy(),
+                "PROGRAM_CLASS",
+                event.classId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onClassUpdated(ClassUpdated event) {
+        log.info("Recording audit log for class update: classId={}", event.classId());
+
+        String details = toJson(Map.of(
+                "name", event.name(),
+                "level", event.level(),
+                "maxStudents", String.valueOf(event.maxStudents()),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "CLASS_UPDATED",
+                event.updatedBy(),
+                "PROGRAM_CLASS",
+                event.classId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onClassDeactivated(ClassDeactivated event) {
+        log.info("Recording audit log for class deactivation: classId={}", event.classId());
+
+        String details = toJson(Map.of(
+                "deactivatedBy", event.deactivatedBy().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "CLASS_DEACTIVATED",
+                event.deactivatedBy(),
+                "PROGRAM_CLASS",
+                event.classId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onClassReactivated(ClassReactivated event) {
+        log.info("Recording audit log for class reactivation: classId={}", event.classId());
+
+        String details = toJson(Map.of(
+                "reactivatedBy", event.reactivatedBy().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "CLASS_REACTIVATED",
+                event.reactivatedBy(),
+                "PROGRAM_CLASS",
+                event.classId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onProfessorAssignedToClass(ProfessorAssignedToClass event) {
+        log.info("Recording audit log for professor assignment to class: classId={}, professorId={}",
+                event.classId(), event.professorId());
+
+        String details = toJson(Map.of(
+                "professorId", event.professorId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "CLASS_PROFESSOR_ASSIGNED",
+                event.assignedBy(),
+                "PROGRAM_CLASS",
+                event.classId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onProfessorRemovedFromClass(ProfessorRemovedFromClass event) {
+        log.info("Recording audit log for professor removal from class: classId={}, previousProfessorId={}",
+                event.classId(), event.previousProfessorId());
+
+        String details = toJson(Map.of(
+                "previousProfessorId", event.previousProfessorId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "CLASS_PROFESSOR_REMOVED",
+                event.removedBy(),
+                "PROGRAM_CLASS",
+                event.classId(),
                 event.occurredAt(),
                 details
         );

@@ -44,6 +44,33 @@ export function useProfessors(page = 0, size = 20, status?: ProfessorStatus) {
   return { professors, totalPages, totalElements, loading, error, refetch: fetchProfessors };
 }
 
+export function useAllActiveProfessors() {
+  const [professors, setProfessors] = useState<ProfessorSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const data = await api.get<ProfessorListResponse>(
+          `/professors?page=0&size=200`
+        );
+        if (!cancelled) setProfessors(data.content);
+      } catch (err) {
+        if (!cancelled)
+          setError(err instanceof Error ? err.message : "Failed to load professors.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  return { professors, loading, error };
+}
+
 export function useProfessorDetail(id: string) {
   const [professor, setProfessor] = useState<ProfessorDetail | null>(null);
   const [loading, setLoading] = useState(true);

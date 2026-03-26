@@ -118,6 +118,36 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(ClassNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleClassNotFound(ClassNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("CLASS_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ClassNameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleClassNameAlreadyExists(ClassNameAlreadyExistsException ex) {
+        var error = new ErrorResponse.ErrorDetail("CLASS_NAME_ALREADY_EXISTS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ClassAlreadyActiveException.class)
+    public ResponseEntity<ErrorResponse> handleClassAlreadyActive(ClassAlreadyActiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("CLASS_ALREADY_ACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ClassAlreadyInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleClassAlreadyInactive(ClassAlreadyInactiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("CLASS_ALREADY_INACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ClassNoProfessorAssignedException.class)
+    public ResponseEntity<ErrorResponse> handleClassNoProfessorAssigned(ClassNoProfessorAssignedException ex) {
+        var error = new ErrorResponse.ErrorDetail("CLASS_NO_PROFESSOR_ASSIGNED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         var error = new ErrorResponse.ErrorDetail("INVALID_FILE_TYPE", ex.getMessage());
