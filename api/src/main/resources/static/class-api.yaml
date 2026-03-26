@@ -1,0 +1,502 @@
+openapi: 3.0.3
+info:
+  title: Klasio Class Management API
+  description: REST API for managing classes and schedules within a program
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: Classes
+    description: Class CRUD and lifecycle operations
+  - name: Class Professor
+    description: Professor assignment to classes
+
+paths:
+  /programs/{programId}/classes:
+    get:
+      operationId: listClasses
+      tags: [Classes]
+      summary: List all classes for a program
+      description: Returns a paginated list of classes within a program. Filterable by level and status.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: level
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [BEGINNER, INTERMEDIATE, ADVANCED]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE]
+      responses:
+        '200':
+          description: Paginated list of classes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassListResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — insufficient role
+        '404':
+          description: Program not found
+
+    post:
+      operationId: createClass
+      tags: [Classes]
+      summary: Create a new class in a program
+      description: Creates a class with schedule entries. Only ADMIN, SUPERADMIN, or MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassRequest'
+      responses:
+        '201':
+          description: Class created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassDetailResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Program not found
+        '409':
+          description: Class name already exists in this program
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /programs/{programId}/classes/{classId}:
+    get:
+      operationId: getClassDetail
+      tags: [Classes]
+      summary: Get class details
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+        - $ref: '#/components/parameters/ClassIdParam'
+      responses:
+        '200':
+          description: Class details with schedule and professor info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassDetailResponse'
+        '404':
+          description: Class not found
+
+    put:
+      operationId: updateClass
+      tags: [Classes]
+      summary: Update class configuration
+      description: Updates class name, level, schedule entries, and max student limit. Type is immutable. Only ADMIN, SUPERADMIN, or MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+        - $ref: '#/components/parameters/ClassIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClassRequest'
+      responses:
+        '200':
+          description: Class updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassDetailResponse'
+        '400':
+          description: Validation error
+        '404':
+          description: Class not found
+        '409':
+          description: Class name already exists in this program
+
+  /programs/{programId}/classes/{classId}/deactivate:
+    post:
+      operationId: deactivateClass
+      tags: [Classes]
+      summary: Deactivate a class
+      description: Sets class status to INACTIVE. Only ADMIN, SUPERADMIN, or MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+        - $ref: '#/components/parameters/ClassIdParam'
+      responses:
+        '200':
+          description: Class deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassDetailResponse'
+        '404':
+          description: Class not found
+        '409':
+          description: Class is already inactive
+
+  /programs/{programId}/classes/{classId}/reactivate:
+    post:
+      operationId: reactivateClass
+      tags: [Classes]
+      summary: Reactivate a class
+      description: Sets class status back to ACTIVE. Only ADMIN, SUPERADMIN, or MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+        - $ref: '#/components/parameters/ClassIdParam'
+      responses:
+        '200':
+          description: Class reactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassDetailResponse'
+        '404':
+          description: Class not found
+        '409':
+          description: Class is already active
+
+  /programs/{programId}/classes/{classId}/professor:
+    put:
+      operationId: assignProfessor
+      tags: [Class Professor]
+      summary: Assign a professor to a class
+      description: Assigns or reassigns a professor. Replaces existing assignment. Only ADMIN, SUPERADMIN, or MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+        - $ref: '#/components/parameters/ClassIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignProfessorRequest'
+      responses:
+        '200':
+          description: Professor assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassDetailResponse'
+        '400':
+          description: Professor is deactivated or does not exist in this tenant
+        '404':
+          description: Class or professor not found
+
+    delete:
+      operationId: removeProfessor
+      tags: [Class Professor]
+      summary: Remove professor from a class
+      description: Removes the professor assignment, leaving the class without an instructor. Only ADMIN, SUPERADMIN, or MANAGER roles.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProgramIdParam'
+        - $ref: '#/components/parameters/ClassIdParam'
+      responses:
+        '200':
+          description: Professor removed from class
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassDetailResponse'
+        '404':
+          description: Class not found
+        '409':
+          description: Class has no professor assigned
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ProgramIdParam:
+      name: programId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    ClassIdParam:
+      name: classId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    PageParam:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+
+    SizeParam:
+      name: size
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+
+  schemas:
+    CreateClassRequest:
+      type: object
+      required: [name, level, type, scheduleEntries, maxStudents]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Monday Beginners
+        level:
+          type: string
+          enum: [BEGINNER, INTERMEDIATE, ADVANCED]
+          example: BEGINNER
+        type:
+          type: string
+          enum: [RECURRING, ONE_TIME]
+          example: RECURRING
+        scheduleEntries:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ScheduleEntryRequest'
+        professorId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional professor assignment at creation time
+        maxStudents:
+          type: integer
+          minimum: 1
+          example: 15
+
+    UpdateClassRequest:
+      type: object
+      required: [name, level, scheduleEntries, maxStudents]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        level:
+          type: string
+          enum: [BEGINNER, INTERMEDIATE, ADVANCED]
+        scheduleEntries:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ScheduleEntryRequest'
+        maxStudents:
+          type: integer
+          minimum: 1
+
+    ScheduleEntryRequest:
+      type: object
+      required: [startTime, endTime]
+      properties:
+        dayOfWeek:
+          type: string
+          enum: [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
+          nullable: true
+          description: Required for RECURRING, null for ONE_TIME
+        specificDate:
+          type: string
+          format: date
+          nullable: true
+          description: Required for ONE_TIME, null for RECURRING
+          example: "2026-04-05"
+        startTime:
+          type: string
+          format: time
+          example: "16:00"
+        endTime:
+          type: string
+          format: time
+          example: "17:30"
+
+    AssignProfessorRequest:
+      type: object
+      required: [professorId]
+      properties:
+        professorId:
+          type: string
+          format: uuid
+
+    ClassDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        programId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        level:
+          type: string
+          enum: [BEGINNER, INTERMEDIATE, ADVANCED]
+        type:
+          type: string
+          enum: [RECURRING, ONE_TIME]
+        scheduleEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleEntryResponse'
+        professorId:
+          type: string
+          format: uuid
+          nullable: true
+        professorName:
+          type: string
+          nullable: true
+          description: Denormalized professor full name for display
+        maxStudents:
+          type: integer
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          format: uuid
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedBy:
+          type: string
+          format: uuid
+          nullable: true
+
+    ClassSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        level:
+          type: string
+          enum: [BEGINNER, INTERMEDIATE, ADVANCED]
+        type:
+          type: string
+          enum: [RECURRING, ONE_TIME]
+        scheduleSummary:
+          type: string
+          description: Human-readable schedule (e.g., "Mon, Wed 16:00-17:30")
+        professorName:
+          type: string
+          nullable: true
+        maxStudents:
+          type: integer
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        createdAt:
+          type: string
+          format: date-time
+
+    ScheduleEntryResponse:
+      type: object
+      properties:
+        dayOfWeek:
+          type: string
+          enum: [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
+          nullable: true
+        specificDate:
+          type: string
+          format: date
+          nullable: true
+        startTime:
+          type: string
+          format: time
+        endTime:
+          type: string
+          format: time
+
+    ClassListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClassSummaryResponse'
+        number:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string

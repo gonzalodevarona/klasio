@@ -75,6 +75,11 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  delete: <T>(path: string) =>
+    request<T>(path, {
+      method: "DELETE",
+    }),
+
   postForm: <T>(path: string, formData: FormData) =>
     request<T>(path, {
       method: "POST",
