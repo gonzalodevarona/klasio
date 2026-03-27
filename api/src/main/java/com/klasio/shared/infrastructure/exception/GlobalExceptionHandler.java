@@ -148,6 +148,48 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(StudentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStudentNotFound(StudentNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("STUDENT_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(StudentEmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleStudentEmailAlreadyExists(StudentEmailAlreadyExistsException ex) {
+        var error = new ErrorResponse.ErrorDetail("STUDENT_EMAIL_ALREADY_EXISTS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(StudentAlreadyActiveException.class)
+    public ResponseEntity<ErrorResponse> handleStudentAlreadyActive(StudentAlreadyActiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("STUDENT_ALREADY_ACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(StudentAlreadyInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleStudentAlreadyInactive(StudentAlreadyInactiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("STUDENT_ALREADY_INACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(EnrollmentAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEnrollmentAlreadyExists(EnrollmentAlreadyExistsException ex) {
+        var error = new ErrorResponse.ErrorDetail("ENROLLMENT_ALREADY_EXISTS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(EnrollmentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEnrollmentNotFound(EnrollmentNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("ENROLLMENT_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(EnrollmentAlreadyInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleEnrollmentAlreadyInactive(EnrollmentAlreadyInactiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("ENROLLMENT_ALREADY_INACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         var error = new ErrorResponse.ErrorDetail("INVALID_FILE_TYPE", ex.getMessage());

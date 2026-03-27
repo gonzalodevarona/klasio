@@ -183,6 +183,7 @@ When running the **specify** phase of speckit (`/speckit.specify`), always read 
 - PostgreSQL (latest stable) with RLS — first tenant-scoped table with enforced row-level policies (002-program-configuration)
 - Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 3.4.3, Spring Data JPA, Spring Security 6, Flyway, Next.js 15.1, Tailwind CSS 3.4, React 19, Jest 29 (003-professor-management)
 - PostgreSQL (latest stable) with RLS tenant isolation (003-professor-management)
+- PostgreSQL (latest stable) with Row Level Security tenant isolation (005-student-level-assignment)
 
 ## Recent Changes
 - 001-tenant-management: Added Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS

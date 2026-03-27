@@ -41,6 +41,14 @@ function Sidebar() {
           </li>
           <li>
             <a
+              href="/students"
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
+            >
+              Students
+            </a>
+          </li>
+          <li>
+            <a
               href="/plans"
               className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white"
             >

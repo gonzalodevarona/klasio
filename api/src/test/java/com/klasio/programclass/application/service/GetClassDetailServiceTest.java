@@ -6,6 +6,7 @@ import com.klasio.programclass.domain.model.ClassScheduleEntry;
 import com.klasio.programclass.domain.model.ClassType;
 import com.klasio.programclass.domain.model.ProgramClass;
 import com.klasio.programclass.domain.port.ProgramClassRepository;
+import com.klasio.professor.domain.port.ProfessorRepository;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +31,9 @@ class GetClassDetailServiceTest {
 
     @Mock
     private ProgramClassRepository programClassRepository;
+
+    @Mock
+    private ProfessorRepository professorRepository;
 
     private GetClassDetailService service;
 
@@ -45,7 +50,7 @@ class GetClassDetailServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new GetClassDetailService(programClassRepository);
+        service = new GetClassDetailService(programClassRepository, professorRepository);
     }
 
     // ---- T069: Happy path - returns full class detail with all fields ----
@@ -62,6 +67,8 @@ class GetClassDetailServiceTest {
 
         when(programClassRepository.findById(TENANT_ID, classId))
                 .thenReturn(Optional.of(programClass));
+        when(professorRepository.findById(any(), any()))
+                .thenReturn(Optional.empty());
 
         ClassDetail result = service.execute(TENANT_ID, classId);
 
