@@ -19,6 +19,13 @@ import com.klasio.programclass.domain.event.ClassReactivated;
 import com.klasio.programclass.domain.event.ClassUpdated;
 import com.klasio.programclass.domain.event.ProfessorAssignedToClass;
 import com.klasio.programclass.domain.event.ProfessorRemovedFromClass;
+import com.klasio.student.domain.event.StudentCreated;
+import com.klasio.student.domain.event.StudentDeactivated;
+import com.klasio.student.domain.event.StudentEnrolled;
+import com.klasio.student.domain.event.StudentPromoted;
+import com.klasio.student.domain.event.StudentReactivated;
+import com.klasio.student.domain.event.StudentUnenrolled;
+import com.klasio.student.domain.event.StudentUpdated;
 import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -495,6 +502,170 @@ public class AuditEventListener {
                 event.deactivatedBy(),
                 "TENANT",
                 event.tenantId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onStudentCreated(StudentCreated event) {
+        log.info("Recording audit log for student creation: studentId={}, email={}",
+                event.studentId(), event.email());
+
+        String details = toJson(Map.of(
+                "firstName", event.firstName(),
+                "lastName", event.lastName(),
+                "email", event.email()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "STUDENT_CREATED",
+                event.createdBy(),
+                "STUDENT",
+                event.studentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onStudentUpdated(StudentUpdated event) {
+        log.info("Recording audit log for student update: studentId={}", event.studentId());
+
+        String details = toJson(Map.of(
+                "firstName", event.firstName(),
+                "lastName", event.lastName(),
+                "email", event.email()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "STUDENT_UPDATED",
+                event.updatedBy(),
+                "STUDENT",
+                event.studentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onStudentDeactivated(StudentDeactivated event) {
+        log.info("Recording audit log for student deactivation: studentId={}", event.studentId());
+
+        String details = toJson(Map.of(
+                "deactivatedBy", event.deactivatedBy().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "STUDENT_DEACTIVATED",
+                event.deactivatedBy(),
+                "STUDENT",
+                event.studentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onStudentReactivated(StudentReactivated event) {
+        log.info("Recording audit log for student reactivation: studentId={}", event.studentId());
+
+        String details = toJson(Map.of(
+                "reactivatedBy", event.reactivatedBy().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "STUDENT_REACTIVATED",
+                event.reactivatedBy(),
+                "STUDENT",
+                event.studentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onStudentEnrolled(StudentEnrolled event) {
+        log.info("Recording audit log for student enrollment: enrollmentId={}, studentId={}, programId={}",
+                event.enrollmentId(), event.studentId(), event.programId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString(),
+                "level", event.level()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "STUDENT_ENROLLED",
+                event.createdBy(),
+                "STUDENT_ENROLLMENT",
+                event.enrollmentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onStudentUnenrolled(StudentUnenrolled event) {
+        log.info("Recording audit log for student unenrollment: enrollmentId={}, studentId={}, programId={}",
+                event.enrollmentId(), event.studentId(), event.programId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString(),
+                "level", event.level()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "STUDENT_UNENROLLED",
+                event.changedBy(),
+                "STUDENT_ENROLLMENT",
+                event.enrollmentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onStudentPromoted(StudentPromoted event) {
+        log.info("Recording audit log for student promotion: enrollmentId={}, studentId={}, {} -> {}",
+                event.enrollmentId(), event.studentId(), event.previousLevel(), event.newLevel());
+
+        java.util.HashMap<String, String> detailMap = new java.util.HashMap<>();
+        detailMap.put("studentId", event.studentId().toString());
+        detailMap.put("programId", event.programId().toString());
+        detailMap.put("previousLevel", event.previousLevel());
+        if (event.newLevel() != null) {
+            detailMap.put("newLevel", event.newLevel());
+        }
+        String details = toJson(detailMap);
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "STUDENT_PROMOTED",
+                event.changedBy(),
+                "STUDENT_ENROLLMENT",
+                event.enrollmentId(),
                 event.occurredAt(),
                 details
         );
