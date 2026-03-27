@@ -151,6 +151,13 @@ All generated code, project files, and configurations must be compatible with th
 - `release/<version>` — from `develop`, merged into `main` + `develop`.
 - `hotfix/<name>` — from `main`, merged into `main` + `develop`.
 
+**Branch naming after merge**: Once a feature branch is merged into `main`, rename it to `merged/<original-name>` both locally and on the remote, then delete the old remote branch name. This preserves traceability without polluting the active branch list. Current convention examples: `merged/001-tenant-management`, `merged/002-program-configuration`, `merged/003-professor-management`, `merged/004-class-management`, `merged/005-student-level-assignment`.
+
+**Feature completion checklist** (must be done before closing a feature):
+1. Update `functional-requirements.md` — mark each touched RF as ✅ or 🔄 Partial with a status note.
+2. Merge to `main` with `git merge --no-ff` using a conventional commit: `feat(<scope>): merge <feature> (<RF list>)`.
+3. Rename feature branch to `merged/<name>` locally and on origin; delete the old remote branch name.
+
 **Conventional Commits** — format: `<type>(<scope>): <description>`
 
 Types: `feat`, `fix`, `hotfix`, `test`, `refactor`, `chore`, `docs`, `style`, `perf`, `ci`, `revert`.
@@ -160,10 +167,21 @@ Description: lowercase, imperative mood. Example: `feat(membership): add automat
 
 Auth, multitenancy, programs/levels/professors/classes, student management, membership lifecycle (creation → activation → expiration → inactivation), payment upload/validation, attendance registration/marking, student dashboard.
 
-**Deferred to v1.1 (P1–P2):** cost modification history, student level promotion, manual hour adjustments, membership history export, manager delegation 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
+**Deferred to v1.1 (P1–P2):** cost modification history, manual hour adjustments, membership history export, manager delegation 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
+
+## XIII. Implementation Status (as of 2026-03-27)
+
+| Feature | RFs | Status |
+|---|---|---|
+| Tenant management | RF-05 | ✅ |
+| Program & plan configuration | RF-06 | ✅ |
+| Professor management | RF-08 | 🔄 Partial — CRUD done; professor invitation email pending RF-32 |
+| Class & schedule management | RF-09 | ✅ |
+| Student management + level assignment | RF-07, RF-11, RF-12, RF-13 | RF-07 ✅, RF-11 ✅, RF-12 🔄 (no-active-membership state pending RF-14), RF-13 ✅ |
+| Auth, membership, payments, attendance | RF-01–04, RF-14–28, RF-29 | Not started |
 
 ## Governance
 
 This constitution supersedes all other practices and conventions. Every PR review must verify compliance with architecture boundaries, security rules, and domain invariants. Amendments require explicit documentation and team approval.
 
-**Version**: 1.1.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-16
+**Version**: 1.2.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-27

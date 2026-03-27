@@ -170,20 +170,41 @@ Auth, multitenancy, programs/classes/professors, student management (with level 
 
 ## v1.1 Deferred (P1-P2)
 
-Cost modification history, student level promotion, manual hour adjustments, membership history export, manager delegation with 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
+Cost modification history, manual hour adjustments, membership history export, manager delegation with 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
 
 ## Speckit Workflow
 
 When running the **specify** phase of speckit (`/speckit.specify`), always read `functional-requirements.md` first to understand the full context of existing requirements, priorities, and implementation status before creating or updating a feature specification.
 
+## Feature Completion Workflow
+
+When a feature branch is finished and ready to ship, always follow these steps in order:
+
+1. **Update `functional-requirements.md`** — mark every RF touched by the feature with ✅ (fully done) or 🔄 Partial (incomplete with a note explaining what remains and which RF it is blocked on).
+2. **Merge to `main`** — use `git merge --no-ff` with a conventional commit message: `feat(<scope>): merge <feature name> (<RF list>)`.
+3. **Rename the branch** — rename the feature branch locally and on the remote to `merged/<original-name>` to preserve traceability without polluting the active branch list. Delete the old remote branch name.
+
 ## Active Technologies
-- Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS (001-tenant-management)
-- PostgreSQL (latest stable) with RLS, AWS S3 (logos) (001-tenant-management)
-- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 3.4.3, Spring Data JPA, Spring Security 6, Flyway, Next.js 15.1, Tailwind CSS 3.4 (002-program-configuration)
-- PostgreSQL (latest stable) with RLS — first tenant-scoped table with enforced row-level policies (002-program-configuration)
-- Java 21 (backend), TypeScript 5.9 (frontend) + Spring Boot 3.4.3, Spring Data JPA, Spring Security 6, Flyway, Next.js 15.1, Tailwind CSS 3.4, React 19, Jest 29 (003-professor-management)
-- PostgreSQL (latest stable) with RLS tenant isolation (003-professor-management)
-- PostgreSQL (latest stable) with Row Level Security tenant isolation (005-student-level-assignment)
+
+| Layer | Technology | Version |
+|---|---|---|
+| Backend | Java + Spring Boot | Java 21, Spring Boot 3.4.3 |
+| Backend framework | Spring Security, Spring Data JPA, Flyway | Spring Security 6 |
+| Frontend | Next.js + TypeScript + Tailwind CSS + React | Next.js 15.1, TS 5.9, Tailwind 3.4, React 19 |
+| Testing | JUnit 5 + Mockito (backend), Jest (frontend) | Jest 29 |
+| Database | PostgreSQL with Row Level Security (RLS) | Latest stable |
+| File storage | AWS S3 (payment proofs, tenant logos) | AWS SDK v2 |
+| Auth | JWT + refresh tokens | — |
+
+## Implemented Features (as of 2026-03-27)
+
+| Feature branch | RFs | Status |
+|---|---|---|
+| `merged/001-tenant-management` | RF-05 | ✅ |
+| `merged/002-program-configuration` | RF-06 | ✅ |
+| `merged/003-professor-management` | RF-08 | 🔄 Partial (email invite pending RF-32) |
+| `merged/004-class-management` | RF-09 | ✅ |
+| `merged/005-student-level-assignment` | RF-07, RF-11, RF-12, RF-13 | RF-07 ✅, RF-11 ✅, RF-12 🔄 (no-membership state pending RF-14), RF-13 ✅ |
 
 ## Recent Changes
-- 001-tenant-management: Added Java 21 (backend), TypeScript (frontend) + Spring Boot 3 (latest LTS), Spring Security 6, Spring Data JPA, Flyway, AWS SDK v2 (S3), Next.js (latest LTS), Tailwind CSS
+- 005-student-level-assignment: Full student CRUD, program enrollment with level assignment, level promotion, unenroll, level history tracking, enrollment status filter, audit log events (STUDENT_CREATED/UPDATED/DEACTIVATED/REACTIVATED/ENROLLED/UNENROLLED/PROMOTED), Flyway migrations V016–V023
