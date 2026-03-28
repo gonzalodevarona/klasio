@@ -190,6 +190,42 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(MembershipNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleMembershipNotFound(MembershipNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("MEMBERSHIP_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(MembershipAlreadyActiveException.class)
+    public ResponseEntity<ErrorResponse> handleMembershipAlreadyActive(MembershipAlreadyActiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("MEMBERSHIP_ALREADY_ACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidStatusTransition(InvalidStatusTransitionException ex) {
+        var error = new ErrorResponse.ErrorDetail("INVALID_STATUS_TRANSITION", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(NegativeBalanceException.class)
+    public ResponseEntity<ErrorResponse> handleNegativeBalance(NegativeBalanceException ex) {
+        var error = new ErrorResponse.ErrorDetail("NEGATIVE_BALANCE", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(MembershipNotActiveException.class)
+    public ResponseEntity<ErrorResponse> handleMembershipNotActive(MembershipNotActiveException ex) {
+        var error = new ErrorResponse.ErrorDetail("MEMBERSHIP_NOT_ACTIVE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ManagerProgramMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleManagerProgramMismatch(ManagerProgramMismatchException ex) {
+        var error = new ErrorResponse.ErrorDetail("MANAGER_PROGRAM_MISMATCH", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         var error = new ErrorResponse.ErrorDetail("INVALID_FILE_TYPE", ex.getMessage());

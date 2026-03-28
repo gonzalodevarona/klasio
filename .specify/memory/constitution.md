@@ -169,7 +169,7 @@ Auth, multitenancy, programs/levels/professors/classes, student management, memb
 
 **Deferred to v1.1 (P1–P2):** cost modification history, manual hour adjustments, membership history export, manager delegation 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
 
-## XIII. Implementation Status (as of 2026-03-27)
+## XIII. Implementation Status (as of 2026-03-28)
 
 | Feature | RFs | Status |
 |---|---|---|
@@ -177,11 +177,32 @@ Auth, multitenancy, programs/levels/professors/classes, student management, memb
 | Program & plan configuration | RF-06 | ✅ |
 | Professor management | RF-08 | 🔄 Partial — CRUD done; professor invitation email pending RF-32 |
 | Class & schedule management | RF-09 | ✅ |
-| Student management + level assignment | RF-07, RF-11, RF-12, RF-13 | RF-07 ✅, RF-11 ✅, RF-12 🔄 (no-active-membership state pending RF-14), RF-13 ✅ |
-| Auth, membership, payments, attendance | RF-01–04, RF-14–28, RF-29 | Not started |
+| Student management + level assignment | RF-07, RF-11, RF-12, RF-13 | ✅ all |
+| Membership lifecycle | RF-14, RF-15, RF-16, RF-17, RF-18 | ✅ all — see details below |
+| Auth | RF-01–04 | Not started |
+| Payment upload/validation | RF-19–RF-22 | Not started (deferred to v1.1) |
+| Attendance | RF-23–RF-28 | Not started |
+| Dashboards & reports | RF-29–RF-31 | Not started |
+| Transactional email | RF-32 | 🔄 Partial — stubs in place (MembershipNotificationListener); real Postmark integration pending |
+
+### Membership Module — Implementation Notes (branch `006-membership-lifecycle`)
+
+**Domain**: Pure-Java `Membership` aggregate (zero Spring imports). 5-state lifecycle: `PENDING_PAYMENT_VALIDATION → PENDING_MANAGER_ACTIVATION → ACTIVE → INACTIVE / EXPIRED`. Immutable `HourTransaction` append-only ledger with types `ATTENDANCE_DEDUCTION`, `MANUAL_ADDITION`, `MANUAL_SUBTRACTION`. 8 domain events cover every state transition.
+
+**Use cases (10)**: Create, ValidatePayment (direct activation or manager delegation), Activate (manager program scope guard), DeductHours (package-scoped — called by attendance feature), AdjustHours (ADMIN/SUPERADMIN only, reason 5–500 chars, negative-balance guard), GetMembership, GetActiveMembership, ListMemberships, GetMembershipHistory, GetHourTransactions.
+
+**Scheduler**: `MembershipExpirationJob` — cron 01:00 UTC expires past-due memberships, cron 01:05 UTC publishes 3-day expiry warnings. `SYSTEM_ACTOR = UUID 000...000` used in `AuditEventListener` for scheduler-sourced audit entries. Both jobs are idempotent.
+
+**Persistence**: Flyway V024 (memberships table, two partial unique indexes enforcing one ACTIVE and one PENDING_MANAGER_ACTIVATION per student+program), V025 (hour_transactions, append-only + RLS), V026 (8 new MEMBERSHIP_* action types in audit_log), V027 (plan_id FK + plan_name snapshot column).
+
+**API**: 9 REST endpoints at `/memberships/**` and `/students/{id}/programs/{id}/membership-history`. All tenant-scoped from JWT. Role access: ADMIN/SUPERADMIN for creation and payment validation; MANAGER for activation (own program only); PROFESSOR for read-only active membership lookup.
+
+**Frontend**: 3 Next.js pages, 7 React components (MembershipStatusBadge, HourBalance with color-coded progress bar, HourTransactionList, HourAdjustmentForm, MembershipList, MembershipForm, MembershipDetail), 2 hooks (useMemberships, useHourTransactions), CSV export via native fetch + URL.createObjectURL.
+
+**Deferred**: Payment proof upload and validation queue (RF-19–RF-22); real email delivery for notifications (RF-32); PDF export for membership history.
 
 ## Governance
 
 This constitution supersedes all other practices and conventions. Every PR review must verify compliance with architecture boundaries, security rules, and domain invariants. Amendments require explicit documentation and team approval.
 
-**Version**: 1.2.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-27
+**Version**: 1.3.0 | **Ratified**: 2026-03-14 | **Last Amended**: 2026-03-28

@@ -18,6 +18,9 @@ public interface SpringDataStudentEnrollmentRepository extends JpaRepository<Stu
 
     Optional<StudentEnrollmentJpaEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
+    Optional<StudentEnrollmentJpaEntity> findFirstByTenantIdAndStudentIdAndProgramIdAndStatus(
+            UUID tenantId, UUID studentId, UUID programId, String status);
+
     @Query(value = "SELECT e.* FROM student_enrollments e WHERE e.tenant_id = :tenantId " +
             "AND e.student_id = :studentId " +
             "AND (CAST(:status AS TEXT) IS NULL OR e.status = CAST(:status AS TEXT)) " +

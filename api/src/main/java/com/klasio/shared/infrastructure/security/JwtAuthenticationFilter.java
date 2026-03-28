@@ -29,6 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String CLAIM_TENANT_ID = "tenant_id";
     private static final String CLAIM_ROLES = "roles";
+    private static final String CLAIM_PROGRAM_ID = "program_id";
 
     private final SecretKey secretKey;
 
@@ -58,6 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String userId = claims.getSubject();
             String tenantId = claims.get(CLAIM_TENANT_ID, String.class);
+            String programId = claims.get(CLAIM_PROGRAM_ID, String.class);
 
             @SuppressWarnings("unchecked")
             List<String> roles = claims.get(CLAIM_ROLES, List.class);
@@ -70,6 +72,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             details.put("userId", userId);
             if (tenantId != null) {
                 details.put("tenantId", tenantId);
+            }
+            if (programId != null) {
+                details.put("programId", programId);
             }
 
             var authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);

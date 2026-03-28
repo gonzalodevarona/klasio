@@ -69,4 +69,12 @@ public class JpaStudentEnrollmentRepository extends TenantScopedRepository imple
         return springDataRepository.findByStudentIdWithFilters(tenantId, studentId, status, pageable)
                 .map(mapper::toDomain);
     }
+
+    @Override
+    public Optional<StudentEnrollment> findActiveByStudentIdAndProgramId(UUID tenantId, UUID studentId, UUID programId) {
+        applyTenantContext();
+        return springDataRepository.findFirstByTenantIdAndStudentIdAndProgramIdAndStatus(
+                        tenantId, studentId, programId, "ACTIVE")
+                .map(mapper::toDomain);
+    }
 }

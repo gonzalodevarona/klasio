@@ -5,6 +5,8 @@ import { api } from "@/lib/api";
 import {
   ProgramDetail,
   ProgramListResponse,
+  ProgramModality,
+  ProgramPlanSummary,
   ProgramStatus,
   ProgramSummary,
 } from "@/lib/types/program";
@@ -70,4 +72,30 @@ export function useProgramDetail(id: string) {
   }, [fetchProgram]);
 
   return { program, loading, error, refetch: fetchProgram };
+}
+
+/** Fetches all active HOURS_BASED plans — used when creating a membership. */
+export function useProgramPlans(modality?: ProgramModality) {
+  const [plans, setPlans] = useState<ProgramPlanSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPlans = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.get<ProgramPlanSummary[]>("/plans?status=ACTIVE");
+      setPlans(modality ? data.filter((p) => p.modality === modality) : data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load plans.");
+    } finally {
+      setLoading(false);
+    }
+  }, [modality]);
+
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
+
+  return { plans, loading, error, refetch: fetchPlans };
 }
