@@ -14,9 +14,10 @@ public record StudentSummary(
         String identityDocumentType,
         int age,
         String status,
+        boolean hasActiveMembership,
         Instant createdAt
 ) {
-    public static StudentSummary fromDomain(Student student) {
+    public static StudentSummary fromDomain(Student student, boolean hasActiveMembership) {
         return new StudentSummary(
                 student.getId().value(),
                 student.getFirstName(),
@@ -26,6 +27,7 @@ public record StudentSummary(
                 student.getIdentityDocumentType().name(),
                 student.calculateAge(),
                 student.getStatus(),
+                hasActiveMembership,
                 student.getCreatedAt()
         );
     }

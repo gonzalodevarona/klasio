@@ -144,6 +144,9 @@ export default function StudentList() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Membership
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -168,6 +171,17 @@ export default function StudentList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StudentStatusBadge status={student.status} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {student.hasActiveMembership ? (
+                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                          No active
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}

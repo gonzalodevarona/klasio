@@ -22,6 +22,7 @@ export interface StudentSummary {
   identityDocumentType: string;
   age: number;
   status: StudentStatus;
+  hasActiveMembership: boolean;
   createdAt: string;
 }
 

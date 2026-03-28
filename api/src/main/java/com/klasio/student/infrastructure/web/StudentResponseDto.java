@@ -86,6 +86,7 @@ public final class StudentResponseDto {
             String identityDocumentType,
             int age,
             String status,
+            boolean hasActiveMembership,
             Instant createdAt
     ) {
 
@@ -99,6 +100,7 @@ public final class StudentResponseDto {
                     summary.identityDocumentType(),
                     summary.age(),
                     summary.status(),
+                    summary.hasActiveMembership(),
                     summary.createdAt()
             );
         }
