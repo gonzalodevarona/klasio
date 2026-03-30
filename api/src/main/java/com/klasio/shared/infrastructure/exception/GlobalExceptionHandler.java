@@ -1,5 +1,6 @@
 package com.klasio.shared.infrastructure.exception;
 
+import com.klasio.auth.domain.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -238,6 +240,82 @@ public class GlobalExceptionHandler {
         var error = new ErrorResponse.ErrorDetail("VALIDATION_ERROR",
                 "Required parameter '%s' is missing".formatted(ex.getParameterName()));
         return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
+        var error = new ErrorResponse.ErrorDetail("INVALID_CREDENTIALS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountLocked(AccountLockedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                "error", Map.of(
+                        "code", "ACCOUNT_LOCKED",
+                        "message", ex.getMessage(),
+                        "lockedUntil", ex.getLockedUntil().toString()
+                )
+        ));
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleEmailNotVerified(EmailNotVerifiedException ex) {
+        var error = new ErrorResponse.ErrorDetail("EMAIL_NOT_VERIFIED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyRegistered(EmailAlreadyRegisteredException ex) {
+        var error = new ErrorResponse.ErrorDetail("EMAIL_ALREADY_REGISTERED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(IdentityNumberAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleIdentityAlreadyRegistered(IdentityNumberAlreadyRegisteredException ex) {
+        var error = new ErrorResponse.ErrorDetail("IDENTITY_NUMBER_ALREADY_REGISTERED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(VerificationTokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleVerificationExpired(VerificationTokenExpiredException ex) {
+        var error = new ErrorResponse.ErrorDetail("VERIFICATION_TOKEN_EXPIRED", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(VerificationTokenAlreadyUsedException.class)
+    public ResponseEntity<ErrorResponse> handleVerificationUsed(VerificationTokenAlreadyUsedException ex) {
+        var error = new ErrorResponse.ErrorDetail("VERIFICATION_TOKEN_ALREADY_USED", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ResetTokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleResetExpired(ResetTokenExpiredException ex) {
+        var error = new ErrorResponse.ErrorDetail("RESET_TOKEN_EXPIRED", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ResetTokenAlreadyUsedException.class)
+    public ResponseEntity<ErrorResponse> handleResetUsed(ResetTokenAlreadyUsedException ex) {
+        var error = new ErrorResponse.ErrorDetail("RESET_TOKEN_ALREADY_USED", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(PasswordPolicyViolationException.class)
+    public ResponseEntity<Map<String, Object>> handlePasswordPolicy(PasswordPolicyViolationException ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", Map.of(
+                        "code", "PASSWORD_POLICY_VIOLATION",
+                        "message", ex.getMessage(),
+                        "violations", ex.getViolations()
+                )
+        ));
+    }
+
+    @ExceptionHandler(RoleElevationForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleRoleElevation(RoleElevationForbiddenException ex) {
+        var error = new ErrorResponse.ErrorDetail("ROLE_ELEVATION_FORBIDDEN", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

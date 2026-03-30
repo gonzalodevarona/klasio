@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "klasio.jwt")
 public record JwtProperties(
         String secret,
-        long expiration
+        long accessTokenExpiration,
+        long refreshTokenExpiration
 ) {
 }

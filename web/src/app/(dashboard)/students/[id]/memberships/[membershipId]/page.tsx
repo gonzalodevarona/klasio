@@ -3,6 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useMembershipDetail } from "@/hooks/useMemberships";
+import { useAuth } from "@/hooks/useAuth";
 import MembershipDetail from "@/components/memberships/MembershipDetail";
 
 interface Props {
@@ -12,6 +13,9 @@ interface Props {
 export default function MembershipDetailPage({ params }: Props) {
   const { id: studentId, membershipId } = use(params);
   const { membership, loading, error, refetch } = useMembershipDetail(membershipId);
+  const { user } = useAuth();
+
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
 
   return (
     <div>
@@ -48,7 +52,7 @@ export default function MembershipDetailPage({ params }: Props) {
         <MembershipDetail
           membership={membership}
           onRefresh={refetch}
-          isAdmin={true}
+          isAdmin={isAdmin}
         />
       )}
     </div>

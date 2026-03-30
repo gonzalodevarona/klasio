@@ -5,10 +5,26 @@ spring:
     password: klasio_pass
   jpa:
     show-sql: true
+  mail:
+    host: localhost
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
 
 klasio:
   jwt:
     secret: local-dev-secret-key-that-is-at-least-256-bits-long-for-hs256-signing
+    access-token-expiration: 28800000
+    refresh-token-expiration: 604800000
+  auth:
+    email-verification-expiry-hours: 24
+    password-reset-expiry-minutes: 30
+    max-failed-login-attempts: 5
+    lockout-duration-minutes: 15
+    from-email: noreply@klasio.local
   s3:
     endpoint: http://localhost:4566
     bucket: klasio-logos-dev

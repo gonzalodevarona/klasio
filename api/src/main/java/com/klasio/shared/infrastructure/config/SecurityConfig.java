@@ -1,5 +1,6 @@
 package com.klasio.shared.infrastructure.config;
 
+import com.klasio.auth.infrastructure.security.BCryptPasswordEncoderAdapter;
 import com.klasio.shared.infrastructure.security.JwtAuthenticationFilter;
 import com.klasio.shared.infrastructure.security.TenantStatusFilter;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -24,11 +26,19 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final TenantStatusFilter tenantStatusFilter;
+    private final BCryptPasswordEncoderAdapter bCryptPasswordEncoderAdapter;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          TenantStatusFilter tenantStatusFilter) {
+                          TenantStatusFilter tenantStatusFilter,
+                          BCryptPasswordEncoderAdapter bCryptPasswordEncoderAdapter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.tenantStatusFilter = tenantStatusFilter;
+        this.bCryptPasswordEncoderAdapter = bCryptPasswordEncoderAdapter;
+    }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return bCryptPasswordEncoderAdapter.getSpringEncoder();
     }
 
     @Bean
@@ -46,7 +56,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/favicon.ico",
                                 "/error",
-                                "/dev/**"
+                                "/dev/**",
+                                "/api/v1/auth/**",
+                                "/api/v1/tenants/*/register"
                         ).permitAll()
                         .requestMatchers("/api/v1/tenants/**").hasRole("SUPERADMIN")
                         .requestMatchers("/api/v1/programs/**").authenticated()
@@ -63,7 +75,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 

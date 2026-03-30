@@ -87,7 +87,10 @@ public class StudentJpaEntity implements Persistable<UUID> {
     @Column(name = "deactivated_by")
     private UUID deactivatedBy;
 
-    protected StudentJpaEntity() {
+    @Column(name = "user_id")
+    private UUID userId;
+
+    public StudentJpaEntity() {
     }
 
     @Override
@@ -159,6 +162,9 @@ public class StudentJpaEntity implements Persistable<UUID> {
 
     public UUID getDeactivatedBy() { return deactivatedBy; }
     public void setDeactivatedBy(UUID deactivatedBy) { this.deactivatedBy = deactivatedBy; }
+
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
 
     @Override
     public boolean isNew() { return isNew; }
