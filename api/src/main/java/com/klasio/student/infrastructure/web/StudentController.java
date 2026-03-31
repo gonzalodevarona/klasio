@@ -65,7 +65,7 @@ public class StudentController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
     public ResponseEntity<StudentResponseDto.StudentDetailResponse> createStudent(
             @Valid @RequestBody StudentRequestDto.CreateStudentRequest request) {
 
@@ -122,7 +122,7 @@ public class StudentController {
     }
 
     @PutMapping("/{studentId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
     public ResponseEntity<StudentResponseDto.StudentDetailResponse> updateStudent(
             @PathVariable UUID studentId,
             @Valid @RequestBody StudentRequestDto.UpdateStudentRequest request) {
@@ -150,7 +150,7 @@ public class StudentController {
     }
 
     @PostMapping("/{studentId}/deactivate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
     public ResponseEntity<StudentResponseDto.StudentDetailResponse> deactivateStudent(
             @PathVariable UUID studentId) {
 
@@ -172,7 +172,7 @@ public class StudentController {
     }
 
     @PostMapping("/{studentId}/reactivate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
     public ResponseEntity<StudentResponseDto.StudentDetailResponse> reactivateStudent(
             @PathVariable UUID studentId) {
 

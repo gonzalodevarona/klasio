@@ -13,24 +13,37 @@ class ApiError extends Error {
   }
 }
 
-async function getAuthToken(): Promise<string | null> {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("auth_token");
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch("/api/auth/refresh", { method: "POST" });
+      return response.ok;
+    } catch {
+      return false;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = await getAuthToken();
-
   const headers: HeadersInit = {
     ...options.headers,
   };
-
-  if (token) {
-    (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
-  }
 
   if (!(options.body instanceof FormData)) {
     (headers as Record<string, string>)["Content-Type"] = "application/json";
@@ -39,7 +52,41 @@ async function request<T>(
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
+    credentials: "include",
   });
+
+  if (response.status === 401) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      const retryResponse = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers,
+        credentials: "include",
+      });
+
+      if (!retryResponse.ok) {
+        const body = await retryResponse.json().catch(() => null);
+        const error = body?.error;
+        throw new ApiError(
+          retryResponse.status,
+          error?.code ?? "UNKNOWN_ERROR",
+          error?.message ?? retryResponse.statusText,
+          error?.details,
+          error?.suggestedSlug
+        );
+      }
+
+      if (retryResponse.status === 204) {
+        return undefined as T;
+      }
+
+      return retryResponse.json();
+    }
+
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
+  }
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
@@ -72,6 +119,12 @@ export const api = {
   put: <T>(path: string, body?: unknown) =>
     request<T>(path, {
       method: "PUT",
+      body: JSON.stringify(body),
+    }),
+
+  patch: <T>(path: string, body?: unknown) =>
+    request<T>(path, {
+      method: "PATCH",
       body: JSON.stringify(body),
     }),
 

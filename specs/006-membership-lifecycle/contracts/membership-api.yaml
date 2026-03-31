@@ -1,0 +1,412 @@
+openapi: 3.1.0
+info:
+  title: Klasio – Membership API
+  version: 1.0.0
+  description: |
+    Membership lifecycle: creation, payment validation, activation, hour adjustments, and history.
+    All endpoints are tenant-scoped — tenant_id is resolved from the authenticated JWT.
+
+servers:
+  - url: /api/v1
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Memberships
+    description: Membership CRUD and lifecycle operations
+  - name: HourTransactions
+    description: Hour balance ledger
+
+paths:
+
+  /memberships:
+    get:
+      tags: [Memberships]
+      summary: List memberships (paginated)
+      description: |
+        Roles: ADMIN, SUPERADMIN, MANAGER (own program only).
+        Filtered by studentId, programId, and/or status.
+      parameters:
+        - { name: studentId, in: query, schema: { type: string, format: uuid } }
+        - { name: programId, in: query, schema: { type: string, format: uuid } }
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING_PAYMENT_VALIDATION, PENDING_MANAGER_ACTIVATION, ACTIVE, INACTIVE, EXPIRED]
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, default: 20, maximum: 100 } }
+      responses:
+        "200":
+          description: Paginated list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipPage' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+
+    post:
+      tags: [Memberships]
+      summary: Create a membership
+      description: |
+        Roles: ADMIN, SUPERADMIN.
+        Creates in PENDING_PAYMENT_VALIDATION status by default.
+        With paymentValidated=true + activateDirectly=true → ACTIVE.
+        With paymentValidated=true + activateDirectly=false → PENDING_MANAGER_ACTIVATION.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateMembershipRequest' }
+      responses:
+        "201":
+          description: Membership created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipDetail' }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404":
+          description: Student enrollment not found for given studentId+programId
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example:
+                error: { code: ENROLLMENT_NOT_FOUND, message: "No active enrollment found for this student in the program" }
+        "409":
+          description: Active membership already exists
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example:
+                error: { code: MEMBERSHIP_ALREADY_ACTIVE, message: "Student already has an active membership in this program" }
+
+  /memberships/{id}:
+    get:
+      tags: [Memberships]
+      summary: Get membership by ID
+      description: Roles: ADMIN, SUPERADMIN, MANAGER (own program).
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        "200":
+          description: Membership details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipDetail' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /memberships/{id}/validate-payment:
+    patch:
+      tags: [Memberships]
+      summary: Validate payment and optionally activate
+      description: |
+        Transitions PENDING_PAYMENT_VALIDATION → ACTIVE (activateDirectly=true) or
+        PENDING_MANAGER_ACTIVATION (activateDirectly=false).
+        Roles: ADMIN, SUPERADMIN.
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ValidatePaymentRequest' }
+      responses:
+        "200":
+          description: Updated membership
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipDetail' }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "409":
+          description: Membership not in PENDING_PAYMENT_VALIDATION status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example:
+                error: { code: INVALID_STATUS_TRANSITION, message: "Membership is not in PENDING_PAYMENT_VALIDATION status" }
+
+  /memberships/{id}/activate:
+    patch:
+      tags: [Memberships]
+      summary: Activate a membership (manager delegation)
+      description: |
+        Transitions PENDING_MANAGER_ACTIVATION → ACTIVE.
+        Manager can only activate memberships delegated to their program.
+        Admin can activate any membership in this status.
+        Roles: ADMIN, SUPERADMIN, MANAGER (own program only).
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        "200":
+          description: Membership activated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipDetail' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "409":
+          description: Membership not in PENDING_MANAGER_ACTIVATION status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /memberships/{id}/adjust-hours:
+    post:
+      tags: [Memberships]
+      summary: Manually adjust hour balance
+      description: |
+        Add or subtract hours from an ACTIVE membership.
+        Negative delta that brings balance to 0 triggers INACTIVE transition.
+        Roles: ADMIN, SUPERADMIN only.
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdjustHoursRequest' }
+      responses:
+        "200":
+          description: Updated membership
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipDetail' }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+        "409":
+          description: Adjustment would result in negative balance or membership not ACTIVE
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              example:
+                error: { code: NEGATIVE_BALANCE, message: "Adjustment would result in a negative hour balance" }
+
+  /memberships/{id}/transactions:
+    get:
+      tags: [HourTransactions]
+      summary: List hour transactions for a membership
+      description: |
+        Append-only ledger sorted by created_at DESC.
+        Roles: ADMIN, SUPERADMIN, MANAGER (own program).
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+        - { name: size, in: query, schema: { type: integer, default: 50, maximum: 200 } }
+      responses:
+        "200":
+          description: Paginated transaction list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HourTransactionPage' }
+
+  /students/{studentId}/programs/{programId}/membership-history:
+    get:
+      tags: [Memberships]
+      summary: Complete membership history for a student in a program
+      description: |
+        Returns all memberships (past + current) with summary stats.
+        Accept: application/json → JSON array.
+        Accept: text/csv → CSV file download.
+        Roles: ADMIN, SUPERADMIN.
+      parameters:
+        - { name: studentId, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: programId, in: path, required: true, schema: { type: string, format: uuid } }
+        - name: Accept
+          in: header
+          schema:
+            type: string
+            enum: [application/json, text/csv]
+            default: application/json
+      responses:
+        "200":
+          description: Membership history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MembershipHistoryEntry' }
+            text/csv:
+              schema: { type: string, format: binary }
+
+  /memberships/active:
+    get:
+      tags: [Memberships]
+      summary: Get active membership for a student+program pair
+      description: |
+        Used by attendance marking (RF-25/RF-26) to validate membership before deduction.
+        Returns 404 if no ACTIVE membership found.
+        Roles: ADMIN, SUPERADMIN, MANAGER, PROFESSOR.
+      parameters:
+        - { name: studentId, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: programId, in: query, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: Active membership
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MembershipDetail' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  schemas:
+    CreateMembershipRequest:
+      type: object
+      required: [studentId, programId, purchasedHours, startDate]
+      properties:
+        studentId: { type: string, format: uuid }
+        programId: { type: string, format: uuid }
+        purchasedHours: { type: integer, minimum: 1 }
+        startDate:
+          type: string
+          format: date
+          description: Must be the 1st of a calendar month (e.g. 2026-04-01)
+        paymentValidated: { type: boolean, default: false }
+        activateDirectly:
+          type: boolean
+          default: false
+          description: Only evaluated when paymentValidated=true
+
+    ValidatePaymentRequest:
+      type: object
+      required: [activateDirectly]
+      properties:
+        activateDirectly:
+          type: boolean
+          description: true → ACTIVE; false → PENDING_MANAGER_ACTIVATION
+
+    AdjustHoursRequest:
+      type: object
+      required: [delta, reason]
+      properties:
+        delta:
+          type: integer
+          description: Positive = add hours; negative = subtract hours. Cannot be 0.
+        reason:
+          type: string
+          minLength: 5
+          maxLength: 500
+
+    MembershipSummary:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        studentId: { type: string, format: uuid }
+        programId: { type: string, format: uuid }
+        status:
+          type: string
+          enum: [PENDING_PAYMENT_VALIDATION, PENDING_MANAGER_ACTIVATION, ACTIVE, INACTIVE, EXPIRED]
+        purchasedHours: { type: integer }
+        availableHours: { type: integer }
+        startDate: { type: string, format: date }
+        expirationDate: { type: string, format: date }
+
+    MembershipDetail:
+      allOf:
+        - $ref: '#/components/schemas/MembershipSummary'
+        - type: object
+          properties:
+            enrollmentId: { type: string, format: uuid }
+            paymentValidated: { type: boolean }
+            paymentValidatedBy: { type: string, format: uuid, nullable: true }
+            paymentValidatedAt: { type: string, format: date-time, nullable: true }
+            activatedBy: { type: string, format: uuid, nullable: true }
+            activatedAt: { type: string, format: date-time, nullable: true }
+            createdAt: { type: string, format: date-time }
+            createdBy: { type: string, format: uuid }
+
+    MembershipPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items: { $ref: '#/components/schemas/MembershipSummary' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+
+    HourTransactionSummary:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        membershipId: { type: string, format: uuid }
+        type:
+          type: string
+          enum: [ATTENDANCE_DEDUCTION, MANUAL_ADDITION, MANUAL_SUBTRACTION]
+        delta: { type: integer }
+        reason: { type: string, nullable: true }
+        actorId: { type: string, format: uuid }
+        actorRole: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    HourTransactionPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items: { $ref: '#/components/schemas/HourTransactionSummary' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+
+    MembershipHistoryEntry:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        purchasedHours: { type: integer }
+        consumedHours: { type: integer }
+        availableHours: { type: integer }
+        startDate: { type: string, format: date }
+        expirationDate: { type: string, format: date }
+        status:
+          type: string
+          enum: [PENDING_PAYMENT_VALIDATION, PENDING_MANAGER_ACTIVATION, ACTIVE, INACTIVE, EXPIRED]
+        activatedAt: { type: string, format: date-time, nullable: true }
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: FORBIDDEN, message: "Insufficient permissions" }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: MEMBERSHIP_NOT_FOUND, message: "Membership not found" }

@@ -1,0 +1,624 @@
+openapi: 3.1.0
+info:
+  title: Klasio Auth API
+  description: Authentication & RBAC endpoints (RF-01, RF-02, RF-03, RF-04)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: auth
+    description: Login, logout, token refresh
+  - name: registration
+    description: Student self-registration
+  - name: password-recovery
+    description: Password reset flow
+  - name: roles
+    description: Role assignment
+
+paths:
+
+  # ─── RF-02: Login ───────────────────────────────────────────────────────────
+
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: login
+      summary: Authenticate with email and password
+      description: |
+        Validates credentials, checks lockout state, issues JWT access token
+        and a refresh token. Sets both as HttpOnly cookies in the response.
+        Redirects each role to its corresponding dashboard on the frontend.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          headers:
+            Set-Cookie:
+              description: |
+                Two cookies are set:
+                - `accessToken` (HttpOnly, Secure, SameSite=Strict, max-age=28800)
+                - `refreshToken` (HttpOnly, Secure, SameSite=Strict, max-age=604800)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: Invalid email or password
+        '403':
+          description: Account locked or unverified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                locked:
+                  value:
+                    error:
+                      code: ACCOUNT_LOCKED
+                      message: Account locked until 2026-03-28T15:30:00Z
+                      lockedUntil: '2026-03-28T15:30:00Z'
+                unverified:
+                  value:
+                    error:
+                      code: EMAIL_NOT_VERIFIED
+                      message: Please verify your email address before logging in
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      operationId: logout
+      summary: Invalidate the current session
+      description: |
+        Revokes the refresh token server-side. Clears both cookies.
+        Subsequent requests with the old refresh token will be rejected.
+      security:
+        - cookieAuth: []
+      responses:
+        '204':
+          description: Session invalidated successfully. Cookies cleared.
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      operationId: refreshToken
+      summary: Exchange a refresh token for a new access token
+      description: |
+        Rotates the refresh token (old token revoked, new token issued).
+        Returns a new access token and a new refresh token as HttpOnly cookies.
+      security:
+        - cookieRefresh: []
+      responses:
+        '200':
+          description: Tokens refreshed
+          headers:
+            Set-Cookie:
+              description: New `accessToken` and `refreshToken` cookies set
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '401':
+          description: Refresh token invalid, expired, or revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: REFRESH_TOKEN_INVALID
+                  message: Refresh token is invalid or has been revoked
+
+  # ─── RF-01: Student Self-Registration ───────────────────────────────────────
+
+  /tenants/{tenantSlug}/register:
+    post:
+      tags: [registration]
+      operationId: registerStudent
+      summary: Student self-registration (public endpoint)
+      description: |
+        Creates a new student account in EMAIL_UNVERIFIED state.
+        Sends a verification email with a 24h one-time link.
+        If date_of_birth indicates age < 18, tutor fields are mandatory.
+        Scoped to the tenant identified by tenantSlug.
+      parameters:
+        - name: tenantSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentRegistrationRequest'
+      responses:
+        '202':
+          description: Registration received. Verification email sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+        '409':
+          description: Duplicate email or identity number within this tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicate_email:
+                  value:
+                    error:
+                      code: EMAIL_ALREADY_REGISTERED
+                      message: This email address is already registered in this league
+                duplicate_identity:
+                  value:
+                    error:
+                      code: IDENTITY_NUMBER_ALREADY_REGISTERED
+                      message: This identity document number is already registered in this league
+        '422':
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Tenant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: TENANT_NOT_FOUND
+                  message: No league found for identifier
+
+  /auth/verify-email:
+    get:
+      tags: [registration]
+      operationId: verifyEmail
+      summary: Activate account via email verification link
+      description: |
+        Consumes the one-time token from the verification email.
+        Sets user status to ACTIVE and student membership state to PENDING_MEMBERSHIP.
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email verified. Account activated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmailResponse'
+        '400':
+          description: Token invalid, expired, or already used
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                expired:
+                  value:
+                    error:
+                      code: VERIFICATION_TOKEN_EXPIRED
+                      message: This verification link has expired. Please request a new one.
+                used:
+                  value:
+                    error:
+                      code: VERIFICATION_TOKEN_ALREADY_USED
+                      message: This verification link has already been used.
+
+  /auth/resend-verification:
+    post:
+      tags: [registration]
+      operationId: resendVerification
+      summary: Resend email verification link
+      description: |
+        Invalidates any existing unused verification tokens for the user
+        and sends a new one. Always returns 202 to prevent email enumeration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, tenantSlug]
+              properties:
+                email:
+                  type: string
+                  format: email
+                tenantSlug:
+                  type: string
+      responses:
+        '202':
+          description: If the email is registered and unverified, a new link has been sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: If your account exists and is unverified, a new verification email has been sent.
+
+  # ─── RF-03: Password Recovery ───────────────────────────────────────────────
+
+  /auth/forgot-password:
+    post:
+      tags: [password-recovery]
+      operationId: forgotPassword
+      summary: Request a password reset email
+      description: |
+        Sends a one-time reset link valid for 30 minutes.
+        Always returns 202 regardless of whether the email is registered (no enumeration).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: If the email is registered, a reset link has been sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: If your account exists, a password reset link has been sent to your email.
+
+  /auth/reset-password:
+    post:
+      tags: [password-recovery]
+      operationId: resetPassword
+      summary: Set a new password using a reset token
+      description: |
+        Validates the one-time reset token, enforces password policy, updates password,
+        marks token as consumed, and redirects the user to login with a success message.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password updated. You can now log in with your new password.
+        '400':
+          description: Token invalid, expired, or already used; or password policy violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                expired_token:
+                  value:
+                    error:
+                      code: RESET_TOKEN_EXPIRED
+                      message: This reset link has expired. Please request a new one.
+                used_token:
+                  value:
+                    error:
+                      code: RESET_TOKEN_ALREADY_USED
+                      message: This reset link has already been used.
+                policy_violation:
+                  value:
+                    error:
+                      code: PASSWORD_POLICY_VIOLATION
+                      message: Password does not meet requirements
+                      violations:
+                        - MINIMUM_LENGTH
+                        - REQUIRES_UPPERCASE
+
+  # ─── RF-04: Role Assignment ─────────────────────────────────────────────────
+
+  /users/{userId}/role:
+    patch:
+      tags: [roles]
+      operationId: assignRole
+      summary: Assign or change a user's role
+      description: |
+        Role assignment rules:
+        - SUPERADMIN can assign ADMIN to any user in any tenant.
+        - ADMIN can assign MANAGER or PROFESSOR to users in their own tenant only.
+        - No user can assign a role equal to or higher than their own.
+        - Replaces the user's current role (one role per tenant).
+        - Role change takes effect on next login.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                  enum: [SUPERADMIN, ADMIN, MANAGER, PROFESSOR, STUDENT]
+                tenantId:
+                  type: string
+                  format: uuid
+                  description: Required when SUPERADMIN assigns ADMIN to a user in a specific tenant
+      responses:
+        '200':
+          description: Role assigned. Change takes effect on next login.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummary'
+        '403':
+          description: Insufficient privileges for this role assignment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                cannot_elevate:
+                  value:
+                    error:
+                      code: ROLE_ELEVATION_FORBIDDEN
+                      message: You cannot assign a role equal to or higher than your own
+                cross_tenant:
+                  value:
+                    error:
+                      code: CROSS_TENANT_ROLE_ASSIGNMENT_FORBIDDEN
+                      message: Admins can only assign roles within their own tenant
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+# ─── Reusable Components ──────────────────────────────────────────────────────
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
+    cookieRefresh:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+
+  responses:
+    Unauthenticated:
+      description: Missing or invalid access token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHENTICATED
+              message: Authentication required
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [SUPERADMIN, ADMIN, MANAGER, PROFESSOR, STUDENT]
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Null for SUPERADMIN
+        dashboardUrl:
+          type: string
+          description: Frontend URL for post-login redirect
+          example: /admin/dashboard
+
+    RefreshResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        role:
+          type: string
+
+    StudentRegistrationRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - dateOfBirth
+        - documentType
+        - documentNumber
+        - eps
+        - email
+        - password
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        dateOfBirth:
+          type: string
+          format: date
+        documentType:
+          type: string
+          enum: [CC, TI, CE, PASAPORTE]
+        documentNumber:
+          type: string
+          minLength: 4
+          maxLength: 20
+        eps:
+          type: string
+          minLength: 2
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          description: Must meet policy (8+ chars, uppercase, digit, special char)
+        tutorFullName:
+          type: string
+          description: Required if age < 18
+        tutorRelationship:
+          type: string
+          description: Required if age < 18
+        tutorContact:
+          type: string
+          description: Required if age < 18 — phone or email
+
+    RegistrationResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        message:
+          type: string
+          example: Account created. Please check your email to verify your account.
+
+    VerifyEmailResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Email verified successfully. You can now log in.
+
+    ResetPasswordRequest:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+          format: password
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        role:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            lockedUntil:
+              type: string
+              format: date-time
+              nullable: true
+            violations:
+              type: array
+              items:
+                type: string
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string

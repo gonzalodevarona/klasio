@@ -199,7 +199,7 @@ public class EnrollmentController {
     }
 
     @PostMapping("/api/v1/enrollments/{enrollmentId}/promote")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'PROFESSOR')")
     public ResponseEntity<EnrollmentResponseDto.EnrollmentDetailResponse> promoteStudent(
             @PathVariable UUID enrollmentId,
             @Valid @RequestBody EnrollmentRequestDto.PromoteEnrollmentRequest request) {

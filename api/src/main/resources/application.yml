@@ -2,6 +2,10 @@ spring:
   application:
     name: klasio-api
 
+  datasource:
+    hikari:
+      connection-init-sql: "SELECT set_config('app.current_tenant', '00000000-0000-0000-0000-000000000000', false)"
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -34,7 +38,14 @@ logging:
 klasio:
   jwt:
     secret: ${JWT_SECRET:}
-    expiration: 86400000
+    access-token-expiration: ${JWT_ACCESS_EXPIRATION:28800000}
+    refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+  auth:
+    email-verification-expiry-hours: ${AUTH_EMAIL_VERIFICATION_EXPIRY_HOURS:24}
+    password-reset-expiry-minutes: ${AUTH_PASSWORD_RESET_EXPIRY_MINUTES:30}
+    max-failed-login-attempts: ${AUTH_MAX_FAILED_LOGIN_ATTEMPTS:5}
+    lockout-duration-minutes: ${AUTH_LOCKOUT_DURATION_MINUTES:15}
+    from-email: ${AUTH_FROM_EMAIL:noreply@klasio.com}
   s3:
     bucket: ${AWS_S3_BUCKET:klasio-logos-dev}
     region: ${AWS_REGION:us-east-1}

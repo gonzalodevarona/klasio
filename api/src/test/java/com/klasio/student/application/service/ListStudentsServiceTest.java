@@ -5,6 +5,7 @@ import com.klasio.student.domain.model.BloodType;
 import com.klasio.student.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.model.StudentId;
+import com.klasio.student.domain.port.ActiveMembershipPort;
 import com.klasio.student.domain.port.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,13 +33,16 @@ class ListStudentsServiceTest {
     @Mock
     private StudentRepository studentRepository;
 
+    @Mock
+    private ActiveMembershipPort activeMembershipPort;
+
     private ListStudentsService service;
 
     private static final UUID TENANT_ID = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
-        service = new ListStudentsService(studentRepository);
+        service = new ListStudentsService(studentRepository, activeMembershipPort);
     }
 
     private Student reconstitute(String firstName, String lastName, String email) {
@@ -51,21 +57,27 @@ class ListStudentsServiceTest {
     }
 
     @Test
-    @DisplayName("should return paginated student summaries from repository")
+    @DisplayName("should return paginated student summaries with active membership flag")
     void shouldReturnPaginatedResults() {
         Student student1 = reconstitute("Carlos", "Garcia", "carlos@example.com");
         Student student2 = reconstitute("Maria", "Lopez", "maria@example.com");
 
         Page<Student> page = new PageImpl<>(List.of(student1, student2));
         when(studentRepository.findAll(TENANT_ID, 0, 10, null, null)).thenReturn(page);
+        when(activeMembershipPort.hasActiveMembership(eq(TENANT_ID), eq(student1.getId().value()))).thenReturn(true);
+        when(activeMembershipPort.hasActiveMembership(eq(TENANT_ID), eq(student2.getId().value()))).thenReturn(false);
 
         Page<StudentSummary> result = service.execute(TENANT_ID, 0, 10, null, null);
 
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent().get(0).firstName()).isEqualTo("Carlos");
+        assertThat(result.getContent().get(0).hasActiveMembership()).isTrue();
         assertThat(result.getContent().get(1).firstName()).isEqualTo("Maria");
+        assertThat(result.getContent().get(1).hasActiveMembership()).isFalse();
 
         verify(studentRepository).findAll(TENANT_ID, 0, 10, null, null);
+        verify(activeMembershipPort).hasActiveMembership(TENANT_ID, student1.getId().value());
+        verify(activeMembershipPort).hasActiveMembership(TENANT_ID, student2.getId().value());
     }
 
     @Test

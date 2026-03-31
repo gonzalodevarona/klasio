@@ -305,6 +305,22 @@ export default function StudentDetail({
           )}
         </div>
       </div>
+
+      {/* Memberships Section */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="px-6 py-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Memberships</h3>
+            <p className="text-sm text-gray-500 mt-1">Manage monthly hour packages for this student.</p>
+          </div>
+          <Link
+            href={`/students/${student.id}/memberships`}
+            className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            View Memberships
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

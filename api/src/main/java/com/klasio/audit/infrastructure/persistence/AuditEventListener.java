@@ -28,6 +28,14 @@ import com.klasio.student.domain.event.StudentUnenrolled;
 import com.klasio.student.domain.event.StudentUpdated;
 import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
+import com.klasio.membership.domain.event.MembershipCreated;
+import com.klasio.membership.domain.event.MembershipPaymentValidated;
+import com.klasio.membership.domain.event.MembershipActivated;
+import com.klasio.membership.domain.event.MembershipPendingManagerActivation;
+import com.klasio.membership.domain.event.MembershipDepleted;
+import com.klasio.membership.domain.event.MembershipExpired;
+import com.klasio.membership.domain.event.MembershipExpiryWarning;
+import com.klasio.membership.domain.event.HourAdjusted;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -42,6 +50,8 @@ import java.util.UUID;
 public class AuditEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(AuditEventListener.class);
+    /** Sentinel UUID for system-triggered audit events (cron jobs, scheduled processes). */
+    private static final UUID SYSTEM_ACTOR = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     private final JpaAuditLogRepository auditLogRepository;
     private final ObjectMapper objectMapper;
@@ -666,6 +676,195 @@ public class AuditEventListener {
                 event.changedBy(),
                 "STUDENT_ENROLLMENT",
                 event.enrollmentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipCreated(MembershipCreated event) {
+        log.info("Recording audit log for membership creation: membershipId={}, studentId={}, programId={}",
+                event.membershipId(), event.studentId(), event.programId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString(),
+                "purchasedHours", String.valueOf(event.purchasedHours()),
+                "startDate", event.startDate().toString(),
+                "expirationDate", event.expirationDate().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_CREATED",
+                event.createdBy(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipPaymentValidated(MembershipPaymentValidated event) {
+        log.info("Recording audit log for membership payment validation: membershipId={}", event.membershipId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_PAYMENT_VALIDATED",
+                event.actorId(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipActivated(MembershipActivated event) {
+        log.info("Recording audit log for membership activation: membershipId={}", event.membershipId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_ACTIVATED",
+                event.actorId(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipPendingManagerActivation(MembershipPendingManagerActivation event) {
+        log.info("Recording audit log for membership pending manager activation: membershipId={}", event.membershipId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_PENDING_MANAGER_ACTIVATION",
+                event.actorId(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipDepleted(MembershipDepleted event) {
+        log.info("Recording audit log for membership depletion: membershipId={}, studentId={}",
+                event.membershipId(), event.studentId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_DEPLETED",
+                event.actorId(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipExpired(MembershipExpired event) {
+        log.info("Recording audit log for membership expiration: membershipId={}, studentId={}",
+                event.membershipId(), event.studentId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_EXPIRED",
+                SYSTEM_ACTOR,
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipExpiryWarning(MembershipExpiryWarning event) {
+        log.info("Recording audit log for membership expiry warning: membershipId={}, expirationDate={}",
+                event.membershipId(), event.expirationDate());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString(),
+                "expirationDate", event.expirationDate().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_EXPIRY_WARNING",
+                SYSTEM_ACTOR,
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onHourAdjusted(HourAdjusted event) {
+        log.info("Recording audit log for hour adjustment: membershipId={}, delta={}, type={}",
+                event.membershipId(), event.delta(), event.type());
+
+        java.util.HashMap<String, String> detailMap = new java.util.HashMap<>();
+        detailMap.put("delta", String.valueOf(event.delta()));
+        detailMap.put("type", event.type().name());
+        detailMap.put("actorRole", event.actorRole());
+        if (event.reason() != null) {
+            detailMap.put("reason", event.reason());
+        }
+        String details = toJson(detailMap);
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_HOUR_ADJUSTED",
+                event.actorId(),
+                "MEMBERSHIP",
+                event.membershipId(),
                 event.occurredAt(),
                 details
         );

@@ -1,4 +1,16 @@
 export type ProgramStatus = "ACTIVE" | "INACTIVE";
+export type ProgramModality = "HOURS_BASED" | "CLASSES_PER_WEEK";
+
+export interface ProgramPlanSummary {
+  id: string;
+  programId: string;
+  name: string;
+  modality: ProgramModality;
+  cost: number;
+  hours: number | null;
+  managerId: string;
+  status: ProgramStatus;
+}
 
 export interface ProgramSummary {
   id: string;

@@ -19,4 +19,7 @@ public interface StudentEnrollmentRepository {
     Page<StudentEnrollment> findByProgramId(UUID tenantId, UUID programId, int page, int size, String level, String status);
 
     Page<StudentEnrollment> findByStudentId(UUID tenantId, UUID studentId, int page, int size, String status);
+
+    /** Used by membership creation to verify the student has any active enrollment in the program */
+    Optional<StudentEnrollment> findActiveByStudentIdAndProgramId(UUID tenantId, UUID studentId, UUID programId);
 }

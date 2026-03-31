@@ -15,6 +15,8 @@ public interface SpringDataStudentRepository extends JpaRepository<StudentJpaEnt
 
     boolean existsByTenantIdAndEmailAndIdNot(UUID tenantId, String email, UUID id);
 
+    boolean existsByTenantIdAndIdentityNumber(UUID tenantId, String identityNumber);
+
     Optional<StudentJpaEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     @Query(value = "SELECT s.* FROM students s WHERE s.tenant_id = :tenantId " +
