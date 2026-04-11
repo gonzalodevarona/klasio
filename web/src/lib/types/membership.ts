@@ -1,4 +1,5 @@
 export type MembershipStatus =
+  | "PENDING_PAYMENT"
   | "PENDING_PAYMENT_VALIDATION"
   | "PENDING_MANAGER_ACTIVATION"
   | "ACTIVE"
@@ -92,4 +93,8 @@ export interface ValidatePaymentRequest {
 export interface AdjustHoursRequest {
   delta: number;
   reason: string;
+}
+
+export interface CreateSelfMembershipRequest {
+  planId: string;
 }

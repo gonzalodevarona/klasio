@@ -80,6 +80,8 @@ public class CreateMembershipService implements CreateMembershipUseCase {
         );
 
         if (command.paymentValidated()) {
+            // Admin is directly validating — advance through the proof upload step first
+            membership.markProofUploaded();
             membership.validatePayment(command.actorId(), command.activateDirectly());
         }
 

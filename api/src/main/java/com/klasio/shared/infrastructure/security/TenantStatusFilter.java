@@ -14,8 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,10 +28,9 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class TenantStatusFilter extends OncePerRequestFilter implements TenantCacheEviction {
-
-    private static final Logger log = LoggerFactory.getLogger(TenantStatusFilter.class);
 
     private static final String TENANT_STATUS_QUERY = "SELECT status FROM tenants WHERE id = ?";
     private static final String ACTIVE_STATUS = "ACTIVE";

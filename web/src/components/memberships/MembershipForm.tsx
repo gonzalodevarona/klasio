@@ -68,9 +68,27 @@ export default function MembershipForm({
           ))}
         </select>
         {selectedPlan && (
-          <p className="mt-1 text-xs text-gray-500">
-            {selectedPlan.hours} hours included &middot; Cost: ${selectedPlan.cost}
-          </p>
+          <div className="mt-2 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 space-y-1.5">
+            <p className="text-sm font-semibold text-blue-900">{selectedPlan.name}</p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+              <div>
+                <span className="text-blue-600 font-medium">Modality: </span>
+                <span className="text-blue-800">
+                  {selectedPlan.modality === "HOURS_BASED" ? "Hours-based" : "Classes per week"}
+                </span>
+              </div>
+              {selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null && (
+                <div>
+                  <span className="text-blue-600 font-medium">Hours: </span>
+                  <span className="text-blue-800">{selectedPlan.hours}h / month</span>
+                </div>
+              )}
+              <div>
+                <span className="text-blue-600 font-medium">Cost: </span>
+                <span className="text-blue-800">${Number(selectedPlan.cost).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

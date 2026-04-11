@@ -7,6 +7,8 @@ import com.klasio.membership.domain.event.MembershipDepleted;
 import com.klasio.membership.domain.event.MembershipExpired;
 import com.klasio.membership.domain.event.MembershipPaymentValidated;
 import com.klasio.membership.domain.event.MembershipPendingManagerActivation;
+import com.klasio.membership.domain.event.MembershipProofUploaded;
+import com.klasio.membership.domain.event.MembershipRenewed;
 import com.klasio.shared.domain.DomainEvent;
 
 import java.time.Instant;
@@ -30,10 +32,10 @@ public class Membership {
     private final UUID programId;
     private final UUID planId;
     private final String planName;
-    private final int purchasedHours;
+    private int purchasedHours;
     private int availableHours;
-    private final LocalDate startDate;
-    private final LocalDate expirationDate;
+    private LocalDate startDate;
+    private LocalDate expirationDate;
     private MembershipStatus status;
     private boolean paymentValidated;
     private UUID paymentValidatedBy;
@@ -114,6 +116,9 @@ public class Membership {
         if (purchasedHours < 1) {
             throw new IllegalArgumentException("purchasedHours must be >= 1");
         }
+        if (startDate.getDayOfMonth() != 1) {
+            throw new IllegalArgumentException("startDate must be the 1st day of the month");
+        }
         LocalDate expirationDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
         Instant now = Instant.now();
         MembershipId membershipId = MembershipId.generate();
@@ -121,7 +126,7 @@ public class Membership {
         Membership membership = new Membership(
                 membershipId, tenantId, studentId, enrollmentId, programId,
                 planId, planName, purchasedHours, purchasedHours, startDate, expirationDate,
-                MembershipStatus.PENDING_PAYMENT_VALIDATION,
+                MembershipStatus.PENDING_PAYMENT,
                 false, null, null, null, null,
                 now, createdBy, null, null
         );
@@ -162,6 +167,36 @@ public class Membership {
 
     // ---- State transitions ----
 
+    /**
+     * Transitions PENDING_PAYMENT → PENDING_PAYMENT_VALIDATION.
+     * Called by UploadPaymentProofService after the proof file has been stored.
+     */
+    public void markProofUploaded() {
+        if (this.status != MembershipStatus.PENDING_PAYMENT) {
+            throw new IllegalStateException(
+                    "Cannot mark proof uploaded for membership not in PENDING_PAYMENT. Current: " + this.status);
+        }
+        Instant now = Instant.now();
+        this.status = MembershipStatus.PENDING_PAYMENT_VALIDATION;
+        this.updatedAt = now;
+        domainEvents.add(new MembershipProofUploaded(id.value(), tenantId, studentId, programId, now));
+    }
+
+    /**
+     * Transitions PENDING_PAYMENT_VALIDATION → PENDING_PAYMENT.
+     * Called by RejectProofService so the student can re-upload after an admin rejection.
+     */
+    public void markProofRejected() {
+        if (this.status != MembershipStatus.PENDING_PAYMENT_VALIDATION) {
+            throw new IllegalStateException(
+                    "Cannot revert proof state for membership not in PENDING_PAYMENT_VALIDATION. Current: " + this.status);
+        }
+        Instant now = Instant.now();
+        this.status = MembershipStatus.PENDING_PAYMENT;
+        this.updatedAt = now;
+        // No new domain event — PaymentProofRejected is already emitted by the PaymentProof aggregate.
+    }
+
     public void validatePayment(UUID validatedBy, boolean activateDirectly) {
         Objects.requireNonNull(validatedBy, "validatedBy must not be null");
         if (this.status != MembershipStatus.PENDING_PAYMENT_VALIDATION) {
@@ -175,6 +210,12 @@ public class Membership {
         this.paymentValidatedAt = now;
         this.updatedAt = now;
         this.updatedBy = validatedBy;
+
+        // Renewal case: dates are null until payment is validated
+        if (this.startDate == null) {
+            this.startDate = LocalDate.now();
+            this.expirationDate = this.startDate.withDayOfMonth(this.startDate.lengthOfMonth());
+        }
 
         domainEvents.add(new MembershipPaymentValidated(
                 id.value(), tenantId, studentId, programId, validatedBy, now));
@@ -286,6 +327,34 @@ public class Membership {
 
         domainEvents.add(new MembershipExpired(
                 id.value(), tenantId, studentId, programId, now));
+    }
+
+    public void renew(int newPurchasedHours, UUID renewedBy) {
+        Objects.requireNonNull(renewedBy, "renewedBy must not be null");
+        if (this.status != MembershipStatus.EXPIRED && this.status != MembershipStatus.INACTIVE) {
+            throw new IllegalStateException(
+                    "Only EXPIRED or INACTIVE memberships can be renewed. Current: " + this.status);
+        }
+        if (newPurchasedHours < 1) {
+            throw new IllegalArgumentException("newPurchasedHours must be >= 1");
+        }
+
+        Instant now = Instant.now();
+        this.purchasedHours = newPurchasedHours;
+        this.availableHours = newPurchasedHours;
+        this.startDate = null;
+        this.expirationDate = null;
+        this.status = MembershipStatus.PENDING_PAYMENT;
+        this.paymentValidated = false;
+        this.paymentValidatedBy = null;
+        this.paymentValidatedAt = null;
+        this.activatedBy = null;
+        this.activatedAt = null;
+        this.updatedAt = now;
+        this.updatedBy = renewedBy;
+
+        domainEvents.add(new MembershipRenewed(
+                id.value(), tenantId, studentId, programId, newPurchasedHours, renewedBy, now));
     }
 
     // ---- Domain events ----

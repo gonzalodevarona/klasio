@@ -5,8 +5,7 @@ import com.klasio.audit.infrastructure.persistence.JpaAuditLogRepository;
 import com.klasio.auth.domain.event.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -15,10 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class AuthAuditEventListener {
-
-    private static final Logger log = LoggerFactory.getLogger(AuthAuditEventListener.class);
 
     private final JpaAuditLogRepository auditLogRepository;
     private final ObjectMapper objectMapper;

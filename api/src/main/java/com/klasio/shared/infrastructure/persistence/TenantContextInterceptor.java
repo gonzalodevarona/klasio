@@ -2,8 +2,7 @@ package com.klasio.shared.infrastructure.persistence;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,10 +15,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class TenantContextInterceptor implements HandlerInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(TenantContextInterceptor.class);
     private static final ThreadLocal<String> CURRENT_TENANT = new ThreadLocal<>();
 
     private final DataSource dataSource;

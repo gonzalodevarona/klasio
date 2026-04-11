@@ -43,8 +43,11 @@ class ValidatePaymentServiceTest {
     }
 
     private Membership pendingMembership() {
-        return Membership.create(TENANT_ID, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+        Membership m = Membership.create(TENANT_ID, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
                 UUID.randomUUID(), "Test Plan", 10, LocalDate.of(2026, 4, 1), UUID.randomUUID());
+        m.markProofUploaded(); // PENDING_PAYMENT → PENDING_PAYMENT_VALIDATION
+        m.clearDomainEvents();
+        return m;
     }
 
     @Test
@@ -94,8 +97,8 @@ class ValidatePaymentServiceTest {
     @Test
     @DisplayName("throws when membership not in PENDING_PAYMENT_VALIDATION")
     void execute_wrongStatus_throwsIllegalState() {
-        Membership m = pendingMembership();
-        m.validatePayment(ACTOR_ID, true); // already ACTIVE
+        Membership m = pendingMembership(); // already PENDING_PAYMENT_VALIDATION
+        m.validatePayment(ACTOR_ID, true); // now ACTIVE — wrong state for second call
         UUID id = m.getId().value();
         when(membershipRepository.findById(TENANT_ID, id)).thenReturn(Optional.of(m));
 

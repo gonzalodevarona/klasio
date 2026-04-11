@@ -41,6 +41,13 @@ public class JpaStudentRepository extends TenantScopedRepository implements Stud
     }
 
     @Override
+    public Optional<Student> findByUserId(UUID tenantId, UUID userId) {
+        applyTenantContext();
+        return springDataRepository.findByTenantIdAndUserId(tenantId, userId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public boolean existsByEmailInTenant(UUID tenantId, String email) {
         applyTenantContext();
         return springDataRepository.existsByTenantIdAndEmail(tenantId, email);

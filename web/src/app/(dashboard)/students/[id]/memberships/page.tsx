@@ -57,7 +57,7 @@ export default function StudentMembershipsPage({ params }: Props) {
 
       {/* Filters */}
       <div className="mb-4 flex gap-2">
-        {["", "ACTIVE", "INACTIVE", "EXPIRED", "PENDING_PAYMENT_VALIDATION", "PENDING_MANAGER_ACTIVATION"].map(
+        {["", "ACTIVE", "INACTIVE", "EXPIRED", "PENDING_PAYMENT", "PENDING_PAYMENT_VALIDATION", "PENDING_MANAGER_ACTIVATION"].map(
           (s) => (
             <button
               key={s}

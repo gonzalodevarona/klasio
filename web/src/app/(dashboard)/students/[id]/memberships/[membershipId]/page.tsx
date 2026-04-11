@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMembershipDetail } from "@/hooks/useMemberships";
 import { useAuth } from "@/hooks/useAuth";
 import MembershipDetail from "@/components/memberships/MembershipDetail";
+import { PaymentProofTimeline } from "@/components/payment-proofs/PaymentProofTimeline";
 
 interface Props {
   params: Promise<{ id: string; membershipId: string }>;
@@ -49,11 +50,14 @@ export default function MembershipDetailPage({ params }: Props) {
       )}
 
       {membership && (
-        <MembershipDetail
-          membership={membership}
-          onRefresh={refetch}
-          isAdmin={isAdmin}
-        />
+        <div className="space-y-6">
+          <MembershipDetail
+            membership={membership}
+            onRefresh={refetch}
+            isAdmin={isAdmin}
+          />
+          <PaymentProofTimeline membershipId={membershipId} />
+        </div>
       )}
     </div>
   );

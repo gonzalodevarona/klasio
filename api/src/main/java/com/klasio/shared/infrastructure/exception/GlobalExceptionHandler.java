@@ -1,8 +1,7 @@
 package com.klasio.shared.infrastructure.exception;
 
 import com.klasio.auth.domain.exception.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,10 +14,9 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
@@ -220,6 +218,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMembershipNotActive(MembershipNotActiveException ex) {
         var error = new ErrorResponse.ErrorDetail("MEMBERSHIP_NOT_ACTIVE", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(PaymentProofNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentProofNotFound(PaymentProofNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("PAYMENT_PROOF_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(InvalidMembershipStatusForUploadException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidMembershipStatusForUpload(
+            InvalidMembershipStatusForUploadException ex) {
+        var error = new ErrorResponse.ErrorDetail("INVALID_MEMBERSHIP_STATUS_FOR_UPLOAD", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(ManagerProgramMismatchException.class)

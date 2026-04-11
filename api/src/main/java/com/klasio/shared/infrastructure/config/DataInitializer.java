@@ -6,8 +6,7 @@ import com.klasio.auth.domain.model.User;
 import com.klasio.auth.infrastructure.persistence.SpringDataUserRepository;
 import com.klasio.auth.infrastructure.persistence.UserJpaEntity;
 import jakarta.persistence.EntityManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Slf4j
 @Configuration
 @Profile("local")
 public class DataInitializer {
-
-    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     @Bean
     CommandLineRunner seedUsers(DataSeeder seeder) {

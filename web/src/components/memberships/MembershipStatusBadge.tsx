@@ -4,20 +4,23 @@ interface MembershipStatusBadgeProps {
   status: MembershipStatus;
 }
 
+// Color scale: red (no active membership) → green (active)
 const STATUS_STYLES: Record<MembershipStatus, string> = {
-  ACTIVE: "bg-green-100 text-green-800",
-  INACTIVE: "bg-yellow-100 text-yellow-800",
-  EXPIRED: "bg-gray-100 text-gray-700",
-  PENDING_PAYMENT_VALIDATION: "bg-blue-100 text-blue-800",
-  PENDING_MANAGER_ACTIVATION: "bg-blue-100 text-blue-700",
+  EXPIRED:                    "bg-red-100 text-red-800",
+  INACTIVE:                   "bg-orange-100 text-orange-800",
+  PENDING_PAYMENT:            "bg-red-50 text-red-700 border border-red-200",
+  PENDING_PAYMENT_VALIDATION: "bg-orange-50 text-orange-700 border border-orange-200",
+  PENDING_MANAGER_ACTIVATION: "bg-amber-100 text-amber-800",
+  ACTIVE:                     "bg-green-100 text-green-800",
 };
 
 const STATUS_LABELS: Record<MembershipStatus, string> = {
-  ACTIVE: "Active",
-  INACTIVE: "Inactive",
-  EXPIRED: "Expired",
-  PENDING_PAYMENT_VALIDATION: "Pending Payment",
+  EXPIRED:                    "Expired",
+  INACTIVE:                   "Inactive",
+  PENDING_PAYMENT:            "Pending Payment",
+  PENDING_PAYMENT_VALIDATION: "Under Review",
   PENDING_MANAGER_ACTIVATION: "Pending Activation",
+  ACTIVE:                     "Active",
 };
 
 export default function MembershipStatusBadge({ status }: MembershipStatusBadgeProps) {

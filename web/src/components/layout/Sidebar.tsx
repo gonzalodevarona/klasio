@@ -12,19 +12,21 @@ interface NavItem {
 
 const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
   SUPERADMIN: [
-    { label: "Tenants",    href: "/tenants" },
-    { label: "Programs",   href: "/programs" },
-    { label: "Professors", href: "/professors" },
-    { label: "Students",   href: "/students" },
-    { label: "Plans",      href: "/plans" },
-    { label: "Classes",    href: "/classes" },
+    { label: "Tenants",        href: "/tenants" },
+    { label: "Programs",       href: "/programs" },
+    { label: "Professors",     href: "/professors" },
+    { label: "Students",       href: "/students" },
+    { label: "Plans",          href: "/plans" },
+    { label: "Classes",        href: "/classes" },
+    { label: "Payment Proofs", href: "/payment-proofs" },
   ],
   ADMIN: [
-    { label: "Programs",   href: "/programs" },
-    { label: "Professors", href: "/professors" },
-    { label: "Students",   href: "/students" },
-    { label: "Plans",      href: "/plans" },
-    { label: "Classes",    href: "/classes" },
+    { label: "Programs",        href: "/programs" },
+    { label: "Professors",      href: "/professors" },
+    { label: "Students",        href: "/students" },
+    { label: "Plans",           href: "/plans" },
+    { label: "Classes",         href: "/classes" },
+    { label: "Payment Proofs",  href: "/payment-proofs" },
   ],
   MANAGER: [
     { label: "Programs",   href: "/programs" },
@@ -35,7 +37,12 @@ const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
   PROFESSOR: [
     { label: "Classes", href: "/classes" },
   ],
-  STUDENT: [],
+  STUDENT: [
+    { label: "Dashboard",      href: "/student/dashboard" },
+    { label: "My Memberships", href: "/student/memberships" },
+    { label: "My Enrollments", href: "/student/enrollments" },
+    { label: "My Classes",     href: "/student/classes" },
+  ],
 };
 
 export default function Sidebar() {
@@ -44,7 +51,7 @@ export default function Sidebar() {
 
   if (loading) {
     return (
-      <aside className="w-64 bg-gray-900 min-h-screen flex flex-col">
+      <aside className="w-64 bg-gray-900 h-screen sticky top-0 flex flex-col">
         <div className="p-6">
           <div className="h-6 w-24 bg-gray-700 rounded animate-pulse" />
           <div className="h-4 w-32 bg-gray-700 rounded animate-pulse mt-2" />
@@ -56,13 +63,13 @@ export default function Sidebar() {
   const navItems = user ? (NAV_ITEMS_BY_ROLE[user.role] ?? []) : [];
 
   return (
-    <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
-      <div className="p-6">
+    <aside className="w-64 bg-gray-900 text-white h-screen sticky top-0 flex flex-col">
+      <div className="p-6 shrink-0">
         <h1 className="text-xl font-bold">Klasio</h1>
         <p className="text-sm text-gray-400 mt-1">League Management</p>
       </div>
 
-      <nav className="flex-1 px-4">
+      <nav className="flex-1 px-4 overflow-y-auto">
         <ul className="space-y-1">
           {navItems.map(({ label, href }) => {
             const isActive = pathname === href || pathname.startsWith(href + "/");
@@ -85,7 +92,7 @@ export default function Sidebar() {
       </nav>
 
       {user && (
-        <div className="p-4 border-t border-gray-700">
+        <div className="p-4 border-t border-gray-700 shrink-0">
           <p className="text-xs text-gray-400 mb-2 truncate">{user.role}</p>
           <button
             onClick={logout}

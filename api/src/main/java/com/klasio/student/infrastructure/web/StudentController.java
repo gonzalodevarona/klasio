@@ -6,6 +6,7 @@ import com.klasio.student.application.dto.CreateStudentCommand;
 import com.klasio.student.application.dto.EnrollmentSummary;
 import com.klasio.student.application.dto.StudentSummary;
 import com.klasio.student.application.dto.UpdateStudentCommand;
+import com.klasio.membership.domain.port.StudentIdPort;
 import com.klasio.student.application.port.input.CreateStudentUseCase;
 import com.klasio.student.application.port.input.GetStudentUseCase;
 import com.klasio.student.application.port.input.ListEnrollmentsUseCase;
@@ -47,6 +48,7 @@ public class StudentController {
     private final ListEnrollmentsUseCase listEnrollmentsUseCase;
     private final StudentRepository studentRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final StudentIdPort studentIdPort;
 
     public StudentController(CreateStudentUseCase createStudentUseCase,
                              GetStudentUseCase getStudentUseCase,
@@ -54,7 +56,8 @@ public class StudentController {
                              UpdateStudentUseCase updateStudentUseCase,
                              ListEnrollmentsUseCase listEnrollmentsUseCase,
                              StudentRepository studentRepository,
-                             ApplicationEventPublisher eventPublisher) {
+                             ApplicationEventPublisher eventPublisher,
+                             StudentIdPort studentIdPort) {
         this.createStudentUseCase = createStudentUseCase;
         this.getStudentUseCase = getStudentUseCase;
         this.listStudentsUseCase = listStudentsUseCase;
@@ -62,6 +65,7 @@ public class StudentController {
         this.listEnrollmentsUseCase = listEnrollmentsUseCase;
         this.studentRepository = studentRepository;
         this.eventPublisher = eventPublisher;
+        this.studentIdPort = studentIdPort;
     }
 
     @PostMapping
@@ -191,6 +195,24 @@ public class StudentController {
 
         return ResponseEntity.ok(
                 StudentResponseDto.StudentDetailResponse.fromDomain(student, List.of()));
+    }
+
+    // GET /api/v1/me/profile  (STUDENT — returns their own profile)
+    @GetMapping("/me/profile")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentResponseDto.StudentDetailResponse> getMyProfile() {
+        UUID userId = extractUserId();
+        UUID tenantId = extractTenantId();
+
+        UUID studentId = studentIdPort.findStudentIdByUserId(tenantId, userId)
+                .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
+
+        Student student = getStudentUseCase.execute(tenantId, studentId);
+        Page<com.klasio.student.application.dto.EnrollmentSummary> enrollments =
+                listEnrollmentsUseCase.byStudent(tenantId, studentId, 0, 100, null);
+
+        return ResponseEntity.ok(
+                StudentResponseDto.StudentDetailResponse.fromDomain(student, enrollments.getContent()));
     }
 
     @SuppressWarnings("unchecked")

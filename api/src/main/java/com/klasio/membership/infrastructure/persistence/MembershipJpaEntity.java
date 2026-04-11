@@ -45,10 +45,10 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     @Column(name = "available_hours", nullable = false)
     private int availableHours;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name = "expiration_date", nullable = false)
+    @Column(name = "expiration_date")
     private LocalDate expirationDate;
 
     @Column(nullable = false, length = 35)

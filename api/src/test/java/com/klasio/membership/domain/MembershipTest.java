@@ -1,5 +1,7 @@
 package com.klasio.membership.domain;
 
+import com.klasio.membership.domain.event.MembershipProofUploaded;
+import com.klasio.membership.domain.event.MembershipRenewed;
 import com.klasio.membership.domain.model.HourTransactionType;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipId;
@@ -37,8 +39,8 @@ class MembershipTest {
     class Create {
 
         @Test
-        @DisplayName("creates membership in PENDING_PAYMENT_VALIDATION with correct fields")
-        void create_validInputs_returnsPendingPaymentValidation() {
+        @DisplayName("creates membership in PENDING_PAYMENT with correct fields")
+        void create_validInputs_returnsPendingPayment() {
             Membership m = createDefault();
 
             assertNotNull(m.getId());
@@ -50,7 +52,7 @@ class MembershipTest {
             assertEquals(10, m.getAvailableHours());
             assertEquals(START_DATE, m.getStartDate());
             assertEquals(LocalDate.of(2026, 4, 30), m.getExpirationDate());
-            assertEquals(MembershipStatus.PENDING_PAYMENT_VALIDATION, m.getStatus());
+            assertEquals(MembershipStatus.PENDING_PAYMENT, m.getStatus());
             assertFalse(m.isPaymentValidated());
             assertEquals(ACTOR_ID, m.getCreatedBy());
             assertNotNull(m.getCreatedAt());
@@ -81,6 +83,75 @@ class MembershipTest {
         }
     }
 
+    // ---- markProofUploaded() ----
+
+    @Nested
+    @DisplayName("markProofUploaded()")
+    class MarkProofUploaded {
+
+        @Test
+        @DisplayName("transitions PENDING_PAYMENT → PENDING_PAYMENT_VALIDATION")
+        void markProofUploaded_pendingPayment_transitionsToPendingValidation() {
+            Membership m = createDefault();
+            m.clearDomainEvents();
+
+            m.markProofUploaded();
+
+            assertEquals(MembershipStatus.PENDING_PAYMENT_VALIDATION, m.getStatus());
+            assertNotNull(m.getUpdatedAt());
+        }
+
+        @Test
+        @DisplayName("emits MembershipProofUploaded event")
+        void markProofUploaded_emitsEvent() {
+            Membership m = createDefault();
+            m.clearDomainEvents();
+
+            m.markProofUploaded();
+
+            List<DomainEvent> events = m.getDomainEvents();
+            assertEquals(1, events.size());
+            assertInstanceOf(MembershipProofUploaded.class, events.get(0));
+        }
+
+        @Test
+        @DisplayName("throws when membership is not in PENDING_PAYMENT")
+        void markProofUploaded_wrongStatus_throwsIllegalState() {
+            Membership m = createDefault();
+            m.markProofUploaded(); // now PENDING_PAYMENT_VALIDATION
+
+            assertThrows(IllegalStateException.class, m::markProofUploaded);
+        }
+    }
+
+    // ---- markProofRejected() ----
+
+    @Nested
+    @DisplayName("markProofRejected()")
+    class MarkProofRejected {
+
+        @Test
+        @DisplayName("transitions PENDING_PAYMENT_VALIDATION → PENDING_PAYMENT")
+        void markProofRejected_pendingValidation_transitionsBackToPendingPayment() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.clearDomainEvents();
+
+            m.markProofRejected();
+
+            assertEquals(MembershipStatus.PENDING_PAYMENT, m.getStatus());
+            assertNotNull(m.getUpdatedAt());
+        }
+
+        @Test
+        @DisplayName("throws when membership is not in PENDING_PAYMENT_VALIDATION")
+        void markProofRejected_wrongStatus_throwsIllegalState() {
+            Membership m = createDefault(); // PENDING_PAYMENT
+
+            assertThrows(IllegalStateException.class, m::markProofRejected);
+        }
+    }
+
     // ---- validatePayment() → ACTIVE ----
 
     @Nested
@@ -91,6 +162,7 @@ class MembershipTest {
         @DisplayName("transitions PENDING_PAYMENT_VALIDATION → ACTIVE when activateDirectly=true")
         void validatePayment_activateDirectly_transitionsToActive() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.clearDomainEvents();
 
             m.validatePayment(ACTOR_ID, true);
@@ -107,6 +179,7 @@ class MembershipTest {
         @DisplayName("transitions PENDING_PAYMENT_VALIDATION → PENDING_MANAGER_ACTIVATION when activateDirectly=false")
         void validatePayment_delegate_transitionsToPendingManager() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.clearDomainEvents();
 
             m.validatePayment(ACTOR_ID, false);
@@ -120,7 +193,8 @@ class MembershipTest {
         @DisplayName("throws when membership is not in PENDING_PAYMENT_VALIDATION")
         void validatePayment_wrongStatus_throwsInvalidStatusTransition() {
             Membership m = createDefault();
-            m.validatePayment(ACTOR_ID, true);
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true); // now ACTIVE
 
             assertThrows(IllegalStateException.class, () -> m.validatePayment(ACTOR_ID, true));
         }
@@ -136,6 +210,7 @@ class MembershipTest {
         @DisplayName("transitions PENDING_MANAGER_ACTIVATION → ACTIVE")
         void activate_pendingManagerActivation_transitionsToActive() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, false);
             m.clearDomainEvents();
 
@@ -166,6 +241,7 @@ class MembershipTest {
         @DisplayName("deducts hours and stays ACTIVE when balance > 0")
         void deductHours_partialDeduction_staysActive() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.clearDomainEvents();
 
@@ -179,6 +255,7 @@ class MembershipTest {
         @DisplayName("deducting last hour transitions to INACTIVE")
         void deductHours_lastHour_transitionsToInactive() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.clearDomainEvents();
 
@@ -192,6 +269,7 @@ class MembershipTest {
         @DisplayName("throws when deduction exceeds available hours")
         void deductHours_exceedsBalance_throwsNegativeBalance() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -218,6 +296,7 @@ class MembershipTest {
         @DisplayName("adds hours to ACTIVE membership")
         void adjustHours_positiveDealt_increasesBalance() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.clearDomainEvents();
 
@@ -231,6 +310,7 @@ class MembershipTest {
         @DisplayName("subtracts hours from ACTIVE membership")
         void adjustHours_negativeDelta_decreasesBalance() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.clearDomainEvents();
 
@@ -244,6 +324,7 @@ class MembershipTest {
         @DisplayName("subtraction to zero transitions to INACTIVE")
         void adjustHours_toZero_transitionsToInactive() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.clearDomainEvents();
 
@@ -257,6 +338,7 @@ class MembershipTest {
         @DisplayName("throws when adjustment would make balance negative")
         void adjustHours_wouldGoNegative_throwsNegativeBalance() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -267,6 +349,7 @@ class MembershipTest {
         @DisplayName("throws when delta is zero")
         void adjustHours_zeroDelta_throwsIllegalArgument() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
 
             assertThrows(IllegalArgumentException.class, () ->
@@ -293,6 +376,7 @@ class MembershipTest {
         @DisplayName("transitions ACTIVE → EXPIRED")
         void expire_activeStatus_transitionsToExpired() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.clearDomainEvents();
 
@@ -305,6 +389,7 @@ class MembershipTest {
         @DisplayName("transitions INACTIVE → EXPIRED (depleted memberships also expire)")
         void expire_inactiveStatus_transitionsToExpired() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.deductHours(10, ACTOR_ID, "PROFESSOR");
             m.clearDomainEvents();
@@ -318,10 +403,148 @@ class MembershipTest {
         @DisplayName("throws when already EXPIRED (idempotency guard)")
         void expire_alreadyExpired_throwsIllegalState() {
             Membership m = createDefault();
+            m.markProofUploaded();
             m.validatePayment(ACTOR_ID, true);
             m.expire();
 
             assertThrows(IllegalStateException.class, m::expire);
+        }
+    }
+
+    // ---- renew() ----
+
+    @Nested
+    @DisplayName("renew()")
+    class Renew {
+
+        @Test
+        @DisplayName("transitions EXPIRED → PENDING_PAYMENT")
+        void renew_fromExpired_transitionsToPendingPayment() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+            m.expire();
+            m.clearDomainEvents();
+
+            m.renew(8, ACTOR_ID);
+
+            assertEquals(MembershipStatus.PENDING_PAYMENT, m.getStatus());
+        }
+
+        @Test
+        @DisplayName("transitions INACTIVE → PENDING_PAYMENT")
+        void renew_fromInactive_transitionsToPendingPayment() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+            m.deductHours(10, ACTOR_ID, "PROFESSOR"); // depletes → INACTIVE
+            m.clearDomainEvents();
+
+            m.renew(8, ACTOR_ID);
+
+            assertEquals(MembershipStatus.PENDING_PAYMENT, m.getStatus());
+        }
+
+        @Test
+        @DisplayName("throws when membership is ACTIVE")
+        void renew_fromActive_throwsIllegalState() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+
+            assertThrows(IllegalStateException.class, () -> m.renew(8, ACTOR_ID));
+        }
+
+        @Test
+        @DisplayName("throws when membership is PENDING_PAYMENT")
+        void renew_fromPendingPayment_throwsIllegalState() {
+            Membership m = createDefault(); // PENDING_PAYMENT
+
+            assertThrows(IllegalStateException.class, () -> m.renew(8, ACTOR_ID));
+        }
+
+        @Test
+        @DisplayName("resets hours, clears payment and activation fields")
+        void renew_resetsHoursAndClearsPaymentFields() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+            m.expire();
+            m.clearDomainEvents();
+
+            m.renew(8, ACTOR_ID);
+
+            assertEquals(8, m.getPurchasedHours());
+            assertEquals(8, m.getAvailableHours());
+            assertFalse(m.isPaymentValidated());
+            assertNull(m.getPaymentValidatedBy());
+            assertNull(m.getPaymentValidatedAt());
+            assertNull(m.getActivatedBy());
+            assertNull(m.getActivatedAt());
+        }
+
+        @Test
+        @DisplayName("leaves startDate and expirationDate null (set at payment validation)")
+        void renew_leavesStartDateNull() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+            m.expire();
+            m.clearDomainEvents();
+
+            m.renew(8, ACTOR_ID);
+
+            assertNull(m.getStartDate());
+            assertNull(m.getExpirationDate());
+        }
+
+        @Test
+        @DisplayName("emits MembershipRenewed event")
+        void renew_emitsMembershipRenewedEvent() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+            m.expire();
+            m.clearDomainEvents();
+
+            m.renew(8, ACTOR_ID);
+
+            List<DomainEvent> events = m.getDomainEvents();
+            assertEquals(1, events.size());
+            assertInstanceOf(MembershipRenewed.class, events.get(0));
+            MembershipRenewed event = (MembershipRenewed) events.get(0);
+            assertEquals(m.getId().value(), event.membershipId());
+            assertEquals(8, event.purchasedHours());
+            assertEquals(ACTOR_ID, event.renewedBy());
+        }
+    }
+
+    // ---- validatePayment() — renewal date logic ----
+
+    @Nested
+    @DisplayName("validatePayment() — renewal sets dates")
+    class ValidatePaymentRenewal {
+
+        @Test
+        @DisplayName("sets startDate and expirationDate when startDate is null (renewal case)")
+        void validatePayment_setsStartDateWhenNull() {
+            Membership m = createDefault();
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+            m.expire();
+            m.renew(8, ACTOR_ID);
+            m.markProofUploaded(); // re-upload after renewal → PENDING_PAYMENT_VALIDATION
+            m.clearDomainEvents();
+
+            m.validatePayment(ACTOR_ID, true);
+
+            assertNotNull(m.getStartDate());
+            assertNotNull(m.getExpirationDate());
+            assertEquals(LocalDate.now(), m.getStartDate());
+            assertEquals(
+                    LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()),
+                    m.getExpirationDate());
+            assertEquals(MembershipStatus.ACTIVE, m.getStatus());
         }
     }
 }

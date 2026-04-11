@@ -31,4 +31,13 @@ public final class MembershipRequestDto {
             @NotBlank @Size(min = 5, max = 500) String reason
     ) {
     }
+
+    public record CreateSelfMembershipRequest(
+            @NotNull UUID planId
+    ) {
+    }
+
+    public record RenewMembershipRequest(
+    ) {
+    }
 }

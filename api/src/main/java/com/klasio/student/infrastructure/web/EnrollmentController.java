@@ -9,6 +9,7 @@ import com.klasio.student.application.dto.EnrollmentSummary;
 import com.klasio.student.application.dto.LevelHistoryDetail;
 import com.klasio.student.application.dto.PromoteStudentCommand;
 import com.klasio.student.application.dto.UnenrollStudentCommand;
+import com.klasio.membership.domain.port.StudentIdPort;
 import com.klasio.student.application.port.input.EnrollStudentUseCase;
 import com.klasio.student.application.port.input.GetLevelHistoryUseCase;
 import com.klasio.student.application.port.input.ListEnrollmentsUseCase;
@@ -46,6 +47,7 @@ public class EnrollmentController {
     private final GetLevelHistoryUseCase getLevelHistoryUseCase;
     private final StudentEnrollmentRepository enrollmentRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final StudentIdPort studentIdPort;
 
     public EnrollmentController(EnrollStudentUseCase enrollStudentUseCase,
                                 UnenrollStudentUseCase unenrollStudentUseCase,
@@ -53,7 +55,8 @@ public class EnrollmentController {
                                 ListEnrollmentsUseCase listEnrollmentsUseCase,
                                 GetLevelHistoryUseCase getLevelHistoryUseCase,
                                 StudentEnrollmentRepository enrollmentRepository,
-                                ApplicationEventPublisher eventPublisher) {
+                                ApplicationEventPublisher eventPublisher,
+                                StudentIdPort studentIdPort) {
         this.enrollStudentUseCase = enrollStudentUseCase;
         this.unenrollStudentUseCase = unenrollStudentUseCase;
         this.promoteStudentUseCase = promoteStudentUseCase;
@@ -61,6 +64,26 @@ public class EnrollmentController {
         this.getLevelHistoryUseCase = getLevelHistoryUseCase;
         this.enrollmentRepository = enrollmentRepository;
         this.eventPublisher = eventPublisher;
+        this.studentIdPort = studentIdPort;
+    }
+
+    // GET /api/v1/me/enrollments  (STUDENT — returns their own active enrollments)
+    @GetMapping("/api/v1/me/enrollments")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<Page<EnrollmentResponseDto.EnrollmentSummaryResponse>> getMyEnrollments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+
+        UUID userId = extractUserId();
+        UUID tenantId = extractTenantId();
+
+        UUID studentId = studentIdPort.findStudentIdByUserId(tenantId, userId)
+                .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
+
+        Page<EnrollmentSummary> summaries = listEnrollmentsUseCase.byStudent(
+                tenantId, studentId, page, size, null);
+
+        return ResponseEntity.ok(summaries.map(EnrollmentResponseDto.EnrollmentSummaryResponse::fromSummary));
     }
 
     @PostMapping("/api/v1/programs/{programId}/enrollments")

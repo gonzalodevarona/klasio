@@ -60,7 +60,7 @@ class CreateMembershipServiceTest {
     }
 
     @Test
-    @DisplayName("creates membership in PENDING_PAYMENT_VALIDATION and publishes MembershipCreated")
+    @DisplayName("creates membership in PENDING_PAYMENT and publishes MembershipCreated")
     void execute_validCommand_createsMembershipAndPublishesEvent() {
         when(programPlanPort.findActivePlan(PLAN_ID, TENANT_ID)).thenReturn(Optional.of(ACTIVE_PLAN));
         StudentEnrollment enrollment = mock(StudentEnrollment.class);
@@ -76,7 +76,7 @@ class CreateMembershipServiceTest {
         Membership result = service.execute(cmd);
 
         assertThat(result).isNotNull();
-        assertThat(result.getStatus()).isEqualTo(MembershipStatus.PENDING_PAYMENT_VALIDATION);
+        assertThat(result.getStatus()).isEqualTo(MembershipStatus.PENDING_PAYMENT);
         // purchasedHours comes from the plan, not the command
         assertThat(result.getPurchasedHours()).isEqualTo(10);
         assertThat(result.getPlanId()).isEqualTo(PLAN_ID);
@@ -109,8 +109,8 @@ class CreateMembershipServiceTest {
         assertThat(result.getStatus()).isEqualTo(MembershipStatus.ACTIVE);
         assertThat(result.isPaymentValidated()).isTrue();
 
-        // MembershipCreated + MembershipPaymentValidated + MembershipActivated
-        verify(eventPublisher, times(3)).publishEvent(any(Object.class));
+        // MembershipCreated + MembershipProofUploaded + MembershipPaymentValidated + MembershipActivated
+        verify(eventPublisher, times(4)).publishEvent(any(Object.class));
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         verify(eventPublisher, atLeastOnce()).publishEvent(captor.capture());
         List<Object> events = captor.getAllValues();

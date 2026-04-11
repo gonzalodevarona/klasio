@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import { DelegatedMembershipList } from "@/components/payment-proofs/DelegatedMembershipList";
 
 export default function ManagerDashboard() {
   const { user, logout } = useAuth();
@@ -20,9 +21,15 @@ export default function ManagerDashboard() {
         </button>
       </div>
       <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">
+        <p className="text-gray-600 mb-6">
           Welcome, Manager. Manage your program from the sidebar.
         </p>
+        <div>
+          <h2 className="text-base font-semibold text-gray-800 mb-3">
+            Memberships Awaiting Activation
+          </h2>
+          <DelegatedMembershipList />
+        </div>
       </div>
     </div>
   );
