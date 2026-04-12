@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
 import HourBalance from "@/components/memberships/HourBalance";
-import { PaymentProofPanel } from "@/components/payment-proofs/PaymentProofPanel";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -90,11 +89,6 @@ export default function StudentMembershipsPage() {
                 </span>
               </div>
             </div>
-
-            {/* Payment proof panel — re-upload only when membership has expired */}
-            {m.status === "EXPIRED" && (
-              <PaymentProofPanel membershipId={m.id} membershipStatus={m.status} />
-            )}
 
             {/* Actions row */}
             <div className="pt-1 flex items-center gap-4">

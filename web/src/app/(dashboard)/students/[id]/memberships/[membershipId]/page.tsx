@@ -56,7 +56,7 @@ export default function MembershipDetailPage({ params }: Props) {
             onRefresh={refetch}
             isAdmin={isAdmin}
           />
-          <PaymentProofTimeline membershipId={membershipId} />
+          <PaymentProofTimeline membershipId={membershipId} membershipStatus={membership.status} />
         </div>
       )}
     </div>

@@ -72,7 +72,8 @@ public class EnrollmentController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Page<EnrollmentResponseDto.EnrollmentSummaryResponse>> getMyEnrollments(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String status) {
 
         UUID userId = extractUserId();
         UUID tenantId = extractTenantId();
@@ -81,7 +82,7 @@ public class EnrollmentController {
                 .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
 
         Page<EnrollmentSummary> summaries = listEnrollmentsUseCase.byStudent(
-                tenantId, studentId, page, size, null);
+                tenantId, studentId, page, size, status);
 
         return ResponseEntity.ok(summaries.map(EnrollmentResponseDto.EnrollmentSummaryResponse::fromSummary));
     }

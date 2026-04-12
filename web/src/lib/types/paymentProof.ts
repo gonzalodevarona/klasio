@@ -29,7 +29,9 @@ export interface ProofQueueItem {
   proofId: string;
   membershipId: string;
   studentName: string;
-  programName: string;
+  studentIdentityDocumentType: string;
+  studentIdentityNumber: string;
+  planName: string;
   uploadedAt: string;
   contentType: string;
 }

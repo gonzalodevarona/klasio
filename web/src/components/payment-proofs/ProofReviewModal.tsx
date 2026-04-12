@@ -3,11 +3,16 @@
 import { useEffect, useState } from "react";
 import { usePaymentProofs } from "@/hooks/usePaymentProofs";
 import type { ProofQueueItem } from "@/lib/types/paymentProof";
+import { IDENTITY_DOCUMENT_TYPES } from "@/lib/types/student";
 
 interface Props {
   proof: ProofQueueItem;
   onClose: () => void;
   onDone: () => void;
+}
+
+function formatDocType(code: string): string {
+  return IDENTITY_DOCUMENT_TYPES.find((t) => t.value === code)?.label ?? code;
 }
 
 export function ProofReviewModal({ proof, onClose, onDone }: Props) {
@@ -60,7 +65,14 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
           <div>
             <h2 className="text-base font-semibold text-gray-900">Review Payment Proof</h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              {proof.studentName} — {proof.programName}
+              {proof.studentName}
+              <span className="mx-1 text-gray-400">·</span>
+              <span className="text-gray-600">
+                {formatDocType(proof.studentIdentityDocumentType)} {proof.studentIdentityNumber}
+              </span>
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Plan: <span className="font-medium text-gray-700">{proof.planName}</span>
             </p>
           </div>
           <button

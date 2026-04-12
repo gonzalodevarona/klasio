@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePaymentProofs } from "@/hooks/usePaymentProofs";
 import { ProofStatusBadge } from "./ProofStatusBadge";
-import type { PaymentProofResponse } from "@/lib/types/paymentProof";
+import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
+import type { PaymentProofResponse, ProofStatus } from "@/lib/types/paymentProof";
+import type { MembershipStatus } from "@/lib/types/membership";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -19,11 +21,25 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+// Statuses where the proof is the "current" one — show membership state instead of raw proof status
+const LIVE_PROOF_STATUSES: ProofStatus[] = ["PENDING", "APPROVED"];
+
+// Dot color based on membership status for the live proof row
+const MEMBERSHIP_DOT_STYLES: Record<MembershipStatus, string> = {
+  ACTIVE:                     "border-green-500 bg-green-100",
+  INACTIVE:                   "border-orange-500 bg-orange-100",
+  EXPIRED:                    "border-red-500 bg-red-100",
+  PENDING_PAYMENT:            "border-gray-400 bg-gray-100",
+  PENDING_PAYMENT_VALIDATION: "border-yellow-500 bg-yellow-100",
+  PENDING_MANAGER_ACTIVATION: "border-amber-500 bg-amber-100",
+};
+
 interface Props {
   membershipId: string;
+  membershipStatus?: MembershipStatus;
 }
 
-export function PaymentProofTimeline({ membershipId }: Props) {
+export function PaymentProofTimeline({ membershipId, membershipStatus }: Props) {
   const { listMembershipProofs, getDownloadUrl, loading, error } =
     usePaymentProofs();
   const [proofs, setProofs] = useState<PaymentProofResponse[]>([]);
@@ -87,22 +103,31 @@ export function PaymentProofTimeline({ membershipId }: Props) {
         <div className="absolute left-3 top-2 bottom-2 w-px bg-gray-200" />
 
         <div className="space-y-4">
-          {proofs.map((proof) => {
+          {proofs.map((proof, index) => {
             const isExpanded = expandedProofId === proof.proofId;
+
+            // The most recent proof (index 0) with a live status (PENDING or APPROVED)
+            // should reflect the membership lifecycle state rather than the raw proof status.
+            const isLiveProof =
+              index === 0 &&
+              membershipStatus != null &&
+              LIVE_PROOF_STATUSES.includes(proof.status);
+
+            const dotStyle = isLiveProof
+              ? MEMBERSHIP_DOT_STYLES[membershipStatus!]
+              : proof.status === "APPROVED"
+                ? "border-green-500 bg-green-100"
+                : proof.status === "REJECTED"
+                  ? "border-red-500 bg-red-100"
+                  : proof.status === "PENDING"
+                    ? "border-yellow-500 bg-yellow-100"
+                    : "border-gray-400 bg-gray-100";
 
             return (
               <div key={proof.proofId} className="relative pl-8">
                 {/* Timeline dot */}
                 <div
-                  className={`absolute left-1.5 top-1.5 w-3 h-3 rounded-full border-2 ${
-                    proof.status === "APPROVED"
-                      ? "border-green-500 bg-green-100"
-                      : proof.status === "REJECTED"
-                        ? "border-red-500 bg-red-100"
-                        : proof.status === "PENDING"
-                          ? "border-yellow-500 bg-yellow-100"
-                          : "border-gray-400 bg-gray-100"
-                  }`}
+                  className={`absolute left-1.5 top-1.5 w-3 h-3 rounded-full border-2 ${dotStyle}`}
                 />
 
                 <div
@@ -117,7 +142,11 @@ export function PaymentProofTimeline({ membershipId }: Props) {
                       <span className="text-xs text-gray-500">
                         {formatDate(proof.uploadedAt)}
                       </span>
-                      <ProofStatusBadge status={proof.status} />
+                      {isLiveProof ? (
+                        <MembershipStatusBadge status={membershipStatus!} />
+                      ) : (
+                        <ProofStatusBadge status={proof.status} />
+                      )}
                     </div>
                     <svg
                       className={`w-4 h-4 text-gray-400 transition-transform ${

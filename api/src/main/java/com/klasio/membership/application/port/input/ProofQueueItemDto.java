@@ -7,7 +7,9 @@ public record ProofQueueItemDto(
         UUID proofId,
         UUID membershipId,
         String studentName,
-        String programName,
+        String studentIdentityDocumentType,
+        String studentIdentityNumber,
+        String planName,
         Instant uploadedAt,
         String contentType
 ) {}

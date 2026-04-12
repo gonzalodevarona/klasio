@@ -1,14 +1,17 @@
--- V040: Introduce PENDING_PAYMENT as the initial membership status.
+-- V040: Two sets of changes merged from feature branches.
 --
--- New lifecycle: PENDING_PAYMENT (created, no proof yet)
---               → PENDING_PAYMENT_VALIDATION (proof uploaded)
---               → ACTIVE / PENDING_MANAGER_ACTIVATION (payment validated)
+-- (1) Introduce PENDING_PAYMENT as the initial membership status.
+--     New lifecycle: PENDING_PAYMENT (created, no proof yet)
+--                  → PENDING_PAYMENT_VALIDATION (proof uploaded)
+--                  → ACTIVE / PENDING_MANAGER_ACTIVATION (payment validated)
+--     Also makes start_date/expiration_date nullable for the renewal case
+--     where dates are reset and recalculated at payment validation.
 --
--- Also makes start_date / expiration_date nullable to support the
--- renewal case where dates are reset and recalculated at payment validation.
+-- (2) Allow multiple APPROVED/REJECTED proofs per membership (one per renewal cycle).
+--     Replaces the old active-proof unique index with a PENDING-only constraint
+--     so only one pending proof exists at a time.
 
 -- 1. Expand the status check constraint to include PENDING_PAYMENT
---    PostgreSQL names inline check constraints as <table>_<column>_check.
 ALTER TABLE memberships
     DROP CONSTRAINT IF EXISTS memberships_status_check;
 
@@ -27,7 +30,13 @@ ALTER TABLE memberships
     ALTER COLUMN start_date DROP NOT NULL,
     ALTER COLUMN expiration_date DROP NOT NULL;
 
--- 3. Extend audit_log action type constraint
+-- 3. Replace the old active-proof-per-membership index with a PENDING-only constraint
+DROP INDEX IF EXISTS idx_payment_proofs_active_per_membership;
+
+CREATE UNIQUE INDEX idx_payment_proofs_pending_per_membership
+    ON payment_proofs (membership_id) WHERE status = 'PENDING';
+
+-- 4. Rebuild audit_log action type constraint with full action set
 ALTER TABLE audit_log
     DROP CONSTRAINT IF EXISTS chk_audit_action_type;
 

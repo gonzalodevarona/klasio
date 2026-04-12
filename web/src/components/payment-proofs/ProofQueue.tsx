@@ -4,9 +4,14 @@ import { useEffect, useState } from "react";
 import { usePaymentProofs } from "@/hooks/usePaymentProofs";
 import { ProofReviewModal } from "./ProofReviewModal";
 import type { ProofQueueItem } from "@/lib/types/paymentProof";
+import { IDENTITY_DOCUMENT_TYPES } from "@/lib/types/student";
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString();
+}
+
+function formatDocType(code: string): string {
+  return IDENTITY_DOCUMENT_TYPES.find((t) => t.value === code)?.label ?? code;
 }
 
 export function ProofQueue() {
@@ -54,7 +59,10 @@ export function ProofQueue() {
                   Student
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Program
+                  ID Document
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Plan
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Uploaded
@@ -69,7 +77,11 @@ export function ProofQueue() {
               {queue.map((item) => (
                 <tr key={item.proofId} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-900">{item.studentName}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{item.programName}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    <span className="font-medium">{formatDocType(item.studentIdentityDocumentType)}</span>
+                    <span className="ml-1 text-gray-500">{item.studentIdentityNumber}</span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{item.planName}</td>
                   <td className="px-4 py-3 text-sm text-gray-500">
                     {formatDateTime(item.uploadedAt)}
                   </td>

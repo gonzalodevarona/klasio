@@ -1,7 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import LevelBadge from "@/components/enrollments/LevelBadge";
+
+const STATUS_OPTIONS = [
+  { value: "ACTIVE", label: "Active" },
+  { value: "INACTIVE", label: "Inactive" },
+  { value: "", label: "All" },
+];
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -9,15 +16,35 @@ function formatDate(iso: string | null): string {
 }
 
 export default function StudentEnrollmentsPage() {
-  const { enrollments, loading, error } = useMyEnrollments();
+  const [statusFilter, setStatusFilter] = useState<string>("ACTIVE");
+  const { enrollments, loading, error } = useMyEnrollments(statusFilter || undefined);
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">My Enrollments</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Programs you are enrolled in and your current level.
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">My Enrollments</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Programs you are enrolled in and your current level.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 pt-1">
+          <label htmlFor="statusFilter" className="text-sm text-gray-600 whitespace-nowrap">
+            Status:
+          </label>
+          <select
+            id="statusFilter"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading && (
@@ -32,7 +59,7 @@ export default function StudentEnrollmentsPage() {
 
       {!loading && !error && enrollments.length === 0 && (
         <p className="py-8 text-center text-sm text-gray-400">
-          You are not enrolled in any programs yet.
+          No {statusFilter ? statusFilter.toLowerCase() : ""} enrollments found.
         </p>
       )}
 

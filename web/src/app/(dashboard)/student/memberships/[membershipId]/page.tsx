@@ -46,7 +46,7 @@ export default function StudentMembershipDetailPage({ params }: Props) {
           {membership.status === "EXPIRED" && (
             <PaymentProofPanel membershipId={membershipId} membershipStatus={membership.status} />
           )}
-          <PaymentProofTimeline membershipId={membershipId} />
+          <PaymentProofTimeline membershipId={membershipId} membershipStatus={membership.status} />
         </div>
       )}
     </div>
