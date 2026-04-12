@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class JpaTenantRepository implements TenantRepository {
@@ -28,6 +29,11 @@ public class JpaTenantRepository implements TenantRepository {
             entity.markAsNew();
         }
         springDataRepository.save(entity);
+    }
+
+    @Override
+    public Optional<Tenant> findById(UUID id) {
+        return springDataRepository.findById(id).map(mapper::toDomain);
     }
 
     @Override
