@@ -29,7 +29,11 @@ export function ProofQueue() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleDone() {
+  // After approving or rejecting a proof, remove it optimistically so the row
+  // disappears immediately (no flicker waiting on the refetch) and then refresh
+  // from the server to pick up any new items that arrived in the meantime.
+  function handleDone(resolvedProofId: string) {
+    setQueue((prev) => prev.filter((item) => item.proofId !== resolvedProofId));
     setSelected(null);
     load();
   }
@@ -105,7 +109,7 @@ export function ProofQueue() {
         <ProofReviewModal
           proof={selected}
           onClose={() => setSelected(null)}
-          onDone={handleDone}
+          onDone={() => handleDone(selected.proofId)}
         />
       )}
     </div>

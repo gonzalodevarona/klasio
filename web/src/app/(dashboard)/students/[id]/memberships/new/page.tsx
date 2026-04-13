@@ -18,6 +18,7 @@ export default function NewMembershipPage({ params }: Props) {
   const router = useRouter();
   const { createMembership } = useMembershipActions();
   const { student, loading: studentLoading } = useStudentDetail(studentId);
+  const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
 
   const activeEnrollments = student?.enrollments?.filter((e) => e.status === "ACTIVE") ?? [];
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
@@ -41,7 +42,7 @@ export default function NewMembershipPage({ params }: Props) {
         </Link>
         <span className="mx-2">/</span>
         <Link href={`/students/${studentId}`} className="hover:text-gray-700 hover:underline">
-          Student
+          {studentName}
         </Link>
         <span className="mx-2">/</span>
         <Link

@@ -3,6 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useMembershipDetail } from "@/hooks/useMemberships";
+import { useStudentDetail } from "@/hooks/useStudents";
 import { useAuth } from "@/hooks/useAuth";
 import MembershipDetail from "@/components/memberships/MembershipDetail";
 import { PaymentProofTimeline } from "@/components/payment-proofs/PaymentProofTimeline";
@@ -14,6 +15,8 @@ interface Props {
 export default function MembershipDetailPage({ params }: Props) {
   const { id: studentId, membershipId } = use(params);
   const { membership, loading, error, refetch } = useMembershipDetail(membershipId);
+  const { student } = useStudentDetail(studentId);
+  const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
   const { user } = useAuth();
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
@@ -26,7 +29,7 @@ export default function MembershipDetailPage({ params }: Props) {
         </Link>
         <span className="mx-2">/</span>
         <Link href={`/students/${studentId}`} className="hover:text-gray-700 hover:underline">
-          Student
+          {studentName}
         </Link>
         <span className="mx-2">/</span>
         <Link

@@ -3,6 +3,7 @@
 import { use, useState } from "react";
 import Link from "next/link";
 import { useMemberships, useMembershipActions } from "@/hooks/useMemberships";
+import { useStudentDetail } from "@/hooks/useStudents";
 import MembershipList from "@/components/memberships/MembershipList";
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
 export default function StudentMembershipsPage({ params }: Props) {
   const { id: studentId } = use(params);
   const { memberships, loading, error, refetch } = useMemberships(studentId);
+  const { student } = useStudentDetail(studentId);
+  const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
   const { activateMembership, validatePayment, loading: actionLoading, error: actionError } =
     useMembershipActions();
 
@@ -39,7 +42,7 @@ export default function StudentMembershipsPage({ params }: Props) {
         </Link>
         <span className="mx-2">/</span>
         <Link href={`/students/${studentId}`} className="hover:text-gray-700 hover:underline">
-          Student
+          {studentName}
         </Link>
         <span className="mx-2">/</span>
         <span className="text-gray-900">Memberships</span>

@@ -4,9 +4,13 @@ import com.klasio.membership.application.dto.ValidatePaymentCommand;
 import com.klasio.membership.application.service.ValidatePaymentService;
 import com.klasio.membership.domain.event.MembershipActivated;
 import com.klasio.membership.domain.event.MembershipPendingManagerActivation;
+import com.klasio.membership.domain.event.PaymentProofApproved;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipStatus;
+import com.klasio.membership.domain.model.PaymentProof;
+import com.klasio.membership.domain.model.ProofStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
+import com.klasio.membership.domain.port.PaymentProofRepository;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +34,7 @@ import static org.mockito.Mockito.*;
 class ValidatePaymentServiceTest {
 
     @Mock private MembershipRepository membershipRepository;
+    @Mock private PaymentProofRepository paymentProofRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
 
     private ValidatePaymentService service;
@@ -39,7 +44,7 @@ class ValidatePaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ValidatePaymentService(membershipRepository, eventPublisher);
+        service = new ValidatePaymentService(membershipRepository, paymentProofRepository, eventPublisher);
     }
 
     private Membership pendingMembership() {
@@ -50,12 +55,20 @@ class ValidatePaymentServiceTest {
         return m;
     }
 
+    private PaymentProof pendingProof(UUID membershipId) {
+        PaymentProof p = PaymentProof.upload(TENANT_ID, membershipId, UUID.randomUUID(),
+                "proofs/t/m/file.pdf", "recibo.pdf", "application/pdf", 100L, UUID.randomUUID());
+        p.clearDomainEvents();
+        return p;
+    }
+
     @Test
     @DisplayName("activateDirectly=true transitions to ACTIVE and publishes MembershipActivated")
     void execute_activateDirectly_transitionsToActive() {
         Membership m = pendingMembership();
         UUID id = m.getId().value();
         when(membershipRepository.findById(TENANT_ID, id)).thenReturn(Optional.of(m));
+        when(paymentProofRepository.findPendingByMembershipId(TENANT_ID, id)).thenReturn(Optional.empty());
 
         service.execute(new ValidatePaymentCommand(TENANT_ID, id, true, ACTOR_ID));
 
@@ -73,6 +86,7 @@ class ValidatePaymentServiceTest {
         Membership m = pendingMembership();
         UUID id = m.getId().value();
         when(membershipRepository.findById(TENANT_ID, id)).thenReturn(Optional.of(m));
+        when(paymentProofRepository.findPendingByMembershipId(TENANT_ID, id)).thenReturn(Optional.empty());
 
         service.execute(new ValidatePaymentCommand(TENANT_ID, id, false, ACTOR_ID));
 
@@ -81,6 +95,43 @@ class ValidatePaymentServiceTest {
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         verify(eventPublisher, atLeastOnce()).publishEvent(captor.capture());
         assertThat(captor.getAllValues()).anyMatch(e -> e instanceof MembershipPendingManagerActivation);
+    }
+
+    @Test
+    @DisplayName("when a pending proof exists, it is also transitioned to APPROVED and persisted")
+    void execute_withPendingProof_approvesProof() {
+        Membership m = pendingMembership();
+        UUID id = m.getId().value();
+        PaymentProof proof = pendingProof(id);
+
+        when(membershipRepository.findById(TENANT_ID, id)).thenReturn(Optional.of(m));
+        when(paymentProofRepository.findPendingByMembershipId(TENANT_ID, id)).thenReturn(Optional.of(proof));
+        when(paymentProofRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.execute(new ValidatePaymentCommand(TENANT_ID, id, true, ACTOR_ID));
+
+        assertThat(proof.getStatus()).isEqualTo(ProofStatus.APPROVED);
+        assertThat(proof.getValidatedBy()).isEqualTo(ACTOR_ID);
+        assertThat(proof.getValidatedAt()).isNotNull();
+        verify(paymentProofRepository).save(proof);
+
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(eventPublisher, atLeastOnce()).publishEvent(captor.capture());
+        assertThat(captor.getAllValues()).anyMatch(e -> e instanceof PaymentProofApproved);
+    }
+
+    @Test
+    @DisplayName("when no pending proof exists, validation still succeeds and no proof save is attempted")
+    void execute_withoutPendingProof_succeedsWithoutProofInteraction() {
+        Membership m = pendingMembership();
+        UUID id = m.getId().value();
+        when(membershipRepository.findById(TENANT_ID, id)).thenReturn(Optional.of(m));
+        when(paymentProofRepository.findPendingByMembershipId(TENANT_ID, id)).thenReturn(Optional.empty());
+
+        service.execute(new ValidatePaymentCommand(TENANT_ID, id, true, ACTOR_ID));
+
+        assertThat(m.getStatus()).isEqualTo(MembershipStatus.ACTIVE);
+        verify(paymentProofRepository, never()).save(any());
     }
 
     @Test
@@ -107,5 +158,6 @@ class ValidatePaymentServiceTest {
                 .isInstanceOf(IllegalStateException.class);
 
         verify(membershipRepository, never()).save(any());
+        verify(paymentProofRepository, never()).save(any());
     }
 }
