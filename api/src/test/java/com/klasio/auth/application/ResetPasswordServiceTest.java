@@ -50,7 +50,8 @@ class ResetPasswordServiceTest {
 
         PasswordResetToken token = PasswordResetToken.create(userId, hashedToken,
                 Instant.now().plusSeconds(1800));
-        User user = User.createActive(UUID.randomUUID(), "user@example.com", "old-hash", Role.STUDENT);
+        User user = User.createActive(UUID.randomUUID(), "user@example.com", "old-hash", Role.STUDENT,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(tokenGenerator.hashToken(rawToken)).thenReturn(hashedToken);
         when(prtRepository.findByTokenHash(hashedToken)).thenReturn(Optional.of(token));

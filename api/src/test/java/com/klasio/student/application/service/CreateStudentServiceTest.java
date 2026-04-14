@@ -4,7 +4,7 @@ import com.klasio.shared.infrastructure.exception.StudentEmailAlreadyExistsExcep
 import com.klasio.student.application.dto.CreateStudentCommand;
 import com.klasio.student.domain.event.StudentCreated;
 import com.klasio.student.domain.model.BloodType;
-import com.klasio.student.domain.model.IdentityDocumentType;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.port.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;

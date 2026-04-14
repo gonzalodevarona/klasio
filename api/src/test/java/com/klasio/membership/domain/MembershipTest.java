@@ -25,7 +25,7 @@ class MembershipTest {
     private static final UUID PROGRAM_ID = UUID.randomUUID();
     private static final UUID PLAN_ID = UUID.randomUUID();
     private static final UUID ACTOR_ID = UUID.randomUUID();
-    private static final LocalDate START_DATE = LocalDate.of(2026, 4, 1);
+    private static final LocalDate START_DATE = LocalDate.of(2026, 4, 15);
 
     private Membership createDefault() {
         return Membership.create(TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
@@ -51,19 +51,11 @@ class MembershipTest {
             assertEquals(10, m.getPurchasedHours());
             assertEquals(10, m.getAvailableHours());
             assertEquals(START_DATE, m.getStartDate());
-            assertEquals(LocalDate.of(2026, 4, 30), m.getExpirationDate());
+            assertEquals(LocalDate.of(2026, 4, 30), m.getExpirationDate()); // last day of April regardless of start day
             assertEquals(MembershipStatus.PENDING_PAYMENT, m.getStatus());
             assertFalse(m.isPaymentValidated());
             assertEquals(ACTOR_ID, m.getCreatedBy());
             assertNotNull(m.getCreatedAt());
-        }
-
-        @Test
-        @DisplayName("start_date must be 1st of month — rejects other days")
-        void create_startDateNotFirstOfMonth_throwsIllegalArgument() {
-            assertThrows(IllegalArgumentException.class, () ->
-                    Membership.create(TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
-                            PLAN_ID, "Test Plan", 10, LocalDate.of(2026, 4, 15), ACTOR_ID));
         }
 
         @Test

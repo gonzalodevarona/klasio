@@ -1,7 +1,10 @@
 package com.klasio.professor.infrastructure.persistence;
 
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -55,6 +58,13 @@ public class ProfessorJpaEntity implements Persistable<UUID> {
 
     @Column(name = "updated_by")
     private UUID updatedBy;
+
+    @Column(name = "identity_document_type", nullable = false, length = 5)
+    @Enumerated(EnumType.STRING)
+    private IdentityDocumentType identityDocumentType;
+
+    @Column(name = "identity_number", nullable = false, length = 30)
+    private String identityNumber;
 
     protected ProfessorJpaEntity() {
     }
@@ -162,6 +172,22 @@ public class ProfessorJpaEntity implements Persistable<UUID> {
 
     public void setUpdatedBy(UUID updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public IdentityDocumentType getIdentityDocumentType() {
+        return identityDocumentType;
+    }
+
+    public void setIdentityDocumentType(IdentityDocumentType identityDocumentType) {
+        this.identityDocumentType = identityDocumentType;
+    }
+
+    public String getIdentityNumber() {
+        return identityNumber;
+    }
+
+    public void setIdentityNumber(String identityNumber) {
+        this.identityNumber = identityNumber;
     }
 
     @Override

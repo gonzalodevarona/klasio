@@ -38,7 +38,7 @@ class ResendVerificationEmailServiceTest {
     void unverifiedUser_invalidatesOldTokensAndSendsNew() {
         UUID tenantId = UUID.randomUUID();
         String email = "student@example.com";
-        User user = User.createUnverified(tenantId, email, "hashed-pwd");
+        User user = User.createUnverified(tenantId, email, "hashed-pwd", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(tokenGenerator.generateRawToken()).thenReturn("new-raw-token");
@@ -66,7 +66,7 @@ class ResendVerificationEmailServiceTest {
     void alreadyVerifiedUser_noOp_noException() {
         UUID tenantId = UUID.randomUUID();
         User user = User.createActive(tenantId, "verified@example.com", "hashed-pwd",
-                com.klasio.auth.domain.model.Role.STUDENT);
+                com.klasio.auth.domain.model.Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findByEmail("verified@example.com")).thenReturn(Optional.of(user));
 

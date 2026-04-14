@@ -103,7 +103,7 @@ export default function MembershipForm({
           required
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <p className="mt-1 text-xs text-gray-500">Membership expires on the last day of this month.</p>
+        <p className="mt-1 text-xs text-gray-500">Membership expires on the last day of the selected month.</p>
       </div>
 
       <div className="space-y-2">

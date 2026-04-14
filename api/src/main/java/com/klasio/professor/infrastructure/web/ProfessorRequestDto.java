@@ -1,7 +1,10 @@
 package com.klasio.professor.infrastructure.web;
 
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public final class ProfessorRequestDto {
@@ -24,7 +27,15 @@ public final class ProfessorRequestDto {
             String email,
 
             @Size(max = 20, message = "Phone number must be at most 20 characters")
-            String phoneNumber
+            String phoneNumber,
+
+            @NotNull(message = "Identity document type is required")
+            IdentityDocumentType identityDocumentType,
+
+            @NotBlank(message = "Identity number is required")
+            @Size(max = 30, message = "Identity number must be at most 30 characters")
+            @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Identity number must contain only alphanumeric characters and hyphens")
+            String identityNumber
     ) {
     }
 
@@ -43,7 +54,15 @@ public final class ProfessorRequestDto {
             String email,
 
             @Size(max = 20, message = "Phone number must be at most 20 characters")
-            String phoneNumber
+            String phoneNumber,
+
+            @NotNull(message = "Identity document type is required")
+            IdentityDocumentType identityDocumentType,
+
+            @NotBlank(message = "Identity number is required")
+            @Size(max = 30, message = "Identity number must be at most 30 characters")
+            @Pattern(regexp = "^[A-Za-z0-9\\-]+$", message = "Identity number must contain only alphanumeric characters and hyphens")
+            String identityNumber
     ) {
     }
 }

@@ -106,6 +106,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(ProfessorIdentityNumberAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleProfessorIdentityNumberAlreadyExists(
+            ProfessorIdentityNumberAlreadyExistsException ex) {
+        var error = new ErrorResponse.ErrorDetail("PROFESSOR_IDENTITY_NUMBER_ALREADY_EXISTS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(ProfessorAlreadyActiveException.class)
     public ResponseEntity<ErrorResponse> handleProfessorAlreadyActive(ProfessorAlreadyActiveException ex) {
         var error = new ErrorResponse.ErrorDetail("PROFESSOR_ALREADY_ACTIVE", ex.getMessage());

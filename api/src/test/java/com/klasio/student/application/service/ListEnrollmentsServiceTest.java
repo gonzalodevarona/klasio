@@ -6,7 +6,7 @@ import com.klasio.program.domain.model.ProgramStatus;
 import com.klasio.program.domain.port.ProgramRepository;
 import com.klasio.student.application.dto.EnrollmentSummary;
 import com.klasio.student.domain.model.BloodType;
-import com.klasio.student.domain.model.IdentityDocumentType;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Level;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.model.StudentEnrollment;

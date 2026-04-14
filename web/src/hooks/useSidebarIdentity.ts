@@ -16,9 +16,13 @@ interface StudentInfo {
   identityNumber: string;
 }
 
+interface UserProfile {
+  email: string;
+}
+
 export interface SidebarIdentity {
   tenantName: string | null;
-  studentFullName: string | null;
+  displayName: string | null;
   identityDocumentType: string | null;
   identityNumber: string | null;
 }
@@ -45,6 +49,7 @@ export function useSidebarIdentity(
 ): SidebarIdentity {
   const [tenantName, setTenantName] = useState<string | null>(null);
   const [studentInfo, setStudentInfo] = useState<StudentInfo | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   // Fetch tenant name for all non-SUPERADMIN roles.
   useEffect(() => {
@@ -58,7 +63,7 @@ export function useSidebarIdentity(
       .catch(() => {/* degrade gracefully */});
   }, [tenantId, role]);
 
-  // Fetch student profile only for the STUDENT role.
+  // Fetch full student profile (name + document) for STUDENT role.
   useEffect(() => {
     if (role !== "STUDENT") return;
 
@@ -70,15 +75,29 @@ export function useSidebarIdentity(
       .catch(() => {/* degrade gracefully */});
   }, [role]);
 
+  // Fetch email for all other authenticated roles.
+  useEffect(() => {
+    if (!role || role === "STUDENT") return;
+
+    fetch("/api/me/user-profile", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: UserProfile | null) => {
+        if (data?.email) setUserEmail(data.email);
+      })
+      .catch(() => {/* degrade gracefully */});
+  }, [role]);
+
+  const isStudent = role === "STUDENT";
+
   return {
     tenantName,
-    studentFullName: studentInfo
-      ? `${studentInfo.firstName} ${studentInfo.lastName}`
-      : null,
-    identityDocumentType: studentInfo
+    displayName: isStudent
+      ? (studentInfo ? `${studentInfo.firstName} ${studentInfo.lastName}` : null)
+      : userEmail,
+    identityDocumentType: isStudent && studentInfo
       ? (DOCUMENT_TYPE_LABELS[studentInfo.identityDocumentType] ??
           studentInfo.identityDocumentType)
       : null,
-    identityNumber: studentInfo?.identityNumber ?? null,
+    identityNumber: isStudent ? (studentInfo?.identityNumber ?? null) : null,
   };
 }

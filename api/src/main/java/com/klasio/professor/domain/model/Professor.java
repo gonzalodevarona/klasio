@@ -5,6 +5,7 @@ import com.klasio.professor.domain.event.ProfessorDeactivated;
 import com.klasio.professor.domain.event.ProfessorReactivated;
 import com.klasio.professor.domain.event.ProfessorUpdated;
 import com.klasio.shared.domain.DomainEvent;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -33,6 +34,8 @@ public class Professor {
     private final UUID createdBy;
     private Instant updatedAt;
     private UUID updatedBy;
+    private IdentityDocumentType identityDocumentType;
+    private String identityNumber;
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
@@ -48,7 +51,9 @@ public class Professor {
                       Instant createdAt,
                       UUID createdBy,
                       Instant updatedAt,
-                      UUID updatedBy) {
+                      UUID updatedBy,
+                      IdentityDocumentType identityDocumentType,
+                      String identityNumber) {
         this.id = id;
         this.tenantId = tenantId;
         this.firstName = firstName;
@@ -62,6 +67,8 @@ public class Professor {
         this.createdBy = createdBy;
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy;
+        this.identityDocumentType = identityDocumentType;
+        this.identityNumber = identityNumber;
     }
 
     public static Professor create(UUID tenantId,
@@ -69,17 +76,26 @@ public class Professor {
                                    String lastName,
                                    String email,
                                    String phoneNumber,
+                                   IdentityDocumentType identityDocumentType,
+                                   String identityNumber,
                                    UUID createdBy) {
         Objects.requireNonNull(tenantId, "Tenant id must not be null");
         Objects.requireNonNull(createdBy, "Created by must not be null");
+        Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
         validateNotBlank(firstName, "First name");
         validateNotBlank(lastName, "Last name");
         validateNotBlank(email, "Email");
         validateEmail(email);
+        validateNotBlank(identityNumber, "Identity number");
+
+        if (identityNumber.trim().length() > 30) {
+            throw new IllegalArgumentException("Identity number must be at most 30 characters");
+        }
 
         String normalizedFirstName = capitalize(firstName);
         String normalizedLastName = capitalize(lastName);
         String normalizedEmail = email.trim().toLowerCase();
+        String normalizedIdentityNumber = identityNumber.trim();
 
         Instant now = Instant.now();
         ProfessorId id = ProfessorId.generate();
@@ -89,11 +105,13 @@ public class Professor {
         Professor professor = new Professor(
                 id, tenantId, normalizedFirstName, normalizedLastName, normalizedEmail, phoneNumber,
                 ProfessorStatus.INVITED, token, expiresAt,
-                now, createdBy, null, null
+                now, createdBy, null, null,
+                identityDocumentType, normalizedIdentityNumber
         );
 
         professor.domainEvents.add(new ProfessorCreated(
-                id.value(), tenantId, normalizedFirstName, normalizedLastName, normalizedEmail, phoneNumber, token, createdBy, now));
+                id.value(), tenantId, normalizedFirstName, normalizedLastName, normalizedEmail, phoneNumber,
+                identityDocumentType, normalizedIdentityNumber, token, createdBy, now));
 
         return professor;
     }
@@ -110,27 +128,36 @@ public class Professor {
                                          Instant createdAt,
                                          UUID createdBy,
                                          Instant updatedAt,
-                                         UUID updatedBy) {
+                                         UUID updatedBy,
+                                         IdentityDocumentType identityDocumentType,
+                                         String identityNumber) {
         return new Professor(id, tenantId, firstName, lastName, email, phoneNumber, status,
-                invitationToken, invitationExpiresAt, createdAt, createdBy, updatedAt, updatedBy);
+                invitationToken, invitationExpiresAt, createdAt, createdBy, updatedAt, updatedBy,
+                identityDocumentType, identityNumber);
     }
 
-    public void update(String firstName, String lastName, String email, String phoneNumber, UUID updatedBy) {
+    public void update(String firstName, String lastName, String email, String phoneNumber,
+                       IdentityDocumentType identityDocumentType, String identityNumber, UUID updatedBy) {
         Objects.requireNonNull(updatedBy, "Updated by must not be null");
+        Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
         validateNotBlank(firstName, "First name");
         validateNotBlank(lastName, "Last name");
         validateNotBlank(email, "Email");
         validateEmail(email);
+        validateNotBlank(identityNumber, "Identity number");
 
         this.firstName = capitalize(firstName);
         this.lastName = capitalize(lastName);
         this.email = email.trim().toLowerCase();
         this.phoneNumber = phoneNumber;
+        this.identityDocumentType = identityDocumentType;
+        this.identityNumber = identityNumber.trim();
         this.updatedAt = Instant.now();
         this.updatedBy = updatedBy;
 
         domainEvents.add(new ProfessorUpdated(
-                id.value(), tenantId, this.firstName, this.lastName, email, phoneNumber, updatedBy, this.updatedAt));
+                id.value(), tenantId, this.firstName, this.lastName, this.email, phoneNumber,
+                identityDocumentType, this.identityNumber, updatedBy, this.updatedAt));
     }
 
     public void deactivate(UUID deactivatedBy) {
@@ -182,6 +209,8 @@ public class Professor {
     public UUID getCreatedBy() { return createdBy; }
     public Instant getUpdatedAt() { return updatedAt; }
     public UUID getUpdatedBy() { return updatedBy; }
+    public IdentityDocumentType getIdentityDocumentType() { return identityDocumentType; }
+    public String getIdentityNumber() { return identityNumber; }
 
     private static String capitalize(String value) {
         String trimmed = value.trim();

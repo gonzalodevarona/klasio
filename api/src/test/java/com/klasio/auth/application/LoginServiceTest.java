@@ -58,7 +58,8 @@ class LoginServiceTest {
 
     private User activeUser(Role role) {
         UUID tenantId = role == Role.SUPERADMIN ? null : UUID.randomUUID();
-        return User.createActive(tenantId, "test@example.com", "encoded_pass", role);
+        return User.createActive(tenantId, "test@example.com", "encoded_pass", role,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
     }
 
     @Test
@@ -121,7 +122,8 @@ class LoginServiceTest {
     @Test
     void login_fifthFailure_locksAccount() {
         User user = new User(UUID.randomUUID(), UUID.randomUUID(), "test@example.com", "encoded_pass",
-                Role.ADMIN, UserStatus.ACTIVE, 4, null, Instant.now(), Instant.now());
+                Role.ADMIN, UserStatus.ACTIVE, 4, null, Instant.now(), Instant.now(),
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "encoded_pass")).thenReturn(false);
         when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -135,7 +137,8 @@ class LoginServiceTest {
     void login_lockedAccount_throwsAccountLocked() {
         User user = new User(UUID.randomUUID(), UUID.randomUUID(), "test@example.com", "encoded_pass",
                 Role.ADMIN, UserStatus.ACTIVE, 5, Instant.now().plus(Duration.ofMinutes(15)),
-                Instant.now(), Instant.now());
+                Instant.now(), Instant.now(),
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         assertThrows(AccountLockedException.class,
@@ -144,7 +147,8 @@ class LoginServiceTest {
 
     @Test
     void login_unverifiedEmail_throwsEmailNotVerified() {
-        User user = User.createUnverified(UUID.randomUUID(), "test@example.com", "encoded_pass");
+        User user = User.createUnverified(UUID.randomUUID(), "test@example.com", "encoded_pass",
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         assertThrows(EmailNotVerifiedException.class,

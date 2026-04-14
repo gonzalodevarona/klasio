@@ -6,6 +6,7 @@ import com.klasio.professor.domain.model.Professor;
 import com.klasio.professor.domain.port.ProfessorRepository;
 import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.ProfessorEmailAlreadyExistsException;
+import com.klasio.shared.infrastructure.exception.ProfessorIdentityNumberAlreadyExistsException;
 import com.klasio.shared.infrastructure.exception.ProfessorNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,15 @@ public class UpdateProfessorService implements UpdateProfessorUseCase {
                     "A professor with email '%s' already exists in this tenant".formatted(command.email()));
         }
 
-        professor.update(command.firstName(), command.lastName(), command.email(), command.phoneNumber(), command.updatedBy());
+        if (professorRepository.existsByIdentityNumberInTenantExcluding(
+                command.tenantId(), command.identityNumber(), command.professorId())) {
+            throw new ProfessorIdentityNumberAlreadyExistsException(
+                    "A professor with identity number '%s' already exists in this tenant"
+                            .formatted(command.identityNumber()));
+        }
+
+        professor.update(command.firstName(), command.lastName(), command.email(), command.phoneNumber(),
+                command.identityDocumentType(), command.identityNumber(), command.updatedBy());
 
         List<DomainEvent> events = List.copyOf(professor.getDomainEvents());
 

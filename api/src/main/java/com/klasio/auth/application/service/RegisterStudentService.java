@@ -10,6 +10,7 @@ import com.klasio.auth.domain.model.EmailVerificationToken;
 import com.klasio.auth.domain.model.PasswordPolicy;
 import com.klasio.auth.domain.model.User;
 import com.klasio.auth.infrastructure.config.AuthProperties;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +63,14 @@ public class RegisterStudentService {
             throw new EmailAlreadyRegisteredException();
         }
 
-        if (studentProfilePort.existsByIdentityNumberInTenant(tenantId, command.documentNumber())) {
+        IdentityDocumentType docType = parseDocumentType(command.identityDocumentType());
+        String identityNumber = command.identityNumber();
+
+        if (userRepository.existsByIdentityNumberAndTenantId(tenantId, identityNumber)) {
+            throw new IdentityNumberAlreadyRegisteredException();
+        }
+
+        if (studentProfilePort.existsByIdentityNumberInTenant(tenantId, identityNumber)) {
             throw new IdentityNumberAlreadyRegisteredException();
         }
 
@@ -72,12 +80,12 @@ public class RegisterStudentService {
         }
 
         String passwordHash = passwordEncoder.encode(command.password());
-        User user = User.createUnverified(tenantId, command.email(), passwordHash);
+        User user = User.createUnverified(tenantId, command.email(), passwordHash, docType, identityNumber);
         userRepository.save(user);
 
         UUID studentId = studentProfilePort.createStudentProfile(
                 tenantId, command.firstName(), command.lastName(), command.email(),
-                command.dateOfBirth(), command.documentType(), command.documentNumber(),
+                command.dateOfBirth(), command.identityDocumentType(), command.identityNumber(),
                 command.eps(), command.tutorFullName(), command.tutorRelationship(),
                 command.tutorContact(), user.getId());
 
@@ -91,5 +99,13 @@ public class RegisterStudentService {
 
         eventPublisher.publishEvent(new StudentRegisteredEvent(
                 user.getId(), tenantId, studentId, command.email(), Instant.now()));
+    }
+
+    private IdentityDocumentType parseDocumentType(String value) {
+        try {
+            return IdentityDocumentType.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid identity document type: " + value);
+        }
     }
 }

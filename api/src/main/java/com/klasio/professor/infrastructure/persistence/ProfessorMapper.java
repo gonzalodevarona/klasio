@@ -22,7 +22,9 @@ public class ProfessorMapper {
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
                 entity.getUpdatedAt(),
-                entity.getUpdatedBy()
+                entity.getUpdatedBy(),
+                entity.getIdentityDocumentType(),
+                entity.getIdentityNumber()
         );
     }
 
@@ -41,6 +43,8 @@ public class ProfessorMapper {
         entity.setCreatedBy(professor.getCreatedBy());
         entity.setUpdatedAt(professor.getUpdatedAt());
         entity.setUpdatedBy(professor.getUpdatedBy());
+        entity.setIdentityDocumentType(professor.getIdentityDocumentType());
+        entity.setIdentityNumber(professor.getIdentityNumber());
         return entity;
     }
 }

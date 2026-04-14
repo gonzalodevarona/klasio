@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateProfessorServiceTest {
@@ -55,14 +56,15 @@ class UpdateProfessorServiceTest {
                 ProfessorId.of(professorId), TENANT_ID,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
 
         when(professorRepository.findById(TENANT_ID, professorId)).thenReturn(Optional.of(professor));
         when(professorRepository.existsByEmailInTenantExcluding(TENANT_ID, "ana@example.com", professorId)).thenReturn(false);
 
         UpdateProfessorCommand command = new UpdateProfessorCommand(
-                TENANT_ID, professorId, "Ana", "Lopez", "ana@example.com", "+573009876543", UPDATED_BY);
+                TENANT_ID, professorId, "Ana", "Lopez", "ana@example.com", "+573009876543", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY);
 
         Professor result = service.execute(command);
 
@@ -85,7 +87,7 @@ class UpdateProfessorServiceTest {
         when(professorRepository.findById(TENANT_ID, professorId)).thenReturn(Optional.empty());
 
         UpdateProfessorCommand command = new UpdateProfessorCommand(
-                TENANT_ID, professorId, "Ana", "Lopez", "ana@example.com", "+573009876543", UPDATED_BY);
+                TENANT_ID, professorId, "Ana", "Lopez", "ana@example.com", "+573009876543", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY);
 
         assertThatThrownBy(() -> service.execute(command))
                 .isInstanceOf(ProfessorNotFoundException.class);
@@ -102,14 +104,15 @@ class UpdateProfessorServiceTest {
                 ProfessorId.of(professorId), TENANT_ID,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
 
         when(professorRepository.findById(TENANT_ID, professorId)).thenReturn(Optional.of(professor));
         when(professorRepository.existsByEmailInTenantExcluding(TENANT_ID, "ana@example.com", professorId)).thenReturn(true);
 
         UpdateProfessorCommand command = new UpdateProfessorCommand(
-                TENANT_ID, professorId, "Ana", "Lopez", "ana@example.com", "+573009876543", UPDATED_BY);
+                TENANT_ID, professorId, "Ana", "Lopez", "ana@example.com", "+573009876543", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY);
 
         assertThatThrownBy(() -> service.execute(command))
                 .isInstanceOf(ProfessorEmailAlreadyExistsException.class);

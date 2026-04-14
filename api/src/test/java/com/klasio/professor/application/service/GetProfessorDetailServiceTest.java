@@ -20,6 +20,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 @ExtendWith(MockitoExtension.class)
 class GetProfessorDetailServiceTest {
@@ -45,7 +46,8 @@ class GetProfessorDetailServiceTest {
                 ProfessorId.of(professorId), TENANT_ID,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
 
         when(professorRepository.findById(TENANT_ID, professorId)).thenReturn(Optional.of(professor));

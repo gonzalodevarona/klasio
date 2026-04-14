@@ -13,7 +13,7 @@ import com.klasio.student.application.port.input.ListEnrollmentsUseCase;
 import com.klasio.student.application.port.input.ListStudentsUseCase;
 import com.klasio.student.application.port.input.UpdateStudentUseCase;
 import com.klasio.student.domain.model.BloodType;
-import com.klasio.student.domain.model.IdentityDocumentType;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.port.StudentRepository;
 import jakarta.validation.Valid;

@@ -53,6 +53,18 @@ public class JpaProfessorRepository extends TenantScopedRepository implements Pr
     }
 
     @Override
+    public boolean existsByIdentityNumberInTenant(UUID tenantId, String identityNumber) {
+        applyTenantContext();
+        return springDataRepository.existsByTenantIdAndIdentityNumber(tenantId, identityNumber);
+    }
+
+    @Override
+    public boolean existsByIdentityNumberInTenantExcluding(UUID tenantId, String identityNumber, UUID excludeId) {
+        applyTenantContext();
+        return springDataRepository.existsByTenantIdAndIdentityNumberAndIdNot(tenantId, identityNumber, excludeId);
+    }
+
+    @Override
     public Page<Professor> findAllByTenant(UUID tenantId, Pageable pageable, ProfessorStatus status) {
         applyTenantContext();
         if (status != null) {

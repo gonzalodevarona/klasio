@@ -41,4 +41,9 @@ public class JpaUserRepository implements UserRepository {
     public boolean existsByEmailAndTenantId(String email, UUID tenantId) {
         return springDataRepo.existsByEmailAndTenantId(email, tenantId);
     }
+
+    @Override
+    public boolean existsByIdentityNumberAndTenantId(UUID tenantId, String identityNumber) {
+        return springDataRepo.existsByTenantIdAndIdentityNumber(tenantId, identityNumber);
+    }
 }

@@ -1,7 +1,7 @@
 package com.klasio.student.infrastructure.persistence;
 
 import com.klasio.student.domain.model.BloodType;
-import com.klasio.student.domain.model.IdentityDocumentType;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.model.StudentId;
 import org.springframework.stereotype.Component;

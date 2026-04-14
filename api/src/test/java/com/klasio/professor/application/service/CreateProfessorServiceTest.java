@@ -6,6 +6,7 @@ import com.klasio.professor.domain.model.Professor;
 import com.klasio.professor.domain.model.ProfessorStatus;
 import com.klasio.professor.domain.port.ProfessorRepository;
 import com.klasio.shared.infrastructure.exception.ProfessorEmailAlreadyExistsException;
+import com.klasio.shared.infrastructure.exception.ProfessorIdentityNumberAlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 @ExtendWith(MockitoExtension.class)
 class CreateProfessorServiceTest {
@@ -53,9 +55,7 @@ class CreateProfessorServiceTest {
                 "Carlos",
                 "Martinez",
                 "carlos@example.com",
-                "+573001234567",
-                CREATED_BY
-        );
+                "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
         Professor result = service.execute(command);
 
@@ -86,12 +86,27 @@ class CreateProfessorServiceTest {
                 "Carlos",
                 "Martinez",
                 "carlos@example.com",
-                "+573001234567",
-                CREATED_BY
-        );
+                "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
         assertThatThrownBy(() -> service.execute(command))
                 .isInstanceOf(ProfessorEmailAlreadyExistsException.class);
+
+        verify(professorRepository, never()).save(any());
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    @DisplayName("should throw ProfessorIdentityNumberAlreadyExistsException when identity number is duplicate in tenant")
+    void execute_withDuplicateIdentityNumber_throwsException() {
+        when(professorRepository.existsByEmailInTenant(TENANT_ID, "carlos@example.com")).thenReturn(false);
+        when(professorRepository.existsByIdentityNumberInTenant(TENANT_ID, "12345678")).thenReturn(true);
+
+        CreateProfessorCommand command = new CreateProfessorCommand(
+                TENANT_ID, "Carlos", "Martinez", "carlos@example.com", "+573001234567",
+                IdentityDocumentType.CC, "12345678", CREATED_BY);
+
+        assertThatThrownBy(() -> service.execute(command))
+                .isInstanceOf(ProfessorIdentityNumberAlreadyExistsException.class);
 
         verify(professorRepository, never()).save(any());
         verify(eventPublisher, never()).publishEvent(any());
@@ -107,9 +122,7 @@ class CreateProfessorServiceTest {
                 "Carlos",
                 "Martinez",
                 "carlos@example.com",
-                "+573001234567",
-                CREATED_BY
-        );
+                "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
         Professor result = service.execute(command);
 

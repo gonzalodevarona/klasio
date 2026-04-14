@@ -9,6 +9,7 @@ import com.klasio.auth.domain.exception.PasswordPolicyViolationException;
 import com.klasio.auth.domain.model.User;
 import com.klasio.auth.domain.model.UserStatus;
 import com.klasio.auth.infrastructure.config.AuthProperties;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +60,8 @@ class RegisterStudentServiceTest {
 
         when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.documentNumber())).thenReturn(false);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
+        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
         when(passwordEncoder.encode(command.password())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(studentProfilePort.createStudentProfile(eq(TENANT_ID), anyString(), anyString(),
@@ -76,10 +78,12 @@ class RegisterStudentServiceTest {
         assertEquals(UserStatus.EMAIL_UNVERIFIED, savedUser.getStatus());
         assertEquals(command.email(), savedUser.getEmail());
         assertEquals(TENANT_ID, savedUser.getTenantId());
+        assertEquals(IdentityDocumentType.CC, savedUser.getIdentityDocumentType());
+        assertEquals(command.identityNumber(), savedUser.getIdentityNumber());
 
         verify(studentProfilePort).createStudentProfile(eq(TENANT_ID), eq(command.firstName()),
                 eq(command.lastName()), eq(command.email()), eq(command.dateOfBirth()),
-                eq(command.documentType()), eq(command.documentNumber()), eq(command.eps()),
+                eq(command.identityDocumentType()), eq(command.identityNumber()), eq(command.eps()),
                 isNull(), isNull(), isNull(), any(UUID.class));
 
         verify(evtRepository).save(any());
@@ -93,7 +97,8 @@ class RegisterStudentServiceTest {
 
         when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.documentNumber())).thenReturn(false);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
+        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
         when(passwordEncoder.encode(command.password())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(studentProfilePort.createStudentProfile(eq(TENANT_ID), anyString(), anyString(),
@@ -106,7 +111,7 @@ class RegisterStudentServiceTest {
 
         verify(studentProfilePort).createStudentProfile(eq(TENANT_ID), eq(command.firstName()),
                 eq(command.lastName()), eq(command.email()), eq(command.dateOfBirth()),
-                eq(command.documentType()), eq(command.documentNumber()), eq(command.eps()),
+                eq(command.identityDocumentType()), eq(command.identityNumber()), eq(command.eps()),
                 eq("Maria Garcia"), eq("Mother"), eq("3001234567"), any(UUID.class));
     }
 
@@ -125,12 +130,26 @@ class RegisterStudentServiceTest {
     }
 
     @Test
-    void duplicateIdentityNumber_throwsIdentityNumberAlreadyRegisteredException() {
+    void duplicateIdentityNumberInUsers_throwsIdentityNumberAlreadyRegisteredException() {
         RegisterStudentCommand command = adultStudentCommand();
 
         when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.documentNumber())).thenReturn(true);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(true);
+
+        assertThrows(IdentityNumberAlreadyRegisteredException.class, () -> service.register(command));
+
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void duplicateIdentityNumberInStudents_throwsIdentityNumberAlreadyRegisteredException() {
+        RegisterStudentCommand command = adultStudentCommand();
+
+        when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
+        when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
+        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(true);
 
         assertThrows(IdentityNumberAlreadyRegisteredException.class, () -> service.register(command));
 
@@ -157,7 +176,8 @@ class RegisterStudentServiceTest {
 
         when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.documentNumber())).thenReturn(false);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
+        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
 
         PasswordPolicyViolationException ex = assertThrows(
                 PasswordPolicyViolationException.class, () -> service.register(command));
@@ -173,7 +193,8 @@ class RegisterStudentServiceTest {
 
         when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.documentNumber())).thenReturn(false);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
+        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
         when(passwordEncoder.encode(command.password())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(studentProfilePort.createStudentProfile(eq(TENANT_ID), anyString(), anyString(),

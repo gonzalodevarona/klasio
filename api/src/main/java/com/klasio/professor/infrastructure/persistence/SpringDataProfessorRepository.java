@@ -15,6 +15,10 @@ public interface SpringDataProfessorRepository extends JpaRepository<ProfessorJp
 
     boolean existsByTenantIdAndEmailAndIdNot(UUID tenantId, String email, UUID id);
 
+    boolean existsByTenantIdAndIdentityNumber(UUID tenantId, String identityNumber);
+
+    boolean existsByTenantIdAndIdentityNumberAndIdNot(UUID tenantId, String identityNumber, UUID id);
+
     Page<ProfessorJpaEntity> findByTenantIdOrderByCreatedAtDesc(UUID tenantId, Pageable pageable);
 
     Page<ProfessorJpaEntity> findByTenantIdAndStatusOrderByCreatedAtDesc(UUID tenantId, String status, Pageable pageable);

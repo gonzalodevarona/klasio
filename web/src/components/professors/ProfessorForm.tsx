@@ -8,12 +8,16 @@ import {
   CreateProfessorRequest,
   UpdateProfessorRequest,
 } from "@/lib/types/professor";
+import type { IdentityDocumentType } from "@/lib/types/identity";
+import DocumentFields from "@/components/common/DocumentFields";
 
 interface FieldErrors {
   firstName?: string;
   lastName?: string;
   email?: string;
   phoneNumber?: string;
+  identityDocumentType?: string;
+  identityNumber?: string;
   [key: string]: string | undefined;
 }
 
@@ -31,6 +35,10 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
   const [lastName, setLastName] = useState(professor?.lastName ?? "");
   const [email, setEmail] = useState(professor?.email ?? "");
   const [phoneNumber, setPhoneNumber] = useState(professor?.phoneNumber ?? "");
+  const [identityDocumentType, setIdentityDocumentType] = useState<IdentityDocumentType>(
+    professor?.identityDocumentType ?? "CC"
+  );
+  const [identityNumber, setIdentityNumber] = useState(professor?.identityNumber ?? "");
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
@@ -63,6 +71,12 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
       errors.phoneNumber = "Phone number must be at most 20 characters.";
     }
 
+    if (!identityNumber.trim()) {
+      errors.identityNumber = "Document number is required.";
+    } else if (identityNumber.trim().length > 30) {
+      errors.identityNumber = "Document number must be at most 30 characters.";
+    }
+
     return errors;
   }
 
@@ -86,6 +100,8 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           lastName: lastName.trim(),
           email: email.trim(),
           phoneNumber: phoneNumber.trim() || undefined,
+          identityDocumentType,
+          identityNumber: identityNumber.trim(),
         };
         await api.put<ProfessorDetail>(`/professors/${professor.id}`, body);
         router.push(`/professors/${professor.id}`);
@@ -95,6 +111,8 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           lastName: lastName.trim(),
           email: email.trim(),
           phoneNumber: phoneNumber.trim() || undefined,
+          identityDocumentType,
+          identityNumber: identityNumber.trim(),
         };
         const created = await api.post<ProfessorDetail>("/professors", body);
         router.push(`/professors/${created.id}`);
@@ -222,6 +240,19 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           <p className="mt-1 text-sm text-red-600">{fieldErrors.phoneNumber}</p>
         )}
       </div>
+
+      {/* Identity Document */}
+      <DocumentFields
+        documentType={identityDocumentType}
+        documentNumber={identityNumber}
+        onDocumentTypeChange={setIdentityDocumentType}
+        onDocumentNumberChange={setIdentityNumber}
+        errors={{
+          documentType: fieldErrors.identityDocumentType,
+          documentNumber: fieldErrors.identityNumber,
+        }}
+        disabled={submitting}
+      />
 
       {/* Submit */}
       <div className="pt-2">

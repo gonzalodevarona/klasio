@@ -1,14 +1,8 @@
 export type StudentStatus = "ACTIVE" | "INACTIVE";
 
-export type IdentityDocumentType = "CC" | "TI" | "CE" | "PA" | "RC";
-
-export const IDENTITY_DOCUMENT_TYPES: { value: IdentityDocumentType; label: string }[] = [
-  { value: "CC", label: "Cédula de Ciudadanía" },
-  { value: "TI", label: "Tarjeta de Identidad" },
-  { value: "CE", label: "Cédula de Extranjería" },
-  { value: "PA", label: "Pasaporte" },
-  { value: "RC", label: "Registro Civil" },
-];
+// Re-exported from shared identity types for backwards compatibility
+export type { IdentityDocumentType } from "./identity";
+export { IDENTITY_DOCUMENT_TYPES } from "./identity";
 
 export const BLOOD_TYPES = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"] as const;
 export type BloodType = (typeof BLOOD_TYPES)[number];

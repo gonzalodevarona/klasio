@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +28,8 @@ public class RegistrationController {
             @NotBlank String firstName,
             @NotBlank String lastName,
             @NotNull LocalDate dateOfBirth,
-            @NotBlank String documentType,
-            @NotBlank String documentNumber,
+            @NotBlank @Pattern(regexp = "^(CC|TI|CE|PA|RC)$", message = "Invalid document type") String identityDocumentType,
+            @NotBlank @Size(max = 30) String identityNumber,
             @NotBlank String eps,
             @NotBlank @Email String email,
             @NotBlank String password,
@@ -46,8 +48,8 @@ public class RegistrationController {
                 request.firstName(),
                 request.lastName(),
                 request.dateOfBirth(),
-                request.documentType(),
-                request.documentNumber(),
+                request.identityDocumentType(),
+                request.identityNumber(),
                 request.eps(),
                 request.email(),
                 request.password(),

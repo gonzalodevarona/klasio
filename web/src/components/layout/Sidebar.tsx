@@ -134,39 +134,33 @@ function Brand({
 // User identity block shown at the bottom of the sidebar.
 function UserFooter({
   role,
-  studentFullName,
+  displayName,
   identityDocumentType,
   identityNumber,
   collapsed,
   onLogout,
 }: {
   role: Role;
-  studentFullName: string | null;
+  displayName: string | null;
   identityDocumentType: string | null;
   identityNumber: string | null;
   collapsed: boolean;
   onLogout: () => void;
 }) {
-  const isStudent = role === "STUDENT";
-
   return (
     <div className="px-2 py-4 border-t border-gray-700 shrink-0">
       {!collapsed && (
         <div className="px-3 mb-2 space-y-0.5">
-          {isStudent && studentFullName ? (
-            <>
-              <p className="text-xs font-medium text-white truncate">
-                {studentFullName}
-              </p>
-              <p className="text-xs text-gray-400 truncate">{role}</p>
-              {identityDocumentType && identityNumber && (
-                <p className="text-xs text-gray-500 truncate">
-                  {identityDocumentType} {identityNumber}
-                </p>
-              )}
-            </>
-          ) : (
-            <p className="text-xs text-gray-400 truncate">{role}</p>
+          {displayName && (
+            <p className="text-xs font-medium text-white truncate">
+              {displayName}
+            </p>
+          )}
+          <p className="text-xs text-gray-400 truncate">{role}</p>
+          {identityDocumentType && identityNumber && (
+            <p className="text-xs text-gray-500 truncate">
+              {identityDocumentType} {identityNumber}
+            </p>
           )}
         </div>
       )}
@@ -189,36 +183,30 @@ function UserFooter({
 // Mobile-drawer version of the user footer (never collapsed).
 function MobileUserFooter({
   role,
-  studentFullName,
+  displayName,
   identityDocumentType,
   identityNumber,
   onLogout,
 }: {
   role: Role;
-  studentFullName: string | null;
+  displayName: string | null;
   identityDocumentType: string | null;
   identityNumber: string | null;
   onLogout: () => void;
 }) {
-  const isStudent = role === "STUDENT";
-
   return (
     <div className="px-3 py-4 border-t border-gray-700 shrink-0">
       <div className="px-3 mb-2 space-y-0.5">
-        {isStudent && studentFullName ? (
-          <>
-            <p className="text-xs font-medium text-white truncate">
-              {studentFullName}
-            </p>
-            <p className="text-xs text-gray-400 truncate">{role}</p>
-            {identityDocumentType && identityNumber && (
-              <p className="text-xs text-gray-500 truncate">
-                {identityDocumentType} {identityNumber}
-              </p>
-            )}
-          </>
-        ) : (
-          <p className="text-xs text-gray-400 truncate">{role}</p>
+        {displayName && (
+          <p className="text-xs font-medium text-white truncate">
+            {displayName}
+          </p>
+        )}
+        <p className="text-xs text-gray-400 truncate">{role}</p>
+        {identityDocumentType && identityNumber && (
+          <p className="text-xs text-gray-500 truncate">
+            {identityDocumentType} {identityNumber}
+          </p>
         )}
       </div>
       <button
@@ -238,7 +226,7 @@ export default function Sidebar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
 
-  const { tenantName, studentFullName, identityDocumentType, identityNumber } =
+  const { tenantName, displayName, identityDocumentType, identityNumber } =
     useSidebarIdentity(user?.role, user?.tenantId);
 
   // Close mobile drawer on route change.
@@ -344,7 +332,7 @@ export default function Sidebar() {
             {user && (
               <MobileUserFooter
                 role={user.role}
-                studentFullName={studentFullName}
+                displayName={displayName}
                 identityDocumentType={identityDocumentType}
                 identityNumber={identityNumber}
                 onLogout={logout}
@@ -396,7 +384,7 @@ export default function Sidebar() {
         {user && (
           <UserFooter
             role={user.role}
-            studentFullName={studentFullName}
+            displayName={displayName}
             identityDocumentType={identityDocumentType}
             identityNumber={identityNumber}
             collapsed={collapsed}

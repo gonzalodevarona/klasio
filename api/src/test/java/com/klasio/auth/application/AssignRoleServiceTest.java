@@ -41,7 +41,7 @@ class AssignRoleServiceTest {
     void superadmin_assignsAdmin_succeeds() {
         UUID targetUserId = UUID.randomUUID();
         UUID assignerId = UUID.randomUUID();
-        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT);
+        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -60,7 +60,7 @@ class AssignRoleServiceTest {
     void admin_assignsManager_sameTenant_succeeds() {
         UUID targetUserId = UUID.randomUUID();
         UUID assignerId = UUID.randomUUID();
-        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT);
+        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -78,7 +78,7 @@ class AssignRoleServiceTest {
     void admin_assignsProfessor_sameTenant_succeeds() {
         UUID targetUserId = UUID.randomUUID();
         UUID assignerId = UUID.randomUUID();
-        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT);
+        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -95,7 +95,7 @@ class AssignRoleServiceTest {
     void admin_assignsAdmin_throwsRoleElevationForbidden() {
         UUID targetUserId = UUID.randomUUID();
         UUID assignerId = UUID.randomUUID();
-        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT);
+        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
 
@@ -110,7 +110,7 @@ class AssignRoleServiceTest {
     void manager_assignsAnyRole_throwsRoleElevationForbidden() {
         UUID targetUserId = UUID.randomUUID();
         UUID assignerId = UUID.randomUUID();
-        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT);
+        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
 
@@ -125,7 +125,7 @@ class AssignRoleServiceTest {
     void admin_assignsRole_differentTenant_throwsRoleElevationForbidden() {
         UUID targetUserId = UUID.randomUUID();
         UUID assignerId = UUID.randomUUID();
-        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT);
+        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
 
@@ -140,7 +140,7 @@ class AssignRoleServiceTest {
     void roleReplaced_notStacked() {
         UUID targetUserId = UUID.randomUUID();
         UUID assignerId = UUID.randomUUID();
-        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.PROFESSOR);
+        User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.PROFESSOR, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));

@@ -4,11 +4,13 @@ import com.klasio.auth.domain.exception.AccountLockedException;
 import com.klasio.auth.domain.exception.EmailNotVerifiedException;
 import com.klasio.auth.domain.exception.InvalidCredentialsException;
 import com.klasio.shared.domain.DomainEvent;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class User {
@@ -23,12 +25,15 @@ public class User {
     private Instant lockedUntil;
     private Instant createdAt;
     private Instant updatedAt;
+    private IdentityDocumentType identityDocumentType;
+    private String identityNumber;
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     public User(UUID id, UUID tenantId, String email, String passwordHash,
                 Role role, UserStatus status, int failedLoginCount, Instant lockedUntil,
-                Instant createdAt, Instant updatedAt) {
+                Instant createdAt, Instant updatedAt,
+                IdentityDocumentType identityDocumentType, String identityNumber) {
         this.id = id;
         this.tenantId = tenantId;
         this.email = email;
@@ -39,18 +44,34 @@ public class User {
         this.lockedUntil = lockedUntil;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.identityDocumentType = identityDocumentType;
+        this.identityNumber = identityNumber;
     }
 
-    public static User createActive(UUID tenantId, String email, String passwordHash, Role role) {
+    public static User createActive(UUID tenantId, String email, String passwordHash, Role role,
+                                    IdentityDocumentType identityDocumentType, String identityNumber) {
+        Objects.requireNonNull(role, "Role must not be null");
+        if (role != Role.SUPERADMIN) {
+            Objects.requireNonNull(tenantId, "Tenant id must not be null");
+        }
+        Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
+        validateNotBlank(identityNumber, "Identity number");
+
         Instant now = Instant.now();
         return new User(UUID.randomUUID(), tenantId, email, passwordHash,
-                role, UserStatus.ACTIVE, 0, null, now, now);
+                role, UserStatus.ACTIVE, 0, null, now, now,
+                identityDocumentType, identityNumber.trim());
     }
 
-    public static User createUnverified(UUID tenantId, String email, String passwordHash) {
+    public static User createUnverified(UUID tenantId, String email, String passwordHash,
+                                        IdentityDocumentType identityDocumentType, String identityNumber) {
+        Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
+        validateNotBlank(identityNumber, "Identity number");
+
         Instant now = Instant.now();
         return new User(UUID.randomUUID(), tenantId, email, passwordHash,
-                Role.STUDENT, UserStatus.EMAIL_UNVERIFIED, 0, null, now, now);
+                Role.STUDENT, UserStatus.EMAIL_UNVERIFIED, 0, null, now, now,
+                identityDocumentType, identityNumber.trim());
     }
 
     public boolean isLocked() {
@@ -116,8 +137,16 @@ public class User {
     public Instant getLockedUntil() { return lockedUntil; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public IdentityDocumentType getIdentityDocumentType() { return identityDocumentType; }
+    public String getIdentityNumber() { return identityNumber; }
 
     public List<DomainEvent> getDomainEvents() { return List.copyOf(domainEvents); }
     public void clearDomainEvents() { domainEvents.clear(); }
     protected void registerEvent(DomainEvent event) { domainEvents.add(event); }
+
+    private static void validateNotBlank(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("%s must not be blank".formatted(fieldName));
+        }
+    }
 }

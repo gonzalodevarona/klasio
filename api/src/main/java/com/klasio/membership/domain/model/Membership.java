@@ -116,9 +116,6 @@ public class Membership {
         if (purchasedHours < 1) {
             throw new IllegalArgumentException("purchasedHours must be >= 1");
         }
-        if (startDate.getDayOfMonth() != 1) {
-            throw new IllegalArgumentException("startDate must be the 1st day of the month");
-        }
         LocalDate expirationDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
         Instant now = Instant.now();
         MembershipId membershipId = MembershipId.generate();

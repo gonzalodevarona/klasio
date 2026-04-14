@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 class ProfessorTest {
 
@@ -36,7 +37,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should create professor with INVITED status and all fields set correctly")
         void create_withValidData_returnsProfessorWithInvitedStatus() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             assertNotNull(professor.getId());
             assertNotNull(professor.getId().value());
@@ -60,48 +61,48 @@ class ProfessorTest {
         @DisplayName("should reject null tenantId")
         void create_withNullTenantId_throwsNPE() {
             assertThrows(NullPointerException.class,
-                    () -> Professor.create(null, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY));
+                    () -> Professor.create(null, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY));
         }
 
         @Test
         @DisplayName("should reject null createdBy")
         void create_withNullCreatedBy_throwsNPE() {
             assertThrows(NullPointerException.class,
-                    () -> Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, null));
+                    () -> Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", null));
         }
 
         @Test
         @DisplayName("should reject blank firstName")
         void create_withBlankFirstName_throwsIllegalArgument() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Professor.create(TENANT_ID, "  ", LAST_NAME, EMAIL, null, CREATED_BY));
+                    () -> Professor.create(TENANT_ID, "  ", LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY));
         }
 
         @Test
         @DisplayName("should reject blank lastName")
         void create_withBlankLastName_throwsIllegalArgument() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Professor.create(TENANT_ID, FIRST_NAME, "  ", EMAIL, null, CREATED_BY));
+                    () -> Professor.create(TENANT_ID, FIRST_NAME, "  ", EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY));
         }
 
         @Test
         @DisplayName("should reject blank email")
         void create_withBlankEmail_throwsIllegalArgument() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, "  ", null, CREATED_BY));
+                    () -> Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, "  ", null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY));
         }
 
         @Test
         @DisplayName("should reject invalid email format")
         void create_withInvalidEmail_throwsIllegalArgument() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, "not-an-email", null, CREATED_BY));
+                    () -> Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, "not-an-email", null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY));
         }
 
         @Test
         @DisplayName("should capitalize first letter of firstName and lastName")
         void create_withLowercaseNames_capitalizesFirstLetter() {
-            Professor professor = Professor.create(TENANT_ID, "carlos", "martinez", EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, "carlos", "martinez", EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             assertEquals("Carlos", professor.getFirstName());
             assertEquals("Martinez", professor.getLastName());
@@ -110,7 +111,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should store email in lowercase")
         void create_withUpperCaseEmail_storesLowerCase() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, "CARLOS@EXAMPLE.COM", null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, "CARLOS@EXAMPLE.COM", null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             assertEquals("carlos@example.com", professor.getEmail());
         }
@@ -118,7 +119,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should not lowercase the rest of the name")
         void create_withMixedCaseNames_onlyCapitalizesFirstLetter() {
-            Professor professor = Professor.create(TENANT_ID, "mcGregor", "de la Cruz", EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, "mcGregor", "de la Cruz", EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             assertEquals("McGregor", professor.getFirstName());
             assertEquals("De la Cruz", professor.getLastName());
@@ -127,7 +128,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should emit ProfessorCreated event with correct fields")
         void create_publishesProfessorCreatedEvent() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             List<DomainEvent> events = professor.getDomainEvents();
             assertEquals(1, events.size());
@@ -152,10 +153,10 @@ class ProfessorTest {
         @Test
         @DisplayName("should update fields correctly")
         void update_withValidData_updatesFields() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             professor.clearDomainEvents();
 
-            professor.update("Ana", "Lopez", "ana@example.com", "+573001234567", UPDATED_BY);
+            professor.update("Ana", "Lopez", "ana@example.com", "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY);
 
             assertEquals("Ana", professor.getFirstName());
             assertEquals("Lopez", professor.getLastName());
@@ -167,8 +168,8 @@ class ProfessorTest {
         @Test
         @DisplayName("should store email in lowercase on update")
         void update_withUpperCaseEmail_storesLowerCase() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
-            professor.update(FIRST_NAME, LAST_NAME, "ANA@EXAMPLE.COM", null, UPDATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
+            professor.update(FIRST_NAME, LAST_NAME, "ANA@EXAMPLE.COM", null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY);
 
             assertEquals("ana@example.com", professor.getEmail());
         }
@@ -176,8 +177,8 @@ class ProfessorTest {
         @Test
         @DisplayName("should capitalize first letter on update")
         void update_withLowercaseNames_capitalizesFirstLetter() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
-            professor.update("ana", "lopez", "ana@example.com", null, UPDATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
+            professor.update("ana", "lopez", "ana@example.com", null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY);
 
             assertEquals("Ana", professor.getFirstName());
             assertEquals("Lopez", professor.getLastName());
@@ -186,28 +187,28 @@ class ProfessorTest {
         @Test
         @DisplayName("should reject blank firstName")
         void update_withBlankFirstName_throwsIllegalArgument() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             assertThrows(IllegalArgumentException.class,
-                    () -> professor.update("  ", LAST_NAME, EMAIL, null, UPDATED_BY));
+                    () -> professor.update("  ", LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY));
         }
 
         @Test
         @DisplayName("should reject blank email")
         void update_withBlankEmail_throwsIllegalArgument() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             assertThrows(IllegalArgumentException.class,
-                    () -> professor.update(FIRST_NAME, LAST_NAME, "  ", null, UPDATED_BY));
+                    () -> professor.update(FIRST_NAME, LAST_NAME, "  ", null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY));
         }
 
         @Test
         @DisplayName("should emit ProfessorUpdated event")
         void update_publishesProfessorUpdatedEvent() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             professor.clearDomainEvents();
 
-            professor.update("Ana", "Lopez", "ana@example.com", "+573001234567", UPDATED_BY);
+            professor.update("Ana", "Lopez", "ana@example.com", "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", UPDATED_BY);
 
             List<DomainEvent> events = professor.getDomainEvents();
             assertEquals(1, events.size());
@@ -233,12 +234,13 @@ class ProfessorTest {
         @Test
         @DisplayName("should deactivate from ACTIVE status")
         void deactivate_fromActive_setsStatusToDeactivated() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             // Activate first by reconstituting as ACTIVE
             Professor active = Professor.reconstitute(
                     professor.getId(), TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null,
                     ProfessorStatus.ACTIVE, null, null,
-                    Instant.now(), CREATED_BY, null, null);
+                    Instant.now(), CREATED_BY, null, null,
+                    com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
             active.deactivate(DEACTIVATED_BY);
 
             assertEquals(ProfessorStatus.DEACTIVATED, active.getStatus());
@@ -247,7 +249,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should deactivate from INVITED status")
         void deactivate_fromInvited_setsStatusToDeactivated() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             professor.clearDomainEvents();
 
             professor.deactivate(DEACTIVATED_BY);
@@ -258,7 +260,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should throw when already deactivated")
         void deactivate_fromDeactivated_throwsIllegalState() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             professor.deactivate(DEACTIVATED_BY);
 
             assertThrows(IllegalStateException.class,
@@ -268,7 +270,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should emit ProfessorDeactivated event")
         void deactivate_publishesProfessorDeactivatedEvent() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             professor.clearDomainEvents();
 
             professor.deactivate(DEACTIVATED_BY);
@@ -295,7 +297,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should reactivate from DEACTIVATED status to ACTIVE")
         void reactivate_fromDeactivated_setsStatusToActive() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             professor.deactivate(DEACTIVATED_BY);
             professor.clearDomainEvents();
 
@@ -310,7 +312,8 @@ class ProfessorTest {
             Professor active = Professor.reconstitute(
                     ProfessorId.generate(), TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null,
                     ProfessorStatus.ACTIVE, null, null,
-                    Instant.now(), CREATED_BY, null, null);
+                    Instant.now(), CREATED_BY, null, null,
+                    com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
             assertThrows(IllegalStateException.class,
                     () -> active.reactivate(REACTIVATED_BY));
@@ -319,7 +322,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should throw when status is INVITED")
         void reactivate_fromInvited_throwsIllegalState() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
 
             assertThrows(IllegalStateException.class,
                     () -> professor.reactivate(REACTIVATED_BY));
@@ -328,7 +331,7 @@ class ProfessorTest {
         @Test
         @DisplayName("should emit ProfessorReactivated event")
         void reactivate_publishesProfessorReactivatedEvent() {
-            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, CREATED_BY);
+            Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             professor.deactivate(DEACTIVATED_BY);
             professor.clearDomainEvents();
 
@@ -356,7 +359,8 @@ class ProfessorTest {
             Professor professor = Professor.reconstitute(
                     ProfessorId.generate(), TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null,
                     ProfessorStatus.ACTIVE, null, null,
-                    Instant.now(), CREATED_BY, null, null);
+                    Instant.now(), CREATED_BY, null, null,
+                    com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
             assertEquals(0, professor.getDomainEvents().size());
             assertEquals(ProfessorStatus.ACTIVE, professor.getStatus());

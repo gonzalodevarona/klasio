@@ -1,4 +1,4 @@
-package com.klasio.student.domain.model;
+package com.klasio.shared.domain.model;
 
 public enum IdentityDocumentType {
     CC,  // Cédula de Ciudadanía

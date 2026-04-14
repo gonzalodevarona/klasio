@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 @ExtendWith(MockitoExtension.class)
 class AssignProfessorServiceTest {
@@ -75,7 +76,9 @@ class AssignProfessorServiceTest {
         return Professor.reconstitute(
                 ProfessorId.of(professorId), TENANT_ID, "Carlos", "Martinez",
                 "carlos@example.com", null, ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), ASSIGNED_BY, null, null);
+                Instant.now(), ASSIGNED_BY, null, null,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
+        );
     }
 
     // ---- T055: Happy path ----
@@ -131,7 +134,9 @@ class AssignProfessorServiceTest {
         Professor deactivated = Professor.reconstitute(
                 ProfessorId.of(PROFESSOR_ID), TENANT_ID, "Carlos", "Martinez",
                 "carlos@example.com", null, ProfessorStatus.DEACTIVATED, null, null,
-                Instant.now(), ASSIGNED_BY, null, null);
+                Instant.now(), ASSIGNED_BY, null, null,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
+        );
 
         when(programClassRepository.findById(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(pc));
         when(professorRepository.findById(TENANT_ID, PROFESSOR_ID)).thenReturn(Optional.of(deactivated));
