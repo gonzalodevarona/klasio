@@ -4,8 +4,7 @@ import com.klasio.membership.domain.event.MembershipActivated;
 import com.klasio.membership.domain.event.MembershipDepleted;
 import com.klasio.membership.domain.event.MembershipExpired;
 import com.klasio.membership.domain.event.MembershipExpiryWarning;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -17,10 +16,9 @@ import org.springframework.stereotype.Component;
  *
  * In v1.0 these log stubs will be replaced with real Postmark email calls.
  */
+@Slf4j
 @Component
 public class MembershipNotificationListener {
-
-    private static final Logger log = LoggerFactory.getLogger(MembershipNotificationListener.class);
 
     @Async
     @EventListener

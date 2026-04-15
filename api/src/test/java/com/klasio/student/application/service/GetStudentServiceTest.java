@@ -2,7 +2,7 @@ package com.klasio.student.application.service;
 
 import com.klasio.shared.infrastructure.exception.StudentNotFoundException;
 import com.klasio.student.domain.model.BloodType;
-import com.klasio.student.domain.model.IdentityDocumentType;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.model.StudentId;
 import com.klasio.student.domain.port.StudentRepository;

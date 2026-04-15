@@ -21,7 +21,7 @@ public class GetMembershipService implements GetMembershipUseCase {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'STUDENT')")
     public Membership execute(UUID tenantId, UUID membershipId) {
         return membershipRepository.findById(tenantId, membershipId)
                 .orElseThrow(() -> new MembershipNotFoundException(

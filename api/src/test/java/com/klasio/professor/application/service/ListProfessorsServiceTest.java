@@ -23,6 +23,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 @ExtendWith(MockitoExtension.class)
 class ListProfessorsServiceTest {
@@ -47,7 +48,8 @@ class ListProfessorsServiceTest {
                 ProfessorId.of(UUID.randomUUID()), TENANT_ID,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                        com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
         Page<Professor> page = new PageImpl<>(List.of(professor), pageable, 1);
 
@@ -82,13 +84,15 @@ class ListProfessorsServiceTest {
                 ProfessorId.of(UUID.randomUUID()), TENANT_ID,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                        com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
         Professor professor2 = Professor.reconstitute(
                 ProfessorId.of(UUID.randomUUID()), TENANT_ID,
                 "Ana", "Lopez", "ana@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                        com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
         Page<Professor> page = new PageImpl<>(List.of(professor1, professor2), pageable, 25);
 

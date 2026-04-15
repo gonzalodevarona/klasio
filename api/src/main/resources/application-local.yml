@@ -15,6 +15,9 @@ spring:
       mail.smtp.starttls.enable: false
 
 klasio:
+  scheduler:
+    delegation-reminder:
+      enabled: false   # disable during local dev to avoid log noise
   jwt:
     secret: local-dev-secret-key-that-is-at-least-256-bits-long-for-hs256-signing
     access-token-expiration: 28800000

@@ -1,7 +1,7 @@
 package com.klasio.student.application.dto;
 
 import com.klasio.student.domain.model.BloodType;
-import com.klasio.student.domain.model.IdentityDocumentType;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 import java.time.LocalDate;
 import java.util.UUID;

@@ -68,6 +68,38 @@ class MembershipExpirationJobTest {
     }
 
     @Nested
+    @DisplayName("onStartup()")
+    class OnStartup {
+
+        @Test
+        @DisplayName("catches up expired memberships on application startup")
+        void onStartup_expiresAllPastDue() {
+            Membership m1 = buildActiveMembership();
+            Membership m2 = buildInactiveMembership();
+            when(membershipRepository.findExpirable(any(LocalDate.class)))
+                    .thenReturn(List.of(m1, m2));
+
+            job.onStartup();
+
+            verify(membershipRepository).save(m1);
+            verify(membershipRepository).save(m2);
+            verify(eventPublisher, times(2)).publishEvent(any(Object.class));
+        }
+
+        @Test
+        @DisplayName("does nothing on startup when no memberships are expirable")
+        void onStartup_nothingToDo() {
+            when(membershipRepository.findExpirable(any(LocalDate.class)))
+                    .thenReturn(List.of());
+
+            job.onStartup();
+
+            verify(membershipRepository, never()).save(any());
+            verify(eventPublisher, never()).publishEvent(any());
+        }
+    }
+
+    @Nested
     @DisplayName("sendExpiryWarnings()")
     class SendExpiryWarnings {
 

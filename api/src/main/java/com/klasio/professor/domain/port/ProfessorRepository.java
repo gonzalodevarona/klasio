@@ -18,5 +18,9 @@ public interface ProfessorRepository {
 
     boolean existsByEmailInTenantExcluding(UUID tenantId, String email, UUID excludeId);
 
+    boolean existsByIdentityNumberInTenant(UUID tenantId, String identityNumber);
+
+    boolean existsByIdentityNumberInTenantExcluding(UUID tenantId, String identityNumber, UUID excludeId);
+
     Page<Professor> findAllByTenant(UUID tenantId, Pageable pageable, ProfessorStatus status);
 }

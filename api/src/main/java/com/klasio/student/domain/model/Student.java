@@ -1,6 +1,7 @@
 package com.klasio.student.domain.model;
 
 import com.klasio.shared.domain.DomainEvent;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.event.StudentCreated;
 import com.klasio.student.domain.event.StudentDeactivated;
 import com.klasio.student.domain.event.StudentReactivated;

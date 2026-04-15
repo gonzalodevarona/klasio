@@ -22,7 +22,7 @@ public class ListMembershipsService implements ListMembershipsUseCase {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'STUDENT')")
     public Page<Membership> execute(UUID tenantId, UUID studentId, UUID programId,
                                     MembershipStatus status, int page, int size) {
         return membershipRepository.findAll(tenantId, studentId, programId, status, page, size);

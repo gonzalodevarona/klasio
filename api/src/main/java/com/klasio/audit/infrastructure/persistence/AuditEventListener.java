@@ -36,20 +36,25 @@ import com.klasio.membership.domain.event.MembershipDepleted;
 import com.klasio.membership.domain.event.MembershipExpired;
 import com.klasio.membership.domain.event.MembershipExpiryWarning;
 import com.klasio.membership.domain.event.HourAdjusted;
+import com.klasio.membership.domain.event.MembershipProofUploaded;
+import com.klasio.membership.domain.event.MembershipRenewed;
+import com.klasio.membership.domain.event.PaymentProofUploaded;
+import com.klasio.membership.domain.event.PaymentProofApproved;
+import com.klasio.membership.domain.event.PaymentProofRejected;
+import com.klasio.membership.domain.event.DelegationReminderDue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class AuditEventListener {
 
-    private static final Logger log = LoggerFactory.getLogger(AuditEventListener.class);
     /** Sentinel UUID for system-triggered audit events (cron jobs, scheduled processes). */
     private static final UUID SYSTEM_ACTOR = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
@@ -863,6 +868,147 @@ public class AuditEventListener {
                 UUID.randomUUID(),
                 "MEMBERSHIP_HOUR_ADJUSTED",
                 event.actorId(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipRenewed(MembershipRenewed event) {
+        log.info("Recording audit log for membership renewal: membershipId={}, studentId={}",
+                event.membershipId(), event.studentId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString(),
+                "purchasedHours", String.valueOf(event.purchasedHours())
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_RENEWED",
+                event.renewedBy(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onMembershipProofUploaded(MembershipProofUploaded event) {
+        log.info("Recording audit log for membership proof upload transition: membershipId={}", event.membershipId());
+
+        String details = toJson(Map.of(
+                "studentId", event.studentId().toString(),
+                "programId", event.programId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "MEMBERSHIP_PROOF_UPLOADED",
+                event.studentId(),
+                "MEMBERSHIP",
+                event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onPaymentProofUploaded(PaymentProofUploaded event) {
+        log.info("Recording audit log for payment proof upload: proofId={}, membershipId={}",
+                event.proofId(), event.membershipId());
+
+        String details = toJson(Map.of(
+                "membershipId", event.membershipId().toString(),
+                "studentId", event.studentId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "PAYMENT_PROOF_UPLOADED",
+                event.studentId(),
+                "PAYMENT_PROOF",
+                event.proofId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onPaymentProofApproved(PaymentProofApproved event) {
+        log.info("Recording audit log for payment proof approval: proofId={}, activateDirectly={}",
+                event.proofId(), event.activateDirectly());
+
+        String details = toJson(Map.of(
+                "membershipId", event.membershipId().toString(),
+                "studentId", event.studentId().toString(),
+                "activateDirectly", String.valueOf(event.activateDirectly())
+        ));
+
+        String actionType = event.activateDirectly()
+                ? "PAYMENT_PROOF_APPROVED"
+                : "MEMBERSHIP_ACTIVATION_DELEGATED";
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                actionType,
+                event.validatedBy(),
+                "PAYMENT_PROOF",
+                event.proofId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onPaymentProofRejected(PaymentProofRejected event) {
+        log.info("Recording audit log for payment proof rejection: proofId={}", event.proofId());
+
+        String details = toJson(Map.of(
+                "membershipId", event.membershipId().toString(),
+                "studentId", event.studentId().toString(),
+                "rejectionReason", event.rejectionReason()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "PAYMENT_PROOF_REJECTED",
+                event.validatedBy(),
+                "PAYMENT_PROOF",
+                event.proofId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onDelegationReminderDue(DelegationReminderDue event) {
+        log.info("Recording audit log for delegation reminder: membershipId={}", event.membershipId());
+
+        String details = toJson(Map.of(
+                "membershipId", event.membershipId().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "DELEGATION_REMINDER_SENT",
+                SYSTEM_ACTOR,
                 "MEMBERSHIP",
                 event.membershipId(),
                 event.occurredAt(),

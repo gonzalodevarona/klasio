@@ -3,15 +3,17 @@ package com.klasio.membership.infrastructure.scheduler;
 import com.klasio.membership.domain.event.MembershipExpiryWarning;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.port.MembershipRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -19,10 +21,9 @@ import java.util.List;
  * 1. Expires all ACTIVE/INACTIVE memberships past their expiration date.
  * 2. Sends 3-day expiry warning events for memberships expiring soon.
  */
+@Slf4j
 @Component
 public class MembershipExpirationJob {
-
-    private static final Logger log = LoggerFactory.getLogger(MembershipExpirationJob.class);
 
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -34,40 +35,37 @@ public class MembershipExpirationJob {
     }
 
     /**
-     * Runs daily at 01:00 UTC.
-     * Expires all ACTIVE/INACTIVE memberships whose expiration_date < today.
+     * Catches up on any missed expirations when the application starts.
+     * Spring @Scheduled does not execute missed cron triggers, so this ensures
+     * memberships that should have expired while the app was down are processed immediately.
      */
-    @Scheduled(cron = "0 0 1 * * *", zone = "UTC")
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void onStartup() {
+        log.info("Application started — running catch-up expiration check");
+        runExpiration();
+    }
+
+    /**
+     * Runs daily at 01:00 UTC.
+     * Expires all ACTIVE/INACTIVE memberships whose expiration_date < today (UTC).
+     */
+    @Scheduled(cron = "0 30 4 * * *", zone = "UTC")
     @Transactional
     public void expireExpired() {
-        LocalDate today = LocalDate.now();
-        List<Membership> expirable = membershipRepository.findExpirable(today);
-
-        log.info("Expiration job: found {} memberships to expire (today={})", expirable.size(), today);
-
-        for (Membership membership : expirable) {
-            try {
-                membership.expire();
-                membershipRepository.save(membership);
-                membership.getDomainEvents().forEach(eventPublisher::publishEvent);
-                membership.clearDomainEvents();
-            } catch (IllegalStateException ex) {
-                log.warn("Could not expire membership {}: {}", membership.getId().value(), ex.getMessage());
-            }
-        }
+        runExpiration();
     }
 
     /**
      * Runs daily at 01:05 UTC (after expireExpired).
      * Publishes MembershipExpiryWarning for ACTIVE memberships expiring in exactly 3 days.
      */
-    @Scheduled(cron = "0 5 1 * * *", zone = "UTC")
+    @Scheduled(cron = "0 30 14 * * *", zone = "UTC")
     public void sendExpiryWarnings() {
-        LocalDate warningFrom = LocalDate.now().plusDays(3);
-        LocalDate warningTo = warningFrom;
-        List<Membership> expiringSoon = membershipRepository.findExpiringBetween(warningFrom, warningTo);
+        LocalDate warningDate = LocalDate.now(ZoneOffset.UTC).plusDays(3);
+        List<Membership> expiringSoon = membershipRepository.findExpiringBetween(warningDate, warningDate);
 
-        log.info("Expiry warning job: found {} memberships expiring on {}", expiringSoon.size(), warningFrom);
+        log.info("Expiry warning job: found {} memberships expiring on {}", expiringSoon.size(), warningDate);
 
         for (Membership membership : expiringSoon) {
             MembershipExpiryWarning warning = new MembershipExpiryWarning(
@@ -79,6 +77,24 @@ public class MembershipExpirationJob {
                     Instant.now()
             );
             eventPublisher.publishEvent(warning);
+        }
+    }
+
+    private void runExpiration() {
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        List<Membership> expirable = membershipRepository.findExpirable(today);
+
+        log.info("Expiration check: found {} memberships to expire (today={})", expirable.size(), today);
+
+        for (Membership membership : expirable) {
+            try {
+                membership.expire();
+                membershipRepository.save(membership);
+                membership.getDomainEvents().forEach(eventPublisher::publishEvent);
+                membership.clearDomainEvents();
+            } catch (IllegalStateException ex) {
+                log.warn("Could not expire membership {}: {}", membership.getId().value(), ex.getMessage());
+            }
         }
     }
 }

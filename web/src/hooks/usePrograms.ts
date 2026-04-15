@@ -99,3 +99,34 @@ export function useProgramPlans(modality?: ProgramModality) {
 
   return { plans, loading, error, refetch: fetchPlans };
 }
+
+/** Fetches active plans scoped to a specific program — used by students to discover plans for their enrollment. */
+export function useProgramPlansByProgram(programId: string | null, modality?: ProgramModality) {
+  const [plans, setPlans] = useState<ProgramPlanSummary[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPlans = useCallback(async () => {
+    if (!programId) {
+      setPlans([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.get<ProgramPlanSummary[]>(`/programs/${programId}/plans`);
+      const activePlans = data.filter((p) => p.status === "ACTIVE");
+      setPlans(modality ? activePlans.filter((p) => p.modality === modality) : activePlans);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load plans.");
+    } finally {
+      setLoading(false);
+    }
+  }, [programId, modality]);
+
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
+
+  return { plans, loading, error, refetch: fetchPlans };
+}

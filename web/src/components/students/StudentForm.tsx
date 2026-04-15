@@ -7,9 +7,10 @@ import {
   StudentDetail,
   CreateStudentRequest,
   UpdateStudentRequest,
-  IDENTITY_DOCUMENT_TYPES,
   BLOOD_TYPES,
 } from "@/lib/types/student";
+import type { IdentityDocumentType } from "@/lib/types/identity";
+import DocumentFields from "@/components/common/DocumentFields";
 
 interface FieldErrors {
   [key: string]: string | undefined;
@@ -42,7 +43,9 @@ export default function StudentForm({ student }: StudentFormProps) {
   const [dateOfBirth, setDateOfBirth] = useState(student?.dateOfBirth ?? "");
   const [eps, setEps] = useState(student?.eps ?? "");
   const [identityNumber, setIdentityNumber] = useState(student?.identityNumber ?? "");
-  const [identityDocumentType, setIdentityDocumentType] = useState(student?.identityDocumentType ?? "CC");
+  const [identityDocumentType, setIdentityDocumentType] = useState<IdentityDocumentType>(
+    (student?.identityDocumentType as IdentityDocumentType) ?? "CC"
+  );
   const [bloodType, setBloodType] = useState(student?.bloodType ?? "");
   const [phone, setPhone] = useState(student?.phone ?? "");
   const [tutorFirstName, setTutorFirstName] = useState(student?.tutorFirstName ?? "");
@@ -230,31 +233,20 @@ export default function StudentForm({ student }: StudentFormProps) {
       {/* Identity & Health */}
       <fieldset>
         <legend className="text-base font-semibold text-gray-900 mb-4">Identity & Health</legend>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="identityDocumentType" className="block text-sm font-medium text-gray-700 mb-1">
-              Document Type <span className="text-red-500">*</span>
-            </label>
-            <select id="identityDocumentType" value={identityDocumentType}
-              onChange={(e) => setIdentityDocumentType(e.target.value)}
-              className={inputClass("identityDocumentType")}>
-              {IDENTITY_DOCUMENT_TYPES.map((dt) => (
-                <option key={dt.value} value={dt.value}>{dt.value} - {dt.label}</option>
-              ))}
-            </select>
-            {fieldErrors.identityDocumentType && <p className="mt-1 text-sm text-red-600">{fieldErrors.identityDocumentType}</p>}
-          </div>
+        <div className="space-y-4">
+          <DocumentFields
+            documentType={identityDocumentType}
+            documentNumber={identityNumber}
+            onDocumentTypeChange={setIdentityDocumentType}
+            onDocumentNumberChange={setIdentityNumber}
+            errors={{
+              documentType: fieldErrors.identityDocumentType,
+              documentNumber: fieldErrors.identityNumber,
+            }}
+            disabled={submitting}
+          />
 
-          <div>
-            <label htmlFor="identityNumber" className="block text-sm font-medium text-gray-700 mb-1">
-              Identity Number <span className="text-red-500">*</span>
-            </label>
-            <input id="identityNumber" type="text" value={identityNumber}
-              onChange={(e) => setIdentityNumber(e.target.value)}
-              className={inputClass("identityNumber")} placeholder="e.g. 1234567890" />
-            {fieldErrors.identityNumber && <p className="mt-1 text-sm text-red-600">{fieldErrors.identityNumber}</p>}
-          </div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="bloodType" className="block text-sm font-medium text-gray-700 mb-1">Blood Type</label>
             <select id="bloodType" value={bloodType} onChange={(e) => setBloodType(e.target.value)}
@@ -264,6 +256,7 @@ export default function StudentForm({ student }: StudentFormProps) {
                 <option key={bt} value={bt}>{bt}</option>
               ))}
             </select>
+          </div>
           </div>
         </div>
       </fieldset>

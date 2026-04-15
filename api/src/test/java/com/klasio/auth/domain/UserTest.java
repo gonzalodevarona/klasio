@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserTest {
 
     private User activeUser() {
-        return User.createActive(UUID.randomUUID(), "test@example.com", "hash", Role.ADMIN);
+        return User.createActive(UUID.randomUUID(), "test@example.com", "hash", Role.ADMIN, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
     }
 
     private User unverifiedUser() {
-        return User.createUnverified(UUID.randomUUID(), "test@example.com", "hash");
+        return User.createUnverified(UUID.randomUUID(), "test@example.com", "hash", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
     }
 
     @Test
@@ -74,7 +74,8 @@ class UserTest {
     void isLocked_returnsFalseWhenLockedUntilIsInPast() {
         User user = new User(UUID.randomUUID(), UUID.randomUUID(), "test@example.com", "hash",
                 Role.ADMIN, UserStatus.ACTIVE, 5, Instant.now().minusSeconds(1),
-                Instant.now(), Instant.now());
+                Instant.now(), Instant.now(),
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001");
         assertFalse(user.isLocked());
     }
 

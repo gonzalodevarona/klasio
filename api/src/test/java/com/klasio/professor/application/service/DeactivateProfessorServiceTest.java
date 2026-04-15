@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 @ExtendWith(MockitoExtension.class)
 class DeactivateProfessorServiceTest {
@@ -54,7 +55,8 @@ class DeactivateProfessorServiceTest {
                 ProfessorId.of(professorId), TENANT_ID,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
 
         when(professorRepository.findById(TENANT_ID, professorId)).thenReturn(Optional.of(professor));
@@ -92,7 +94,8 @@ class DeactivateProfessorServiceTest {
                 ProfessorId.of(professorId), TENANT_ID,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.DEACTIVATED, null, null,
-                Instant.now(), UUID.randomUUID(), null, null
+                Instant.now(), UUID.randomUUID(), null, null,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
 
         when(professorRepository.findById(TENANT_ID, professorId)).thenReturn(Optional.of(professor));

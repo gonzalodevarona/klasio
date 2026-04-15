@@ -170,7 +170,7 @@ Auth, multitenancy, programs/classes/professors, student management (with level 
 
 ## v1.1 Deferred (P1-P2)
 
-Cost modification history, manager delegation with 48h reminder, attendance alerts, manager/admin dashboards, payment history export.
+Cost modification history (RF-10), attendance session alerts and cancellations (RF-27, RF-28), manager and admin dashboards full analytics (RF-30, RF-31), payment history export (RF-22). Note: manager delegation with 48h reminder (RF-21) is ✅ complete.
 
 ## Speckit Workflow
 
@@ -198,7 +198,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | File storage | AWS S3 (payment proofs, tenant logos) | AWS SDK v2 |
 | Auth | JWT + refresh tokens | — |
 
-## Implemented Features (as of 2026-03-27)
+## Implemented Features (as of 2026-04-14)
 
 | Feature branch | RFs | Status |
 |---|---|---|
@@ -207,8 +207,26 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | `merged/003-professor-management` | RF-08 | 🔄 Partial (email invite pending RF-32) |
 | `merged/004-class-management` | RF-09 | ✅ |
 | `merged/005-student-level-assignment` | RF-07, RF-11, RF-12, RF-13 | RF-07 ✅, RF-11 ✅, RF-12 ✅, RF-13 ✅ |
-| `006-membership-lifecycle` | RF-14, RF-15, RF-16, RF-17, RF-18 | RF-14 ✅, RF-15 ✅, RF-16 ✅, RF-17 ✅, RF-18 ✅ |
-| `007-auth-rbac` | RF-01, RF-02, RF-03, RF-04 | RF-01 ✅, RF-02 ✅, RF-03 ✅, RF-04 ✅ |
+| `merged/007-auth-rbac` | RF-01, RF-02, RF-03, RF-04 | RF-01 ✅, RF-02 ✅, RF-03 ✅, RF-04 ✅ |
+| `006-membership-lifecycle` (active, not merged) | RF-14, RF-15, RF-16, RF-17, RF-18 | RF-14 ✅, RF-15 ✅, RF-16 ✅, RF-17 ✅, RF-18 ✅ |
+| `008-payment-proof-validation` (active, not merged) | RF-19, RF-20, RF-21 | RF-19 ✅, RF-20 ✅, RF-21 ✅ |
+
+### Remaining v1.0 work (P0 features not yet implemented)
+
+| RF | Feature | Blocker |
+|---|---|---|
+| RF-10 | Program – Cost Modification History | No `cost_history` table; cost edit works but history missing |
+| RF-22 | Payment – Payment History | Not started |
+| RF-23 | Attendance – Student Registration | Not started |
+| RF-24 | Attendance – Student Cancellation | Blocked on RF-23 |
+| RF-25 | Attendance – Marking by Professor | Blocked on RF-23 |
+| RF-26 | Attendance – Marking by Manager | Blocked on RF-25 |
+| RF-27 | Attendance – Class Alert | Blocked on RF-23, RF-32 |
+| RF-28 | Attendance – Class Cancellation | Blocked on RF-23, RF-32 |
+| RF-29 | Student Dashboard | 🔄 Partial — missing upcoming classes + attendance history (blocked on RF-23/RF-25) |
+| RF-30 | Manager Dashboard | 🔄 Partial — only delegated memberships panel (blocked on RF-23/RF-25) |
+| RF-31 | Admin Dashboard | Not started — blocked on RF-22, RF-23/RF-25 |
+| RF-32 | Transactional Email (Postmark) | 🔄 Partial — all listeners stubbed; no Postmark adapter yet |
 
 ## Membership Module Architecture (com.klasio.membership)
 
@@ -216,7 +234,7 @@ Added in `006-membership-lifecycle`. Key patterns:
 
 ### Domain Model
 - **Pure aggregate**: `Membership` aggregate root has zero Spring imports. All state transitions are pure Java methods that return void and emit domain events. `HourTransaction` is immutable (append-only) — every balance change (attendance deduction or manual adjustment) appends a new record.
-- **5-state lifecycle**: `PENDING_PAYMENT_VALIDATION → PENDING_MANAGER_ACTIVATION → ACTIVE → INACTIVE / EXPIRED`. Transitions: validatePayment (direct or delegate), activate (manager), deductHours/adjustHours (→ INACTIVE at 0), expire (scheduler).
+- **6-state lifecycle**: `PENDING_PAYMENT → PENDING_PAYMENT_VALIDATION → PENDING_MANAGER_ACTIVATION → ACTIVE → INACTIVE / EXPIRED`. `PENDING_PAYMENT` = membership created but proof not yet uploaded (V040). Transitions: uploadProof (→ PENDING_PAYMENT_VALIDATION), validatePayment (direct or delegate), activate (manager), deductHours/adjustHours (→ INACTIVE at 0), expire (scheduler).
 - **8 domain events**: `MembershipCreated`, `MembershipPaymentValidated`, `MembershipActivated`, `MembershipPendingManagerActivation`, `MembershipDepleted`, `MembershipExpired`, `MembershipExpiryWarning`, `HourAdjusted`.
 - **Hour transaction types**: `ATTENDANCE_DEDUCTION` (from attendance feature), `MANUAL_ADDITION`, `MANUAL_SUBTRACTION` (admin-only).
 
@@ -250,6 +268,7 @@ Added in `006-membership-lifecycle`. Key patterns:
 - **CSV export**: native `fetch` with `Accept: text/csv` header + `URL.createObjectURL` (no third-party library).
 
 ## Recent Changes
+- 008-payment-proof-validation: Payment proof upload/validation/delegation (RF-19–RF-21): `PaymentProof` aggregate (pure Java) with `upload()`/`approve()`/`reject()`/`supersede()` transitions and 3 domain events. `UploadPaymentProofService`, `ApproveProofService`, `RejectProofService`, `ListPendingProofsService`, `GetPaymentProofService`, `GetProofDownloadUrlService`, `ListDelegatedMembershipsService`. `S3PaymentProofStorage` (presigned URLs). `DelegationReminderJob` (hourly cron, 48 h cutoff, idempotent via `reminder_sent` flag). `PaymentProofController` (8 endpoints). V037 (payment_proofs + RLS), V038 (delegation_reminders), V039 (PAYMENT_PROOF audit types). Frontend: `ProofQueue`, `ProofReviewModal`, `ProofStatusBadge`, `PaymentProofPanel`, `DelegatedMembershipList`, `/payment-proofs` admin page, student memberships page with upload panel. Notification stubs in `PaymentProofNotificationListener` (Postmark pending RF-32).
 - 007-auth-rbac: Full auth & RBAC (RF-01–RF-04): `com.klasio.auth` hexagonal module with User aggregate, 9 domain events, 9 use case services (Login, Logout, RefreshToken, RegisterStudent, VerifyEmail, ResendVerification, RequestPasswordReset, ResetPassword, AssignRole). JWT access tokens (8h) + DB-backed refresh tokens (7d, rotated). HttpOnly cookies via Next.js API proxy routes. Cookie-first token extraction with Authorization header fallback. Account lockout (5 failed → 15 min). Email verification (24h) and password reset (30 min) one-time tokens. BCrypt factor 12. Edge Runtime middleware with `jose` for RBAC routing. V028–V034 Flyway migrations. AuthAuditEventListener (11 action types). Frontend: LoginForm, RegistrationForm (age-based tutor fields), PasswordPolicyChecker (real-time), ForgotPasswordForm, ResetPasswordForm, verify-email page. Cross-module ports: StudentProfilePort, TenantResolverPort. MailHog for local email testing.
-- 006-membership-lifecycle: Full membership lifecycle (RF-14–RF-18): pure-Java Membership aggregate + HourTransaction append-only ledger, 8 domain events, 10 use case services, MembershipController (9 endpoints), MembershipExpirationJob (daily cron), MembershipNotificationListener (fire-and-forget stubs), frontend pages + 7 components + 2 hooks, V024–V027 Flyway migrations, audit log integration (8 new action types), cross-module ports (StudentName, ProgramName, ProgramPlan). Deferred: payment proof upload/queue (RF-19–RF-22), real email delivery (RF-32).
+- 006-membership-lifecycle: Full membership lifecycle (RF-14–RF-18): pure-Java Membership aggregate + HourTransaction append-only ledger, 8 domain events, 10 use case services, MembershipController (9 endpoints), MembershipExpirationJob (daily cron), MembershipNotificationListener (fire-and-forget stubs), frontend pages + 7 components + 2 hooks, V024–V027 Flyway migrations, audit log integration (8 new action types), cross-module ports (StudentName, ProgramName, ProgramPlan).
 - 005-student-level-assignment: Full student CRUD, program enrollment with level assignment, level promotion, unenroll, level history tracking, enrollment status filter, audit log events (STUDENT_CREATED/UPDATED/DEACTIVATED/REACTIVATED/ENROLLED/UNENROLLED/PROMOTED), Flyway migrations V016–V023

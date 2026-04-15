@@ -1,3 +1,5 @@
+import type { IdentityDocumentType } from "./identity";
+
 export type ProfessorStatus = "INVITED" | "ACTIVE" | "DEACTIVATED";
 
 export interface ProfessorSummary {
@@ -7,6 +9,8 @@ export interface ProfessorSummary {
   email: string;
   phoneNumber: string | null;
   status: ProfessorStatus;
+  identityDocumentType: IdentityDocumentType;
+  identityNumber: string;
   createdAt: string;
 }
 
@@ -30,6 +34,8 @@ export interface CreateProfessorRequest {
   lastName: string;
   email: string;
   phoneNumber?: string;
+  identityDocumentType: IdentityDocumentType;
+  identityNumber: string;
 }
 
 export interface UpdateProfessorRequest {
@@ -37,4 +43,6 @@ export interface UpdateProfessorRequest {
   lastName: string;
   email: string;
   phoneNumber?: string;
+  identityDocumentType: IdentityDocumentType;
+  identityNumber: string;
 }

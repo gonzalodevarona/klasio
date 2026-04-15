@@ -71,6 +71,8 @@ public class ProfessorController {
                 request.lastName(),
                 request.email(),
                 request.phoneNumber(),
+                request.identityDocumentType(),
+                request.identityNumber(),
                 userId
         );
 
@@ -117,7 +119,8 @@ public class ProfessorController {
         UUID tenantId = extractTenantId();
 
         UpdateProfessorCommand command = new UpdateProfessorCommand(
-                tenantId, professorId, request.firstName(), request.lastName(), request.email(), request.phoneNumber(), userId);
+                tenantId, professorId, request.firstName(), request.lastName(), request.email(),
+                request.phoneNumber(), request.identityDocumentType(), request.identityNumber(), userId);
 
         Professor professor = updateProfessorUseCase.execute(command);
 

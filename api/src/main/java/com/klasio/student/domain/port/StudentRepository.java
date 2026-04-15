@@ -12,6 +12,8 @@ public interface StudentRepository {
 
     Optional<Student> findById(UUID tenantId, UUID studentId);
 
+    Optional<Student> findByUserId(UUID tenantId, UUID userId);
+
     boolean existsByEmailInTenant(UUID tenantId, String email);
 
     boolean existsByEmailInTenantExcluding(UUID tenantId, String email, UUID excludeId);

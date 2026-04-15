@@ -3,6 +3,7 @@ package com.klasio.professor.infrastructure.web;
 import com.klasio.professor.application.dto.ProfessorDetail;
 import com.klasio.professor.application.dto.ProfessorSummary;
 import com.klasio.professor.domain.model.Professor;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -20,6 +21,8 @@ public final class ProfessorResponseDto {
             String email,
             String phoneNumber,
             String status,
+            IdentityDocumentType identityDocumentType,
+            String identityNumber,
             Instant createdAt,
             UUID createdBy,
             Instant updatedAt,
@@ -35,6 +38,8 @@ public final class ProfessorResponseDto {
                     professor.getEmail(),
                     professor.getPhoneNumber(),
                     professor.getStatus().name(),
+                    professor.getIdentityDocumentType(),
+                    professor.getIdentityNumber(),
                     professor.getCreatedAt(),
                     professor.getCreatedBy(),
                     professor.getUpdatedAt(),
@@ -51,6 +56,8 @@ public final class ProfessorResponseDto {
                     detail.email(),
                     detail.phoneNumber(),
                     detail.status(),
+                    detail.identityDocumentType(),
+                    detail.identityNumber(),
                     detail.createdAt(),
                     detail.createdBy(),
                     detail.updatedAt(),
@@ -66,6 +73,8 @@ public final class ProfessorResponseDto {
             String email,
             String phoneNumber,
             String status,
+            IdentityDocumentType identityDocumentType,
+            String identityNumber,
             Instant createdAt
     ) {
 
@@ -77,6 +86,8 @@ public final class ProfessorResponseDto {
                     summary.email(),
                     summary.phoneNumber(),
                     summary.status(),
+                    summary.identityDocumentType(),
+                    summary.identityNumber(),
                     summary.createdAt()
             );
         }

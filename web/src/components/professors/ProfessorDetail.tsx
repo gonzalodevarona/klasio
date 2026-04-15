@@ -120,6 +120,16 @@ export default function ProfessorDetail({
             </div>
 
             <div>
+              <dt className="text-sm font-medium text-gray-500">Document Type</dt>
+              <dd className="mt-1 text-sm text-gray-900">{professor.identityDocumentType}</dd>
+            </div>
+
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Document Number</dt>
+              <dd className="mt-1 text-sm text-gray-900">{professor.identityNumber}</dd>
+            </div>
+
+            <div>
               <dt className="text-sm font-medium text-gray-500">Status</dt>
               <dd className="mt-1">
                 <ProfessorStatusBadge status={professor.status} />

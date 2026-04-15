@@ -9,19 +9,17 @@ import com.klasio.tenant.domain.model.Tenant;
 import com.klasio.tenant.domain.model.TenantSlug;
 import com.klasio.tenant.domain.port.LogoStorage;
 import com.klasio.tenant.domain.port.TenantRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 public class CreateTenantService implements CreateTenantUseCase {
-
-    private static final Logger log = LoggerFactory.getLogger(CreateTenantService.class);
 
     private final TenantRepository tenantRepository;
     private final LogoStorage logoStorage;

@@ -80,7 +80,7 @@ public class ProgramPlanController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'STUDENT')")
     public ResponseEntity<List<ProgramPlanResponseDto.ProgramPlanSummaryResponse>> listPlans(
             @PathVariable UUID programId) {
 
@@ -95,7 +95,7 @@ public class ProgramPlanController {
     }
 
     @GetMapping("/{planId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'STUDENT')")
     public ResponseEntity<ProgramPlanResponseDto.ProgramPlanDetailResponse> getPlanDetail(
             @PathVariable UUID programId,
             @PathVariable UUID planId) {

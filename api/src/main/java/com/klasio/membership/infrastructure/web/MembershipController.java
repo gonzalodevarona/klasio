@@ -6,18 +6,25 @@ import com.klasio.membership.application.dto.CreateMembershipCommand;
 import com.klasio.membership.application.dto.MembershipHistoryEntryDto;
 import com.klasio.membership.application.dto.ValidatePaymentCommand;
 import com.klasio.membership.application.dto.HourTransactionSummaryDto;
+import com.klasio.membership.application.dto.CreateSelfMembershipCommand;
 import com.klasio.membership.application.port.input.ActivateMembershipUseCase;
 import com.klasio.membership.application.port.input.AdjustHoursUseCase;
+import com.klasio.membership.application.dto.RenewMembershipCommand;
 import com.klasio.membership.application.port.input.CreateMembershipUseCase;
+import com.klasio.membership.application.port.input.CreateSelfMembershipUseCase;
 import com.klasio.membership.application.port.input.GetActiveMembershipUseCase;
 import com.klasio.membership.application.port.input.GetHourTransactionsUseCase;
 import com.klasio.membership.application.port.input.GetMembershipHistoryUseCase;
 import com.klasio.membership.application.port.input.GetMembershipUseCase;
 import com.klasio.membership.application.port.input.ListMembershipsUseCase;
+import com.klasio.membership.application.port.input.RenewMembershipUseCase;
+import com.klasio.membership.application.port.input.UploadPaymentProofCommand;
+import com.klasio.membership.application.port.input.UploadPaymentProofUseCase;
 import com.klasio.membership.application.port.input.ValidatePaymentUseCase;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.ProgramNamePort;
+import com.klasio.membership.domain.port.StudentIdPort;
 import com.klasio.membership.domain.port.StudentNamePort;
 import com.klasio.shared.infrastructure.persistence.TenantContextInterceptor;
 import jakarta.validation.Valid;
@@ -26,12 +33,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,6 +53,8 @@ import java.util.UUID;
 public class MembershipController {
 
     private final CreateMembershipUseCase createMembershipUseCase;
+    private final CreateSelfMembershipUseCase createSelfMembershipUseCase;
+    private final RenewMembershipUseCase renewMembershipUseCase;
     private final ValidatePaymentUseCase validatePaymentUseCase;
     private final ActivateMembershipUseCase activateMembershipUseCase;
     private final AdjustHoursUseCase adjustHoursUseCase;
@@ -49,10 +63,14 @@ public class MembershipController {
     private final GetActiveMembershipUseCase getActiveMembershipUseCase;
     private final GetMembershipHistoryUseCase getMembershipHistoryUseCase;
     private final GetHourTransactionsUseCase getHourTransactionsUseCase;
+    private final UploadPaymentProofUseCase uploadProofUseCase;
     private final StudentNamePort studentNamePort;
     private final ProgramNamePort programNamePort;
+    private final StudentIdPort studentIdPort;
 
     public MembershipController(CreateMembershipUseCase createMembershipUseCase,
+                                 CreateSelfMembershipUseCase createSelfMembershipUseCase,
+                                 RenewMembershipUseCase renewMembershipUseCase,
                                  ValidatePaymentUseCase validatePaymentUseCase,
                                  ActivateMembershipUseCase activateMembershipUseCase,
                                  AdjustHoursUseCase adjustHoursUseCase,
@@ -61,9 +79,13 @@ public class MembershipController {
                                  GetActiveMembershipUseCase getActiveMembershipUseCase,
                                  GetMembershipHistoryUseCase getMembershipHistoryUseCase,
                                  GetHourTransactionsUseCase getHourTransactionsUseCase,
+                                 UploadPaymentProofUseCase uploadProofUseCase,
                                  StudentNamePort studentNamePort,
-                                 ProgramNamePort programNamePort) {
+                                 ProgramNamePort programNamePort,
+                                 StudentIdPort studentIdPort) {
         this.createMembershipUseCase = createMembershipUseCase;
+        this.createSelfMembershipUseCase = createSelfMembershipUseCase;
+        this.renewMembershipUseCase = renewMembershipUseCase;
         this.validatePaymentUseCase = validatePaymentUseCase;
         this.activateMembershipUseCase = activateMembershipUseCase;
         this.adjustHoursUseCase = adjustHoursUseCase;
@@ -72,8 +94,10 @@ public class MembershipController {
         this.getActiveMembershipUseCase = getActiveMembershipUseCase;
         this.getMembershipHistoryUseCase = getMembershipHistoryUseCase;
         this.getHourTransactionsUseCase = getHourTransactionsUseCase;
+        this.uploadProofUseCase = uploadProofUseCase;
         this.studentNamePort = studentNamePort;
         this.programNamePort = programNamePort;
+        this.studentIdPort = studentIdPort;
     }
 
     // GET /api/v1/memberships?studentId=&programId=&status=&page=0&size=20
@@ -93,6 +117,88 @@ public class MembershipController {
                 tenantId, studentId, programId, statusEnum, page, size);
 
         return ResponseEntity.ok(result.map(MembershipResponseDto::toSummary));
+    }
+
+    // GET /api/v1/me/memberships  (STUDENT — returns their own memberships)
+    @GetMapping("/me/memberships")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<MembershipResponseDto.MembershipSummaryResponse>> getMyMemberships() {
+        UUID userId = extractUserId();
+        UUID tenantId = extractTenantId();
+
+        UUID studentId = studentIdPort.findStudentIdByUserId(tenantId, userId)
+                .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
+
+        Page<Membership> result = listMembershipsUseCase.execute(
+                tenantId, studentId, null, null, 0, 50);
+
+        return ResponseEntity.ok(result.map(MembershipResponseDto::toSummary).getContent());
+    }
+
+    // POST /api/v1/me/memberships  (STUDENT — self-service: payment proof required)
+    @PostMapping(value = "/me/memberships", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('STUDENT')")
+    @Transactional
+    public ResponseEntity<MembershipResponseDto.MembershipDetailResponse> createSelfMembership(
+            @RequestParam("planId") UUID planId,
+            @RequestParam(value = "startDate", required = false) LocalDate startDate,
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        UUID userId = extractUserId();
+        UUID tenantId = extractTenantId();
+        UUID studentId = studentIdPort.findStudentIdByUserId(tenantId, userId)
+                .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
+
+        LocalDate effectiveStartDate = startDate != null ? startDate : LocalDate.now();
+
+        CreateSelfMembershipCommand command = new CreateSelfMembershipCommand(
+                tenantId, studentId, planId, effectiveStartDate, userId);
+
+        Membership membership = createSelfMembershipUseCase.execute(command);
+
+        UploadPaymentProofCommand proofCommand = new UploadPaymentProofCommand(
+                tenantId, membership.getId().value(), studentId,
+                file.getInputStream(), file.getOriginalFilename(),
+                file.getContentType(), file.getSize(), userId);
+        uploadProofUseCase.execute(proofCommand);
+
+        // Reload — uploadProofUseCase transitioned membership to PENDING_PAYMENT_VALIDATION
+        Membership updated = getMembershipUseCase.execute(tenantId, membership.getId().value());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toDetailWithNames(updated, tenantId));
+    }
+
+    // POST /api/v1/me/memberships/{id}/renew  (STUDENT — reactivates same membership)
+    @PostMapping(value = "/me/memberships/{id}/renew", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('STUDENT')")
+    @Transactional
+    public ResponseEntity<MembershipResponseDto.MembershipDetailResponse> renewMembership(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file) throws IOException {
+
+        UUID userId = extractUserId();
+        UUID tenantId = extractTenantId();
+        UUID studentId = studentIdPort.findStudentIdByUserId(tenantId, userId)
+                .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
+
+        // Verify ownership before renewing
+        Membership source = getMembershipUseCase.execute(tenantId, id);
+        assertStudentOwnershipIfStudent(tenantId, source.getStudentId());
+
+        // Renew the same membership (domain validates EXPIRED/INACTIVE status)
+        RenewMembershipCommand command = new RenewMembershipCommand(tenantId, id, userId);
+        Membership renewed = renewMembershipUseCase.execute(command);
+
+        // Upload proof against the same membership ID
+        UploadPaymentProofCommand proofCommand = new UploadPaymentProofCommand(
+                tenantId, renewed.getId().value(), studentId,
+                file.getInputStream(), file.getOriginalFilename(),
+                file.getContentType(), file.getSize(), userId);
+        uploadProofUseCase.execute(proofCommand);
+
+        // Reload — uploadProofUseCase transitioned membership to PENDING_PAYMENT_VALIDATION
+        Membership updated = getMembershipUseCase.execute(tenantId, renewed.getId().value());
+        return ResponseEntity.ok(toDetailWithNames(updated, tenantId));
     }
 
     // POST /api/v1/memberships
@@ -121,12 +227,13 @@ public class MembershipController {
 
     // GET /api/v1/memberships/{id}
     @GetMapping("/memberships/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'STUDENT')")
     public ResponseEntity<MembershipResponseDto.MembershipDetailResponse> getMembership(
             @PathVariable UUID id) {
 
         UUID tenantId = extractTenantId();
         Membership membership = getMembershipUseCase.execute(tenantId, id);
+        assertStudentOwnershipIfStudent(tenantId, membership.getStudentId());
         return ResponseEntity.ok(toDetailWithNames(membership, tenantId));
     }
 
@@ -197,13 +304,15 @@ public class MembershipController {
 
     // GET /api/v1/memberships/{id}/transactions?page=0&size=20
     @GetMapping("/memberships/{id}/transactions")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'PROFESSOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'PROFESSOR', 'STUDENT')")
     public ResponseEntity<org.springframework.data.domain.Page<HourTransactionSummaryDto>> getTransactions(
             @PathVariable UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         UUID tenantId = extractTenantId();
+        Membership membership = getMembershipUseCase.execute(tenantId, id);
+        assertStudentOwnershipIfStudent(tenantId, membership.getStudentId());
         return ResponseEntity.ok(getHourTransactionsUseCase.execute(tenantId, id, page, size));
     }
 
@@ -232,6 +341,23 @@ public class MembershipController {
     }
 
     // ---- Helpers ----
+
+    /**
+     * If the caller is a STUDENT, verifies the resolved studentId matches the membership's studentId.
+     * Non-STUDENT roles skip this check entirely.
+     */
+    private void assertStudentOwnershipIfStudent(UUID tenantId, UUID membershipStudentId) {
+        String role = extractRole();
+        if (!"STUDENT".equals(role)) {
+            return;
+        }
+        UUID userId = extractUserId();
+        UUID studentId = studentIdPort.findStudentIdByUserId(tenantId, userId)
+                .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
+        if (!studentId.equals(membershipStudentId)) {
+            throw new AccessDeniedException("Students may only access their own memberships");
+        }
+    }
 
     private MembershipResponseDto.MembershipDetailResponse toDetailWithNames(
             Membership membership, UUID tenantId) {

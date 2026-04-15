@@ -49,7 +49,8 @@ class VerifyEmailServiceTest {
         EmailVerificationToken token = EmailVerificationToken.create(
                 userId, hashedToken, Instant.now().plusSeconds(86400));
 
-        User user = User.createUnverified(UUID.randomUUID(), "student@example.com", "hashed-pwd");
+        User user = User.createUnverified(UUID.randomUUID(), "student@example.com", "hashed-pwd",
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(tokenGenerator.hashToken(rawToken)).thenReturn(hashedToken);
         when(evtRepository.findByTokenHash(hashedToken)).thenReturn(Optional.of(token));

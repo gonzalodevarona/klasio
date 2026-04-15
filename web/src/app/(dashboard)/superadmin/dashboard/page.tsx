@@ -21,7 +21,7 @@ export default function SuperadminDashboard() {
       </div>
       <div className="bg-white rounded-lg shadow p-6">
         <p className="text-gray-600">
-          Welcome, {user?.email ?? "Superadmin"}. Manage tenants from the sidebar.
+          Welcome, Superadmin. Manage tenants from the sidebar.
         </p>
       </div>
     </div>

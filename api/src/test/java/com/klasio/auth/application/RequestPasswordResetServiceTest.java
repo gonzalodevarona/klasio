@@ -42,7 +42,7 @@ class RequestPasswordResetServiceTest {
     void registeredEmail_generatesTokenAndSendsEmail() {
         UUID tenantId = UUID.randomUUID();
         String email = "user@example.com";
-        User user = User.createActive(tenantId, email, "hashed-pwd", Role.STUDENT);
+        User user = User.createActive(tenantId, email, "hashed-pwd", Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(tokenGenerator.generateRawToken()).thenReturn("raw-reset-token");

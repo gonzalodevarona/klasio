@@ -5,9 +5,9 @@ import com.klasio.auth.domain.model.Role;
 import com.klasio.auth.domain.model.User;
 import com.klasio.auth.infrastructure.persistence.SpringDataUserRepository;
 import com.klasio.auth.infrastructure.persistence.UserJpaEntity;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import jakarta.persistence.EntityManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,11 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Slf4j
 @Configuration
 @Profile("local")
 public class DataInitializer {
-
-    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     @Bean
     CommandLineRunner seedUsers(DataSeeder seeder) {
@@ -61,7 +60,8 @@ public class DataInitializer {
 
             // Seed the superadmin first — no tenant needed.
             String adminPassword = passwordEncoder.encode("Admin123!");
-            seedUser(null, "superadmin@klasio.local", adminPassword, Role.SUPERADMIN);
+            seedUser(null, "superadmin@klasio.local", adminPassword, Role.SUPERADMIN,
+                    IdentityDocumentType.CC, "10000001");
 
             // Find the first available tenant for the remaining seed users.
             UUID tenantId = jdbcTemplate.query(
@@ -83,16 +83,17 @@ public class DataInitializer {
 
             String studentPassword = passwordEncoder.encode("Student123!");
 
-            seedUser(tenantId, "admin@klasio.local", adminPassword, Role.ADMIN);
-            seedUser(tenantId, "manager@klasio.local", adminPassword, Role.MANAGER);
-            seedUser(tenantId, "prof@klasio.local", adminPassword, Role.PROFESSOR);
-            seedUser(tenantId, "student@klasio.local", studentPassword, Role.STUDENT);
+            seedUser(tenantId, "admin@klasio.local",   adminPassword,   Role.ADMIN,      IdentityDocumentType.CC, "10000002");
+            seedUser(tenantId, "manager@klasio.local", adminPassword,   Role.MANAGER,    IdentityDocumentType.CC, "10000003");
+            seedUser(tenantId, "prof@klasio.local",    adminPassword,   Role.PROFESSOR,  IdentityDocumentType.CC, "10000004");
+            seedUser(tenantId, "student@klasio.local", studentPassword, Role.STUDENT,    IdentityDocumentType.CC, "10000005");
 
             log.info("Seeded 5 users for local development (tenantId={})", tenantId);
         }
 
-        private void seedUser(UUID tenantId, String email, String passwordHash, Role role) {
-            User user = User.createActive(tenantId, email, passwordHash, role);
+        private void seedUser(UUID tenantId, String email, String passwordHash, Role role,
+                              IdentityDocumentType identityDocumentType, String identityNumber) {
+            User user = User.createActive(tenantId, email, passwordHash, role, identityDocumentType, identityNumber);
             userRepository.save(UserJpaEntity.fromDomain(user));
         }
     }

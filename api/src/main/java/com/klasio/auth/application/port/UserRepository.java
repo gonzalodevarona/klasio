@@ -16,4 +16,6 @@ public interface UserRepository {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmailAndTenantId(String email, UUID tenantId);
+
+    boolean existsByIdentityNumberAndTenantId(UUID tenantId, String identityNumber);
 }

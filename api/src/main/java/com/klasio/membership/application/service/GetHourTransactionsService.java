@@ -21,7 +21,7 @@ public class GetHourTransactionsService implements GetHourTransactionsUseCase {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'PROFESSOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'PROFESSOR', 'STUDENT')")
     public Page<HourTransactionSummaryDto> execute(UUID tenantId, UUID membershipId, int page, int size) {
         return hourTransactionRepository
                 .findByMembershipId(tenantId, membershipId, page, size)

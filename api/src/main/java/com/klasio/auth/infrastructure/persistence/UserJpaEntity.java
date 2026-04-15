@@ -3,6 +3,7 @@ package com.klasio.auth.infrastructure.persistence;
 import com.klasio.auth.domain.model.Role;
 import com.klasio.auth.domain.model.User;
 import com.klasio.auth.domain.model.UserStatus;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -44,6 +45,13 @@ public class UserJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "identity_document_type", nullable = false, length = 5)
+    @Enumerated(EnumType.STRING)
+    private IdentityDocumentType identityDocumentType;
+
+    @Column(name = "identity_number", nullable = false, length = 30)
+    private String identityNumber;
+
     protected UserJpaEntity() {}
 
     public static UserJpaEntity fromDomain(User user) {
@@ -58,12 +66,15 @@ public class UserJpaEntity {
         entity.lockedUntil = user.getLockedUntil();
         entity.createdAt = user.getCreatedAt();
         entity.updatedAt = user.getUpdatedAt();
+        entity.identityDocumentType = user.getIdentityDocumentType();
+        entity.identityNumber = user.getIdentityNumber();
         return entity;
     }
 
     public User toDomain() {
         return new User(id, tenantId, email, passwordHash, role, status,
-                failedLoginCount, lockedUntil, createdAt, updatedAt);
+                failedLoginCount, lockedUntil, createdAt, updatedAt,
+                identityDocumentType, identityNumber);
     }
 
     // Getters for JPA queries
@@ -72,4 +83,6 @@ public class UserJpaEntity {
     public String getEmail() { return email; }
     public Role getRole() { return role; }
     public UserStatus getStatus() { return status; }
+    public IdentityDocumentType getIdentityDocumentType() { return identityDocumentType; }
+    public String getIdentityNumber() { return identityNumber; }
 }

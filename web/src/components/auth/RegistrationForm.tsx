@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from "react";
 import PasswordPolicyChecker from "./PasswordPolicyChecker";
+import DocumentFields from "@/components/common/DocumentFields";
+import type { IdentityDocumentType } from "@/lib/types/identity";
 import type { AuthError } from "@/lib/types/auth";
 
 interface RegistrationFormProps {
@@ -13,8 +15,8 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
     firstName: "",
     lastName: "",
     dateOfBirth: "",
-    documentType: "CC",
-    documentNumber: "",
+    identityDocumentType: "CC" as IdentityDocumentType,
+    identityNumber: "",
     eps: "",
     email: "",
     password: "",
@@ -58,8 +60,8 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
         firstName: formData.firstName,
         lastName: formData.lastName,
         dateOfBirth: formData.dateOfBirth,
-        documentType: formData.documentType,
-        documentNumber: formData.documentNumber,
+        identityDocumentType: formData.identityDocumentType,
+        identityNumber: formData.identityNumber,
         eps: formData.eps,
         email: formData.email,
         password: formData.password,
@@ -202,41 +204,18 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="documentType" className="block text-sm font-medium text-gray-700">
-            Document Type *
-          </label>
-          <select
-            id="documentType"
-            name="documentType"
-            value={formData.documentType}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          >
-            <option value="CC">CC - Cedula de Ciudadania</option>
-            <option value="TI">TI - Tarjeta de Identidad</option>
-            <option value="CE">CE - Cedula de Extranjeria</option>
-            <option value="PA">PA - Pasaporte</option>
-            <option value="RC">RC - Registro Civil</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="documentNumber" className="block text-sm font-medium text-gray-700">
-            Document Number *
-          </label>
-          <input
-            id="documentNumber"
-            name="documentNumber"
-            type="text"
-            value={formData.documentNumber}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-        </div>
-      </div>
+      <DocumentFields
+        documentType={formData.identityDocumentType}
+        documentNumber={formData.identityNumber}
+        onDocumentTypeChange={(val) =>
+          setFormData((prev) => ({ ...prev, identityDocumentType: val }))
+        }
+        onDocumentNumberChange={(val) =>
+          setFormData((prev) => ({ ...prev, identityNumber: val }))
+        }
+        labelClassName="block text-sm font-medium text-gray-700"
+        inputClassName="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      />
 
       <div>
         <label htmlFor="eps" className="block text-sm font-medium text-gray-700">

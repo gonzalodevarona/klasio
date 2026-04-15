@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import {
   AdjustHoursRequest,
   CreateMembershipRequest,
+  CreateSelfMembershipRequest,
   MembershipDetail,
   MembershipHistoryEntry,
   MembershipListResponse,
@@ -56,6 +57,29 @@ export function useMemberships(
   }, [fetchMemberships]);
 
   return { memberships, totalPages, totalElements, loading, error, refetch: fetchMemberships };
+}
+
+export function useMyMemberships() {
+  const [memberships, setMemberships] = useState<MembershipSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.get<MembershipSummary[]>("/me/memberships");
+      setMemberships(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load your memberships.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  return { memberships, loading, error, refetch: fetch };
 }
 
 export function useMembershipDetail(membershipId: string) {
@@ -158,7 +182,43 @@ export function useMembershipActions() {
     []
   );
 
-  return { createMembership, validatePayment, activateMembership, adjustHours, loading, error };
+  const createSelfMembership = useCallback(async (request: CreateSelfMembershipRequest, file: File) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("planId", request.planId);
+      formData.append("file", file);
+      return await api.post<MembershipDetail>("/me/memberships", formData);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create membership.";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const renewMembership = useCallback(async (membershipId: string, file: File) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      return await api.post<MembershipDetail>(
+        `/me/memberships/${membershipId}/renew`,
+        formData
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to renew membership.";
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return { createMembership, validatePayment, activateMembership, adjustHours, createSelfMembership, renewMembership, loading, error };
 }
 
 export function useMembershipHistory(studentId: string, programId: string) {

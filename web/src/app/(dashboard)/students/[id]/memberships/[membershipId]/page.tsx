@@ -3,8 +3,10 @@
 import { use } from "react";
 import Link from "next/link";
 import { useMembershipDetail } from "@/hooks/useMemberships";
+import { useStudentDetail } from "@/hooks/useStudents";
 import { useAuth } from "@/hooks/useAuth";
 import MembershipDetail from "@/components/memberships/MembershipDetail";
+import { PaymentProofTimeline } from "@/components/payment-proofs/PaymentProofTimeline";
 
 interface Props {
   params: Promise<{ id: string; membershipId: string }>;
@@ -13,6 +15,8 @@ interface Props {
 export default function MembershipDetailPage({ params }: Props) {
   const { id: studentId, membershipId } = use(params);
   const { membership, loading, error, refetch } = useMembershipDetail(membershipId);
+  const { student } = useStudentDetail(studentId);
+  const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
   const { user } = useAuth();
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
@@ -25,7 +29,7 @@ export default function MembershipDetailPage({ params }: Props) {
         </Link>
         <span className="mx-2">/</span>
         <Link href={`/students/${studentId}`} className="hover:text-gray-700 hover:underline">
-          Student
+          {studentName}
         </Link>
         <span className="mx-2">/</span>
         <Link
@@ -49,11 +53,14 @@ export default function MembershipDetailPage({ params }: Props) {
       )}
 
       {membership && (
-        <MembershipDetail
-          membership={membership}
-          onRefresh={refetch}
-          isAdmin={isAdmin}
-        />
+        <div className="space-y-6">
+          <MembershipDetail
+            membership={membership}
+            onRefresh={refetch}
+            isAdmin={isAdmin}
+          />
+          <PaymentProofTimeline membershipId={membershipId} membershipStatus={membership.status} />
+        </div>
       )}
     </div>
   );

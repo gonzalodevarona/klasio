@@ -2,6 +2,7 @@ package com.klasio.auth.infrastructure.web;
 
 import com.klasio.auth.application.dto.LoginCommand;
 import com.klasio.auth.application.dto.LoginResult;
+import com.klasio.auth.application.port.UserRepository;
 import com.klasio.auth.application.service.LoginService;
 import com.klasio.auth.application.service.LogoutService;
 import com.klasio.auth.application.service.RefreshTokenService;
@@ -9,6 +10,7 @@ import com.klasio.auth.application.service.RequestPasswordResetService;
 import com.klasio.auth.application.service.ResendVerificationEmailService;
 import com.klasio.auth.application.service.ResetPasswordService;
 import com.klasio.auth.application.service.VerifyEmailService;
+import com.klasio.auth.domain.model.User;
 import com.klasio.shared.infrastructure.config.JwtProperties;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +38,7 @@ public class AuthController {
     private final RequestPasswordResetService requestPasswordResetService;
     private final ResetPasswordService resetPasswordService;
     private final JwtProperties jwtProperties;
+    private final UserRepository userRepository;
 
     public AuthController(LoginService loginService,
                           LogoutService logoutService,
@@ -43,7 +47,8 @@ public class AuthController {
                           ResendVerificationEmailService resendVerificationEmailService,
                           RequestPasswordResetService requestPasswordResetService,
                           ResetPasswordService resetPasswordService,
-                          JwtProperties jwtProperties) {
+                          JwtProperties jwtProperties,
+                          UserRepository userRepository) {
         this.loginService = loginService;
         this.logoutService = logoutService;
         this.refreshTokenService = refreshTokenService;
@@ -52,12 +57,26 @@ public class AuthController {
         this.requestPasswordResetService = requestPasswordResetService;
         this.resetPasswordService = resetPasswordService;
         this.jwtProperties = jwtProperties;
+        this.userRepository = userRepository;
     }
 
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {}
     public record ResendVerificationRequest(@NotBlank @Email String email, @NotBlank String tenantSlug) {}
     public record ForgotPasswordRequest(@NotBlank @Email String email) {}
     public record ResetPasswordRequest(@NotBlank String token, @NotBlank String newPassword) {}
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> getMe(Authentication authentication) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> details = (Map<String, Object>) authentication.getDetails();
+        String userIdStr = (String) details.get("userId");
+
+        User user = userRepository.findById(UUID.fromString(userIdStr))
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        return ResponseEntity.ok(Map.of("email", user.getEmail()));
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request,
