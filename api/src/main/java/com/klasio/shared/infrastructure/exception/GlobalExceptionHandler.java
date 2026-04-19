@@ -294,6 +294,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotificationNotFound(NotificationNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(new ErrorResponse.ErrorDetail(
+                        "NOTIFICATION_NOT_FOUND", ex.getMessage())));
+    }
+
     @ExceptionHandler(RegistrationNotCancellableException.class)
     public ResponseEntity<ErrorResponse> handleRegistrationNotCancellable(RegistrationNotCancellableException ex) {
         var error = new ErrorResponse.ErrorDetail("REGISTRATION_NOT_CANCELLABLE", ex.getMessage());
