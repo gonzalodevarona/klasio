@@ -87,4 +87,8 @@ public interface SpringDataClassSessionRepository extends JpaRepository<ClassSes
             @Param("tenantId") UUID tenantId,
             @Param("classId")  UUID classId,
             @Param("fromDate") LocalDate fromDate);
+
+    @Modifying
+    @Query("UPDATE ClassSessionJpaEntity s SET s.currentCapacity = 0 WHERE s.id = :id")
+    int resetCurrentCapacity(@Param("id") UUID id);
 }

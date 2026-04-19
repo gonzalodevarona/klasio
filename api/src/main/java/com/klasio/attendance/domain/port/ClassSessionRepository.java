@@ -48,4 +48,10 @@ public interface ClassSessionRepository {
      * Used when a class schedule changes to invalidate stale session rows.
      */
     void cancelFutureSessionsByClass(UUID tenantId, UUID classId, LocalDate fromDate);
+
+    /**
+     * Resets current_capacity to 0 for the given session.
+     * Used during class cancellation to free all reserved spots.
+     */
+    void resetCurrentCapacity(UUID sessionId);
 }

@@ -87,4 +87,10 @@ public class JpaClassSessionRepository extends TenantScopedRepository implements
         applyTenantContext();
         springDataRepository.cancelFutureSessionsByClass(tenantId, classId, fromDate);
     }
+
+    @Override
+    public void resetCurrentCapacity(UUID sessionId) {
+        applyTenantContext();
+        springDataRepository.resetCurrentCapacity(sessionId);
+    }
 }
