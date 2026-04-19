@@ -18,6 +18,9 @@ public interface SpringDataClassSessionRepository extends JpaRepository<ClassSes
     Optional<ClassSessionJpaEntity> findByClassIdAndSessionDateAndStartTime(
             UUID classId, LocalDate sessionDate, LocalTime startTime);
 
+    Optional<ClassSessionJpaEntity> findByTenantIdAndClassIdAndSessionDate(
+            UUID tenantId, UUID classId, LocalDate sessionDate);
+
     @Modifying
     @Query(value = """
             INSERT INTO class_sessions (id, tenant_id, class_id, session_date, start_time, end_time, status, created_by)

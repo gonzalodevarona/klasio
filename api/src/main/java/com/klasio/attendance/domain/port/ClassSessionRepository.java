@@ -44,6 +44,12 @@ public interface ClassSessionRepository {
                                                    LocalDate from, LocalDate to);
 
     /**
+     * Looks up an existing session by class + date, without creating one.
+     * Used by the PATCH /alert endpoint to resolve the sessionId from path parameters.
+     */
+    Optional<ClassSession> findByClassAndDate(UUID tenantId, UUID classId, LocalDate sessionDate);
+
+    /**
      * Marks all SCHEDULED/ALERTED sessions for a given class on or after fromDate as CANCELLED.
      * Used when a class schedule changes to invalidate stale session rows.
      */
