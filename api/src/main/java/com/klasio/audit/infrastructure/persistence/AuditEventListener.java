@@ -1234,8 +1234,6 @@ public class AuditEventListener {
 
     @EventListener
     public void onSessionCancelled(SessionCancelled e) {
-        if (e.affectedStudentIds() == null || e.affectedStudentIds().isEmpty()) return;
-
         log.info("Recording audit log for session cancelled: sessionId={}, classId={}, affectedStudents={}",
                 e.sessionId(), e.classId(), e.affectedStudentIds().size());
 

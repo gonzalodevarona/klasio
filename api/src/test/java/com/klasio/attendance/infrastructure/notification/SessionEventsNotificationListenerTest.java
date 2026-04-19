@@ -123,6 +123,18 @@ class SessionEventsNotificationListenerTest {
                 .doesNotContain(professorId);
     }
 
+    @Test
+    void cancellationWithEmptyAffectedListSendsNoNotifications() {
+        UUID tenantId = UUID.randomUUID();
+        UUID classId = UUID.randomUUID();
+
+        listener.onSessionCancelled(new com.klasio.attendance.domain.event.SessionCancelled(
+                UUID.randomUUID(), tenantId, classId, "some reason longer than twenty chars",
+                UUID.randomUUID(), "ADMIN", List.of(), java.time.Instant.now()));
+
+        verify(createNotif, never()).execute(any());
+    }
+
     private static AttendanceRegistration regOfStudent(UUID tenantId, UUID studentId, UUID sessionId, UUID classId) {
         return AttendanceRegistration.register(sessionId, tenantId, classId,
                 studentId, UUID.randomUUID(), UUID.randomUUID(),

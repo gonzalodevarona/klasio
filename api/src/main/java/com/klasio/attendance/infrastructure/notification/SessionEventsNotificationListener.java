@@ -11,6 +11,7 @@ import com.klasio.notifications.application.dto.CreateNotificationCommand;
 import com.klasio.notifications.application.port.input.CreateNotificationUseCase;
 import com.klasio.notifications.domain.model.NotificationType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
@@ -52,6 +53,7 @@ public class SessionEventsNotificationListener {
         this.createNotification = createNotification;
     }
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onSessionAlertRaised(SessionAlertRaised e) {
         log.info("[NOTIFY] Session alert raised — sessionId={}, classId={}, actorRole={}",
@@ -63,6 +65,7 @@ public class SessionEventsNotificationListener {
                 e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_ALERTED);
     }
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onSessionAlertUpdated(SessionAlertUpdated e) {
         log.info("[NOTIFY] Session alert updated — sessionId={}, classId={}, actorRole={}",
@@ -70,10 +73,12 @@ public class SessionEventsNotificationListener {
         String className = resolveClassName(e.tenantId(), e.classId());
         String title = SessionNotificationTemplates.alertTitle(className);
         String body = SessionNotificationTemplates.alertBody(e.newReason());
+        // Updated alerts reuse CLASS_SESSION_ALERTED — student sees a refreshed alert, not a new notification type.
         fanOutAlertLike(e.tenantId(), e.classId(), e.sessionId(), title, body,
                 e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_ALERTED);
     }
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onSessionCancelled(SessionCancelled e) {
         if (e.affectedStudentIds() == null || e.affectedStudentIds().isEmpty()) return;
