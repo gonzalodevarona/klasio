@@ -22,6 +22,10 @@ public interface ProgramClassRepository {
             UUID tenantId, Pageable pageable,
             ClassLevel level, ClassStatus status, String programName);
 
+    Page<com.klasio.programclass.application.dto.ClassSummary> findByTenantIdAndProfessorId(
+            UUID tenantId, Pageable pageable,
+            ClassLevel level, ClassStatus status, UUID professorId);
+
     boolean existsByNameInProgram(UUID programId, String name);
 
     boolean existsByNameInProgramExcluding(UUID programId, String name, UUID excludeClassId);

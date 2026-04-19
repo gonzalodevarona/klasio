@@ -7,14 +7,12 @@ CREATE TABLE users (
     tenant_id           UUID REFERENCES tenants(id),
     email               TEXT NOT NULL,
     password_hash       TEXT NOT NULL,
-    role                TEXT NOT NULL,
     status              TEXT NOT NULL DEFAULT 'ACTIVE',
     failed_login_count  INTEGER NOT NULL DEFAULT 0,
     locked_until        TIMESTAMPTZ,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT chk_user_role CHECK (role IN ('SUPERADMIN', 'ADMIN', 'MANAGER', 'PROFESSOR', 'STUDENT')),
     CONSTRAINT chk_user_status CHECK (status IN ('ACTIVE', 'EMAIL_UNVERIFIED'))
 );
 

@@ -75,7 +75,15 @@ public class AuthController {
         User user = userRepository.findById(UUID.fromString(userIdStr))
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        return ResponseEntity.ok(Map.of("email", user.getEmail()));
+        java.util.Map<String, Object> body = new java.util.HashMap<>();
+        body.put("email",                user.getEmail());
+        body.put("firstName",            user.getFirstName()  != null ? user.getFirstName()  : "");
+        body.put("lastName",             user.getLastName()   != null ? user.getLastName()   : "");
+        body.put("identityDocumentType", user.getIdentityDocumentType().name());
+        body.put("identityNumber",       user.getIdentityNumber());
+        body.put("phoneNumber",          user.getPhoneNumber());
+        body.put("role",                 user.primaryRole().name());
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping("/login")
@@ -90,7 +98,7 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of(
                 "userId", result.userId().toString(),
-                "role", result.role().name(),
+                "role", result.primaryRole().name(),
                 "dashboardUrl", result.dashboardUrl(),
                 "tenantId", result.tenantId() != null ? result.tenantId().toString() : ""
         ));
@@ -142,7 +150,7 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of(
                 "userId", result.userId().toString(),
-                "role", result.role().name()
+                "role", result.primaryRole().name()
         ));
     }
 

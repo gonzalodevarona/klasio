@@ -94,6 +94,37 @@ export function useAllClasses(
   return { classes, totalPages, totalElements, loading, error, refetch: fetchClasses };
 }
 
+export function useProfessorClasses(professorId: string, page = 0, size = 20) {
+  const [classes, setClasses] = useState<ProgramClassSummary[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchClasses = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams({ page: String(page), size: String(size), professorId });
+      const data = await api.get<ProgramClassListResponse>(`/classes?${params.toString()}`);
+      setClasses(data.content);
+      setTotalPages(data.totalPages);
+      setTotalElements(data.totalElements);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load classes.");
+    } finally {
+      setLoading(false);
+    }
+  }, [professorId, page, size]);
+
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
+
+  return { classes, totalPages, totalElements, loading, error, refetch: fetchClasses };
+}
+
 export function useProgramClassDetail(programId: string, classId: string) {
   const [programClass, setProgramClass] = useState<ProgramClassDetail | null>(null);
   const [loading, setLoading] = useState(true);

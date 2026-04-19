@@ -5,10 +5,12 @@ import com.klasio.auth.domain.exception.EmailNotVerifiedException;
 import com.klasio.auth.domain.model.Role;
 import com.klasio.auth.domain.model.User;
 import com.klasio.auth.domain.model.UserStatus;
+import com.klasio.shared.domain.model.IdentityDocumentType;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,12 +18,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserTest {
 
     private User activeUser() {
-        return User.createActive(UUID.randomUUID(), "test@example.com", "hash", Role.ADMIN, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
+        return User.createActive(UUID.randomUUID(), "test@example.com", "hash", Role.ADMIN,
+                IdentityDocumentType.CC, "12345678", null, null, null);
     }
 
     private User unverifiedUser() {
-        return User.createUnverified(UUID.randomUUID(), "test@example.com", "hash", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
+        return User.createUnverified(UUID.randomUUID(), "test@example.com", "hash",
+                IdentityDocumentType.CC, "12345678");
     }
+
+    // ── createActive ────────────────────────────────────────────────────────
 
     @Test
     void createActive_setsCorrectDefaults() {
@@ -33,11 +39,88 @@ class UserTest {
     }
 
     @Test
+    void createActive_withAdminRole_grantsSingleRole() {
+        User user = User.createActive(UUID.randomUUID(), "a@b.com", "h", Role.ADMIN,
+                IdentityDocumentType.CC, "11111", null, null, null);
+        assertEquals(Set.of(Role.ADMIN), user.getRoles());
+        assertEquals(Role.ADMIN, user.primaryRole());
+    }
+
+    @Test
+    void createActive_withManagerRole_alsoGrantsProfessor() {
+        User user = User.createActive(UUID.randomUUID(), "m@b.com", "h", Role.MANAGER,
+                IdentityDocumentType.CC, "22222", null, null, null);
+        assertTrue(user.hasRole(Role.MANAGER));
+        assertTrue(user.hasRole(Role.PROFESSOR));
+        assertEquals(Set.of(Role.MANAGER, Role.PROFESSOR), user.getRoles());
+    }
+
+    @Test
+    void createActive_withProfessorRole_grantsSingleRole() {
+        User user = User.createActive(UUID.randomUUID(), "p@b.com", "h", Role.PROFESSOR,
+                IdentityDocumentType.CC, "33333", null, null, null);
+        assertEquals(Set.of(Role.PROFESSOR), user.getRoles());
+        assertFalse(user.hasRole(Role.MANAGER));
+    }
+
+    // ── createUnverified ─────────────────────────────────────────────────────
+
+    @Test
     void createUnverified_setsEmailUnverifiedStatus() {
         User user = unverifiedUser();
         assertEquals(UserStatus.EMAIL_UNVERIFIED, user.getStatus());
-        assertEquals(Role.STUDENT, user.getRole());
+        assertEquals(Role.STUDENT, user.primaryRole());
+        assertTrue(user.hasRole(Role.STUDENT));
     }
+
+    // ── primaryRole ──────────────────────────────────────────────────────────
+
+    @Test
+    void primaryRole_returnsHighestPrivilege() {
+        User user = User.createActive(UUID.randomUUID(), "m@b.com", "h", Role.MANAGER,
+                IdentityDocumentType.CC, "44444", null, null, null);
+        // MANAGER (hierarchy=2) is above PROFESSOR (hierarchy=3)
+        assertEquals(Role.MANAGER, user.primaryRole());
+    }
+
+    // ── hasRole ──────────────────────────────────────────────────────────────
+
+    @Test
+    void hasRole_trueForGrantedRole() {
+        User user = activeUser();
+        assertTrue(user.hasRole(Role.ADMIN));
+    }
+
+    @Test
+    void hasRole_falseForUngrantedRole() {
+        User user = activeUser();
+        assertFalse(user.hasRole(Role.MANAGER));
+        assertFalse(user.hasRole(Role.PROFESSOR));
+    }
+
+    // ── assignRole ───────────────────────────────────────────────────────────
+
+    @Test
+    void assignRole_replacesSetAndAppliesImpliedRoles() {
+        User user = activeUser(); // ADMIN
+        user.assignRole(Role.MANAGER);
+        // MANAGER implies PROFESSOR
+        assertTrue(user.hasRole(Role.MANAGER));
+        assertTrue(user.hasRole(Role.PROFESSOR));
+        assertFalse(user.hasRole(Role.ADMIN));
+        assertEquals(Role.MANAGER, user.primaryRole());
+    }
+
+    @Test
+    void assignRole_withProfessor_grantsSingleRole() {
+        User user = User.createActive(UUID.randomUUID(), "m@b.com", "h", Role.MANAGER,
+                IdentityDocumentType.CC, "55555", null, null, null);
+        user.assignRole(Role.PROFESSOR);
+        assertEquals(Set.of(Role.PROFESSOR), user.getRoles());
+        assertFalse(user.hasRole(Role.MANAGER));
+    }
+
+    // ── login / lockout ──────────────────────────────────────────────────────
 
     @Test
     void recordFailedLogin_incrementsCounter() {
@@ -73,9 +156,9 @@ class UserTest {
     @Test
     void isLocked_returnsFalseWhenLockedUntilIsInPast() {
         User user = new User(UUID.randomUUID(), UUID.randomUUID(), "test@example.com", "hash",
-                Role.ADMIN, UserStatus.ACTIVE, 5, Instant.now().minusSeconds(1),
+                Set.of(Role.ADMIN), UserStatus.ACTIVE, 5, Instant.now().minusSeconds(1),
                 Instant.now(), Instant.now(),
-                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001");
+                IdentityDocumentType.CC, "10000001", null, null, null);
         assertFalse(user.isLocked());
     }
 
@@ -112,13 +195,6 @@ class UserTest {
         User user = activeUser();
         user.verifyEmail();
         assertEquals(UserStatus.ACTIVE, user.getStatus());
-    }
-
-    @Test
-    void assignRole_changesRole() {
-        User user = activeUser();
-        user.assignRole(Role.MANAGER);
-        assertEquals(Role.MANAGER, user.getRole());
     }
 
     @Test

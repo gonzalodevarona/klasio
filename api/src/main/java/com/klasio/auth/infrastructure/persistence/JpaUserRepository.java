@@ -1,7 +1,11 @@
 package com.klasio.auth.infrastructure.persistence;
 
 import com.klasio.auth.application.port.UserRepository;
+import com.klasio.auth.domain.model.Role;
 import com.klasio.auth.domain.model.User;
+import com.klasio.auth.domain.model.UserStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -45,5 +49,11 @@ public class JpaUserRepository implements UserRepository {
     @Override
     public boolean existsByIdentityNumberAndTenantId(UUID tenantId, String identityNumber) {
         return springDataRepo.existsByTenantIdAndIdentityNumber(tenantId, identityNumber);
+    }
+
+    @Override
+    public Page<User> findByRole(Role role, UUID tenantId, UserStatus status, Pageable pageable) {
+        return springDataRepo.findByRoleAndOptionalTenantAndStatus(role, tenantId, status, pageable)
+                .map(UserJpaEntity::toDomain);
     }
 }

@@ -56,7 +56,7 @@ public class RoleAssignmentController {
         return ResponseEntity.ok(Map.of(
                 "id", updatedUser.getId().toString(),
                 "email", updatedUser.getEmail(),
-                "role", updatedUser.getRole().name(),
+                "role", updatedUser.primaryRole().name(),
                 "status", updatedUser.getStatus().name(),
                 "tenantId", updatedUser.getTenantId() != null ? updatedUser.getTenantId().toString() : ""
         ));

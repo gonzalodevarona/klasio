@@ -34,8 +34,10 @@ export async function POST(request: NextRequest) {
       tenantId: string;
       dashboardUrl: string;
     };
+    // Store roles as an array. The backend returns a single primary role in the login response;
+    // the full roles set is in the JWT cookie. The userInfo cookie is for client-side reads only.
     const userInfoValue = encodeURIComponent(
-      JSON.stringify({ userId, role, tenantId: tenantId || null })
+      JSON.stringify({ userId, roles: [role], tenantId: tenantId || null })
     );
     nextResponse.headers.append(
       "Set-Cookie",

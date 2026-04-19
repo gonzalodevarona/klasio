@@ -42,6 +42,12 @@ import com.klasio.membership.domain.event.PaymentProofUploaded;
 import com.klasio.membership.domain.event.PaymentProofApproved;
 import com.klasio.membership.domain.event.PaymentProofRejected;
 import com.klasio.membership.domain.event.DelegationReminderDue;
+import com.klasio.attendance.domain.event.AttendanceRegistered;
+import com.klasio.attendance.domain.event.AttendanceMarkedPresent;
+import com.klasio.attendance.domain.event.AttendanceMarkedAbsent;
+import com.klasio.attendance.domain.event.AttendanceMarkedPresentNoHours;
+import com.klasio.attendance.domain.event.AttendanceCorrected;
+import com.klasio.attendance.domain.event.RegistrationCancelled;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -1011,6 +1017,160 @@ public class AuditEventListener {
                 SYSTEM_ACTOR,
                 "MEMBERSHIP",
                 event.membershipId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onAttendanceRegistered(AttendanceRegistered event) {
+        log.info("Recording audit log for attendance registration: registrationId={}, studentId={}, sessionDate={}",
+                event.registrationId(), event.studentId(), event.sessionDate());
+
+        String details = toJson(Map.of(
+                "sessionId", event.sessionId().toString(),
+                "classId", event.classId().toString(),
+                "studentId", event.studentId().toString(),
+                "sessionDate", event.sessionDate().toString(),
+                "level", event.levelAtRegistration(),
+                "intendedHours", String.valueOf(event.intendedHours())
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_REGISTERED",
+                event.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                event.registrationId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onAttendanceMarkedPresent(AttendanceMarkedPresent event) {
+        log.info("Recording audit log for attendance marked present: registrationId={}, studentId={}, sessionDate={}",
+                event.registrationId(), event.studentId(), event.sessionDate());
+
+        String details = toJson(Map.of(
+                "classId", event.classId().toString(),
+                "studentId", event.studentId().toString(),
+                "membershipId", event.membershipId().toString(),
+                "intendedHours", String.valueOf(event.intendedHours()),
+                "sessionDate", event.sessionDate().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_MARKED_PRESENT",
+                event.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                event.registrationId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onAttendanceMarkedAbsent(AttendanceMarkedAbsent event) {
+        log.info("Recording audit log for attendance marked absent: registrationId={}, studentId={}, sessionDate={}",
+                event.registrationId(), event.studentId(), event.sessionDate());
+
+        String details = toJson(Map.of(
+                "classId", event.classId().toString(),
+                "studentId", event.studentId().toString(),
+                "sessionDate", event.sessionDate().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_MARKED_ABSENT",
+                event.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                event.registrationId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onAttendanceMarkedPresentNoHours(AttendanceMarkedPresentNoHours event) {
+        log.info("Recording audit log for attendance marked present (no hours): registrationId={}, studentId={}",
+                event.registrationId(), event.studentId());
+
+        String details = toJson(Map.of(
+                "classId", event.classId().toString(),
+                "studentId", event.studentId().toString(),
+                "membershipId", event.membershipId().toString(),
+                "intendedHours", String.valueOf(event.intendedHours()),
+                "sessionDate", event.sessionDate().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_MARKED_PRESENT_NO_HOURS",
+                event.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                event.registrationId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onAttendanceCorrected(AttendanceCorrected event) {
+        log.info("Recording audit log for attendance corrected: registrationId={}, previousStatus={}, newStatus={}",
+                event.registrationId(), event.previousStatus(), event.newStatus());
+
+        String details = toJson(Map.of(
+                "classId", event.classId().toString(),
+                "studentId", event.studentId().toString(),
+                "previousStatus", event.previousStatus(),
+                "newStatus", event.newStatus(),
+                "reason", event.reason()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_CORRECTED",
+                event.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                event.registrationId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onRegistrationCancelled(RegistrationCancelled event) {
+        log.info("Recording audit log for registration cancellation: registrationId={}, studentId={}, sessionDate={}",
+                event.registrationId(), event.studentId(), event.sessionDate());
+
+        String details = toJson(Map.of(
+                "sessionId", event.sessionId().toString(),
+                "classId", event.classId().toString(),
+                "studentId", event.studentId().toString(),
+                "sessionDate", event.sessionDate().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_REGISTRATION_CANCELLED",
+                event.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                event.registrationId(),
                 event.occurredAt(),
                 details
         );

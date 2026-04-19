@@ -116,6 +116,42 @@ public class Professor {
         return professor;
     }
 
+    /**
+     * Creates a Professor record for an existing Manager user.
+     * Managers are already authenticated users — no invitation flow is needed,
+     * so status is ACTIVE immediately and no invitation token is issued.
+     * The professor ID is set to the Manager's User ID so all professor lookups
+     * (by class assignment, roster, etc.) resolve to the same UUID.
+     */
+    public static Professor createForManager(UUID userId, UUID tenantId,
+                                             String firstName, String lastName,
+                                             String email, String phoneNumber,
+                                             IdentityDocumentType identityDocumentType,
+                                             String identityNumber, UUID createdBy) {
+        Objects.requireNonNull(userId, "User id must not be null");
+        Objects.requireNonNull(tenantId, "Tenant id must not be null");
+        Objects.requireNonNull(createdBy, "Created by must not be null");
+        Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
+        validateNotBlank(firstName, "First name");
+        validateNotBlank(lastName, "Last name");
+        validateNotBlank(email, "Email");
+        validateEmail(email);
+        validateNotBlank(identityNumber, "Identity number");
+
+        Instant now = Instant.now();
+        return new Professor(
+                ProfessorId.of(userId), tenantId,
+                capitalize(firstName), capitalize(lastName),
+                email.trim().toLowerCase(), phoneNumber,
+                ProfessorStatus.ACTIVE, null, null,
+                now, createdBy, null, null,
+                identityDocumentType, identityNumber.trim()
+        );
+        // No ProfessorCreated domain event: the manager creation event (auth module)
+        // already handles audit. An invitation email is not sent because the manager
+        // already has credentials.
+    }
+
     public static Professor reconstitute(ProfessorId id,
                                          UUID tenantId,
                                          String firstName,

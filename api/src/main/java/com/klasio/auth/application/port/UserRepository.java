@@ -1,6 +1,10 @@
 package com.klasio.auth.application.port;
 
+import com.klasio.auth.domain.model.Role;
 import com.klasio.auth.domain.model.User;
+import com.klasio.auth.domain.model.UserStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,4 +22,10 @@ public interface UserRepository {
     boolean existsByEmailAndTenantId(String email, UUID tenantId);
 
     boolean existsByIdentityNumberAndTenantId(UUID tenantId, String identityNumber);
+
+    /**
+     * Paginated list of users with a given role, optionally filtered by tenant and status.
+     * Used by SUPERADMIN to list all admins across all tenants.
+     */
+    Page<User> findByRole(Role role, UUID tenantId, UserStatus status, Pageable pageable);
 }

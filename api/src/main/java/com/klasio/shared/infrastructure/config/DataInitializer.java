@@ -93,7 +93,8 @@ public class DataInitializer {
 
         private void seedUser(UUID tenantId, String email, String passwordHash, Role role,
                               IdentityDocumentType identityDocumentType, String identityNumber) {
-            User user = User.createActive(tenantId, email, passwordHash, role, identityDocumentType, identityNumber);
+            User user = User.createActive(tenantId, email, passwordHash, role, identityDocumentType, identityNumber,
+                    null, null, null);
             userRepository.save(UserJpaEntity.fromDomain(user));
         }
     }

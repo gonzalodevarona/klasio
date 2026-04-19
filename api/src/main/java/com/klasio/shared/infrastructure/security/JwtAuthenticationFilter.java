@@ -81,7 +81,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 details.put("programId", programId);
             }
             if (roles != null && !roles.isEmpty()) {
+                // "role" convenience key: primary role (roles[0] is highest-privilege due to JWT sort order)
                 details.put("role", roles.get(0));
+                // "roles" key: full list for multi-role aware code
+                details.put("roles", roles);
             }
 
             var authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);

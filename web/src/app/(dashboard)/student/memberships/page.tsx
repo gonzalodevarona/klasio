@@ -98,6 +98,14 @@ export default function StudentMembershipsPage() {
               >
                 View details →
               </Link>
+              {m.status === "PENDING_PAYMENT" && (
+                <Link
+                  href={`/student/memberships/${m.id}`}
+                  className="text-sm font-medium text-amber-600 hover:text-amber-800"
+                >
+                  Upload payment proof →
+                </Link>
+              )}
               {(m.status === "EXPIRED" || m.status === "INACTIVE") && (
                 <Link
                   href={`/student/memberships/new?renew=${m.id}`}

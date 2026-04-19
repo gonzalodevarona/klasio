@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
+import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import HourBalance from "@/components/memberships/HourBalance";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
+import { todayInTenantZone } from "@/lib/attendanceConstants";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -13,9 +15,16 @@ function formatDate(iso: string | null): string {
 }
 
 export default function StudentDashboard() {
+  const today = todayInTenantZone();
+
   const { user } = useAuth();
   const { memberships, loading: membershipsLoading } = useMyMemberships();
   const { enrollments, loading: enrollmentsLoading } = useMyEnrollments();
+  const { registrations, loading: registrationsLoading } = useMyRegistrations({
+    status: "REGISTERED",
+    from: today,
+  });
+  const upcomingRegistrations = registrations.slice(0, 3);
 
   const activeMembership = memberships.find(
     (m) =>
@@ -102,6 +111,54 @@ export default function StudentDashboard() {
                     {e.status}
                   </span>
                 </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Upcoming registrations */}
+      <div className="rounded-lg border border-gray-200 bg-white p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+            Upcoming Registrations
+          </h2>
+          <Link
+            href="/student/registrations"
+            className="text-xs text-indigo-600 hover:text-indigo-800"
+          >
+            View all
+          </Link>
+        </div>
+        {registrationsLoading ? (
+          <p className="text-sm text-gray-400">Loading…</p>
+        ) : upcomingRegistrations.length === 0 ? (
+          <p className="text-sm text-gray-400">No upcoming registrations.</p>
+        ) : (
+          <ul className="space-y-2">
+            {upcomingRegistrations.map((r) => (
+              <li key={r.id} className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-3">
+                  <span className="text-gray-900">
+                    {new Date(r.sessionDate).toLocaleDateString()}
+                  </span>
+                  <span className="text-gray-400">
+                    {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}
+                  </span>
+                </div>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                    r.level === "BEGINNER"
+                      ? "bg-blue-100 text-blue-700"
+                      : r.level === "INTERMEDIATE"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : r.level === "ADVANCED"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {r.level}
+                </span>
               </li>
             ))}
           </ul>

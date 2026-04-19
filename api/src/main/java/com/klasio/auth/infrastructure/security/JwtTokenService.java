@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -24,12 +26,22 @@ public class JwtTokenService {
         this.accessTokenExpiration = jwtProperties.accessTokenExpiration();
     }
 
-    public String generateAccessToken(UUID userId, UUID tenantId, Role role) {
+    /**
+     * Generates a signed JWT access token.
+     * Roles are sorted by hierarchy (highest privilege first) so that {@code roles[0]}
+     * is always the primary role, allowing controllers to read it as a convenience.
+     */
+    public String generateAccessToken(UUID userId, UUID tenantId, Set<Role> roles) {
         Instant now = Instant.now();
+
+        List<String> sortedRoles = roles.stream()
+                .sorted(Comparator.comparingInt(r -> r.hierarchy))
+                .map(Role::name)
+                .toList();
 
         var builder = Jwts.builder()
                 .subject(userId.toString())
-                .claim("roles", List.of(role.name()))
+                .claim("roles", sortedRoles)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(accessTokenExpiration)))
                 .signWith(secretKey);

@@ -4,10 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { ProgramClassDetail as ProgramClassDetailType } from "@/lib/types/programClass";
 import { api, ApiError } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
+import { primaryRole } from "@/lib/types/auth";
 import ClassLevelBadge from "./ClassLevelBadge";
 import ClassStatusBadge from "./ClassStatusBadge";
 import ClassTypeBadge from "./ClassTypeBadge";
 import ScheduleDisplay from "./ScheduleDisplay";
+import ClassRosterPanel from "@/components/attendance/ClassRosterPanel";
 
 interface ClassDetailProps {
   programId: string;
@@ -20,6 +23,7 @@ export default function ClassDetail({
   programClass,
   onChanged,
 }: ClassDetailProps) {
+  const { user } = useAuth();
   const [showConfirm, setShowConfirm] = useState<
     "deactivate" | "reactivate" | "removeProfessor" | null
   >(null);
@@ -220,6 +224,11 @@ export default function ClassDetail({
               </>
             )}
           </dl>
+        </div>
+
+        {/* Session Roster */}
+        <div className="border-t border-gray-200">
+          <ClassRosterPanel classId={programClass.id} userRole={user ? primaryRole(user.roles) : undefined} />
         </div>
 
         {/* Professor Assignment */}

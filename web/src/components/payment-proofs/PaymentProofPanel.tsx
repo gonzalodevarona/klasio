@@ -15,13 +15,16 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-// Statuses where payment was already approved or proof is under review — upload makes no sense
-const APPROVED_OR_PENDING_STATUSES: MembershipStatus[] = [
-  "ACTIVE",
-  "INACTIVE",
-  "EXPIRED",
+// Statuses where uploading a new proof makes no sense:
+// - PENDING_PAYMENT_VALIDATION: proof already submitted, awaiting admin review
+// - PENDING_MANAGER_ACTIVATION: payment approved, awaiting manager activation
+// - ACTIVE / INACTIVE: membership is live or depleted — payment already validated
+// PENDING_PAYMENT and EXPIRED are intentionally excluded so the upload form shows.
+const UPLOAD_BLOCKED_STATUSES: MembershipStatus[] = [
   "PENDING_PAYMENT_VALIDATION",
   "PENDING_MANAGER_ACTIVATION",
+  "ACTIVE",
+  "INACTIVE",
 ];
 
 interface Props {
@@ -138,7 +141,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
   }
 
   const proofApproved = membershipStatus
-    ? APPROVED_OR_PENDING_STATUSES.includes(membershipStatus)
+    ? UPLOAD_BLOCKED_STATUSES.includes(membershipStatus)
     : proof?.status === "APPROVED";
   const showUploadSection = !proofApproved && (!proof || proof.status === "REJECTED");
 

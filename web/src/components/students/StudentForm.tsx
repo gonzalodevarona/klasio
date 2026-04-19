@@ -21,6 +21,7 @@ interface StudentFormProps {
 }
 
 const EMAIL_REGEX = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+const PHONE_REGEX = /^\+[1-9]\d{6,19}$/;
 
 function calculateAge(dateOfBirth: string): number {
   const dob = new Date(dateOfBirth);
@@ -86,6 +87,9 @@ export default function StudentForm({ student }: StudentFormProps) {
 
     if (!identityDocumentType) errors.identityDocumentType = "Document type is required.";
 
+    if (!phone.trim()) errors.phone = "Phone number is required.";
+    else if (!PHONE_REGEX.test(phone.trim())) errors.phone = "Enter a valid WhatsApp number in E.164 format, e.g. +573001234567";
+
     if (isMinor) {
       if (!tutorFirstName.trim()) errors.tutorFirstName = "Tutor first name is required for minors.";
       if (!tutorLastName.trim()) errors.tutorLastName = "Tutor last name is required for minors.";
@@ -121,7 +125,7 @@ export default function StudentForm({ student }: StudentFormProps) {
         identityNumber: identityNumber.trim(),
         identityDocumentType,
         bloodType: bloodType || null,
-        phone: phone.trim() || null,
+        phone: phone.trim(),
         tutorFirstName: tutorFirstName.trim() || null,
         tutorLastName: tutorLastName.trim() || null,
         tutorRelationship: tutorRelationship.trim() || null,
@@ -199,9 +203,11 @@ export default function StudentForm({ student }: StudentFormProps) {
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone (WhatsApp) <span className="text-red-500">*</span>
+            </label>
             <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
-              className={inputClass("phone")} placeholder="e.g. 3001234567" />
+              className={inputClass("phone")} placeholder="e.g. +573001234567" />
             {fieldErrors.phone && <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>}
           </div>
 

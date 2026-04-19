@@ -32,6 +32,9 @@ export interface ProofQueueItem {
   studentIdentityDocumentType: string;
   studentIdentityNumber: string;
   planName: string;
+  programName: string;
+  purchasedHours: number;
+  planCost: number;
   uploadedAt: string;
   contentType: string;
 }

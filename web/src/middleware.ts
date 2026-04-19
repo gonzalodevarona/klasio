@@ -28,6 +28,8 @@ const ROLE_PREFIXES: Record<string, string> = {
 // substring collisions like /professor matching /professors.
 const MANAGEMENT_ROUTE_PERMISSIONS: Array<{ prefix: string; roles: string[] }> = [
   { prefix: "/tenants",    roles: ["SUPERADMIN"] },
+  { prefix: "/admins",     roles: ["SUPERADMIN"] },
+  { prefix: "/managers",   roles: ["SUPERADMIN", "ADMIN"] },
   { prefix: "/professors", roles: ["SUPERADMIN", "ADMIN", "MANAGER"] },
   { prefix: "/students",   roles: ["SUPERADMIN", "ADMIN", "MANAGER"] },
   { prefix: "/programs",   roles: ["SUPERADMIN", "ADMIN", "MANAGER"] },
@@ -64,10 +66,11 @@ export async function middleware(request: NextRequest) {
 
     const ownDashboard = `${ROLE_PREFIXES[role] ?? ""}/dashboard`;
 
-    // Guard role-dashboard routes: prevent accessing another role's dashboard prefix.
+    // Guard role-dashboard routes: user "owns" ALL their roles' dashboard prefixes.
+    // A Manager with roles=["MANAGER","PROFESSOR"] may access /professor/dashboard.
     // Uses boundary matching to avoid /professor matching /professors.
     for (const [r, prefix] of Object.entries(ROLE_PREFIXES)) {
-      if (matchesPrefix(pathname, prefix) && r !== role) {
+      if (matchesPrefix(pathname, prefix) && !roles.includes(r)) {
         return NextResponse.redirect(new URL(ownDashboard, request.url));
       }
     }

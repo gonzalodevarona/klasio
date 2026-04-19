@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class KlasioUserDetailsService implements UserDetailsService {
@@ -24,10 +25,14 @@ public class KlasioUserDetailsService implements UserDetailsService {
         UserJpaEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
+        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .collect(Collectors.toList());
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 "{noop}placeholder",
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                authorities
         );
     }
 }

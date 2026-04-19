@@ -31,29 +31,43 @@ public class AllClassesController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'PROFESSOR')")
     public ResponseEntity<Page<ClassResponseDto.ClassSummaryResponse>> listAllClasses(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String level,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String programName) {
+            @RequestParam(required = false) String programName,
+            @RequestParam(required = false) String professorId) {
 
         UUID tenantId = extractTenantId();
+        UUID userId = extractUserId();
+        String role = extractRole();
         Pageable pageable = PageRequest.of(page, size);
 
         ClassLevel classLevel = level != null ? ClassLevel.valueOf(level) : null;
         ClassStatus classStatus = status != null ? ClassStatus.valueOf(status) : null;
 
-        Page<ClassSummary> summaries = listAllClassesUseCase.execute(tenantId, classLevel, classStatus, programName, pageable);
+        Page<ClassSummary> summaries;
+        if (professorId != null) {
+            summaries = listAllClassesUseCase.execute(
+                    tenantId, classLevel, classStatus, pageable, UUID.fromString(professorId));
+        } else {
+            summaries = listAllClassesUseCase.execute(
+                    tenantId, classLevel, classStatus, programName, pageable, userId, role);
+        }
 
         return ResponseEntity.ok(summaries.map(ClassResponseDto.ClassSummaryResponse::fromSummary));
     }
 
     @SuppressWarnings("unchecked")
-    private UUID extractTenantId() {
+    private Map<String, Object> jwtDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Map<String, Object> details = (Map<String, Object>) authentication.getDetails();
+        return (Map<String, Object>) authentication.getDetails();
+    }
+
+    private UUID extractTenantId() {
+        Map<String, Object> details = jwtDetails();
         String tenantId = (String) details.get("tenantId");
 
         if (tenantId == null) {
@@ -66,5 +80,13 @@ public class AllClassesController {
         }
 
         return UUID.fromString(tenantId);
+    }
+
+    private UUID extractUserId() {
+        return UUID.fromString((String) jwtDetails().get("userId"));
+    }
+
+    private String extractRole() {
+        return (String) jwtDetails().get("role");
     }
 }

@@ -67,13 +67,13 @@ public class RefreshTokenService {
         refreshTokenRepository.save(oldToken);
 
         String accessToken = jwtTokenService.generateAccessToken(
-                user.getId(), user.getTenantId(), user.getRole());
+                user.getId(), user.getTenantId(), user.getRoles());
 
         return new LoginResult(
                 user.getId(),
-                user.getRole(),
+                user.getRoles(),
                 user.getTenantId(),
-                user.getRole().dashboardUrl(),
+                user.primaryRole().dashboardUrl(),
                 accessToken,
                 newRawRefreshToken
         );

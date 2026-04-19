@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ProfessorDetail as ProfessorDetailType } from "@/lib/types/professor";
 import { api, ApiError } from "@/lib/api";
 import ProfessorStatusBadge from "./ProfessorStatusBadge";
+import ProfessorClassesTable from "./ProfessorClassesTable";
 
 interface ProfessorDetailProps {
   professor: ProfessorDetailType;
@@ -174,8 +175,13 @@ export default function ProfessorDetail({
           </dl>
         </div>
 
+      </div>
+
+      <ProfessorClassesTable professorId={professor.id} />
+
+      <div className="bg-white shadow rounded-lg overflow-hidden">
         {/* Actions */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="px-6 py-4 border-gray-200 bg-gray-50">
           {(professor.status === "ACTIVE" || professor.status === "INVITED") &&
             showConfirm !== "deactivate" && (
               <button
