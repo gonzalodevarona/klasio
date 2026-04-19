@@ -3,6 +3,7 @@ package com.klasio.attendance.application.service;
 import com.klasio.attendance.application.dto.SessionActionResult;
 import com.klasio.attendance.application.dto.UpdateSessionAlertCommand;
 import com.klasio.attendance.application.port.input.UpdateSessionAlertUseCase;
+import com.klasio.attendance.domain.exception.AlertAuthorViolationException;
 import com.klasio.attendance.domain.model.ClassSession;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.shared.domain.DomainEvent;
@@ -37,13 +38,10 @@ public class UpdateSessionAlertService implements UpdateSessionAlertUseCase {
 
         try {
             session.updateAlertReason(cmd.newReason(), cmd.actorId(), cmd.actorRole());
+        } catch (AlertAuthorViolationException ex) {
+            throw new NotAlertAuthorException();
         } catch (IllegalArgumentException ex) {
             throw new InvalidAlertReasonException(ex.getMessage());
-        } catch (IllegalStateException ex) {
-            if (ex.getMessage() != null && ex.getMessage().contains("author")) {
-                throw new NotAlertAuthorException();
-            }
-            throw ex;
         }
 
         repository.save(session);

@@ -3,6 +3,7 @@ package com.klasio.attendance.domain.model;
 import com.klasio.attendance.domain.event.SessionAlertRaised;
 import com.klasio.attendance.domain.event.SessionAlertUpdated;
 import com.klasio.attendance.domain.event.SessionCancelled;
+import com.klasio.attendance.domain.exception.AlertAuthorViolationException;
 import com.klasio.shared.domain.DomainEvent;
 
 import java.time.Instant;
@@ -159,7 +160,7 @@ public class ClassSession {
             throw new IllegalStateException("Can only update alert reason on ALERTED sessions");
         }
         if (!actorId.equals(this.alertedBy)) {
-            throw new IllegalStateException("Only the alert author can update the reason");
+            throw new AlertAuthorViolationException();
         }
         Instant now = Instant.now();
         this.alertReason = newReason;
