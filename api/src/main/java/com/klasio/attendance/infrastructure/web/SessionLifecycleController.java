@@ -6,7 +6,6 @@ import com.klasio.attendance.application.dto.UpdateSessionAlertCommand;
 import com.klasio.attendance.application.port.input.CancelSessionUseCase;
 import com.klasio.attendance.application.port.input.RaiseSessionAlertUseCase;
 import com.klasio.attendance.application.port.input.UpdateSessionAlertUseCase;
-import com.klasio.attendance.domain.port.ClassSessionRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RestController
@@ -32,16 +30,13 @@ public class SessionLifecycleController {
     private final RaiseSessionAlertUseCase raiseAlert;
     private final UpdateSessionAlertUseCase updateAlert;
     private final CancelSessionUseCase cancelSession;
-    private final ClassSessionRepository sessionRepository;
 
     public SessionLifecycleController(RaiseSessionAlertUseCase raiseAlert,
                                       UpdateSessionAlertUseCase updateAlert,
-                                      CancelSessionUseCase cancelSession,
-                                      ClassSessionRepository sessionRepository) {
+                                      CancelSessionUseCase cancelSession) {
         this.raiseAlert = raiseAlert;
         this.updateAlert = updateAlert;
         this.cancelSession = cancelSession;
-        this.sessionRepository = sessionRepository;
     }
 
     @PostMapping("/alert")
@@ -71,14 +66,10 @@ public class SessionLifecycleController {
             @PathVariable LocalDate sessionDate,
             @Valid @RequestBody SessionLifecycleDtos.ReasonBody body) {
 
-        UUID tenantId = extractTenantId(auth);
-
-        var session = sessionRepository.findByClassAndDate(tenantId, classId, sessionDate)
-                .orElseThrow(() -> new NoSuchElementException("session not found"));
-
         var result = updateAlert.execute(new UpdateSessionAlertCommand(
-                tenantId,
-                session.getId().value(),
+                extractTenantId(auth),
+                classId,
+                sessionDate,
                 body.reason(),
                 extractUserId(auth),
                 extractRole(auth)));

@@ -294,6 +294,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(SessionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSessionNotFound(SessionNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(NotificationNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotificationNotFound(NotificationNotFoundException ex) {
         var error = new ErrorResponse.ErrorDetail("NOTIFICATION_NOT_FOUND", ex.getMessage());

@@ -5,7 +5,6 @@ import com.klasio.attendance.application.dto.SessionActionResult;
 import com.klasio.attendance.application.dto.UpdateSessionAlertCommand;
 import com.klasio.attendance.domain.event.SessionAlertUpdated;
 import com.klasio.attendance.domain.model.ClassSession;
-import com.klasio.attendance.domain.model.ClassSessionId;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.shared.infrastructure.exception.NotAlertAuthorException;
 import org.junit.jupiter.api.Test;
@@ -30,12 +29,14 @@ class UpdateSessionAlertServiceTest {
     @Test
     void authorUpdatesReasonSuccessfully() {
         UUID tenantId = UUID.randomUUID();
+        UUID classId = UUID.randomUUID();
+        LocalDate date = LocalDate.now(AttendanceTimeConstants.TENANT_ZONE).plusDays(1);
         UUID author = UUID.randomUUID();
-        ClassSession s = alertedSession(tenantId, author);
-        when(repo.findById(tenantId, s.getId().value())).thenReturn(Optional.of(s));
+        ClassSession s = alertedSession(tenantId, classId, date, author);
+        when(repo.findByClassAndDate(tenantId, classId, date)).thenReturn(Optional.of(s));
 
         SessionActionResult r = service.execute(new UpdateSessionAlertCommand(
-                tenantId, s.getId().value(), NEW_REASON, author, "PROFESSOR"));
+                tenantId, classId, date, NEW_REASON, author, "PROFESSOR"));
 
         assertThat(r.reason()).isEqualTo(NEW_REASON);
         verify(publisher).publishEvent(any(SessionAlertUpdated.class));
@@ -45,18 +46,19 @@ class UpdateSessionAlertServiceTest {
     @Test
     void nonAuthorIs403() {
         UUID tenantId = UUID.randomUUID();
+        UUID classId = UUID.randomUUID();
+        LocalDate date = LocalDate.now(AttendanceTimeConstants.TENANT_ZONE).plusDays(1);
         UUID author = UUID.randomUUID();
-        ClassSession s = alertedSession(tenantId, author);
-        when(repo.findById(tenantId, s.getId().value())).thenReturn(Optional.of(s));
+        ClassSession s = alertedSession(tenantId, classId, date, author);
+        when(repo.findByClassAndDate(tenantId, classId, date)).thenReturn(Optional.of(s));
 
         assertThatThrownBy(() -> service.execute(new UpdateSessionAlertCommand(
-                tenantId, s.getId().value(), NEW_REASON, UUID.randomUUID(), "PROFESSOR")))
+                tenantId, classId, date, NEW_REASON, UUID.randomUUID(), "PROFESSOR")))
                 .isInstanceOf(NotAlertAuthorException.class);
     }
 
-    private static ClassSession alertedSession(UUID tenantId, UUID author) {
-        ClassSession s = ClassSession.materialize(tenantId, UUID.randomUUID(),
-                LocalDate.now(AttendanceTimeConstants.TENANT_ZONE).plusDays(1),
+    private static ClassSession alertedSession(UUID tenantId, UUID classId, LocalDate date, UUID author) {
+        ClassSession s = ClassSession.materialize(tenantId, classId, date,
                 LocalTime.of(10, 0), LocalTime.of(11, 0), author);
         s.raiseAlert("initial rain warning for outdoor court", author, "PROFESSOR");
         s.clearDomainEvents();

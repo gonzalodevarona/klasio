@@ -2,12 +2,10 @@ package com.klasio.attendance.infrastructure.web;
 
 import com.klasio.attendance.application.dto.SessionActionResult;
 import com.klasio.attendance.application.dto.SessionCancellationResult;
+import com.klasio.attendance.application.dto.UpdateSessionAlertCommand;
 import com.klasio.attendance.application.port.input.CancelSessionUseCase;
 import com.klasio.attendance.application.port.input.RaiseSessionAlertUseCase;
 import com.klasio.attendance.application.port.input.UpdateSessionAlertUseCase;
-import com.klasio.attendance.domain.model.ClassSession;
-import com.klasio.attendance.domain.model.ClassSessionId;
-import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.shared.infrastructure.config.JwtProperties;
 import com.klasio.shared.infrastructure.exception.GlobalExceptionHandler;
 import com.klasio.shared.infrastructure.exception.NotAlertAuthorException;
@@ -35,16 +33,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import javax.sql.DataSource;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -104,9 +98,6 @@ class SessionLifecycleControllerIT {
 
     @MockitoBean
     CancelSessionUseCase cancelSessionUseCase;
-
-    @MockitoBean
-    ClassSessionRepository classSessionRepository;
 
     // ------------------------------------------------------------------
     // Fixed test identifiers
@@ -228,16 +219,7 @@ class SessionLifecycleControllerIT {
     void patchAlert_byProfessor_returns200() throws Exception {
         String updatedReason = "Professor is running late due to a heavy rainstorm near campus";
 
-        // findByClassAndDate returns a mock session so the controller can resolve sessionId
-        ClassSession mockSession = mock(ClassSession.class);
-        ClassSessionId mockId = mock(ClassSessionId.class);
-        when(mockId.value()).thenReturn(SESSION_ID);
-        when(mockSession.getId()).thenReturn(mockId);
-
-        when(classSessionRepository.findByClassAndDate(eq(TENANT_ID), eq(CLASS_ID), eq(SESSION_DATE)))
-                .thenReturn(Optional.of(mockSession));
-
-        when(updateSessionAlertUseCase.execute(any())).thenReturn(
+        when(updateSessionAlertUseCase.execute(any(UpdateSessionAlertCommand.class))).thenReturn(
                 new SessionActionResult(SESSION_ID, "ALERTED", updatedReason, PROFESSOR_ID, Instant.now()));
 
         mockMvc.perform(withAuth(
@@ -257,15 +239,7 @@ class SessionLifecycleControllerIT {
     @Test
     @DisplayName("PATCH /alert by different user returns 403 (not the alert author)")
     void patchAlert_byOtherUser_returns403() throws Exception {
-        ClassSession mockSession = mock(ClassSession.class);
-        ClassSessionId mockId = mock(ClassSessionId.class);
-        when(mockId.value()).thenReturn(SESSION_ID);
-        when(mockSession.getId()).thenReturn(mockId);
-
-        when(classSessionRepository.findByClassAndDate(eq(TENANT_ID), eq(CLASS_ID), eq(SESSION_DATE)))
-                .thenReturn(Optional.of(mockSession));
-
-        when(updateSessionAlertUseCase.execute(any()))
+        when(updateSessionAlertUseCase.execute(any(UpdateSessionAlertCommand.class)))
                 .thenThrow(new NotAlertAuthorException());
 
         mockMvc.perform(withAuth(

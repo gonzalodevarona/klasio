@@ -9,12 +9,11 @@ import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.InvalidAlertReasonException;
 import com.klasio.shared.infrastructure.exception.NotAlertAuthorException;
+import com.klasio.shared.infrastructure.exception.SessionNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 @Service
 @Transactional
@@ -33,8 +32,8 @@ public class UpdateSessionAlertService implements UpdateSessionAlertUseCase {
     @Override
     public SessionActionResult execute(UpdateSessionAlertCommand cmd) {
         ClassSession session = repository
-                .findById(cmd.tenantId(), cmd.sessionId())
-                .orElseThrow(() -> new NoSuchElementException("session not found: " + cmd.sessionId()));
+                .findByClassAndDate(cmd.tenantId(), cmd.classId(), cmd.sessionDate())
+                .orElseThrow(() -> new SessionNotFoundException(cmd.classId(), cmd.sessionDate()));
 
         try {
             session.updateAlertReason(cmd.newReason(), cmd.actorId(), cmd.actorRole());
