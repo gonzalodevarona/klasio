@@ -49,12 +49,12 @@ public class Notification {
     public static Notification create(UUID tenantId, UUID recipientUserId,
                                        NotificationType type, String title, String body,
                                        Map<String, String> metadata, UUID createdBy) {
-        Objects.requireNonNull(tenantId);
-        Objects.requireNonNull(recipientUserId);
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(title);
-        Objects.requireNonNull(body);
-        Objects.requireNonNull(createdBy);
+        Objects.requireNonNull(tenantId, "tenantId must not be null");
+        Objects.requireNonNull(recipientUserId, "recipientUserId must not be null");
+        Objects.requireNonNull(type, "type must not be null");
+        Objects.requireNonNull(title, "title must not be null");
+        Objects.requireNonNull(body, "body must not be null");
+        Objects.requireNonNull(createdBy, "createdBy must not be null");
         if (title.isBlank()) throw new IllegalArgumentException("title must not be blank");
         if (title.length() > MAX_TITLE_LENGTH)
             throw new IllegalArgumentException("title must be ≤ " + MAX_TITLE_LENGTH + " chars");
