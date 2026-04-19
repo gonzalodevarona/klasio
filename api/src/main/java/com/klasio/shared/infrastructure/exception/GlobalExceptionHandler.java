@@ -296,9 +296,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotificationNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotificationNotFound(NotificationNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(new ErrorResponse.ErrorDetail(
-                        "NOTIFICATION_NOT_FOUND", ex.getMessage())));
+        var error = new ErrorResponse.ErrorDetail("NOTIFICATION_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(RegistrationNotCancellableException.class)

@@ -43,6 +43,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -177,6 +178,7 @@ class MeNotificationsControllerIT {
                         .with(authentication(userAuth())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items[0].type").value("CLASS_SESSION_ALERTED"))
                 .andExpect(jsonPath("$.total").value(1));
     }
 
@@ -231,7 +233,8 @@ class MeNotificationsControllerIT {
 
         mockMvc.perform(patch("/api/v1/me/notifications/{id}/read", NOTIF_ID)
                         .with(authentication(userAuth())))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
     }
 
     // ---------------------------------------------------------------
