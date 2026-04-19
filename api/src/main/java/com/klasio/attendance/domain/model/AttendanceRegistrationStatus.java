@@ -6,5 +6,6 @@ public enum AttendanceRegistrationStatus {
     CANCELLED_BY_SYSTEM,
     PRESENT,
     PRESENT_NO_HOURS,
-    ABSENT
+    ABSENT,
+    SESSION_CANCELLED
 }
