@@ -422,6 +422,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(SessionAlreadyStartedException.class)
+    public ResponseEntity<ErrorResponse> handleSessionStarted(SessionAlreadyStartedException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_ALREADY_STARTED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(SessionAlreadyCancelledException.class)
+    public ResponseEntity<ErrorResponse> handleSessionAlreadyCancelled(SessionAlreadyCancelledException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_ALREADY_CANCELLED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(InvalidAlertReasonException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidReason(InvalidAlertReasonException ex) {
+        var error = new ErrorResponse.ErrorDetail("INVALID_ALERT_REASON", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(NotAlertAuthorException.class)
+    public ResponseEntity<ErrorResponse> handleNotAlertAuthor(NotAlertAuthorException ex) {
+        var error = new ErrorResponse.ErrorDetail("NOT_ALERT_AUTHOR", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Validation error: {}", ex.getMessage());
