@@ -37,9 +37,9 @@ public class MarkNotificationReadService implements MarkNotificationReadUseCase 
 
         boolean wasRead = n.isRead();
         n.markRead(Instant.now());
-        repository.save(n);
 
         if (!wasRead) {
+            repository.save(n);
             for (DomainEvent e : n.getDomainEvents()) {
                 eventPublisher.publishEvent(e);
             }

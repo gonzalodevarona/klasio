@@ -11,9 +11,15 @@ import java.util.UUID;
 @Service
 @Transactional
 public class MarkAllNotificationsReadService implements MarkAllNotificationsReadUseCase {
+
     private final NotificationRepository repository;
-    public MarkAllNotificationsReadService(NotificationRepository repository) { this.repository = repository; }
-    @Override public int execute(UUID tenantId, UUID userId) {
+
+    public MarkAllNotificationsReadService(NotificationRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public int execute(UUID tenantId, UUID userId) {
         return repository.markAllReadForRecipient(tenantId, userId, Instant.now());
     }
 }

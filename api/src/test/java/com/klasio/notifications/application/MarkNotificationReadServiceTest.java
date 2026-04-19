@@ -62,4 +62,20 @@ class MarkNotificationReadServiceTest {
                 .isInstanceOf(NotificationNotFoundException.class);
         verify(repo, never()).save(any());
     }
+
+    @Test
+    void doesNotSaveWhenAlreadyRead() {
+        UUID tenant = UUID.randomUUID();
+        UUID user = UUID.randomUUID();
+        Notification n = Notification.create(tenant, user, NotificationType.CLASS_SESSION_ALERTED,
+                "t", "b", Map.of(), UUID.randomUUID());
+        n.markRead(java.time.Instant.now());
+        n.clearDomainEvents();
+        when(repo.findById(eq(tenant), any(NotificationId.class))).thenReturn(Optional.of(n));
+
+        service.execute(tenant, user, n.getId().value());
+
+        verify(repo, never()).save(any());
+        verify(publisher, never()).publishEvent(any());
+    }
 }

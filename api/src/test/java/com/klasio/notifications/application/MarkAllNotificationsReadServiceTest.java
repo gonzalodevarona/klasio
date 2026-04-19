@@ -20,4 +20,13 @@ class MarkAllNotificationsReadServiceTest {
         int updated = new MarkAllNotificationsReadService(repo).execute(t, u);
         assertThat(updated).isEqualTo(5);
     }
+
+    @Test
+    void returnsZeroWhenNoUnreadNotifications() {
+        NotificationRepository repo = mock(NotificationRepository.class);
+        UUID t = UUID.randomUUID(); UUID u = UUID.randomUUID();
+        when(repo.markAllReadForRecipient(eq(t), eq(u), any(Instant.class))).thenReturn(0);
+        int updated = new MarkAllNotificationsReadService(repo).execute(t, u);
+        assertThat(updated).isEqualTo(0);
+    }
 }

@@ -17,4 +17,12 @@ class GetUnreadCountServiceTest {
         when(repo.countUnread(t, u)).thenReturn(7L);
         assertThat(new GetUnreadCountService(repo).execute(t, u)).isEqualTo(7L);
     }
+
+    @Test
+    void returnsZeroWhenNoUnread() {
+        NotificationRepository repo = mock(NotificationRepository.class);
+        UUID t = UUID.randomUUID(); UUID u = UUID.randomUUID();
+        when(repo.countUnread(t, u)).thenReturn(0L);
+        assertThat(new GetUnreadCountService(repo).execute(t, u)).isEqualTo(0L);
+    }
 }

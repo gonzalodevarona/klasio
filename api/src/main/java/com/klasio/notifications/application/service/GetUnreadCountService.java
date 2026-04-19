@@ -10,9 +10,15 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 public class GetUnreadCountService implements GetUnreadCountUseCase {
+
     private final NotificationRepository repository;
-    public GetUnreadCountService(NotificationRepository repository) { this.repository = repository; }
-    @Override public long execute(UUID tenantId, UUID userId) {
+
+    public GetUnreadCountService(NotificationRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public long execute(UUID tenantId, UUID userId) {
         return repository.countUnread(tenantId, userId);
     }
 }
