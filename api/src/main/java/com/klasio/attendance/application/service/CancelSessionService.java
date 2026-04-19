@@ -22,6 +22,7 @@ import com.klasio.shared.infrastructure.exception.SessionAlreadyCancelledExcepti
 import com.klasio.shared.infrastructure.exception.SessionAlreadyStartedException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ import java.util.UUID;
 
 @Service
 @Transactional
+@PreAuthorize("hasAnyRole('PROFESSOR','MANAGER','ADMIN','SUPERADMIN')")
 public class CancelSessionService implements CancelSessionUseCase {
 
     private final ClassDetailsPort classDetailsPort;

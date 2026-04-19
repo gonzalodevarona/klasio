@@ -9,6 +9,7 @@ import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.InvalidAlertReasonException;
 import com.klasio.shared.infrastructure.exception.NotAlertAuthorException;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.NoSuchElementException;
 
 @Service
 @Transactional
+@PreAuthorize("hasAnyRole('PROFESSOR','MANAGER','ADMIN','SUPERADMIN')")
 public class UpdateSessionAlertService implements UpdateSessionAlertUseCase {
 
     private final ClassSessionRepository repository;
