@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,6 +61,9 @@ public interface SpringDataAttendanceRegistrationRepository
             @Param("tenantId") UUID tenantId,
             @Param("studentId") UUID studentId,
             @Param("sessionIds") List<UUID> sessionIds);
+
+    List<AttendanceRegistrationJpaEntity> findAllByTenantIdAndSessionIdAndStatusNotIn(
+            UUID tenantId, UUID sessionId, Collection<String> excludedStatuses);
 
     @Query(value = """
             SELECT * FROM attendance_registrations
