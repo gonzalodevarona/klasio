@@ -1,9 +1,14 @@
 package com.klasio.attendance.domain.model;
 
+import com.klasio.attendance.domain.event.SessionAlertRaised;
+import com.klasio.attendance.domain.event.SessionAlertUpdated;
+import com.klasio.attendance.domain.event.SessionCancelled;
+import com.klasio.shared.domain.DomainEvent;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -16,6 +21,19 @@ class ClassSessionTest {
     private static final LocalDate DATE = LocalDate.of(2026, 5, 4);
     private static final LocalTime START = LocalTime.of(18, 0);
     private static final LocalTime END = LocalTime.of(19, 0);
+
+    private static final String REASON = "rain cancelled the outdoor court"; // 35 chars
+
+    private ClassSession sample() {
+        return ClassSession.materialize(
+                UUID.randomUUID(), UUID.randomUUID(),
+                LocalDate.now().plusDays(1), LocalTime.of(10, 0), LocalTime.of(11, 0),
+                UUID.randomUUID());
+    }
+
+    // ---------------------------------------------------------------
+    // materialize() — unchanged baseline tests
+    // ---------------------------------------------------------------
 
     @Test
     void materialize_validArgs_createsScheduledSession() {
@@ -48,42 +66,95 @@ class ClassSessionTest {
         ).isInstanceOf(NullPointerException.class);
     }
 
-    @Test
-    void cancel_scheduledSession_transitionsToCancelled() {
-        ClassSession session = ClassSession.materialize(TENANT_ID, CLASS_ID, DATE, START, END, ACTOR_ID);
-        session.cancel("Professor is sick", ACTOR_ID);
+    // ---------------------------------------------------------------
+    // raiseAlert() — new 3-arg signature + domain events + validation
+    // ---------------------------------------------------------------
 
-        assertThat(session.getStatus()).isEqualTo(ClassSessionStatus.CANCELLED);
-        assertThat(session.getCancellationReason()).isEqualTo("Professor is sick");
-        assertThat(session.getCancelledBy()).isEqualTo(ACTOR_ID);
-        assertThat(session.getCancelledAt()).isNotNull();
+    @Test
+    void raiseAlertEmitsSessionAlertRaisedEvent() {
+        ClassSession s = sample();
+        s.raiseAlert(REASON, UUID.randomUUID(), "PROFESSOR");
+        assertThat(s.getStatus()).isEqualTo(ClassSessionStatus.ALERTED);
+        assertThat(s.getAlertReason()).isEqualTo(REASON);
+        List<DomainEvent> events = s.getDomainEvents();
+        assertThat(events).hasSize(1).first().isInstanceOf(SessionAlertRaised.class);
     }
 
     @Test
-    void cancel_alreadyCancelled_throws() {
-        ClassSession session = ClassSession.materialize(TENANT_ID, CLASS_ID, DATE, START, END, ACTOR_ID);
-        session.cancel("Reason", ACTOR_ID);
+    void raiseAlertRejectsReasonBelow20Chars() {
+        ClassSession s = sample();
+        assertThatThrownBy(() -> s.raiseAlert("too short", UUID.randomUUID(), "PROFESSOR"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("20");
+    }
 
-        assertThatThrownBy(() -> session.cancel("Another reason", ACTOR_ID))
+    @Test
+    void raiseAlertRejectsCancelledSession() {
+        ClassSession s = sample();
+        s.cancel(REASON, UUID.randomUUID(), "ADMIN");
+        s.clearDomainEvents();
+        assertThatThrownBy(() -> s.raiseAlert(REASON, UUID.randomUUID(), "PROFESSOR"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    // ---------------------------------------------------------------
+    // updateAlertReason()
+    // ---------------------------------------------------------------
+
+    @Test
+    void updateAlertReasonRequiresALERTEDStatus() {
+        ClassSession s = sample();
+        assertThatThrownBy(() -> s.updateAlertReason(REASON, UUID.randomUUID(), "PROFESSOR"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void updateAlertReasonRequiresOriginalAuthor() {
+        ClassSession s = sample();
+        UUID author = UUID.randomUUID();
+        s.raiseAlert(REASON, author, "PROFESSOR");
+        s.clearDomainEvents();
+        assertThatThrownBy(() -> s.updateAlertReason("a different reason for the class", UUID.randomUUID(), "PROFESSOR"))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("already cancelled");
+                .hasMessageContaining("author");
     }
 
     @Test
-    void raiseAlert_scheduledSession_transitionsToAlerted() {
-        ClassSession session = ClassSession.materialize(TENANT_ID, CLASS_ID, DATE, START, END, ACTOR_ID);
-        session.raiseAlert("Low attendance expected", ACTOR_ID);
+    void updateAlertReasonEmitsSessionAlertUpdatedEvent() {
+        ClassSession s = sample();
+        UUID author = UUID.randomUUID();
+        s.raiseAlert(REASON, author, "PROFESSOR");
+        s.clearDomainEvents();
+        String updated = "rain keeps going, now it is pouring hard";
+        s.updateAlertReason(updated, author, "PROFESSOR");
+        assertThat(s.getAlertReason()).isEqualTo(updated);
+        assertThat(s.getDomainEvents()).hasSize(1).first().isInstanceOf(SessionAlertUpdated.class);
+    }
 
-        assertThat(session.getStatus()).isEqualTo(ClassSessionStatus.ALERTED);
-        assertThat(session.getAlertReason()).isEqualTo("Low attendance expected");
+    // ---------------------------------------------------------------
+    // cancel() — new 3-arg signature + domain events + validation
+    // ---------------------------------------------------------------
+
+    @Test
+    void cancelEmitsSessionCancelledEvent() {
+        ClassSession s = sample();
+        s.cancel(REASON, UUID.randomUUID(), "ADMIN");
+        assertThat(s.getStatus()).isEqualTo(ClassSessionStatus.CANCELLED);
+        assertThat(s.getDomainEvents()).hasSize(1).first().isInstanceOf(SessionCancelled.class);
     }
 
     @Test
-    void raiseAlert_cancelledSession_throws() {
-        ClassSession session = ClassSession.materialize(TENANT_ID, CLASS_ID, DATE, START, END, ACTOR_ID);
-        session.cancel("Reason", ACTOR_ID);
+    void cancelRejectsReasonBelow20Chars() {
+        ClassSession s = sample();
+        assertThatThrownBy(() -> s.cancel("short", UUID.randomUUID(), "ADMIN"))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 
-        assertThatThrownBy(() -> session.raiseAlert("Alert", ACTOR_ID))
+    @Test
+    void cancelIsTerminal() {
+        ClassSession s = sample();
+        s.cancel(REASON, UUID.randomUUID(), "ADMIN");
+        assertThatThrownBy(() -> s.cancel(REASON, UUID.randomUUID(), "ADMIN"))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

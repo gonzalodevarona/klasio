@@ -1,8 +1,16 @@
 package com.klasio.attendance.domain.model;
 
+import com.klasio.attendance.domain.event.SessionAlertRaised;
+import com.klasio.attendance.domain.event.SessionAlertUpdated;
+import com.klasio.attendance.domain.event.SessionCancelled;
+import com.klasio.shared.domain.DomainEvent;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -11,6 +19,8 @@ import java.util.UUID;
  * Pure Java domain model — zero Spring imports.
  */
 public class ClassSession {
+
+    private static final int MIN_REASON_LENGTH = 20;
 
     private final ClassSessionId id;
     private final UUID tenantId;
@@ -33,6 +43,8 @@ public class ClassSession {
     private final UUID createdBy;
     private Instant updatedAt;
     private UUID updatedBy;
+
+    private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     private ClassSession(ClassSessionId id, UUID tenantId, UUID classId,
                          LocalDate sessionDate, LocalTime startTime, LocalTime endTime,
@@ -97,11 +109,30 @@ public class ClassSession {
                 createdAt, createdBy, updatedAt, updatedBy);
     }
 
-    // Forward-compat state transitions (RF-27 / RF-28 — not REST-exposed in RF-23)
+    // ---------------------------------------------------------------
+    // Validation helper
+    // ---------------------------------------------------------------
 
-    public void raiseAlert(String reason, UUID alertedBy) {
+    private static void validateReason(String reason) {
         Objects.requireNonNull(reason, "reason must not be null");
+        if (reason.trim().length() < MIN_REASON_LENGTH) {
+            throw new IllegalArgumentException(
+                    "reason must be at least " + MIN_REASON_LENGTH + " characters");
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // State transitions (RF-27 / RF-28)
+    // ---------------------------------------------------------------
+
+    /**
+     * Raises an alert on this session (SCHEDULED or ALERTED → ALERTED).
+     * Emits {@link SessionAlertRaised}.
+     */
+    public void raiseAlert(String reason, UUID alertedBy, String actorRole) {
         Objects.requireNonNull(alertedBy, "alertedBy must not be null");
+        Objects.requireNonNull(actorRole, "actorRole must not be null");
+        validateReason(reason);
         if (this.status == ClassSessionStatus.CANCELLED) {
             throw new IllegalStateException("Cannot alert a cancelled session");
         }
@@ -112,11 +143,40 @@ public class ClassSession {
         this.alertedAt = now;
         this.updatedAt = now;
         this.updatedBy = alertedBy;
+        this.domainEvents.add(new SessionAlertRaised(
+                this.id.value(), this.tenantId, this.classId, reason, alertedBy, actorRole, now));
     }
 
-    public void cancel(String reason, UUID cancelledBy) {
-        Objects.requireNonNull(reason, "reason must not be null");
+    /**
+     * Updates the alert reason on an ALERTED session. Only the original author may update.
+     * Emits {@link SessionAlertUpdated}.
+     */
+    public void updateAlertReason(String newReason, UUID actorId, String actorRole) {
+        Objects.requireNonNull(actorId, "actorId must not be null");
+        Objects.requireNonNull(actorRole, "actorRole must not be null");
+        validateReason(newReason);
+        if (this.status != ClassSessionStatus.ALERTED) {
+            throw new IllegalStateException("Can only update alert reason on ALERTED sessions");
+        }
+        if (!actorId.equals(this.alertedBy)) {
+            throw new IllegalStateException("Only the alert author can update the reason");
+        }
+        Instant now = Instant.now();
+        this.alertReason = newReason;
+        this.updatedAt = now;
+        this.updatedBy = actorId;
+        this.domainEvents.add(new SessionAlertUpdated(
+                this.id.value(), this.tenantId, this.classId, newReason, actorId, actorRole, now));
+    }
+
+    /**
+     * Cancels this session (any non-CANCELLED status → CANCELLED).
+     * Emits {@link SessionCancelled}.
+     */
+    public void cancel(String reason, UUID cancelledBy, String actorRole) {
         Objects.requireNonNull(cancelledBy, "cancelledBy must not be null");
+        Objects.requireNonNull(actorRole, "actorRole must not be null");
+        validateReason(reason);
         if (this.status == ClassSessionStatus.CANCELLED) {
             throw new IllegalStateException("Session is already cancelled");
         }
@@ -127,7 +187,26 @@ public class ClassSession {
         this.cancelledAt = now;
         this.updatedAt = now;
         this.updatedBy = cancelledBy;
+        this.domainEvents.add(new SessionCancelled(
+                this.id.value(), this.tenantId, this.classId, reason, cancelledBy, actorRole,
+                List.of(), now));
     }
+
+    // ---------------------------------------------------------------
+    // Domain event accessors
+    // ---------------------------------------------------------------
+
+    public List<DomainEvent> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    public void clearDomainEvents() {
+        domainEvents.clear();
+    }
+
+    // ---------------------------------------------------------------
+    // Getters
+    // ---------------------------------------------------------------
 
     public ClassSessionId getId() { return id; }
     public UUID getTenantId() { return tenantId; }
