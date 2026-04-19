@@ -187,6 +187,7 @@ public class ClassSession {
         this.cancelledAt = now;
         this.updatedAt = now;
         this.updatedBy = cancelledBy;
+        // affectedStudentIds populated by CancelSessionService after fan-out; aggregate emits empty list
         this.domainEvents.add(new SessionCancelled(
                 this.id.value(), this.tenantId, this.classId, reason, cancelledBy, actorRole,
                 List.of(), now));

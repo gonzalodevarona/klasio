@@ -6,6 +6,7 @@ import com.klasio.attendance.domain.event.AttendanceMarkedPresent;
 import com.klasio.attendance.domain.event.AttendanceMarkedPresentNoHours;
 import com.klasio.attendance.domain.event.AttendanceRegistered;
 import com.klasio.attendance.domain.event.RegistrationCancelled;
+import com.klasio.attendance.domain.event.RegistrationCancelledBySession;
 import com.klasio.shared.domain.DomainEvent;
 
 import java.time.Instant;
@@ -354,7 +355,7 @@ public class AttendanceRegistration {
         this.cancelledBy = actorId;
         this.updatedAt = now;
         this.updatedBy = actorId;
-        this.domainEvents.add(new com.klasio.attendance.domain.event.RegistrationCancelledBySession(
+        this.domainEvents.add(new RegistrationCancelledBySession(
                 this.id.value(), this.tenantId, this.sessionId, this.classId, this.studentId,
                 prior, actorId, now));
     }

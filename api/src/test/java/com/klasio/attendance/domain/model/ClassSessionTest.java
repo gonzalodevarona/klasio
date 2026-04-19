@@ -78,6 +78,9 @@ class ClassSessionTest {
         assertThat(s.getAlertReason()).isEqualTo(REASON);
         List<DomainEvent> events = s.getDomainEvents();
         assertThat(events).hasSize(1).first().isInstanceOf(SessionAlertRaised.class);
+        SessionAlertRaised event = (SessionAlertRaised) events.get(0);
+        assertThat(event.reason()).isEqualTo(REASON);
+        assertThat(event.actorRole()).isEqualTo("PROFESSOR");
     }
 
     @Test
@@ -141,6 +144,10 @@ class ClassSessionTest {
         s.cancel(REASON, UUID.randomUUID(), "ADMIN");
         assertThat(s.getStatus()).isEqualTo(ClassSessionStatus.CANCELLED);
         assertThat(s.getDomainEvents()).hasSize(1).first().isInstanceOf(SessionCancelled.class);
+        SessionCancelled cancelEvent = (SessionCancelled) s.getDomainEvents().get(0);
+        assertThat(cancelEvent.reason()).isEqualTo(REASON);
+        assertThat(cancelEvent.actorRole()).isEqualTo("ADMIN");
+        assertThat(cancelEvent.affectedStudentIds()).isEmpty();
     }
 
     @Test
