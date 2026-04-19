@@ -3,6 +3,7 @@ package com.klasio.notifications.infrastructure.persistence;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.domain.Persistable;
 
 import java.time.Instant;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "notifications")
-public class NotificationJpaEntity {
+public class NotificationJpaEntity implements Persistable<UUID> {
 
     @Id
     @Column(name = "id")
@@ -73,4 +74,7 @@ public class NotificationJpaEntity {
     public UUID getCreatedBy() { return createdBy; }
 
     public void setReadAt(Instant readAt) { this.readAt = readAt; }
+
+    @Override
+    public boolean isNew() { return true; }
 }
