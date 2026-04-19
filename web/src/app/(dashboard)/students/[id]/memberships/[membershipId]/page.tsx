@@ -19,7 +19,7 @@ export default function MembershipDetailPage({ params }: Props) {
   const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
   const { user } = useAuth();
 
-  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
+  const isAdmin = (user?.roles.includes("ADMIN") || user?.roles.includes("SUPERADMIN")) ?? false;
 
   return (
     <div>

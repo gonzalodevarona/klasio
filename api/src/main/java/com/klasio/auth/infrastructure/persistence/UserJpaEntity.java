@@ -7,6 +7,8 @@ import com.klasio.shared.domain.model.IdentityDocumentType;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -25,9 +27,11 @@ public class UserJpaEntity {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Set<Role> roles = new HashSet<>();
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -52,6 +56,15 @@ public class UserJpaEntity {
     @Column(name = "identity_number", nullable = false, length = 30)
     private String identityNumber;
 
+    @Column(name = "first_name", length = 100)
+    private String firstName;
+
+    @Column(name = "last_name", length = 100)
+    private String lastName;
+
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
     protected UserJpaEntity() {}
 
     public static UserJpaEntity fromDomain(User user) {
@@ -60,7 +73,7 @@ public class UserJpaEntity {
         entity.tenantId = user.getTenantId();
         entity.email = user.getEmail();
         entity.passwordHash = user.getPasswordHash();
-        entity.role = user.getRole();
+        entity.roles = new HashSet<>(user.getRoles());
         entity.status = user.getStatus();
         entity.failedLoginCount = user.getFailedLoginCount();
         entity.lockedUntil = user.getLockedUntil();
@@ -68,20 +81,24 @@ public class UserJpaEntity {
         entity.updatedAt = user.getUpdatedAt();
         entity.identityDocumentType = user.getIdentityDocumentType();
         entity.identityNumber = user.getIdentityNumber();
+        entity.firstName = user.getFirstName();
+        entity.lastName = user.getLastName();
+        entity.phoneNumber = user.getPhoneNumber();
         return entity;
     }
 
     public User toDomain() {
-        return new User(id, tenantId, email, passwordHash, role, status,
+        return new User(id, tenantId, email, passwordHash, Set.copyOf(roles), status,
                 failedLoginCount, lockedUntil, createdAt, updatedAt,
-                identityDocumentType, identityNumber);
+                identityDocumentType, identityNumber,
+                firstName, lastName, phoneNumber);
     }
 
     // Getters for JPA queries
     public UUID getId() { return id; }
     public UUID getTenantId() { return tenantId; }
     public String getEmail() { return email; }
-    public Role getRole() { return role; }
+    public Set<Role> getRoles() { return Set.copyOf(roles); }
     public UserStatus getStatus() { return status; }
     public IdentityDocumentType getIdentityDocumentType() { return identityDocumentType; }
     public String getIdentityNumber() { return identityNumber; }

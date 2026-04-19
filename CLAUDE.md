@@ -228,6 +228,52 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | RF-31 | Admin Dashboard | Not started — blocked on RF-22, RF-23/RF-25 |
 | RF-32 | Transactional Email (Postmark) | 🔄 Partial — all listeners stubbed; no Postmark adapter yet |
 
+## Flyway Migration Ownership Rule
+
+### The problem
+
+Flyway connects as `klasio_app`. Any migration that runs `ALTER TABLE`, `ALTER INDEX`, or `ALTER SEQUENCE` will fail with `ERROR: must be owner of table <X>` if the target object is owned by a different PostgreSQL role (usually `postgres`).
+
+This happens whenever the DB is wiped and manually reseeded via `psql` or any script that runs as `postgres` — all objects created in that session are owned by `postgres`, not by `klasio_app`.
+
+### How to detect it before writing a migration
+
+Before writing any migration that uses `ALTER TABLE` (adding a column, changing a constraint, enabling RLS, etc.), check who owns the target table:
+
+```sql
+SELECT tablename, tableowner FROM pg_tables WHERE schemaname = 'public';
+```
+
+If `tableowner` is not `klasio_app` for any table the migration will touch, fix ownership first (see below) — or the migration will fail at startup.
+
+### Prevention rules
+
+1. **Never run DDL manually as `postgres`** after the schema is bootstrapped. Any structural change to the DB must go through a Flyway migration, which runs as `klasio_app`.
+2. **Seeds and one-off data fixes** that must run as `postgres` (e.g. `docker exec psql -U postgres`) must not create or alter tables — data-only operations (`INSERT`, `UPDATE`, `DELETE`) are safe.
+3. **After any `docker compose down -v` + fresh container**, the schema is bootstrapped by `docker/init.sql`, which sets `ALTER SCHEMA public OWNER TO klasio_app`. Tables created by Flyway afterwards are owned by `klasio_app`. Do not run `psql -U postgres` DDL after that point.
+
+### Recovery (when the error has already occurred)
+
+Run this once against the container to reassign all `postgres`-owned tables to `klasio_app`, then restart the application:
+
+```bash
+docker exec -i klasio-postgres psql -U postgres -d klasio <<'EOF'
+DO $$
+DECLARE r RECORD;
+BEGIN
+  FOR r IN
+    SELECT tablename FROM pg_tables
+    WHERE schemaname = 'public' AND tableowner = 'postgres'
+  LOOP
+    EXECUTE 'ALTER TABLE public.' || r.tablename || ' OWNER TO klasio_app';
+  END LOOP;
+END
+$$;
+EOF
+```
+
+---
+
 ## Membership Module Architecture (com.klasio.membership)
 
 Added in `006-membership-lifecycle`. Key patterns:

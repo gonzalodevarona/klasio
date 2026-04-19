@@ -539,4 +539,87 @@ class MembershipTest {
             assertEquals(MembershipStatus.ACTIVE, m.getStatus());
         }
     }
+
+    // ---- refundHours() ----
+
+    @Nested
+    @DisplayName("refundHours()")
+    class RefundHours {
+
+        private Membership activeMembership() {
+            Membership m = createDefault(); // 10 hours
+            m.markProofUploaded();
+            m.validatePayment(ACTOR_ID, true);
+            m.clearDomainEvents();
+            return m;
+        }
+
+        @Test
+        @DisplayName("adds hours back to ACTIVE membership")
+        void refundHours_active_increasesBalance() {
+            Membership m = activeMembership();
+            m.deductHours(4, ACTOR_ID, "PROFESSOR");
+            m.clearDomainEvents();
+
+            m.refundHours(4, ACTOR_ID, "MANAGER");
+
+            assertEquals(10, m.getAvailableHours());
+            assertEquals(MembershipStatus.ACTIVE, m.getStatus());
+        }
+
+        @Test
+        @DisplayName("INACTIVE membership transitions back to ACTIVE on refund")
+        void refundHours_inactive_transitionsToActive() {
+            Membership m = activeMembership();
+            m.deductHours(10, ACTOR_ID, "PROFESSOR"); // depletes → INACTIVE
+            m.clearDomainEvents();
+
+            m.refundHours(3, ACTOR_ID, "MANAGER");
+
+            assertEquals(3, m.getAvailableHours());
+            assertEquals(MembershipStatus.ACTIVE, m.getStatus());
+        }
+
+        @Test
+        @DisplayName("emits HourAdjusted event with ATTENDANCE_REFUND type")
+        void refundHours_emitsHourAdjustedEvent() {
+            Membership m = activeMembership();
+            m.deductHours(2, ACTOR_ID, "PROFESSOR");
+            m.clearDomainEvents();
+
+            m.refundHours(2, ACTOR_ID, "MANAGER");
+
+            List<DomainEvent> events = m.getDomainEvents();
+            assertFalse(events.isEmpty());
+            assertTrue(events.stream().anyMatch(e -> e instanceof com.klasio.membership.domain.event.HourAdjusted ha
+                    && ha.type() == HourTransactionType.ATTENDANCE_REFUND
+                    && ha.delta() == 2));
+        }
+
+        @Test
+        @DisplayName("throws on EXPIRED membership")
+        void refundHours_expired_throws() {
+            Membership m = activeMembership();
+            m.expire();
+
+            assertThrows(IllegalStateException.class, () ->
+                    m.refundHours(2, ACTOR_ID, "MANAGER"));
+        }
+
+        @Test
+        @DisplayName("throws on PENDING_PAYMENT membership")
+        void refundHours_pendingPayment_throws() {
+            Membership m = createDefault();
+            assertThrows(IllegalStateException.class, () ->
+                    m.refundHours(2, ACTOR_ID, "MANAGER"));
+        }
+
+        @Test
+        @DisplayName("throws when hours is less than 1")
+        void refundHours_zeroHours_throws() {
+            Membership m = activeMembership();
+            assertThrows(IllegalArgumentException.class, () ->
+                    m.refundHours(0, ACTOR_ID, "MANAGER"));
+        }
+    }
 }

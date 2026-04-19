@@ -43,7 +43,9 @@ export default function StudentMembershipDetailPage({ params }: Props) {
             isAdmin={false}
             isManager={false}
           />
-          {membership.status === "EXPIRED" && (
+          {(membership.status === "PENDING_PAYMENT" ||
+            membership.status === "PENDING_PAYMENT_VALIDATION" ||
+            membership.status === "EXPIRED") && (
             <PaymentProofPanel membershipId={membershipId} membershipStatus={membership.status} />
           )}
           <PaymentProofTimeline membershipId={membershipId} membershipStatus={membership.status} />

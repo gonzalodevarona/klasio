@@ -62,6 +62,7 @@ export default function EditPlanPage({ params }: EditPlanPageProps) {
         <div className="bg-white shadow rounded-lg p-6">
           <ProgramPlanForm
             programId={id}
+            tenantId={program?.tenantId}
             plan={plan}
           />
         </div>

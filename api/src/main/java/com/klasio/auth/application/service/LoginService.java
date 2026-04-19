@@ -81,7 +81,7 @@ public class LoginService {
         userRepository.save(user);
 
         String accessToken = jwtTokenService.generateAccessToken(
-                user.getId(), user.getTenantId(), user.getRole());
+                user.getId(), user.getTenantId(), user.getRoles());
 
         String rawRefreshToken = tokenGenerator.generateRawToken();
         String hashedRefreshToken = tokenGenerator.hashToken(rawRefreshToken);
@@ -93,13 +93,13 @@ public class LoginService {
 
         eventPublisher.publishEvent(new UserLoggedInEvent(
                 user.getId(), user.getTenantId(), user.getEmail(),
-                user.getRole(), Instant.now()));
+                user.primaryRole(), Instant.now()));
 
         return new LoginResult(
                 user.getId(),
-                user.getRole(),
+                user.getRoles(),
                 user.getTenantId(),
-                user.getRole().dashboardUrl(),
+                user.primaryRole().dashboardUrl(),
                 accessToken,
                 rawRefreshToken
         );

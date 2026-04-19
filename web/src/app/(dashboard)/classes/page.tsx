@@ -1,19 +1,25 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { ClassLevel, ClassStatus } from "@/lib/types/programClass";
 import { useAllClasses } from "@/hooks/useProgramClasses";
+import { useAuth } from "@/hooks/useAuth";
+import { primaryRole } from "@/lib/types/auth";
 import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import ClassTypeBadge from "@/components/classes/ClassTypeBadge";
 import ClassStatusBadge from "@/components/classes/ClassStatusBadge";
+import ClassRosterPanel from "@/components/attendance/ClassRosterPanel";
 
 export default function AllClassesPage() {
+  const { user } = useAuth();
   const [page, setPage] = useState(0);
   const [levelFilter, setLevelFilter] = useState<ClassLevel | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<ClassStatus | undefined>(undefined);
   const [programNameInput, setProgramNameInput] = useState("");
   const [programNameFilter, setProgramNameFilter] = useState<string | undefined>(undefined);
+  const [expandedClassId, setExpandedClassId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const SIZE = 20;
 
@@ -43,6 +49,10 @@ export default function AllClassesPage() {
       month: "short",
       day: "numeric",
     });
+  }
+
+  function toggleExpand(classId: string) {
+    setExpandedClassId((prev) => (prev === classId ? null : classId));
   }
 
   return (
@@ -126,10 +136,11 @@ export default function AllClassesPage() {
 
         {!loading && !error && classes.length > 0 && (
           <>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="w-10 px-3 py-3" aria-label="Expand" />
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
@@ -158,42 +169,64 @@ export default function AllClassesPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {classes.map((c) => (
-                    <tr key={c.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        <Link
-                          href={`/programs/${c.programId}/classes/${c.id}`}
-                          className="hover:text-blue-600 hover:underline"
-                        >
-                          {c.name}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <Link
-                          href={`/programs/${c.programId}/classes`}
-                          className="hover:text-blue-600 hover:underline"
-                        >
-                          {c.programName ?? c.programId}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <ClassLevelBadge level={c.level} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <ClassTypeBadge type={c.type} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {c.professorName ?? <span className="text-gray-400 italic">Unassigned</span>}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {c.maxStudents}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <ClassStatusBadge status={c.status} />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(c.createdAt)}
-                      </td>
-                    </tr>
+                    <React.Fragment key={c.id}>
+                      <tr
+                        className={`hover:bg-gray-50 cursor-pointer ${expandedClassId === c.id ? "bg-blue-50" : ""}`}
+                        onClick={() => toggleExpand(c.id)}
+                      >
+                        <td className="px-3 py-4 text-center text-gray-400">
+                          {expandedClassId === c.id ? (
+                            <ChevronDown className="w-4 h-4 mx-auto text-blue-500" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 mx-auto" />
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <Link
+                            href={`/programs/${c.programId}/classes/${c.id}`}
+                            className="hover:text-blue-600 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {c.name}
+                          </Link>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <Link
+                            href={`/programs/${c.programId}/classes`}
+                            className="hover:text-blue-600 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {c.programName ?? c.programId}
+                          </Link>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <ClassLevelBadge level={c.level} />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <ClassTypeBadge type={c.type} />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {c.professorName ?? <span className="text-gray-400 italic">Unassigned</span>}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {c.maxStudents}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <ClassStatusBadge status={c.status} />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(c.createdAt)}
+                        </td>
+                      </tr>
+
+                      {expandedClassId === c.id && (
+                        <tr>
+                          <td colSpan={9} className="p-0">
+                            <ClassRosterPanel classId={c.id} userRole={user ? primaryRole(user.roles) : undefined} />
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

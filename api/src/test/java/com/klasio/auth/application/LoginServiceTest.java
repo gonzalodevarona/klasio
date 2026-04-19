@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,7 +60,7 @@ class LoginServiceTest {
     private User activeUser(Role role) {
         UUID tenantId = role == Role.SUPERADMIN ? null : UUID.randomUUID();
         return User.createActive(tenantId, "test@example.com", "encoded_pass", role,
-                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", null, null, null);
     }
 
     @Test
@@ -76,7 +77,7 @@ class LoginServiceTest {
 
         assertNotNull(result);
         assertEquals(user.getId(), result.userId());
-        assertEquals(Role.ADMIN, result.role());
+        assertEquals(Role.ADMIN, result.primaryRole());
         assertEquals("/admin/dashboard", result.dashboardUrl());
         assertNotNull(result.accessToken());
         assertEquals("raw_refresh", result.refreshToken());
@@ -122,8 +123,8 @@ class LoginServiceTest {
     @Test
     void login_fifthFailure_locksAccount() {
         User user = new User(UUID.randomUUID(), UUID.randomUUID(), "test@example.com", "encoded_pass",
-                Role.ADMIN, UserStatus.ACTIVE, 4, null, Instant.now(), Instant.now(),
-                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001");
+                Set.of(Role.ADMIN), UserStatus.ACTIVE, 4, null, Instant.now(), Instant.now(),
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001", null, null, null);
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "encoded_pass")).thenReturn(false);
         when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -136,9 +137,9 @@ class LoginServiceTest {
     @Test
     void login_lockedAccount_throwsAccountLocked() {
         User user = new User(UUID.randomUUID(), UUID.randomUUID(), "test@example.com", "encoded_pass",
-                Role.ADMIN, UserStatus.ACTIVE, 5, Instant.now().plus(Duration.ofMinutes(15)),
+                Set.of(Role.ADMIN), UserStatus.ACTIVE, 5, Instant.now().plus(Duration.ofMinutes(15)),
                 Instant.now(), Instant.now(),
-                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001");
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "10000001", null, null, null);
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         assertThrows(AccountLockedException.class,

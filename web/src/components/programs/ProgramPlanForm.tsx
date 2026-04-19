@@ -10,6 +10,7 @@ import {
   ProgramPlanDetail,
   ScheduleEntry,
 } from "@/lib/types/programPlan";
+import { useManagers } from "@/hooks/useManagers";
 
 const DAYS_OF_WEEK = [
   "MONDAY",
@@ -33,11 +34,13 @@ const DAY_LABELS: Record<string, string> = {
 
 interface ProgramPlanFormProps {
   programId: string;
+  tenantId?: string;
   plan?: ProgramPlanDetail;
 }
 
 export default function ProgramPlanForm({
   programId,
+  tenantId,
   plan,
 }: ProgramPlanFormProps) {
   const router = useRouter();
@@ -55,6 +58,10 @@ export default function ProgramPlanForm({
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { managers, loading: loadingManagers } = useManagers(
+    tenantId ? { tenantId, status: "ACTIVE", size: 100 } : undefined
+  );
 
   function addScheduleEntry() {
     setScheduleEntries((prev) => [
@@ -106,14 +113,8 @@ export default function ProgramPlanForm({
       return;
     }
 
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!managerId.trim()) {
-      setError("Manager ID is required.");
-      setSubmitting(false);
-      return;
-    }
-    if (!uuidRegex.test(managerId.trim())) {
-      setError("Manager ID must be a valid UUID.");
+      setError("Manager is required.");
       setSubmitting(false);
       return;
     }
@@ -242,27 +243,36 @@ export default function ProgramPlanForm({
         />
       </div>
 
-      {/* Manager ID */}
+      {/* Manager */}
       <div>
         <label
           htmlFor="managerId"
           className="block text-sm font-medium text-gray-700"
         >
-          Manager ID
+          Manager
         </label>
-        <input
-          type="text"
+        <select
           id="managerId"
-          name="managerId"
           value={managerId}
           onChange={(e) => setManagerId(e.target.value)}
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          placeholder="e.g. 550e8400-e29b-41d4-a716-446655440000"
-        />
-        <p className="mt-1 text-xs text-gray-500">
-          UUID of the manager assigned to this plan.
-        </p>
+          disabled={loadingManagers}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-100"
+        >
+          <option value="">
+            {loadingManagers ? "Loading managers..." : "Select a manager..."}
+          </option>
+          {managers.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.firstName} {m.lastName} - {m.identityDocumentType} {m.identityNumber}
+            </option>
+          ))}
+        </select>
+        {!loadingManagers && managers.length === 0 && (
+          <p className="mt-1 text-xs text-amber-600">
+            No active managers available for this program.
+          </p>
+        )}
       </div>
 
       {modality === "HOURS_BASED" && (

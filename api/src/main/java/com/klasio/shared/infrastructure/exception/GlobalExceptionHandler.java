@@ -252,6 +252,60 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(SessionFullException.class)
+    public ResponseEntity<ErrorResponse> handleSessionFull(SessionFullException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_FULL", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(AlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyRegistered(AlreadyRegisteredException ex) {
+        var error = new ErrorResponse.ErrorDetail("ALREADY_REGISTERED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(SessionCancelledException.class)
+    public ResponseEntity<ErrorResponse> handleSessionCancelled(SessionCancelledException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_CANCELLED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(InsufficientHoursException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientHours(InsufficientHoursException ex) {
+        var error = new ErrorResponse.ErrorDetail("INSUFFICIENT_HOURS", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ClassLevelMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleClassLevelMismatch(ClassLevelMismatchException ex) {
+        var error = new ErrorResponse.ErrorDetail("CLASS_LEVEL_MISMATCH", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(SessionInPastException.class)
+    public ResponseEntity<ErrorResponse> handleSessionInPast(SessionInPastException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_IN_PAST", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(RegistrationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRegistrationNotFound(RegistrationNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("REGISTRATION_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(RegistrationNotCancellableException.class)
+    public ResponseEntity<ErrorResponse> handleRegistrationNotCancellable(RegistrationNotCancellableException ex) {
+        var error = new ErrorResponse.ErrorDetail("REGISTRATION_NOT_CANCELLABLE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(CancellationWindowExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleCancellationWindowExpired(CancellationWindowExpiredException ex) {
+        var error = new ErrorResponse.ErrorDetail("CANCELLATION_WINDOW_EXPIRED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingParam(MissingServletRequestParameterException ex) {
         log.warn("Missing required parameter: {}", ex.getParameterName());
@@ -281,6 +335,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleEmailNotVerified(EmailNotVerifiedException ex) {
         var error = new ErrorResponse.ErrorDetail("EMAIL_NOT_VERIFIED", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(com.klasio.auth.domain.exception.AdminNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAdminNotFound(
+            com.klasio.auth.domain.exception.AdminNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("ADMIN_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(com.klasio.auth.domain.exception.ManagerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleManagerNotFound(
+            com.klasio.auth.domain.exception.ManagerNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("MANAGER_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
@@ -334,6 +402,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleRoleElevation(RoleElevationForbiddenException ex) {
         var error = new ErrorResponse.ErrorDetail("ROLE_ELEVATION_FORBIDDEN", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(MarkingWindowException.class)
+    public ResponseEntity<ErrorResponse> handleMarkingWindow(MarkingWindowException ex) {
+        var error = new ErrorResponse.ErrorDetail("MARKING_WINDOW_VIOLATION", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(CorrectionWindowExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleCorrectionWindowExpired(CorrectionWindowExpiredException ex) {
+        var error = new ErrorResponse.ErrorDetail("CORRECTION_WINDOW_EXPIRED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

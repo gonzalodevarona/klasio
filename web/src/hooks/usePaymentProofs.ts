@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import {
   DelegatedMembership,
@@ -8,6 +8,35 @@ import {
   PaymentProofResponse,
   ProofQueueItem,
 } from "@/lib/types/paymentProof";
+
+/** Polls the pending proof queue count every 60 s. Returns null while loading. */
+export function usePendingProofsCount(enabled: boolean): number | null {
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    let cancelled = false;
+
+    async function fetch() {
+      try {
+        const proofs = await api.get<ProofQueueItem[]>("/payment-proofs");
+        if (!cancelled) setCount(proofs.length);
+      } catch {
+        // silently ignore — badge just won't appear
+      }
+    }
+
+    fetch();
+    const interval = setInterval(fetch, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [enabled]);
+
+  return count;
+}
 
 export function usePaymentProofs() {
   const [loading, setLoading] = useState(false);

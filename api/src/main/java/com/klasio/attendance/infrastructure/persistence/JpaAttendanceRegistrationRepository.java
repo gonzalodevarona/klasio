@@ -1,0 +1,103 @@
+package com.klasio.attendance.infrastructure.persistence;
+
+import com.klasio.attendance.domain.model.AttendanceRegistration;
+import com.klasio.attendance.domain.model.AttendanceRegistrationStatus;
+import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
+import com.klasio.shared.infrastructure.exception.AlreadyRegisteredException;
+import com.klasio.shared.infrastructure.persistence.TenantScopedRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+@Repository
+public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
+        implements AttendanceRegistrationRepository {
+
+    private final SpringDataAttendanceRegistrationRepository springDataRepository;
+    private final AttendanceRegistrationMapper mapper;
+
+    public JpaAttendanceRegistrationRepository(
+            SpringDataAttendanceRegistrationRepository springDataRepository,
+            AttendanceRegistrationMapper mapper) {
+        this.springDataRepository = springDataRepository;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public void save(AttendanceRegistration registration) {
+        applyTenantContext();
+        AttendanceRegistrationJpaEntity entity = mapper.toEntity(registration);
+        if (!springDataRepository.existsById(entity.getId())) {
+            entity.markAsNew();
+        }
+        try {
+            springDataRepository.save(entity);
+        } catch (DataIntegrityViolationException ex) {
+            // Partial unique index ux_registration_active_per_student_session violation
+            throw new AlreadyRegisteredException(
+                    "Student is already registered for this session");
+        }
+    }
+
+    @Override
+    public Optional<AttendanceRegistration> findById(UUID tenantId, UUID registrationId) {
+        applyTenantContext();
+        return springDataRepository.findByTenantIdAndId(tenantId, registrationId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Page<AttendanceRegistration> findByStudent(UUID tenantId, UUID studentId,
+                                                       LocalDate from, LocalDate to,
+                                                       AttendanceRegistrationStatus status,
+                                                       UUID programId,
+                                                       Pageable pageable) {
+        applyTenantContext();
+        String statusStr = status != null ? status.name() : null;
+        return springDataRepository
+                .findByStudentWithFilters(tenantId, studentId, from, to, statusStr, programId, pageable)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Set<UUID> findRegisteredSessionIds(UUID tenantId, UUID studentId, List<UUID> sessionIds) {
+        applyTenantContext();
+        return Set.copyOf(springDataRepository.findRegisteredSessionIds(tenantId, studentId, sessionIds));
+    }
+
+    @Override
+    public List<AttendanceRegistration> findByClassAndDateRange(UUID tenantId, UUID classId,
+                                                                 LocalDate from, LocalDate to) {
+        applyTenantContext();
+        return springDataRepository.findByClassAndDateRange(tenantId, classId, from, to)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<AttendanceRegistration> findFutureRegisteredByClass(UUID tenantId, UUID classId,
+                                                                     LocalDate fromDate) {
+        applyTenantContext();
+        return springDataRepository.findFutureRegisteredByClass(tenantId, classId, fromDate)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public void saveAll(List<AttendanceRegistration> registrations) {
+        applyTenantContext();
+        List<AttendanceRegistrationJpaEntity> entities = registrations.stream()
+                .map(mapper::toEntity)
+                .toList();
+        springDataRepository.saveAll(entities);
+    }
+}

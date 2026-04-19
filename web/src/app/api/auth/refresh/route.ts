@@ -29,8 +29,9 @@ export async function POST(request: NextRequest) {
     const existing = existingRaw
       ? (JSON.parse(decodeURIComponent(existingRaw)) as Record<string, unknown>)
       : {};
+    // Keep roles array in sync; backend refresh returns a single primary role string
     const userInfoValue = encodeURIComponent(
-      JSON.stringify({ ...existing, userId, role })
+      JSON.stringify({ ...existing, userId, roles: [role] })
     );
     nextResponse.headers.append(
       "Set-Cookie",

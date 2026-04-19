@@ -6,6 +6,8 @@ import com.klasio.auth.domain.event.RoleAssignedEvent;
 import com.klasio.auth.domain.exception.RoleElevationForbiddenException;
 import com.klasio.auth.domain.model.Role;
 import com.klasio.auth.domain.model.User;
+import com.klasio.professor.domain.model.Professor;
+import com.klasio.professor.domain.port.ProfessorRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +19,14 @@ public class AssignRoleService {
 
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ProfessorRepository professorRepository;
 
     public AssignRoleService(UserRepository userRepository,
-                             ApplicationEventPublisher eventPublisher) {
+                             ApplicationEventPublisher eventPublisher,
+                             ProfessorRepository professorRepository) {
         this.userRepository = userRepository;
         this.eventPublisher = eventPublisher;
+        this.professorRepository = professorRepository;
     }
 
     @Transactional
@@ -51,9 +56,21 @@ public class AssignRoleService {
             }
         }
 
-        Role previousRole = targetUser.getRole();
+        Role previousRole = targetUser.primaryRole();
         targetUser.assignRole(command.newRole());
         userRepository.save(targetUser);
+
+        // When a user is assigned MANAGER (which implies PROFESSOR), ensure a professor
+        // record exists so they appear in professor lists and can be assigned to classes.
+        if (command.newRole() == Role.MANAGER &&
+                professorRepository.findById(targetUser.getTenantId(), targetUser.getId()).isEmpty()) {
+            Professor professor = Professor.createForManager(
+                    targetUser.getId(), targetUser.getTenantId(),
+                    targetUser.getFirstName(), targetUser.getLastName(), targetUser.getEmail(),
+                    targetUser.getPhoneNumber(), targetUser.getIdentityDocumentType(),
+                    targetUser.getIdentityNumber(), command.assignerId());
+            professorRepository.save(professor);
+        }
 
         eventPublisher.publishEvent(new RoleAssignedEvent(
                 targetUser.getId(), targetUser.getTenantId(),

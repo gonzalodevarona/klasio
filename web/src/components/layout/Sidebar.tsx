@@ -5,7 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebarIdentity } from "@/hooks/useSidebarIdentity";
+import { usePendingProofsCount } from "@/hooks/usePaymentProofs";
 import type { Role } from "@/lib/types/auth";
+import { primaryRole } from "@/lib/types/auth";
 import {
   Building2,
   BookOpen,
@@ -18,10 +20,13 @@ import {
   BadgeCheck,
   ClipboardList,
   Calendar,
+  CalendarCheck,
   LogOut,
   Menu,
   X,
   ChevronLeft,
+  ShieldCheck,
+  UserCog,
   type LucideProps,
 } from "lucide-react";
 
@@ -33,40 +38,68 @@ interface NavItem {
   icon: IconComponent;
 }
 
+function NotificationBadge({ count }: { count: number }) {
+  const label = count > 10 ? "10+" : String(count);
+  return (
+    <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none shrink-0">
+      {label}
+    </span>
+  );
+}
+
 const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
   SUPERADMIN: [
     { label: "Tenants",        href: "/tenants",        icon: Building2 },
-    { label: "Programs",       href: "/programs",       icon: BookOpen },
+    { label: "Admins",         href: "/admins",         icon: ShieldCheck },
+    { label: "Managers",       href: "/managers",       icon: UserCog },
     { label: "Professors",     href: "/professors",     icon: GraduationCap },
     { label: "Students",       href: "/students",       icon: Users },
+    { label: "Programs",       href: "/programs",       icon: BookOpen },
     { label: "Plans",          href: "/plans",          icon: ListChecks },
     { label: "Classes",        href: "/classes",        icon: CalendarDays },
     { label: "Payment Proofs", href: "/payment-proofs", icon: FileCheck },
   ],
   ADMIN: [
-    { label: "Programs",       href: "/programs",       icon: BookOpen },
+    { label: "Managers",       href: "/managers",       icon: UserCog },
     { label: "Professors",     href: "/professors",     icon: GraduationCap },
     { label: "Students",       href: "/students",       icon: Users },
+    { label: "Programs",       href: "/programs",       icon: BookOpen },
     { label: "Plans",          href: "/plans",          icon: ListChecks },
     { label: "Classes",        href: "/classes",        icon: CalendarDays },
     { label: "Payment Proofs", href: "/payment-proofs", icon: FileCheck },
   ],
   MANAGER: [
-    { label: "Programs",   href: "/programs",   icon: BookOpen },
     { label: "Professors", href: "/professors", icon: GraduationCap },
     { label: "Students",   href: "/students",   icon: Users },
+    { label: "Programs",   href: "/programs",   icon: BookOpen },
     { label: "Classes",    href: "/classes",    icon: CalendarDays },
   ],
   PROFESSOR: [
     { label: "Classes", href: "/classes", icon: CalendarDays },
   ],
   STUDENT: [
-    { label: "Dashboard",      href: "/student/dashboard",   icon: LayoutDashboard },
-    { label: "My Memberships", href: "/student/memberships", icon: BadgeCheck },
-    { label: "My Enrollments", href: "/student/enrollments", icon: ClipboardList },
-    { label: "My Classes",     href: "/student/classes",     icon: Calendar },
+    { label: "Dashboard",        href: "/student/dashboard",     icon: LayoutDashboard },
+    { label: "My Memberships",   href: "/student/memberships",   icon: BadgeCheck },
+    { label: "My Enrollments",   href: "/student/enrollments",   icon: ClipboardList },
+    { label: "My Classes",       href: "/student/classes",       icon: Calendar },
+    { label: "My Registrations", href: "/student/registrations", icon: CalendarCheck },
   ],
 };
+
+/** Union of nav items across all granted roles, deduplicated by href, ordered by role privilege. */
+function computeNavItems(roles: Role[]): NavItem[] {
+  const seen = new Set<string>();
+  const result: NavItem[] = [];
+  for (const r of roles) {
+    for (const item of (NAV_ITEMS_BY_ROLE[r] ?? [])) {
+      if (!seen.has(item.href)) {
+        seen.add(item.href);
+        result.push(item);
+      }
+    }
+  }
+  return result;
+}
 
 // Module-level component so its identity is stable across renders.
 function NavLinks({
@@ -74,17 +107,24 @@ function NavLinks({
   pathname,
   collapsed,
   onLinkClick,
+  pendingProofsCount,
 }: {
   items: NavItem[];
   pathname: string;
   collapsed: boolean;
   onLinkClick?: () => void;
+  pendingProofsCount?: number | null;
 }) {
   return (
     <ul className="space-y-1">
       {items.map(({ label, href, icon: Icon }) => {
         const isActive =
           pathname === href || pathname.startsWith(href + "/");
+        const showBadge =
+          href === "/payment-proofs" &&
+          !collapsed &&
+          pendingProofsCount != null &&
+          pendingProofsCount > 0;
         return (
           <li key={href}>
             <Link
@@ -99,8 +139,15 @@ function NavLinks({
                 collapsed ? "justify-center" : "",
               ].join(" ")}
             >
-              <Icon className="h-5 w-5 shrink-0" />
+              <div className="relative shrink-0">
+                <Icon className="h-5 w-5" />
+                {/* Collapsed mode: dot indicator on the icon itself */}
+                {collapsed && pendingProofsCount != null && pendingProofsCount > 0 && href === "/payment-proofs" && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-red-500" />
+                )}
+              </div>
               {!collapsed && <span className="truncate">{label}</span>}
+              {showBadge && <NotificationBadge count={pendingProofsCount!} />}
             </Link>
           </li>
         );
@@ -226,8 +273,15 @@ export default function Sidebar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
 
+  const primaryUserRole = user ? primaryRole(user.roles) : undefined;
   const { tenantName, displayName, identityDocumentType, identityNumber } =
-    useSidebarIdentity(user?.role, user?.tenantId);
+    useSidebarIdentity(primaryUserRole, user?.tenantId);
+
+  const canSeeProofQueue =
+    user?.roles.includes("ADMIN") ||
+    user?.roles.includes("SUPERADMIN") ||
+    false;
+  const pendingProofsCount = usePendingProofsCount(canSeeProofQueue);
 
   // Close mobile drawer on route change.
   useEffect(() => {
@@ -265,7 +319,7 @@ export default function Sidebar() {
     );
   }
 
-  const navItems = user ? (NAV_ITEMS_BY_ROLE[user.role] ?? []) : [];
+  const navItems = user ? computeNavItems(user.roles) : [];
 
   return (
     <>
@@ -325,13 +379,14 @@ export default function Sidebar() {
                 pathname={pathname}
                 collapsed={false}
                 onLinkClick={() => setMobileOpen(false)}
+                pendingProofsCount={pendingProofsCount}
               />
             </nav>
 
             {/* Drawer footer */}
             {user && (
               <MobileUserFooter
-                role={user.role}
+                role={primaryUserRole!}
                 displayName={displayName}
                 identityDocumentType={identityDocumentType}
                 identityNumber={identityNumber}
@@ -377,13 +432,14 @@ export default function Sidebar() {
             items={navItems}
             pathname={pathname}
             collapsed={collapsed}
+            pendingProofsCount={pendingProofsCount}
           />
         </nav>
 
         {/* Sidebar footer */}
         {user && (
           <UserFooter
-            role={user.role}
+            role={primaryUserRole!}
             displayName={displayName}
             identityDocumentType={identityDocumentType}
             identityNumber={identityNumber}

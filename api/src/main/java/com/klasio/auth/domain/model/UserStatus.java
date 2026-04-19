@@ -2,5 +2,6 @@ package com.klasio.auth.domain.model;
 
 public enum UserStatus {
     ACTIVE,
-    EMAIL_UNVERIFIED
+    EMAIL_UNVERIFIED,
+    INACTIVE
 }

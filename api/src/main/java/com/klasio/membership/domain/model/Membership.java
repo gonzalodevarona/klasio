@@ -309,6 +309,30 @@ public class Membership {
         }
     }
 
+    public void refundHours(int hours, UUID actorId, String actorRole) {
+        Objects.requireNonNull(actorId, "actorId must not be null");
+        if (hours < 1) {
+            throw new IllegalArgumentException("refund hours must be >= 1");
+        }
+        if (this.status != MembershipStatus.ACTIVE && this.status != MembershipStatus.INACTIVE) {
+            throw new IllegalStateException(
+                    "Cannot refund hours to a membership in status: " + this.status);
+        }
+
+        Instant now = Instant.now();
+        this.availableHours += hours;
+        this.updatedAt = now;
+        this.updatedBy = actorId;
+
+        if (this.status == MembershipStatus.INACTIVE) {
+            this.status = MembershipStatus.ACTIVE;
+        }
+
+        domainEvents.add(new HourAdjusted(
+                id.value(), tenantId, hours, HourTransactionType.ATTENDANCE_REFUND,
+                null, actorId, actorRole, now));
+    }
+
     public void expire() {
         if (this.status == MembershipStatus.EXPIRED) {
             throw new IllegalStateException("Membership is already EXPIRED");

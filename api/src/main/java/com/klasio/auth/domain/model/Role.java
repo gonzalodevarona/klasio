@@ -1,5 +1,7 @@
 package com.klasio.auth.domain.model;
 
+import java.util.Set;
+
 public enum Role {
     SUPERADMIN(0),
     ADMIN(1),
@@ -7,7 +9,7 @@ public enum Role {
     PROFESSOR(3),
     STUDENT(4);
 
-    private final int hierarchy;
+    public final int hierarchy;
 
     Role(int hierarchy) {
         this.hierarchy = hierarchy;
@@ -24,6 +26,18 @@ public enum Role {
             case MANAGER -> "/manager/dashboard";
             case PROFESSOR -> "/professor/dashboard";
             case STUDENT -> "/student/dashboard";
+        };
+    }
+
+    /**
+     * Returns the set of roles implied by this role.
+     * A MANAGER is also a PROFESSOR — when a MANAGER is created or assigned,
+     * the PROFESSOR role is automatically included.
+     */
+    public Set<Role> impliedRoles() {
+        return switch (this) {
+            case MANAGER -> Set.of(MANAGER, PROFESSOR);
+            default      -> Set.of(this);
         };
     }
 }

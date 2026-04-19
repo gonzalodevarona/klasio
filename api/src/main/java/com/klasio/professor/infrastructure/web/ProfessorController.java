@@ -10,6 +10,8 @@ import com.klasio.professor.application.port.input.GetProfessorDetailUseCase;
 import com.klasio.professor.application.port.input.ListProfessorsUseCase;
 import com.klasio.professor.application.port.input.ReactivateProfessorUseCase;
 import com.klasio.professor.application.port.input.UpdateProfessorUseCase;
+import com.klasio.shared.infrastructure.exception.ProfessorNotFoundException;
+import jakarta.persistence.EntityManager;
 import com.klasio.professor.domain.model.Professor;
 import com.klasio.shared.infrastructure.persistence.TenantContextInterceptor;
 import jakarta.validation.Valid;
@@ -42,19 +44,22 @@ public class ProfessorController {
     private final UpdateProfessorUseCase updateProfessorUseCase;
     private final DeactivateProfessorUseCase deactivateProfessorUseCase;
     private final ReactivateProfessorUseCase reactivateProfessorUseCase;
+    private final EntityManager em;
 
     public ProfessorController(CreateProfessorUseCase createProfessorUseCase,
                                ListProfessorsUseCase listProfessorsUseCase,
                                GetProfessorDetailUseCase getProfessorDetailUseCase,
                                UpdateProfessorUseCase updateProfessorUseCase,
                                DeactivateProfessorUseCase deactivateProfessorUseCase,
-                               ReactivateProfessorUseCase reactivateProfessorUseCase) {
+                               ReactivateProfessorUseCase reactivateProfessorUseCase,
+                               EntityManager em) {
         this.createProfessorUseCase = createProfessorUseCase;
         this.listProfessorsUseCase = listProfessorsUseCase;
         this.getProfessorDetailUseCase = getProfessorDetailUseCase;
         this.updateProfessorUseCase = updateProfessorUseCase;
         this.deactivateProfessorUseCase = deactivateProfessorUseCase;
         this.reactivateProfessorUseCase = reactivateProfessorUseCase;
+        this.em = em;
     }
 
     @PostMapping
@@ -80,6 +85,38 @@ public class ProfessorController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ProfessorResponseDto.ProfessorDetailResponse.fromDomain(professor));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public ResponseEntity<ProfessorResponseDto.ProfessorDetailResponse> getMyProfile() {
+        UUID tenantId = extractTenantId();
+        UUID userId   = extractUserId();
+
+        // Resolve email from users table, then find professor by tenant + email
+        @SuppressWarnings("unchecked")
+        java.util.List<String> emails = em.createNativeQuery(
+                        "SELECT email FROM users WHERE id = :userId")
+                .setParameter("userId", userId)
+                .getResultList();
+
+        if (emails.isEmpty()) {
+            throw new ProfessorNotFoundException("No user found for id: " + userId);
+        }
+
+        @SuppressWarnings("unchecked")
+        java.util.List<UUID> ids = em.createNativeQuery(
+                        "SELECT id FROM professors WHERE tenant_id = :tenantId AND email = :email")
+                .setParameter("tenantId", tenantId)
+                .setParameter("email", emails.get(0))
+                .getResultList();
+
+        if (ids.isEmpty()) {
+            throw new ProfessorNotFoundException("No professor profile found for user: " + userId);
+        }
+
+        ProfessorDetail detail = getProfessorDetailUseCase.execute(tenantId, ids.get(0));
+        return ResponseEntity.ok(ProfessorResponseDto.ProfessorDetailResponse.fromDetail(detail));
     }
 
     @GetMapping

@@ -18,6 +18,7 @@ import com.klasio.programclass.domain.model.ClassScheduleEntry;
 import com.klasio.programclass.domain.model.ClassStatus;
 import com.klasio.programclass.domain.model.ClassType;
 import com.klasio.programclass.domain.model.ProgramClass;
+import com.klasio.programclass.domain.port.ProfessorIdLookupPort;
 import com.klasio.shared.infrastructure.persistence.TenantContextInterceptor;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -58,6 +59,7 @@ public class ClassController {
     private final ReactivateClassUseCase reactivateClassUseCase;
     private final AssignProfessorUseCase assignProfessorUseCase;
     private final RemoveProfessorUseCase removeProfessorUseCase;
+    private final ProfessorIdLookupPort professorIdLookupPort;
 
     public ClassController(CreateClassUseCase createClassUseCase,
                            ListClassesUseCase listClassesUseCase,
@@ -66,7 +68,8 @@ public class ClassController {
                            DeactivateClassUseCase deactivateClassUseCase,
                            ReactivateClassUseCase reactivateClassUseCase,
                            AssignProfessorUseCase assignProfessorUseCase,
-                           RemoveProfessorUseCase removeProfessorUseCase) {
+                           RemoveProfessorUseCase removeProfessorUseCase,
+                           ProfessorIdLookupPort professorIdLookupPort) {
         this.createClassUseCase = createClassUseCase;
         this.listClassesUseCase = listClassesUseCase;
         this.getClassDetailUseCase = getClassDetailUseCase;
@@ -75,6 +78,7 @@ public class ClassController {
         this.reactivateClassUseCase = reactivateClassUseCase;
         this.assignProfessorUseCase = assignProfessorUseCase;
         this.removeProfessorUseCase = removeProfessorUseCase;
+        this.professorIdLookupPort = professorIdLookupPort;
     }
 
     @PostMapping
@@ -122,13 +126,27 @@ public class ClassController {
     }
 
     @GetMapping("/{classId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN', 'MANAGER', 'PROFESSOR')")
     public ResponseEntity<ClassResponseDto.ClassDetailResponse> getClassDetail(
             @PathVariable UUID programId,
             @PathVariable UUID classId) {
 
         UUID tenantId = extractTenantId();
+        UUID userId = extractUserId();
+        String role = extractRole();
+
         ClassDetail detail = getClassDetailUseCase.execute(tenantId, classId);
+
+        // PROFESSOR scope guard: can only view their own assigned class
+        if ("PROFESSOR".equals(role)) {
+            UUID professorId = professorIdLookupPort.findProfessorIdByUserId(tenantId, userId)
+                    .orElseThrow(() -> new org.springframework.security.access.AccessDeniedException(
+                            "Professor profile not found for user: " + userId));
+            if (!professorId.equals(detail.professorId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "Professor is not assigned to this class");
+            }
+        }
 
         return ResponseEntity.ok(ClassResponseDto.ClassDetailResponse.fromDetail(detail));
     }
@@ -233,6 +251,13 @@ public class ClassController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Map<String, Object> details = (Map<String, Object>) authentication.getDetails();
         return UUID.fromString((String) details.get("userId"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private String extractRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Map<String, Object> details = (Map<String, Object>) authentication.getDetails();
+        return (String) details.get("role");
     }
 
     @SuppressWarnings("unchecked")

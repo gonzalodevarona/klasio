@@ -84,6 +84,23 @@ public class JpaProgramClassRepository extends TenantScopedRepository implements
     }
 
     @Override
+    public Page<ClassSummary> findByTenantIdAndProfessorId(UUID tenantId, Pageable pageable,
+                                                            ClassLevel level, ClassStatus status,
+                                                            UUID professorId) {
+        applyTenantContext();
+        return springDataRepository.findByTenantIdAndProfessorId(
+                        tenantId,
+                        professorId,
+                        level != null ? level.name() : null,
+                        status != null ? status.name() : null,
+                        pageable)
+                .map(p -> new ClassSummary(
+                        p.id(), p.programId(), p.programName(), p.name(),
+                        p.level(), p.type(), p.professorId(), p.professorName(),
+                        p.maxStudents(), p.status(), p.createdAt()));
+    }
+
+    @Override
     public boolean existsByNameInProgram(UUID programId, String name) {
         applyTenantContext();
         return springDataRepository.existsByProgramIdAndName(programId, name);

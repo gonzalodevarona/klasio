@@ -49,7 +49,7 @@ export default function NewPlanPage({ params }: NewPlanPageProps) {
 
       {program && (
         <div className="bg-white shadow rounded-lg p-6">
-          <ProgramPlanForm programId={id} />
+          <ProgramPlanForm programId={id} tenantId={program.tenantId} />
         </div>
       )}
     </div>

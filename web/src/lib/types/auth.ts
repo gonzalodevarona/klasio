@@ -2,10 +2,18 @@ export type Role = "SUPERADMIN" | "ADMIN" | "MANAGER" | "PROFESSOR" | "STUDENT";
 
 export type UserStatus = "ACTIVE" | "EMAIL_UNVERIFIED";
 
+/** Ordered from highest to lowest privilege. */
+const ROLE_HIERARCHY: Role[] = ["SUPERADMIN", "ADMIN", "MANAGER", "PROFESSOR", "STUDENT"];
+
+/** Returns the highest-privilege role from the given array. */
+export function primaryRole(roles: Role[]): Role {
+  return ROLE_HIERARCHY.find(r => roles.includes(r)) ?? roles[0];
+}
+
 export interface User {
   id: string;
   email: string;
-  role: Role;
+  roles: Role[];
   tenantId: string | null;
   status: UserStatus;
 }
@@ -17,7 +25,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   userId: string;
-  role: Role;
+  role: Role;          // backend returns single primary role
   tenantId: string | null;
   dashboardUrl: string;
 }
@@ -54,7 +62,7 @@ export interface ResetPasswordRequest {
 export interface UserSummary {
   id: string;
   email: string;
-  role: Role;
+  roles: Role[];
   tenantId: string | null;
   status: UserStatus;
 }

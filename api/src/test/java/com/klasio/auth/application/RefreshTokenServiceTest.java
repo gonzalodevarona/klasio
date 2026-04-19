@@ -50,7 +50,7 @@ class RefreshTokenServiceTest {
         String oldHash = "old_hash";
         RefreshToken oldToken = new RefreshToken(UUID.randomUUID(), userId, oldHash, tenantId,
                 Instant.now(), Instant.now().plusSeconds(604800), false, null);
-        User user = User.createActive(tenantId, "test@example.com", "hash", Role.ADMIN, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
+        User user = User.createActive(tenantId, "test@example.com", "hash", Role.ADMIN, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", null, null, null);
 
         when(tokenGenerator.hashToken("old_raw")).thenReturn(oldHash);
         when(refreshTokenRepository.findByTokenHash(oldHash)).thenReturn(Optional.of(oldToken));
