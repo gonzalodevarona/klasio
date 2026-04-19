@@ -31,3 +31,6 @@ web/out/
 # Temporary files
 *.tmp
 *.swp
+
+# Git worktrees
+.worktrees/
