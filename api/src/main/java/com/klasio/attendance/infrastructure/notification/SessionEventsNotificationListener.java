@@ -6,7 +6,9 @@ import com.klasio.attendance.domain.event.SessionCancelled;
 import com.klasio.attendance.domain.model.AttendanceRegistration;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
+import com.klasio.attendance.domain.port.ProfessorUserIdPort;
 import com.klasio.attendance.domain.port.ProgramManagerPort;
+import com.klasio.attendance.domain.port.StudentUserIdPort;
 import com.klasio.notifications.application.dto.CreateNotificationCommand;
 import com.klasio.notifications.application.port.input.CreateNotificationUseCase;
 import com.klasio.notifications.domain.model.NotificationType;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,15 +45,21 @@ public class SessionEventsNotificationListener {
     private final AttendanceRegistrationRepository registrationRepository;
     private final ProgramManagerPort programManagerPort;
     private final CreateNotificationUseCase createNotification;
+    private final StudentUserIdPort studentUserIdPort;
+    private final ProfessorUserIdPort professorUserIdPort;
 
     public SessionEventsNotificationListener(ClassDetailsPort classDetailsPort,
                                              AttendanceRegistrationRepository registrationRepository,
                                              ProgramManagerPort programManagerPort,
-                                             CreateNotificationUseCase createNotification) {
+                                             CreateNotificationUseCase createNotification,
+                                             StudentUserIdPort studentUserIdPort,
+                                             ProfessorUserIdPort professorUserIdPort) {
         this.classDetailsPort = classDetailsPort;
         this.registrationRepository = registrationRepository;
         this.programManagerPort = programManagerPort;
         this.createNotification = createNotification;
+        this.studentUserIdPort = studentUserIdPort;
+        this.professorUserIdPort = professorUserIdPort;
     }
 
     @Async
@@ -92,9 +101,13 @@ public class SessionEventsNotificationListener {
         String title = SessionNotificationTemplates.cancellationTitle(className, LocalDate.now());
         String body = SessionNotificationTemplates.cancellationBody(e.reason());
 
-        // Notify each affected student (deduplicated in case of duplicates in the list)
+        // Notify each affected student (deduplicated in case of duplicates in the list).
+        // affectedStudentIds contains students.id — must resolve to users.id before creating notifications.
         Set<UUID> notifiedStudents = new HashSet<>();
-        for (UUID studentUserId : e.affectedStudentIds()) {
+        for (UUID studentId : e.affectedStudentIds()) {
+            Optional<UUID> resolvedUserId = studentUserIdPort.findUserIdByStudentId(e.tenantId(), studentId);
+            if (resolvedUserId.isEmpty()) continue;
+            UUID studentUserId = resolvedUserId.get();
             if (notifiedStudents.add(studentUserId)) {
                 createNotification.execute(new CreateNotificationCommand(
                         e.tenantId(), studentUserId, NotificationType.CLASS_SESSION_CANCELLED,
@@ -124,11 +137,13 @@ public class SessionEventsNotificationListener {
 
         Set<UUID> notified = new HashSet<>();
         for (AttendanceRegistration reg : regs) {
-            UUID studentUser = reg.getStudentId();
-            if (studentUser.equals(actorId)) continue;
-            if (notified.add(studentUser)) {
+            Optional<UUID> resolvedUserId = studentUserIdPort.findUserIdByStudentId(tenantId, reg.getStudentId());
+            if (resolvedUserId.isEmpty()) continue;
+            UUID studentUserId = resolvedUserId.get();
+            if (studentUserId.equals(actorId)) continue;
+            if (notified.add(studentUserId)) {
                 createNotification.execute(new CreateNotificationCommand(
-                        tenantId, studentUser, type, title, body,
+                        tenantId, studentUserId, type, title, body,
                         baseMeta(classId, sessionId, actorRole,
                                 "/student/registrations?sessionId=" + sessionId),
                         actorId));
@@ -150,11 +165,18 @@ public class SessionEventsNotificationListener {
                 classDetailsPort.findClassSummary(tenantId, classId).orElse(null);
         if (summary == null) return;
 
-        if (summary.professorId() != null && !summary.professorId().equals(actorId)) {
-            createNotification.execute(new CreateNotificationCommand(
-                    tenantId, summary.professorId(), type, title, body,
-                    baseMeta(classId, sessionId, actorRole, "/classes/" + classId),
-                    actorId));
+        // Resolve professor's users.id — professors.id != users.id; bridge via email.
+        if (summary.professorId() != null) {
+            Optional<UUID> resolvedProfessorUserId =
+                    professorUserIdPort.findUserIdByProfessorId(tenantId, summary.professorId());
+            if (resolvedProfessorUserId.isEmpty()) {
+                log.debug("No user account for professorId={}", summary.professorId());
+            } else if (!resolvedProfessorUserId.get().equals(actorId)) {
+                createNotification.execute(new CreateNotificationCommand(
+                        tenantId, resolvedProfessorUserId.get(), type, title, body,
+                        baseMeta(classId, sessionId, actorRole, "/classes/" + classId),
+                        actorId));
+            }
         }
 
         Set<UUID> managers = programManagerPort.findManagerUserIds(tenantId, summary.programId());
