@@ -210,7 +210,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | `merged/007-auth-rbac` | RF-01, RF-02, RF-03, RF-04 | RF-01 ✅, RF-02 ✅, RF-03 ✅, RF-04 ✅ |
 | `006-membership-lifecycle` (active, not merged) | RF-14, RF-15, RF-16, RF-17, RF-18 | RF-14 ✅, RF-15 ✅, RF-16 ✅, RF-17 ✅, RF-18 ✅ |
 | `merged/008-payment-proof-validation` | RF-19, RF-20, RF-21 | RF-19 ✅, RF-20 ✅, RF-21 ✅ |
-| `010-class-alert-cancellation` (active, not merged) | RF-27, RF-28 | RF-27 ✅, RF-28 ✅ (in-app only) |
+| `merged/010-class-alert-cancellation` | RF-27, RF-28 | RF-27 ✅, RF-28 ✅ (in-app only) |
 
 ### Remaining v1.0 work (P0 features not yet implemented)
 
