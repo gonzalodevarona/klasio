@@ -53,6 +53,9 @@ public class ClassSessionRosterController {
             String sessionDate,
             String startTime,
             String endTime,
+            String status,
+            String alertReason,
+            String cancellationReason,
             int registrantCount,
             List<RegistrantResponse> registrants
     ) {
@@ -80,6 +83,9 @@ public class ClassSessionRosterController {
                     view.sessionDate().toString(),
                     formatTime(view.startTime()),
                     formatTime(view.endTime()),
+                    view.status(),
+                    view.alertReason(),
+                    view.cancellationReason(),
                     registrants.size(),
                     registrants
             );

@@ -7,6 +7,7 @@ import com.klasio.attendance.domain.model.AttendanceRegistrationStatus;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassSummaryView;
+import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.attendance.domain.port.ProfessorIdLookupPort;
 import com.klasio.membership.domain.port.StudentNamePort;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
@@ -37,6 +38,7 @@ class ListClassSessionRosterServiceTest {
 
     @Mock ClassDetailsPort classDetailsPort;
     @Mock AttendanceRegistrationRepository registrationRepository;
+    @Mock ClassSessionRepository sessionRepository;
     @Mock StudentNamePort studentNamePort;
     @Mock ProfessorIdLookupPort professorIdLookupPort;
 
@@ -53,9 +55,11 @@ class ListClassSessionRosterServiceTest {
     private static final LocalDate TO   = FROM.plusDays(6);
 
     @BeforeEach
-    void stubClassSummary() {
+    void stubDefaults() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID))
                 .thenReturn(Optional.of(new ClassSummaryView(CLASS_ID, PROGRAM_ID, PROFESSOR_ID)));
+        // No ClassSession row by default — status falls back to SCHEDULED.
+        when(sessionRepository.findByClassAndDate(any(), any(), any())).thenReturn(Optional.empty());
     }
 
     // ── Window validation ────────────────────────────────────────────────────
@@ -238,6 +242,23 @@ class ListClassSessionRosterServiceTest {
                 service.execute(TENANT_ID, CLASS_ID, FROM, TO, "ADMIN", USER_ID, null);
 
         assertThat(result.get(0).registrants().get(0).studentName()).isEqualTo("Unknown");
+    }
+
+    @Test
+    void sessionStatus_defaultsToScheduledWhenNoSessionRow() {
+        UUID regId = UUID.randomUUID();
+        LocalDate day = FROM.plusDays(1);
+        when(registrationRepository.findByClassAndDateRange(TENANT_ID, CLASS_ID, FROM, TO))
+                .thenReturn(List.of(buildRegistration(regId, STUDENT_ID,
+                        day, LocalTime.of(18, 0), LocalTime.of(19, 0), "REGISTERED")));
+        when(studentNamePort.findFullName(STUDENT_ID, TENANT_ID)).thenReturn(Optional.of("Test User"));
+
+        List<ClassSessionRosterView> result =
+                service.execute(TENANT_ID, CLASS_ID, FROM, TO, "ADMIN", USER_ID, null);
+
+        assertThat(result.get(0).status()).isEqualTo("SCHEDULED");
+        assertThat(result.get(0).alertReason()).isNull();
+        assertThat(result.get(0).cancellationReason()).isNull();
     }
 
     // ── Helper ───────────────────────────────────────────────────────────────

@@ -4,9 +4,11 @@ import com.klasio.attendance.application.dto.ClassSessionRosterView;
 import com.klasio.attendance.application.dto.ClassSessionRosterView.RegistrantView;
 import com.klasio.attendance.application.port.input.ListClassSessionRosterUseCase;
 import com.klasio.attendance.domain.model.AttendanceRegistration;
+import com.klasio.attendance.domain.model.ClassSession;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassSummaryView;
+import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.attendance.domain.port.ProfessorIdLookupPort;
 import com.klasio.membership.domain.port.StudentNamePort;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,15 +36,18 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
 
     private final ClassDetailsPort classDetailsPort;
     private final AttendanceRegistrationRepository registrationRepository;
+    private final ClassSessionRepository sessionRepository;
     private final StudentNamePort studentNamePort;
     private final ProfessorIdLookupPort professorIdLookupPort;
 
     public ListClassSessionRosterService(ClassDetailsPort classDetailsPort,
                                           AttendanceRegistrationRepository registrationRepository,
+                                          ClassSessionRepository sessionRepository,
                                           StudentNamePort studentNamePort,
                                           ProfessorIdLookupPort professorIdLookupPort) {
         this.classDetailsPort = classDetailsPort;
         this.registrationRepository = registrationRepository;
+        this.sessionRepository = sessionRepository;
         this.studentNamePort = studentNamePort;
         this.professorIdLookupPort = professorIdLookupPort;
     }
@@ -98,14 +104,25 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
                     ));
         }
 
-        // 7. Build result (already sorted by date+time because the SQL query orders by session_date, start_time)
+        // 7. Build result enriched with live session status (SCHEDULED / ALERTED / CANCELLED).
+        //    Sessions that were never persisted (no alert/cancel action) default to SCHEDULED.
         return grouped.entrySet().stream()
-                .map(e -> new ClassSessionRosterView(
-                        e.getKey().date(),
-                        e.getKey().startTime(),
-                        e.getKey().endTime(),
-                        List.copyOf(e.getValue())
-                ))
+                .map(e -> {
+                    Optional<ClassSession> cs =
+                            sessionRepository.findByClassAndDate(tenantId, classId, e.getKey().date());
+                    String sessionStatus = cs.map(s -> s.getStatus().name()).orElse("SCHEDULED");
+                    String alertReason = cs.map(ClassSession::getAlertReason).orElse(null);
+                    String cancellationReason = cs.map(ClassSession::getCancellationReason).orElse(null);
+                    return new ClassSessionRosterView(
+                            e.getKey().date(),
+                            e.getKey().startTime(),
+                            e.getKey().endTime(),
+                            sessionStatus,
+                            alertReason,
+                            cancellationReason,
+                            List.copyOf(e.getValue())
+                    );
+                })
                 .toList();
     }
 

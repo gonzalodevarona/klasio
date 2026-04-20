@@ -13,6 +13,9 @@ public record ClassSessionRosterView(
         LocalDate sessionDate,
         LocalTime startTime,
         LocalTime endTime,
+        String status,
+        String alertReason,
+        String cancellationReason,
         List<RegistrantView> registrants
 ) {
     public record RegistrantView(
