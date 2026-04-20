@@ -110,7 +110,7 @@ public class CancelSessionService implements CancelSessionUseCase {
             // Capture prior status BEFORE the transition (cancelBySession changes it).
             AttendanceRegistrationStatus priorStatus = reg.getStatus();
 
-            reg.cancelBySession(cmd.actorId(), Instant.now());
+            reg.cancelBySession(cmd.actorId(), Instant.now(), cmd.reason());
             registrationRepository.save(reg);
 
             // Publish per-registration event.

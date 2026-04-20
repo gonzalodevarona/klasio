@@ -338,7 +338,7 @@ public class AttendanceRegistration {
      * Idempotent: no-op if already SESSION_CANCELLED.
      * Emits {@link com.klasio.attendance.domain.event.RegistrationCancelledBySession}.
      */
-    public void cancelBySession(UUID actorId, Instant now) {
+    public void cancelBySession(UUID actorId, Instant now, String sessionCancellationReason) {
         Objects.requireNonNull(actorId, "actorId must not be null");
         Objects.requireNonNull(now, "now must not be null");
         if (this.status == AttendanceRegistrationStatus.SESSION_CANCELLED) {
@@ -353,6 +353,7 @@ public class AttendanceRegistration {
         this.status = AttendanceRegistrationStatus.SESSION_CANCELLED;
         this.cancelledAt = now;
         this.cancelledBy = actorId;
+        this.cancellationReason = sessionCancellationReason;
         this.updatedAt = now;
         this.updatedBy = actorId;
         this.domainEvents.add(new RegistrationCancelledBySession(

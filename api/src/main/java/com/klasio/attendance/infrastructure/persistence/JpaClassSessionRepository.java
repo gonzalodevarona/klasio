@@ -100,4 +100,16 @@ public class JpaClassSessionRepository extends TenantScopedRepository implements
         applyTenantContext();
         springDataRepository.resetCurrentCapacity(sessionId);
     }
+
+    @Override
+    public List<ClassSession> findByIds(UUID tenantId, List<UUID> sessionIds) {
+        if (sessionIds.isEmpty()) {
+            return List.of();
+        }
+        applyTenantContext();
+        return springDataRepository.findByTenantIdAndIdIn(tenantId, sessionIds)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
 }

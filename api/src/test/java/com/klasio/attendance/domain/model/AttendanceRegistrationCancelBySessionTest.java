@@ -28,7 +28,7 @@ class AttendanceRegistrationCancelBySessionTest {
         AttendanceRegistration r = registered();
         clear(r);
         UUID actor = UUID.randomUUID();
-        r.cancelBySession(actor, Instant.now());
+        r.cancelBySession(actor, Instant.now(), null);
         assertThat(r.getStatus()).isEqualTo(AttendanceRegistrationStatus.SESSION_CANCELLED);
         assertThat(r.getDomainEvents()).hasSize(1).first().isInstanceOf(RegistrationCancelledBySession.class);
         RegistrationCancelledBySession e = (RegistrationCancelledBySession) r.getDomainEvents().get(0);
@@ -40,7 +40,7 @@ class AttendanceRegistrationCancelBySessionTest {
         AttendanceRegistration r = registered();
         r.markPresent(UUID.randomUUID(), Instant.now());
         clear(r);
-        r.cancelBySession(UUID.randomUUID(), Instant.now());
+        r.cancelBySession(UUID.randomUUID(), Instant.now(), null);
         assertThat(r.getStatus()).isEqualTo(AttendanceRegistrationStatus.SESSION_CANCELLED);
         RegistrationCancelledBySession e = (RegistrationCancelledBySession) r.getDomainEvents().get(0);
         assertThat(e.priorStatus()).isEqualTo(AttendanceRegistrationStatus.PRESENT);
@@ -51,7 +51,7 @@ class AttendanceRegistrationCancelBySessionTest {
         AttendanceRegistration r = registered();
         r.markPresentNoHours(UUID.randomUUID(), Instant.now());
         clear(r);
-        r.cancelBySession(UUID.randomUUID(), Instant.now());
+        r.cancelBySession(UUID.randomUUID(), Instant.now(), null);
         RegistrationCancelledBySession e = (RegistrationCancelledBySession) r.getDomainEvents().get(0);
         assertThat(e.priorStatus()).isEqualTo(AttendanceRegistrationStatus.PRESENT_NO_HOURS);
     }
@@ -61,7 +61,7 @@ class AttendanceRegistrationCancelBySessionTest {
         AttendanceRegistration r = registered();
         r.markAbsent(UUID.randomUUID(), Instant.now());
         clear(r);
-        r.cancelBySession(UUID.randomUUID(), Instant.now());
+        r.cancelBySession(UUID.randomUUID(), Instant.now(), null);
         RegistrationCancelledBySession e = (RegistrationCancelledBySession) r.getDomainEvents().get(0);
         assertThat(e.priorStatus()).isEqualTo(AttendanceRegistrationStatus.ABSENT);
     }
@@ -69,9 +69,9 @@ class AttendanceRegistrationCancelBySessionTest {
     @Test
     void cancelBySessionIsIdempotentWhenAlreadySessionCancelled() {
         AttendanceRegistration r = registered();
-        r.cancelBySession(UUID.randomUUID(), Instant.now());
+        r.cancelBySession(UUID.randomUUID(), Instant.now(), null);
         clear(r);
-        r.cancelBySession(UUID.randomUUID(), Instant.now());
+        r.cancelBySession(UUID.randomUUID(), Instant.now(), null);
         assertThat(r.getDomainEvents()).isEmpty();
         assertThat(r.getStatus()).isEqualTo(AttendanceRegistrationStatus.SESSION_CANCELLED);
     }
@@ -80,7 +80,7 @@ class AttendanceRegistrationCancelBySessionTest {
     void cancelBySessionRejectsFromCancelledByStudent() {
         AttendanceRegistration r = registered();
         r.cancelByStudent(UUID.randomUUID(), Instant.now());
-        assertThatThrownBy(() -> r.cancelBySession(UUID.randomUUID(), Instant.now()))
+        assertThatThrownBy(() -> r.cancelBySession(UUID.randomUUID(), Instant.now(), null))
                 .isInstanceOf(IllegalStateException.class);
     }
 
@@ -88,7 +88,7 @@ class AttendanceRegistrationCancelBySessionTest {
     void cancelBySessionRejectsFromCancelledBySystem() {
         AttendanceRegistration r = registered();
         r.cancelBySystem(UUID.randomUUID(), Instant.now());
-        assertThatThrownBy(() -> r.cancelBySession(UUID.randomUUID(), Instant.now()))
+        assertThatThrownBy(() -> r.cancelBySession(UUID.randomUUID(), Instant.now(), null))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

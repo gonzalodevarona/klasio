@@ -60,4 +60,10 @@ public interface ClassSessionRepository {
      * Used during class cancellation to free all reserved spots.
      */
     void resetCurrentCapacity(UUID sessionId);
+
+    /**
+     * Bulk fetch sessions by their IDs within a tenant.
+     * Returns only sessions that exist; missing IDs are silently skipped.
+     */
+    List<ClassSession> findByIds(UUID tenantId, List<UUID> sessionIds);
 }
