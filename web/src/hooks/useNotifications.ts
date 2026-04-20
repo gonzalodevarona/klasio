@@ -85,6 +85,7 @@ export function useNotifications(
 
 interface UseUnreadCountResult {
   count: number;
+  refreshCount: () => void;
 }
 
 const POLL_INTERVAL_MS = 30_000;
@@ -129,7 +130,7 @@ export function useUnreadCount(): UseUnreadCountResult {
     };
   }, [fetchCount]);
 
-  return { count };
+  return { count, refreshCount: fetchCount };
 }
 
 interface UseMarkNotificationReadResult {
@@ -138,10 +139,11 @@ interface UseMarkNotificationReadResult {
 
 export function useMarkNotificationRead(): UseMarkNotificationReadResult {
   const markRead = useCallback(async (id: string): Promise<void> => {
-    await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+    const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
       method: "PATCH",
       credentials: "include",
     });
+    if (!res.ok) throw new Error(`Failed: ${res.status}`);
   }, []);
 
   return { markRead };
@@ -153,10 +155,11 @@ interface UseMarkAllNotificationsReadResult {
 
 export function useMarkAllNotificationsRead(): UseMarkAllNotificationsReadResult {
   const markAllRead = useCallback(async (): Promise<void> => {
-    await fetch(`${API_BASE_URL}/notifications/read-all`, {
+    const res = await fetch(`${API_BASE_URL}/notifications/read-all`, {
       method: "PATCH",
       credentials: "include",
     });
+    if (!res.ok) throw new Error(`Failed: ${res.status}`);
   }, []);
 
   return { markAllRead };
