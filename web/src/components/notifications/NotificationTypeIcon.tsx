@@ -7,10 +7,10 @@ interface NotificationTypeIconProps {
 }
 
 export default function NotificationTypeIcon({ type }: NotificationTypeIconProps) {
-  if (type === "SESSION_ALERTED") {
+  if (type === "CLASS_SESSION_ALERTED") {
     return <AlertTriangle className="w-5 h-5 text-amber-500" />;
   }
-  if (type === "SESSION_CANCELLED") {
+  if (type === "CLASS_SESSION_CANCELLED") {
     return <Bell className="w-5 h-5 text-red-500" />;
   }
   return <Bell className="w-5 h-5 text-gray-400" />;

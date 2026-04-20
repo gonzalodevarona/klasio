@@ -31,8 +31,8 @@ export default function NotificationItem({
     onRead(notification.id);
 
     const isSessionType =
-      notification.type === "SESSION_ALERTED" ||
-      notification.type === "SESSION_CANCELLED";
+      notification.type === "CLASS_SESSION_ALERTED" ||
+      notification.type === "CLASS_SESSION_CANCELLED";
     const classId = notification.metadata?.classId;
 
     if (isSessionType && classId) {
