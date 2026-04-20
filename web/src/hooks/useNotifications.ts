@@ -27,11 +27,6 @@ interface UseNotificationsResult {
   refresh: () => void;
 }
 
-const API_BASE_URL =
-  typeof process !== "undefined"
-    ? (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1")
-    : "http://localhost:8080/api/v1";
-
 export function useNotifications(
   page: number,
   unreadOnly: boolean
@@ -52,10 +47,10 @@ export function useNotifications(
     const params = new URLSearchParams({
       page: String(page),
       size: "20",
-      unreadOnly: String(unreadOnly),
+      unread: String(unreadOnly),
     });
 
-    fetch(`${API_BASE_URL}/notifications?${params.toString()}`, {
+    fetch(`/api/me/notifications?${params.toString()}`, {
       credentials: "include",
     })
       .then((res) => {
@@ -97,7 +92,7 @@ export function useUnreadCount(): UseUnreadCountResult {
   const fetchCount = useCallback(() => {
     if (typeof document !== "undefined" && document.hidden) return;
 
-    fetch(`${API_BASE_URL}/notifications/unread-count`, {
+    fetch(`/api/me/notifications/unread-count`, {
       credentials: "include",
     })
       .then((res) => {
@@ -139,7 +134,7 @@ interface UseMarkNotificationReadResult {
 
 export function useMarkNotificationRead(): UseMarkNotificationReadResult {
   const markRead = useCallback(async (id: string): Promise<void> => {
-    const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+    const res = await fetch(`/api/me/notifications/${id}/read`, {
       method: "PATCH",
       credentials: "include",
     });
@@ -155,8 +150,8 @@ interface UseMarkAllNotificationsReadResult {
 
 export function useMarkAllNotificationsRead(): UseMarkAllNotificationsReadResult {
   const markAllRead = useCallback(async (): Promise<void> => {
-    const res = await fetch(`${API_BASE_URL}/notifications/read-all`, {
-      method: "PATCH",
+    const res = await fetch(`/api/me/notifications/mark-all-read`, {
+      method: "POST",
       credentials: "include",
     });
     if (!res.ok) throw new Error(`Failed: ${res.status}`);

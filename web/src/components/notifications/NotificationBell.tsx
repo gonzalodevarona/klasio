@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Bell } from "lucide-react";
 import { useNotificationCount } from "@/context/NotificationCountContext";
 import NotificationDropdown from "./NotificationDropdown";
@@ -8,19 +9,33 @@ import NotificationDropdown from "./NotificationDropdown";
 export default function NotificationBell() {
   const { count } = useNotificationCount();
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
-  // Close dropdown when clicking outside
+  // Compute dropdown position relative to viewport (fixed positioning)
+  useEffect(() => {
+    if (!open || !buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left: rect.left,
+      zIndex: 9999,
+    });
+  }, [open]);
+
+  // Close when clicking outside
   useEffect(() => {
     if (!open) return;
 
     function handleMouseDown(event: MouseEvent) {
+      const target = event.target as Node;
       if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
+        buttonRef.current?.contains(target) ||
+        dropdownRef.current?.contains(target)
+      ) return;
+      setOpen(false);
     }
 
     document.addEventListener("mousedown", handleMouseDown);
@@ -30,8 +45,9 @@ export default function NotificationBell() {
   const badgeLabel = count > 10 ? "10+" : String(count);
 
   return (
-    <div ref={containerRef} className="relative">
+    <>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Notifications"
@@ -45,11 +61,12 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {open && (
-        <div className="absolute left-0 mt-2 z-50">
+      {open && typeof document !== "undefined" && createPortal(
+        <div ref={dropdownRef} style={dropdownStyle}>
           <NotificationDropdown onClose={() => setOpen(false)} />
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
