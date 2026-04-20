@@ -145,7 +145,9 @@ public class ClassSession {
         this.updatedAt = now;
         this.updatedBy = alertedBy;
         this.domainEvents.add(new SessionAlertRaised(
-                this.id.value(), this.tenantId, this.classId, reason, alertedBy, actorRole, now));
+                this.id.value(), this.tenantId, this.classId, reason,
+                this.sessionDate, this.startTime, this.endTime,
+                alertedBy, actorRole, now));
     }
 
     /**
@@ -167,7 +169,9 @@ public class ClassSession {
         this.updatedAt = now;
         this.updatedBy = actorId;
         this.domainEvents.add(new SessionAlertUpdated(
-                this.id.value(), this.tenantId, this.classId, newReason, actorId, actorRole, now));
+                this.id.value(), this.tenantId, this.classId, newReason,
+                this.sessionDate, this.startTime, this.endTime,
+                actorId, actorRole, now));
     }
 
     /**
@@ -190,8 +194,9 @@ public class ClassSession {
         this.updatedBy = cancelledBy;
         // affectedStudentIds populated by CancelSessionService after fan-out; aggregate emits empty list
         this.domainEvents.add(new SessionCancelled(
-                this.id.value(), this.tenantId, this.classId, reason, cancelledBy, actorRole,
-                List.of(), now));
+                this.id.value(), this.tenantId, this.classId, reason,
+                this.sessionDate, this.startTime, this.endTime,
+                cancelledBy, actorRole, List.of(), now));
     }
 
     // ---------------------------------------------------------------

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +67,7 @@ public class SessionEventsNotificationListener {
         log.info("[NOTIFY] Session alert raised — sessionId={}, classId={}, actorRole={}",
                 e.sessionId(), e.classId(), e.actorRole());
         String className = resolveClassName(e.tenantId(), e.classId());
-        String title = SessionNotificationTemplates.alertTitle(className);
+        String title = SessionNotificationTemplates.alertTitle(className, e.sessionDate(), e.startTime(), e.endTime());
         String body = SessionNotificationTemplates.alertBody(e.reason());
         fanOutAlertLike(e.tenantId(), e.classId(), e.sessionId(), title, body,
                 e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_ALERTED);
@@ -80,7 +79,7 @@ public class SessionEventsNotificationListener {
         log.info("[NOTIFY] Session alert updated — sessionId={}, classId={}, actorRole={}",
                 e.sessionId(), e.classId(), e.actorRole());
         String className = resolveClassName(e.tenantId(), e.classId());
-        String title = SessionNotificationTemplates.alertTitle(className);
+        String title = SessionNotificationTemplates.alertTitle(className, e.sessionDate(), e.startTime(), e.endTime());
         String body = SessionNotificationTemplates.alertBody(e.newReason());
         // Updated alerts reuse CLASS_SESSION_ALERTED — student sees a refreshed alert, not a new notification type.
         fanOutAlertLike(e.tenantId(), e.classId(), e.sessionId(), title, body,
@@ -96,9 +95,7 @@ public class SessionEventsNotificationListener {
                 e.sessionId(), e.classId(), e.affectedStudentIds().size(), e.actorRole());
 
         String className = resolveClassName(e.tenantId(), e.classId());
-        // Use today's date as the cancellation date — the session date isn't on the event.
-        // This is acceptable for the notification body; the deep link carries the sessionId for full details.
-        String title = SessionNotificationTemplates.cancellationTitle(className, LocalDate.now());
+        String title = SessionNotificationTemplates.cancellationTitle(className, e.sessionDate(), e.startTime(), e.endTime());
         String body = SessionNotificationTemplates.cancellationBody(e.reason());
 
         // Notify each affected student (deduplicated in case of duplicates in the list).

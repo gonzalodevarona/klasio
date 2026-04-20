@@ -82,6 +82,9 @@ class ClassSessionTest {
         SessionAlertRaised event = (SessionAlertRaised) events.get(0);
         assertThat(event.reason()).isEqualTo(REASON);
         assertThat(event.actorRole()).isEqualTo("PROFESSOR");
+        assertThat(event.sessionDate()).isNotNull();
+        assertThat(event.startTime()).isNotNull();
+        assertThat(event.endTime()).isNotNull();
     }
 
     @Test
@@ -148,6 +151,9 @@ class ClassSessionTest {
         assertThat(cancelEvent.reason()).isEqualTo(REASON);
         assertThat(cancelEvent.actorRole()).isEqualTo("ADMIN");
         assertThat(cancelEvent.affectedStudentIds()).isEmpty();
+        assertThat(cancelEvent.sessionDate()).isNotNull();
+        assertThat(cancelEvent.startTime()).isNotNull();
+        assertThat(cancelEvent.endTime()).isNotNull();
     }
 
     @Test
