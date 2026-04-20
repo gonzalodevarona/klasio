@@ -46,7 +46,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 z-50">
+        <div className="absolute left-0 mt-2 z-50">
           <NotificationDropdown onClose={() => setOpen(false)} />
         </div>
       )}
