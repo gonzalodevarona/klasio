@@ -59,10 +59,15 @@ export default function SessionReasonModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div
+        className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="session-reason-modal-title"
+      >
         {/* Header */}
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+          <h2 id="session-reason-modal-title" className="text-lg font-semibold text-gray-900">{title}</h2>
           {description && (
             <p className="mt-1 text-sm text-gray-500">{description}</p>
           )}

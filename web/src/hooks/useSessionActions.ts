@@ -44,8 +44,7 @@ function useAction<TInput>(
         setLoading(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [perform]
+    [perform] // honest dependency — callers must memoize perform
   );
 
   return { execute, loading, error, clearError };

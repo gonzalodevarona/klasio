@@ -82,6 +82,8 @@ export default function ClassRosterPanel({
     return `${monday.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${sun.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
   }, [monday]);
 
+  const now = new Date();
+
   return (
     <div className="bg-blue-50 border-t border-blue-100 px-6 py-4">
       {/* Week navigator */}
@@ -128,9 +130,8 @@ export default function ClassRosterPanel({
       {!loading && !error && sessions.length > 0 && (
         <div className="space-y-4">
           {sessions.map((session) => {
-            const now = new Date();
             const sessionStart = new Date(`${session.sessionDate}T${session.startTime}`);
-            const isFuture = sessionStart.getTime() > now.getTime();
+            const isFuture = sessionStart.getTime() > now.getTime(); // now hoisted above map — computed once per render
             const role = (userRole ?? "").toUpperCase();
             const canManage =
               role === "ADMIN" || role === "SUPERADMIN" ||
