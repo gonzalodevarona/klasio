@@ -22,5 +22,5 @@ public final class NotificationDtos {
 
     public record NotificationPageResponse(List<NotificationResponse> items, long total, int page, int size) {}
 
-    public record UnreadCountResponse(long count) {}
+    public record UnreadCountResponse(long count, boolean hasCancellation) {}
 }

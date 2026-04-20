@@ -18,7 +18,9 @@ public class GetUnreadCountService implements GetUnreadCountUseCase {
     }
 
     @Override
-    public long execute(UUID tenantId, UUID userId) {
-        return repository.countUnread(tenantId, userId);
+    public Result execute(UUID tenantId, UUID userId) {
+        long count = repository.countUnread(tenantId, userId);
+        boolean hasCancellation = count > 0 && repository.hasUnreadCancellation(tenantId, userId);
+        return new Result(count, hasCancellation);
     }
 }

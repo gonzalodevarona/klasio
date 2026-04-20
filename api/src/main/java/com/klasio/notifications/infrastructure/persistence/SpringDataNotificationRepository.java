@@ -26,6 +26,9 @@ public interface SpringDataNotificationRepository extends JpaRepository<Notifica
 
     long countByTenantIdAndRecipientUserIdAndReadAtIsNull(UUID tenantId, UUID recipientUserId);
 
+    boolean existsByTenantIdAndRecipientUserIdAndTypeAndReadAtIsNull(
+            UUID tenantId, UUID recipientUserId, String type);
+
     @Transactional
     @Modifying
     @Query("""

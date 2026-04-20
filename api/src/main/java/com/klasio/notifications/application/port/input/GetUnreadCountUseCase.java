@@ -3,5 +3,7 @@ package com.klasio.notifications.application.port.input;
 import java.util.UUID;
 
 public interface GetUnreadCountUseCase {
-    long execute(UUID tenantId, UUID userId);
+    record Result(long count, boolean hasCancellation) {}
+
+    Result execute(UUID tenantId, UUID userId);
 }
