@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
@@ -145,6 +146,14 @@ export default function StudentDashboard() {
                   <span className="text-gray-400">
                     {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}
                   </span>
+                  {r.sessionStatus === "ALERTED" && (
+                    <span
+                      title={r.sessionAlertReason ?? "Alert issued for this session"}
+                      className="inline-flex text-amber-600"
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                    </span>
+                  )}
                 </div>
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
