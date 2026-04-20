@@ -5,8 +5,8 @@ import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotifications,
-  useUnreadCount,
 } from "@/hooks/useNotifications";
+import { useNotificationCount } from "@/context/NotificationCountContext";
 import NotificationItem from "./NotificationItem";
 
 interface NotificationDropdownProps {
@@ -17,7 +17,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
   const { notifications, isLoading, refresh } = useNotifications(0, false);
   const { markRead } = useMarkNotificationRead();
   const { markAllRead } = useMarkAllNotificationsRead();
-  const { refreshCount } = useUnreadCount();
+  const { refreshCount } = useNotificationCount();
 
   async function handleRead(id: string) {
     await markRead(id);

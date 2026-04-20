@@ -6,8 +6,12 @@ import NotificationBell from "../NotificationBell";
 // Module mocks
 // ---------------------------------------------------------------------------
 
+jest.mock("@/context/NotificationCountContext", () => ({
+  useNotificationCount: jest.fn(),
+  NotificationCountProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 jest.mock("@/hooks/useNotifications", () => ({
-  useUnreadCount: jest.fn(),
   useNotifications: jest.fn(() => ({
     notifications: [],
     totalPages: 0,
@@ -19,7 +23,7 @@ jest.mock("@/hooks/useNotifications", () => ({
   useMarkAllNotificationsRead: jest.fn(() => ({ markAllRead: jest.fn() })),
 }));
 
-import { useUnreadCount } from "@/hooks/useNotifications";
+import { useNotificationCount } from "@/context/NotificationCountContext";
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -27,7 +31,7 @@ import { useUnreadCount } from "@/hooks/useNotifications";
 
 describe("NotificationBell", () => {
   it('renders "10+" badge when unread count is 11', () => {
-    (useUnreadCount as jest.Mock).mockReturnValue({ count: 11 });
+    (useNotificationCount as jest.Mock).mockReturnValue({ count: 11, refreshCount: jest.fn() });
 
     render(<NotificationBell />);
 
