@@ -4,19 +4,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface Notification {
   id: string;
-  recipientId: string;
   type: string;
   title: string;
   body: string;
   metadata: Record<string, string>;
+  readAt: string | null;
   read: boolean;
   createdAt: string;
 }
 
 interface NotificationsPage {
-  content: Notification[];
-  totalPages: number;
-  totalElements: number;
+  items: Notification[];
+  total: number;
+  page: number;
+  size: number;
 }
 
 interface UseNotificationsResult {
@@ -59,8 +60,10 @@ export function useNotifications(
       })
       .then((data) => {
         if (cancelled) return;
-        setNotifications(data.content);
-        setTotalPages(data.totalPages);
+        setNotifications(
+          (data.items ?? []).map((n) => ({ ...n, read: n.readAt != null }))
+        );
+        setTotalPages(Math.ceil(data.total / data.size) || 0);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
