@@ -60,6 +60,12 @@ export interface ClassSessionRoster {
   endTime: string;
   registrantCount: number;
   registrants: RosterRegistrantView[];
+  /** Session lifecycle status. Defaults to SCHEDULED when not returned by the API. */
+  status?: SessionStatus;
+  /** Populated when status is ALERTED. */
+  alertReason?: string | null;
+  /** Populated when status is CANCELLED. */
+  cancellationReason?: string | null;
 }
 
 // ── Attendance Marking (RF-25 / RF-26) ───────────────────────────────────────
