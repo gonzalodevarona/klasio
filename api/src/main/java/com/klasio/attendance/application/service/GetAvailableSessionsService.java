@@ -132,6 +132,7 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
             int currentCapacity = materialized != null ? materialized.getCurrentCapacity() : 0;
             UUID sessionId = materialized != null ? materialized.getId().value() : null;
             String status = materialized != null ? materialized.getStatus().name() : "SCHEDULED";
+            String alertReason = materialized != null ? materialized.getAlertReason() : null;
 
             ClassRegistrationView classView = classMap.get(tuple.classId());
             int maxStudents = classView.maxStudents();
@@ -158,7 +159,8 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
                     currentCapacity,
                     maxStudents,
                     status,
-                    registrationOpen
+                    registrationOpen,
+                    alertReason
             ));
         }
 

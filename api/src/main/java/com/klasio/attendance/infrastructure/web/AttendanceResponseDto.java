@@ -21,7 +21,10 @@ public class AttendanceResponseDto {
             String level,
             int intendedHours,
             String status,
-            Instant createdAt
+            Instant createdAt,
+            String sessionCancellationReason,
+            String sessionStatus,
+            String sessionAlertReason
     ) {
         public static RegistrationResponse from(AttendanceRegistrationView view) {
             return new RegistrationResponse(
@@ -35,7 +38,10 @@ public class AttendanceResponseDto {
                     view.level(),
                     view.intendedHours(),
                     view.status(),
-                    view.createdAt()
+                    view.createdAt(),
+                    view.sessionCancellationReason(),
+                    view.sessionStatus(),
+                    view.sessionAlertReason()
             );
         }
     }
@@ -51,7 +57,9 @@ public class AttendanceResponseDto {
             UUID programId,
             int currentCapacity,
             int maxStudents,
-            String status
+            String status,
+            boolean registrationOpen,
+            String alertReason
     ) {
         public static AvailableSessionResponse from(AvailableSessionView view) {
             return new AvailableSessionResponse(
@@ -65,7 +73,9 @@ public class AttendanceResponseDto {
                     view.programId(),
                     view.currentCapacity(),
                     view.maxStudents(),
-                    view.status()
+                    view.status(),
+                    view.registrationOpen(),
+                    view.alertReason()
             );
         }
     }

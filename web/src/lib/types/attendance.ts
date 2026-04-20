@@ -2,6 +2,7 @@ export type RegistrationStatus =
   | "REGISTERED"
   | "CANCELLED_BY_STUDENT"
   | "CANCELLED_BY_SYSTEM"
+  | "SESSION_CANCELLED"
   | "PRESENT"
   | "PRESENT_NO_HOURS"
   | "ABSENT";
@@ -21,6 +22,7 @@ export interface AvailableSession {
   maxStudents: number;
   status: SessionStatus;
   registrationOpen: boolean;
+  alertReason?: string | null;
 }
 
 export interface Registration {
@@ -35,6 +37,9 @@ export interface Registration {
   intendedHours: number;
   status: RegistrationStatus;
   createdAt: string;
+  sessionCancellationReason?: string | null;
+  sessionStatus?: SessionStatus | null;
+  sessionAlertReason?: string | null;
 }
 
 export interface RegistrationListResponse {

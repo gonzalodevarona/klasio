@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
 import { useMyClasses } from "@/hooks/useMyClasses";
 import { useAvailableSessions } from "@/hooks/useAvailableSessions";
 import { useRegisterForSession } from "@/hooks/useRegisterForSession";
@@ -127,7 +127,17 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
               return (
                 <tr key={`${s.classId}-${s.sessionDate}`}>
                   <td className="py-2 pr-4 text-gray-900">
-                    {formatSessionDate(s.sessionDate)}
+                    <div className="flex items-center gap-1.5">
+                      <span>{formatSessionDate(s.sessionDate)}</span>
+                      {s.status === "ALERTED" && (
+                        <span
+                          title={s.alertReason ?? "Alert issued for this session"}
+                          className="inline-flex text-amber-600"
+                        >
+                          <AlertTriangle className="w-4 h-4" />
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-2 pr-4 text-gray-500 whitespace-nowrap">
                     {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
