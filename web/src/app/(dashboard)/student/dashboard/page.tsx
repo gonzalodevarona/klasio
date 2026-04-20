@@ -8,7 +8,7 @@ import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import HourBalance from "@/components/memberships/HourBalance";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
-import { todayInTenantZone } from "@/lib/attendanceConstants";
+import { todayInTenantZone, formatSessionDate } from "@/lib/attendanceConstants";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -141,7 +141,7 @@ export default function StudentDashboard() {
               <li key={r.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-3">
                   <span className="text-gray-900">
-                    {new Date(r.sessionDate).toLocaleDateString()}
+                    {formatSessionDate(r.sessionDate)}
                   </span>
                   <span className="text-gray-400">
                     {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}

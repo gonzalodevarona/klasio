@@ -3,7 +3,7 @@
 import { RegistrationStatus } from "@/lib/types/attendance";
 
 interface RegistrationStatusBadgeProps {
-  status: string;
+  status: RegistrationStatus;
 }
 
 const STATUS_STYLES: Record<RegistrationStatus, string> = {
@@ -27,9 +27,8 @@ const STATUS_LABELS: Record<RegistrationStatus, string> = {
 };
 
 export default function RegistrationStatusBadge({ status }: RegistrationStatusBadgeProps) {
-  const key = status as RegistrationStatus;
-  const styles = STATUS_STYLES[key] ?? "bg-gray-100 text-gray-500";
-  const label = STATUS_LABELS[key] ?? status;
+  const styles = STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500";
+  const label = STATUS_LABELS[status] ?? status;
 
   return (
     <span
