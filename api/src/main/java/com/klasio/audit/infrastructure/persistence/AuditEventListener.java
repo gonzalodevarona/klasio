@@ -48,6 +48,10 @@ import com.klasio.attendance.domain.event.AttendanceMarkedAbsent;
 import com.klasio.attendance.domain.event.AttendanceMarkedPresentNoHours;
 import com.klasio.attendance.domain.event.AttendanceCorrected;
 import com.klasio.attendance.domain.event.RegistrationCancelled;
+import com.klasio.attendance.domain.event.RegistrationCancelledBySession;
+import com.klasio.attendance.domain.event.SessionAlertRaised;
+import com.klasio.attendance.domain.event.SessionAlertUpdated;
+import com.klasio.attendance.domain.event.SessionCancelled;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -1172,6 +1176,107 @@ public class AuditEventListener {
                 "ATTENDANCE_REGISTRATION",
                 event.registrationId(),
                 event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onSessionAlertRaised(SessionAlertRaised e) {
+        log.info("Recording audit log for session alert raised: sessionId={}, classId={}",
+                e.sessionId(), e.classId());
+
+        String details = toJson(Map.of(
+                "sessionId", e.sessionId().toString(),
+                "classId", e.classId().toString(),
+                "reason", e.reason(),
+                "actorRole", e.actorRole()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "SESSION_ALERT_RAISED",
+                e.actorId(),
+                "CLASS_SESSION",
+                e.sessionId(),
+                e.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onSessionAlertUpdated(SessionAlertUpdated e) {
+        log.info("Recording audit log for session alert updated: sessionId={}, classId={}",
+                e.sessionId(), e.classId());
+
+        String details = toJson(Map.of(
+                "sessionId", e.sessionId().toString(),
+                "classId", e.classId().toString(),
+                "newReason", e.newReason(),
+                "actorRole", e.actorRole()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "SESSION_ALERT_UPDATED",
+                e.actorId(),
+                "CLASS_SESSION",
+                e.sessionId(),
+                e.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onSessionCancelled(SessionCancelled e) {
+        log.info("Recording audit log for session cancelled: sessionId={}, classId={}, affectedStudents={}",
+                e.sessionId(), e.classId(), e.affectedStudentIds().size());
+
+        String details = toJson(Map.of(
+                "sessionId", e.sessionId().toString(),
+                "classId", e.classId().toString(),
+                "reason", e.reason(),
+                "actorRole", e.actorRole(),
+                "affectedStudentCount", String.valueOf(e.affectedStudentIds().size())
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "SESSION_CANCELLED",
+                e.actorId(),
+                "CLASS_SESSION",
+                e.sessionId(),
+                e.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onRegistrationCancelledBySession(RegistrationCancelledBySession e) {
+        log.info("Recording audit log for registration cancelled by session: registrationId={}, studentId={}",
+                e.registrationId(), e.studentId());
+
+        String details = toJson(Map.of(
+                "sessionId", e.sessionId().toString(),
+                "classId", e.classId().toString(),
+                "studentId", e.studentId().toString(),
+                "priorStatus", e.priorStatus().name()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_REGISTRATION_CANCELLED_BY_SESSION",
+                e.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                e.registrationId(),
+                e.occurredAt(),
                 details
         );
 

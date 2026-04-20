@@ -83,8 +83,33 @@ public class JpaClassSessionRepository extends TenantScopedRepository implements
     }
 
     @Override
+    public Optional<ClassSession> findByClassAndDate(UUID tenantId, UUID classId, LocalDate sessionDate) {
+        applyTenantContext();
+        return springDataRepository.findByTenantIdAndClassIdAndSessionDate(tenantId, classId, sessionDate)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public void cancelFutureSessionsByClass(UUID tenantId, UUID classId, LocalDate fromDate) {
         applyTenantContext();
         springDataRepository.cancelFutureSessionsByClass(tenantId, classId, fromDate);
+    }
+
+    @Override
+    public void resetCurrentCapacity(UUID sessionId) {
+        applyTenantContext();
+        springDataRepository.resetCurrentCapacity(sessionId);
+    }
+
+    @Override
+    public List<ClassSession> findByIds(UUID tenantId, List<UUID> sessionIds) {
+        if (sessionIds.isEmpty()) {
+            return List.of();
+        }
+        applyTenantContext();
+        return springDataRepository.findByTenantIdAndIdIn(tenantId, sessionIds)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

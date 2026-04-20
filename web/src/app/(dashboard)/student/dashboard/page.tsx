@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import HourBalance from "@/components/memberships/HourBalance";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
-import { todayInTenantZone } from "@/lib/attendanceConstants";
+import { todayInTenantZone, formatSessionDate } from "@/lib/attendanceConstants";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -140,11 +141,19 @@ export default function StudentDashboard() {
               <li key={r.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-3">
                   <span className="text-gray-900">
-                    {new Date(r.sessionDate).toLocaleDateString()}
+                    {formatSessionDate(r.sessionDate)}
                   </span>
                   <span className="text-gray-400">
                     {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}
                   </span>
+                  {r.sessionStatus === "ALERTED" && (
+                    <span
+                      title={r.sessionAlertReason ?? "Alert issued for this session"}
+                      className="inline-flex text-amber-600"
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                    </span>
+                  )}
                 </div>
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${

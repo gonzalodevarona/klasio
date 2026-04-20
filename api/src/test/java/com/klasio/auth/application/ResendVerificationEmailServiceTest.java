@@ -66,7 +66,7 @@ class ResendVerificationEmailServiceTest {
     void alreadyVerifiedUser_noOp_noException() {
         UUID tenantId = UUID.randomUUID();
         User user = User.createActive(tenantId, "verified@example.com", "hashed-pwd",
-                com.klasio.auth.domain.model.Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", null, null);
+                com.klasio.auth.domain.model.Role.STUDENT, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", null, null, null);
 
         when(userRepository.findByEmail("verified@example.com")).thenReturn(Optional.of(user));
 

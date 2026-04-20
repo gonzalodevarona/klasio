@@ -30,6 +30,7 @@ const STATUS_OPTIONS = [
   { value: "REGISTERED",           label: "Registered" },
   { value: "CANCELLED_BY_STUDENT", label: "Cancelled" },
   { value: "CANCELLED_BY_SYSTEM",  label: "Schedule Changed" },
+  { value: "SESSION_CANCELLED",    label: "Cancelled by league" },
 ] as const;
 
 type StatusFilter = typeof STATUS_OPTIONS[number]["value"];
@@ -117,12 +118,22 @@ export default function StudentRegistrationsPage() {
         </div>
       )}
 
+      {statusFilter === "SESSION_CANCELLED" && (
+        <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-800">
+          These registrations were cancelled by the league. Your spot was released and no hours
+          were deducted. You can register for a different session in{" "}
+          <strong>My Classes</strong>.
+        </div>
+      )}
+
       {!loading && !error && registrations.length === 0 && (
         <p className="py-8 text-center text-sm text-gray-400">
           {statusFilter === "REGISTERED"
             ? "You have no upcoming registrations."
             : statusFilter === "CANCELLED_BY_SYSTEM"
             ? "No registrations were cancelled by a schedule change."
+            : statusFilter === "SESSION_CANCELLED"
+            ? "No sessions were cancelled by the league."
             : "You have no cancelled registrations."}
         </p>
       )}
@@ -169,6 +180,11 @@ export default function StudentRegistrationsPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {r.className}
+                      {r.status === "SESSION_CANCELLED" && r.sessionCancellationReason && (
+                        <div className="mt-0.5 text-xs italic text-red-600">
+                          Reason: {r.sessionCancellationReason}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span

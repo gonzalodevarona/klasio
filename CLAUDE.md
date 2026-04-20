@@ -170,7 +170,7 @@ Auth, multitenancy, programs/classes/professors, student management (with level 
 
 ## v1.1 Deferred (P1-P2)
 
-Cost modification history (RF-10), attendance session alerts and cancellations (RF-27, RF-28), manager and admin dashboards full analytics (RF-30, RF-31), payment history export (RF-22). Note: manager delegation with 48h reminder (RF-21) is ✅ complete.
+Cost modification history (RF-10), manager and admin dashboards full analytics (RF-30, RF-31), payment history export (RF-22). Note: manager delegation with 48h reminder (RF-21) is ✅ complete. RF-27 and RF-28 (class alerts and cancellations) are ✅ complete (in-app; email fan-out pending RF-32).
 
 ## Speckit Workflow
 
@@ -198,7 +198,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | File storage | AWS S3 (payment proofs, tenant logos) | AWS SDK v2 |
 | Auth | JWT + refresh tokens | — |
 
-## Implemented Features (as of 2026-04-14)
+## Implemented Features (as of 2026-04-19)
 
 | Feature branch | RFs | Status |
 |---|---|---|
@@ -210,6 +210,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | `merged/007-auth-rbac` | RF-01, RF-02, RF-03, RF-04 | RF-01 ✅, RF-02 ✅, RF-03 ✅, RF-04 ✅ |
 | `006-membership-lifecycle` (active, not merged) | RF-14, RF-15, RF-16, RF-17, RF-18 | RF-14 ✅, RF-15 ✅, RF-16 ✅, RF-17 ✅, RF-18 ✅ |
 | `merged/008-payment-proof-validation` | RF-19, RF-20, RF-21 | RF-19 ✅, RF-20 ✅, RF-21 ✅ |
+| `010-class-alert-cancellation` (active, not merged) | RF-27, RF-28 | RF-27 ✅, RF-28 ✅ (in-app only) |
 
 ### Remaining v1.0 work (P0 features not yet implemented)
 
@@ -221,9 +222,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | RF-24 | Attendance – Student Cancellation | Blocked on RF-23 |
 | RF-25 | Attendance – Marking by Professor | Blocked on RF-23 |
 | RF-26 | Attendance – Marking by Manager | Blocked on RF-25 |
-| RF-27 | Attendance – Class Alert | Blocked on RF-23, RF-32 |
-| RF-28 | Attendance – Class Cancellation | Blocked on RF-23, RF-32 |
-| RF-29 | Student Dashboard | 🔄 Partial — missing upcoming classes + attendance history (blocked on RF-23/RF-25) |
+| RF-29 | Student Dashboard | 🔄 Partial — attendance history not yet surfaced on dashboard |
 | RF-30 | Manager Dashboard | 🔄 Partial — only delegated memberships panel (blocked on RF-23/RF-25) |
 | RF-31 | Admin Dashboard | Not started — blocked on RF-22, RF-23/RF-25 |
 | RF-32 | Transactional Email (Postmark) | 🔄 Partial — all listeners stubbed; no Postmark adapter yet |
@@ -314,6 +313,7 @@ Added in `006-membership-lifecycle`. Key patterns:
 - **CSV export**: native `fetch` with `Accept: text/csv` header + `URL.createObjectURL` (no third-party library).
 
 ## Recent Changes
+- 010-class-alert-cancellation: Class session alerts and cancellations (RF-27, RF-28): `ClassSession.raiseAlert()`, `updateAlertReason()`, `cancel()` transitions + 4 attendance domain events (`SessionAlertRaised`, `SessionAlertUpdated`, `SessionCancelled`, `RegistrationCancelledBySession`). `RaiseSessionAlertService`, `UpdateSessionAlertService`, `CancelSessionService` with RBAC guards (professor assigned / manager of program / admin in tenant). Cancel fans out `cancelBySession()` to all non-cancelled registrations inside the same transaction and calls `RefundHoursUseCase` for prior `PRESENT` rows only. New `com.klasio.notifications` module (generic, reusable): `Notification` aggregate (pure Java), `NotificationCreated` + `NotificationRead` domain events, 5 use cases, `MeNotificationsController` (5 endpoints), `SessionEventsNotificationListener` (`@TransactionalEventListener(AFTER_COMMIT)` — translates session events → in-app rows), V053 attendance extensions + V054 notifications table. Frontend: `NotificationBell` with `10+` badge cap, `/notifications` page, `SessionActionsPanel` + `SessionReasonModal`, student-side status-aware badges (`SESSION_CANCELLED` red badge, `ALERTED` amber icon). Email fan-out deferred to RF-32.
 - 008-payment-proof-validation: Payment proof upload/validation/delegation (RF-19–RF-21): `PaymentProof` aggregate (pure Java) with `upload()`/`approve()`/`reject()`/`supersede()` transitions and 3 domain events. `UploadPaymentProofService`, `ApproveProofService`, `RejectProofService`, `ListPendingProofsService`, `GetPaymentProofService`, `GetProofDownloadUrlService`, `ListDelegatedMembershipsService`. `S3PaymentProofStorage` (presigned URLs). `DelegationReminderJob` (hourly cron, 48 h cutoff, idempotent via `reminder_sent` flag). `PaymentProofController` (8 endpoints). V037 (payment_proofs + RLS), V038 (delegation_reminders), V039 (PAYMENT_PROOF audit types). Frontend: `ProofQueue`, `ProofReviewModal`, `ProofStatusBadge`, `PaymentProofPanel`, `DelegatedMembershipList`, `/payment-proofs` admin page, student memberships page with upload panel. Notification stubs in `PaymentProofNotificationListener` (Postmark pending RF-32).
 - 007-auth-rbac: Full auth & RBAC (RF-01–RF-04): `com.klasio.auth` hexagonal module with User aggregate, 9 domain events, 9 use case services (Login, Logout, RefreshToken, RegisterStudent, VerifyEmail, ResendVerification, RequestPasswordReset, ResetPassword, AssignRole). JWT access tokens (8h) + DB-backed refresh tokens (7d, rotated). HttpOnly cookies via Next.js API proxy routes. Cookie-first token extraction with Authorization header fallback. Account lockout (5 failed → 15 min). Email verification (24h) and password reset (30 min) one-time tokens. BCrypt factor 12. Edge Runtime middleware with `jose` for RBAC routing. V028–V034 Flyway migrations. AuthAuditEventListener (11 action types). Frontend: LoginForm, RegistrationForm (age-based tutor fields), PasswordPolicyChecker (real-time), ForgotPasswordForm, ResetPasswordForm, verify-email page. Cross-module ports: StudentProfilePort, TenantResolverPort. MailHog for local email testing.
 - 006-membership-lifecycle: Full membership lifecycle (RF-14–RF-18): pure-Java Membership aggregate + HourTransaction append-only ledger, 8 domain events, 10 use case services, MembershipController (9 endpoints), MembershipExpirationJob (daily cron), MembershipNotificationListener (fire-and-forget stubs), frontend pages + 7 components + 2 hooks, V024–V027 Flyway migrations, audit log integration (8 new action types), cross-module ports (StudentName, ProgramName, ProgramPlan).

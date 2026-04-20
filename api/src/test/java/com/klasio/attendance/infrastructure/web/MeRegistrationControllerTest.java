@@ -175,7 +175,10 @@ class MeRegistrationControllerTest {
                 "BEGINNER",
                 1,
                 "REGISTERED",
-                Instant.now()
+                Instant.now(),
+                null,
+                null,
+                null
         );
     }
 

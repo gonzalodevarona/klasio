@@ -17,5 +17,8 @@ public record AttendanceRegistrationView(
         String level,
         int intendedHours,
         String status,
-        Instant createdAt
+        Instant createdAt,
+        String sessionCancellationReason,
+        String sessionStatus,
+        String sessionAlertReason
 ) {}

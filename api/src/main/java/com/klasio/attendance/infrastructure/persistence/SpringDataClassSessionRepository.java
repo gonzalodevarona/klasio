@@ -18,6 +18,9 @@ public interface SpringDataClassSessionRepository extends JpaRepository<ClassSes
     Optional<ClassSessionJpaEntity> findByClassIdAndSessionDateAndStartTime(
             UUID classId, LocalDate sessionDate, LocalTime startTime);
 
+    Optional<ClassSessionJpaEntity> findByTenantIdAndClassIdAndSessionDate(
+            UUID tenantId, UUID classId, LocalDate sessionDate);
+
     @Modifying
     @Query(value = """
             INSERT INTO class_sessions (id, tenant_id, class_id, session_date, start_time, end_time, status, created_by)
@@ -87,4 +90,10 @@ public interface SpringDataClassSessionRepository extends JpaRepository<ClassSes
             @Param("tenantId") UUID tenantId,
             @Param("classId")  UUID classId,
             @Param("fromDate") LocalDate fromDate);
+
+    @Modifying
+    @Query("UPDATE ClassSessionJpaEntity s SET s.currentCapacity = 0 WHERE s.id = :id")
+    int resetCurrentCapacity(@Param("id") UUID id);
+
+    List<ClassSessionJpaEntity> findByTenantIdAndIdIn(UUID tenantId, List<UUID> ids);
 }

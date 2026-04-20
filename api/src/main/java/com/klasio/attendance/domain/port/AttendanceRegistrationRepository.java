@@ -43,5 +43,12 @@ public interface AttendanceRegistrationRepository {
     List<AttendanceRegistration> findFutureRegisteredByClass(UUID tenantId, UUID classId,
                                                               LocalDate fromDate);
 
+    /**
+     * Returns all registrations for a session that are NOT in any cancelled state
+     * (CANCELLED_BY_STUDENT, CANCELLED_BY_SYSTEM, SESSION_CANCELLED).
+     * Used by the class cancellation flow to notify affected students.
+     */
+    List<AttendanceRegistration> findAllNonCancelledBySessionId(UUID tenantId, UUID sessionId);
+
     void saveAll(List<AttendanceRegistration> registrations);
 }

@@ -294,6 +294,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(SessionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSessionNotFound(SessionNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotificationNotFound(NotificationNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("NOTIFICATION_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(RegistrationNotCancellableException.class)
     public ResponseEntity<ErrorResponse> handleRegistrationNotCancellable(RegistrationNotCancellableException ex) {
         var error = new ErrorResponse.ErrorDetail("REGISTRATION_NOT_CANCELLABLE", ex.getMessage());
@@ -414,6 +426,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCorrectionWindowExpired(CorrectionWindowExpiredException ex) {
         var error = new ErrorResponse.ErrorDetail("CORRECTION_WINDOW_EXPIRED", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(SessionAlreadyStartedException.class)
+    public ResponseEntity<ErrorResponse> handleSessionStarted(SessionAlreadyStartedException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_ALREADY_STARTED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(SessionAlreadyCancelledException.class)
+    public ResponseEntity<ErrorResponse> handleSessionAlreadyCancelled(SessionAlreadyCancelledException ex) {
+        var error = new ErrorResponse.ErrorDetail("SESSION_ALREADY_CANCELLED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(InvalidAlertReasonException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidReason(InvalidAlertReasonException ex) {
+        var error = new ErrorResponse.ErrorDetail("INVALID_ALERT_REASON", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(NotAlertAuthorException.class)
+    public ResponseEntity<ErrorResponse> handleNotAlertAuthor(NotAlertAuthorException ex) {
+        var error = new ErrorResponse.ErrorDetail("NOT_ALERT_AUTHOR", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

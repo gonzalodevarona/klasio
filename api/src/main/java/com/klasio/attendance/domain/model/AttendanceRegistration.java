@@ -6,6 +6,7 @@ import com.klasio.attendance.domain.event.AttendanceMarkedPresent;
 import com.klasio.attendance.domain.event.AttendanceMarkedPresentNoHours;
 import com.klasio.attendance.domain.event.AttendanceRegistered;
 import com.klasio.attendance.domain.event.RegistrationCancelled;
+import com.klasio.attendance.domain.event.RegistrationCancelledBySession;
 import com.klasio.shared.domain.DomainEvent;
 
 import java.time.Instant;
@@ -329,6 +330,35 @@ public class AttendanceRegistration {
                 this.id.value(), this.sessionId, this.tenantId, this.classId,
                 this.studentId, this.sessionDate, this.sessionStartTime,
                 actorId, now));
+    }
+
+    /**
+     * Transitions this registration to SESSION_CANCELLED when the session itself is cancelled.
+     * Valid from REGISTERED, PRESENT, PRESENT_NO_HOURS, or ABSENT status.
+     * Idempotent: no-op if already SESSION_CANCELLED.
+     * Emits {@link com.klasio.attendance.domain.event.RegistrationCancelledBySession}.
+     */
+    public void cancelBySession(UUID actorId, Instant now, String sessionCancellationReason) {
+        Objects.requireNonNull(actorId, "actorId must not be null");
+        Objects.requireNonNull(now, "now must not be null");
+        if (this.status == AttendanceRegistrationStatus.SESSION_CANCELLED) {
+            return; // idempotent
+        }
+        if (this.status == AttendanceRegistrationStatus.CANCELLED_BY_STUDENT
+                || this.status == AttendanceRegistrationStatus.CANCELLED_BY_SYSTEM) {
+            throw new IllegalStateException(
+                    "Cannot session-cancel a registration already cancelled (" + this.status + ")");
+        }
+        AttendanceRegistrationStatus prior = this.status;
+        this.status = AttendanceRegistrationStatus.SESSION_CANCELLED;
+        this.cancelledAt = now;
+        this.cancelledBy = actorId;
+        this.cancellationReason = sessionCancellationReason;
+        this.updatedAt = now;
+        this.updatedBy = actorId;
+        this.domainEvents.add(new RegistrationCancelledBySession(
+                this.id.value(), this.tenantId, this.sessionId, this.classId, this.studentId,
+                prior, actorId, now));
     }
 
     /**

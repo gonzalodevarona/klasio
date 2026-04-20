@@ -5,11 +5,19 @@ import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { useClassSessionRoster } from "@/hooks/useClassSessionRoster";
 import RegistrationStatusBadge from "./RegistrationStatusBadge";
 import AttendanceMarkingPanel from "./AttendanceMarkingPanel";
+import SessionStatusBadge from "./SessionStatusBadge";
+import SessionActionsPanel from "./SessionActionsPanel";
 
 interface ClassRosterPanelProps {
   classId: string;
   /** When provided, enables interactive marking for the given role (PROFESSOR, MANAGER, ADMIN, SUPERADMIN). */
   userRole?: string;
+  /** Program the class belongs to — used for manager scope check. */
+  programId?: string;
+  /** Program IDs managed by the current user (MANAGER role). */
+  managedProgramIds?: string[];
+  /** Class IDs assigned to the current user (PROFESSOR role). */
+  professorClassIds?: string[];
 }
 
 /** Returns the Monday of the week that contains `date`. */
@@ -55,7 +63,13 @@ const LEVEL_STYLES: Record<string, string> = {
   ADVANCED:     "bg-red-100 text-red-700",
 };
 
-export default function ClassRosterPanel({ classId, userRole }: ClassRosterPanelProps) {
+export default function ClassRosterPanel({
+  classId,
+  userRole,
+  programId,
+  managedProgramIds,
+  professorClassIds,
+}: ClassRosterPanelProps) {
   const [monday, setMonday] = useState<Date>(() => weekStart(new Date()));
 
   const from = useMemo(() => toISO(monday), [monday]);
@@ -67,6 +81,8 @@ export default function ClassRosterPanel({ classId, userRole }: ClassRosterPanel
     const sun = addDays(monday, 6);
     return `${monday.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${sun.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
   }, [monday]);
+
+  const now = new Date();
 
   return (
     <div className="bg-blue-50 border-t border-blue-100 px-6 py-4">
@@ -113,19 +129,41 @@ export default function ClassRosterPanel({ classId, userRole }: ClassRosterPanel
 
       {!loading && !error && sessions.length > 0 && (
         <div className="space-y-4">
-          {sessions.map((session) => (
+          {sessions.map((session) => {
+            const sessionStart = new Date(`${session.sessionDate}T${session.startTime}`);
+            const isFuture = sessionStart.getTime() > now.getTime(); // now hoisted above map — computed once per render
+            const role = (userRole ?? "").toUpperCase();
+            const canManage =
+              role === "ADMIN" || role === "SUPERADMIN" ||
+              (role === "MANAGER" && !!programId && (managedProgramIds ?? []).includes(programId)) ||
+              (role === "PROFESSOR" && (professorClassIds ?? []).includes(classId));
+
+            const sessionStatus = session.status ?? "SCHEDULED";
+            const sessionReason = session.alertReason ?? session.cancellationReason ?? null;
+
+            return (
             <div
               key={`${session.sessionDate}-${session.startTime}`}
               className="bg-white rounded-lg border border-blue-200 overflow-hidden"
             >
               {/* Session header */}
-              <div className="flex items-center px-4 py-2 bg-blue-100 border-b border-blue-200 gap-4">
+              <div className="flex items-center flex-wrap px-4 py-2 bg-blue-100 border-b border-blue-200 gap-4">
                 <span className="text-sm font-semibold text-blue-900">
                   {formatDisplayDate(session.sessionDate)}
                 </span>
                 <span className="text-sm text-blue-700">
                   {formatTime(session.startTime)} – {formatTime(session.endTime)}
                 </span>
+                <SessionStatusBadge status={sessionStatus} reason={sessionReason} />
+                <SessionActionsPanel
+                  classId={classId}
+                  sessionDate={session.sessionDate}
+                  status={sessionStatus}
+                  alertReason={session.alertReason}
+                  isFuture={isFuture}
+                  canManage={canManage}
+                  onActionCompleted={refetch}
+                />
                 <span className="text-xs font-medium text-blue-600 ml-auto">
                   {session.registrantCount} registrant{session.registrantCount !== 1 ? "s" : ""}
                 </span>
@@ -174,7 +212,8 @@ export default function ClassRosterPanel({ classId, userRole }: ClassRosterPanel
                 </table>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>

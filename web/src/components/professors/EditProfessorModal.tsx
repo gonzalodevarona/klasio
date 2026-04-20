@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useUpdateProfessor } from "@/hooks/useProfessors";
 import { ProfessorSummary } from "@/lib/types/professor";
+import type { IdentityDocumentType } from "@/lib/types/identity";
 
 const IDENTITY_DOCUMENT_TYPES = [
   { value: "CC",  label: "CC" },
@@ -82,7 +83,7 @@ export default function EditProfessorModal({ professor, onClose, onUpdated }: Pr
         lastName:             form.lastName,
         email:                form.email.trim(),
         phoneNumber:          form.phoneNumber.trim() || undefined,
-        identityDocumentType: form.identityDocumentType as "CC" | "CE" | "TI" | "PP" | "NIT",
+        identityDocumentType: form.identityDocumentType as IdentityDocumentType,
         identityNumber:       form.identityNumber.trim(),
       });
       onUpdated();

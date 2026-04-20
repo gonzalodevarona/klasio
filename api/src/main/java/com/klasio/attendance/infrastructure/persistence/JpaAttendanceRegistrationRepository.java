@@ -93,6 +93,21 @@ public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
     }
 
     @Override
+    public List<AttendanceRegistration> findAllNonCancelledBySessionId(UUID tenantId, UUID sessionId) {
+        applyTenantContext();
+        List<String> excluded = List.of(
+                AttendanceRegistrationStatus.CANCELLED_BY_STUDENT.name(),
+                AttendanceRegistrationStatus.CANCELLED_BY_SYSTEM.name(),
+                AttendanceRegistrationStatus.SESSION_CANCELLED.name()
+        );
+        return springDataRepository
+                .findAllByTenantIdAndSessionIdAndStatusNotIn(tenantId, sessionId, excluded)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public void saveAll(List<AttendanceRegistration> registrations) {
         applyTenantContext();
         List<AttendanceRegistrationJpaEntity> entities = registrations.stream()

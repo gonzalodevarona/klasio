@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebarIdentity } from "@/hooks/useSidebarIdentity";
 import { usePendingProofsCount } from "@/hooks/usePaymentProofs";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import type { Role } from "@/lib/types/auth";
 import { primaryRole } from "@/lib/types/auth";
 import {
@@ -332,7 +333,7 @@ export default function Sidebar() {
         >
           <Menu className="h-6 w-6" />
         </button>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <span className="text-lg font-bold text-white">Klasio</span>
           {tenantName && (
             <span className="ml-2 text-xs text-indigo-400 truncate hidden sm:inline">
@@ -340,6 +341,7 @@ export default function Sidebar() {
             </span>
           )}
         </div>
+        <NotificationBell />
       </header>
 
       {/* ── Mobile: slide-in drawer ──────────────────────────────── */}
@@ -413,17 +415,20 @@ export default function Sidebar() {
           ].join(" ")}
         >
           <Brand tenantName={tenantName} collapsed={collapsed} />
-          <button
-            onClick={() => setCollapsed((c) => !c)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="p-1 text-gray-400 hover:text-white rounded transition-colors shrink-0"
-          >
-            {collapsed ? (
-              <Menu className="h-5 w-5" />
-            ) : (
-              <ChevronLeft className="h-5 w-5" />
-            )}
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {!collapsed && <NotificationBell />}
+            <button
+              onClick={() => setCollapsed((c) => !c)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="p-1 text-gray-400 hover:text-white rounded transition-colors"
+            >
+              {collapsed ? (
+                <Menu className="h-5 w-5" />
+              ) : (
+                <ChevronLeft className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Sidebar nav */}

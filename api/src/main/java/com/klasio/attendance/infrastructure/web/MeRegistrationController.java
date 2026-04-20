@@ -81,7 +81,10 @@ public class MeRegistrationController {
                 registration.getLevelAtRegistration(),
                 registration.getIntendedHours(),
                 registration.getStatus().name(),
-                registration.getCreatedAt()
+                registration.getCreatedAt(),
+                registration.getCancellationReason(),
+                null,
+                null
         ));
     }
 

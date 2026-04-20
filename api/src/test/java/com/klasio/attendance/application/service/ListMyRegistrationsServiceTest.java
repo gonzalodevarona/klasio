@@ -5,6 +5,8 @@ import com.klasio.attendance.domain.model.AttendanceRegistration;
 import com.klasio.attendance.domain.model.AttendanceRegistrationId;
 import com.klasio.attendance.domain.model.AttendanceRegistrationStatus;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
+import com.klasio.attendance.domain.port.ClassDetailsPort;
+import com.klasio.attendance.domain.port.ClassSessionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,9 +22,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
@@ -32,6 +36,8 @@ import static org.mockito.Mockito.when;
 class ListMyRegistrationsServiceTest {
 
     @Mock AttendanceRegistrationRepository registrationRepository;
+    @Mock ClassDetailsPort classDetailsPort;
+    @Mock ClassSessionRepository sessionRepository;
 
     @InjectMocks ListMyRegistrationsService service;
 
@@ -80,6 +86,8 @@ class ListMyRegistrationsServiceTest {
         when(registrationRepository.findByStudent(
                 TENANT_ID, STUDENT_ID, null, null, null, null, PAGE))
                 .thenReturn(repoPage);
+        when(classDetailsPort.findClassName(any(), any())).thenReturn(Optional.of("Yoga Beginners"));
+        when(sessionRepository.findByIds(any(), any())).thenReturn(List.of());
 
         Page<AttendanceRegistrationView> result =
                 service.execute(TENANT_ID, STUDENT_ID, null, null, null, null, PAGE);

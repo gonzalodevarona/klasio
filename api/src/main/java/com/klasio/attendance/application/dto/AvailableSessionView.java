@@ -16,5 +16,6 @@ public record AvailableSessionView(
         int currentCapacity,
         int maxStudents,
         String status,
-        boolean registrationOpen
+        boolean registrationOpen,
+        String alertReason
 ) {}

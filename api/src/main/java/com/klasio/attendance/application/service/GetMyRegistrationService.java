@@ -50,7 +50,10 @@ public class GetMyRegistrationService implements GetMyRegistrationUseCase {
                 registration.getLevelAtRegistration(),
                 registration.getIntendedHours(),
                 registration.getStatus().name(),
-                registration.getCreatedAt()
+                registration.getCreatedAt(),
+                registration.getCancellationReason(),
+                null,
+                null
         );
     }
 }

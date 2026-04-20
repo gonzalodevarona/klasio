@@ -228,7 +228,13 @@ export default function ClassDetail({
 
         {/* Session Roster */}
         <div className="border-t border-gray-200">
-          <ClassRosterPanel classId={programClass.id} userRole={user ? primaryRole(user.roles) : undefined} />
+          <ClassRosterPanel
+            classId={programClass.id}
+            userRole={user ? primaryRole(user.roles) : undefined}
+            programId={programId}
+            managedProgramIds={[]}
+            professorClassIds={[]}
+          />
         </div>
 
         {/* Professor Assignment */}
