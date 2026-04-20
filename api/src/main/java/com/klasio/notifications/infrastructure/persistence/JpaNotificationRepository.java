@@ -57,6 +57,12 @@ public class JpaNotificationRepository extends TenantScopedRepository implements
     }
 
     @Override
+    public int markOneRead(UUID tenantId, NotificationId id, Instant now) {
+        applyTenantContext();
+        return springRepo.markOneRead(id.value(), tenantId, now);
+    }
+
+    @Override
     public int markAllReadForRecipient(UUID tenantId, UUID recipientUserId, Instant now) {
         applyTenantContext();
         return springRepo.markAllRead(tenantId, recipientUserId, now);

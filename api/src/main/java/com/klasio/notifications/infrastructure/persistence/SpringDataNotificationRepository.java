@@ -31,6 +31,19 @@ public interface SpringDataNotificationRepository extends JpaRepository<Notifica
     @Query("""
             UPDATE NotificationJpaEntity n
             SET n.readAt = :now
+            WHERE n.id = :id
+              AND n.tenantId = :tenantId
+              AND n.readAt IS NULL
+            """)
+    int markOneRead(@Param("id") UUID id,
+                    @Param("tenantId") UUID tenantId,
+                    @Param("now") Instant now);
+
+    @Transactional
+    @Modifying
+    @Query("""
+            UPDATE NotificationJpaEntity n
+            SET n.readAt = :now
             WHERE n.tenantId = :tenantId
               AND n.recipientUserId = :recipient
               AND n.readAt IS NULL

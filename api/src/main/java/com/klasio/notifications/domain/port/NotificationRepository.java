@@ -19,5 +19,7 @@ public interface NotificationRepository {
 
     long countUnread(UUID tenantId, UUID recipientUserId);
 
+    int markOneRead(UUID tenantId, NotificationId id, Instant now);
+
     int markAllReadForRecipient(UUID tenantId, UUID recipientUserId, Instant now);
 }
