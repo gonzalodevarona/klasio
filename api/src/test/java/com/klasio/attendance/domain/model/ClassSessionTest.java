@@ -3,6 +3,7 @@ package com.klasio.attendance.domain.model;
 import com.klasio.attendance.domain.event.SessionAlertRaised;
 import com.klasio.attendance.domain.event.SessionAlertUpdated;
 import com.klasio.attendance.domain.event.SessionCancelled;
+import com.klasio.attendance.domain.exception.AlertAuthorViolationException;
 import com.klasio.shared.domain.DomainEvent;
 import org.junit.jupiter.api.Test;
 
@@ -118,8 +119,7 @@ class ClassSessionTest {
         s.raiseAlert(REASON, author, "PROFESSOR");
         s.clearDomainEvents();
         assertThatThrownBy(() -> s.updateAlertReason("a different reason for the class", UUID.randomUUID(), "PROFESSOR"))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("author");
+                .isInstanceOf(AlertAuthorViolationException.class);
     }
 
     @Test
