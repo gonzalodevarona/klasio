@@ -27,6 +27,7 @@ public class Student {
 
     private final StudentId id;
     private final UUID tenantId;
+    private UUID userId;
     private String firstName;
     private String lastName;
     private String email;
@@ -53,6 +54,7 @@ public class Student {
 
     private Student(StudentId id,
                     UUID tenantId,
+                    UUID userId,
                     String firstName,
                     String lastName,
                     String email,
@@ -76,6 +78,7 @@ public class Student {
                     UUID deactivatedBy) {
         this.id = id;
         this.tenantId = tenantId;
+        this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -137,7 +140,7 @@ public class Student {
         StudentId id = StudentId.generate();
 
         Student student = new Student(
-                id, tenantId, normalizedFirstName, normalizedLastName, normalizedEmail,
+                id, tenantId, null, normalizedFirstName, normalizedLastName, normalizedEmail,
                 dateOfBirth, eps.trim(), trimmedIdentityNumber, identityDocumentType,
                 bloodType, trimNullable(phone),
                 trimNullable(tutorFirstName), trimNullable(tutorLastName),
@@ -154,6 +157,7 @@ public class Student {
 
     public static Student reconstitute(StudentId id,
                                        UUID tenantId,
+                                       UUID userId,
                                        String firstName,
                                        String lastName,
                                        String email,
@@ -175,7 +179,7 @@ public class Student {
                                        UUID updatedBy,
                                        Instant deactivatedAt,
                                        UUID deactivatedBy) {
-        return new Student(id, tenantId, firstName, lastName, email,
+        return new Student(id, tenantId, userId, firstName, lastName, email,
                 dateOfBirth, eps, identityNumber, identityDocumentType,
                 bloodType, phone,
                 tutorFirstName, tutorLastName, tutorRelationship, tutorPhone, tutorEmail,
@@ -279,8 +283,14 @@ public class Student {
         domainEvents.clear();
     }
 
+    public void linkUser(UUID userId) {
+        Objects.requireNonNull(userId, "userId must not be null");
+        this.userId = userId;
+    }
+
     public StudentId getId() { return id; }
     public UUID getTenantId() { return tenantId; }
+    public UUID getUserId() { return userId; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
     public String getEmail() { return email; }

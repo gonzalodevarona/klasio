@@ -8,6 +8,8 @@ import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.port.AccountSetupCreationPort;
 import com.klasio.student.domain.port.StudentRepository;
 import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,7 +63,7 @@ public class CreateStudentService implements CreateStudentUseCase {
         events.forEach(eventPublisher::publishEvent);
 
         // Create user account in EMAIL_UNVERIFIED state and dispatch 15-min setup link.
-        accountSetupCreationPort.createAndDispatchSetup(
+        UUID userId = accountSetupCreationPort.createAndDispatchSetup(
                 command.tenantId(),
                 command.email(),
                 command.firstName(),
@@ -70,6 +72,8 @@ public class CreateStudentService implements CreateStudentUseCase {
                 command.identityNumber(),
                 command.phone()
         );
+        student.linkUser(userId);
+        studentRepository.save(student);
 
         return student;
     }

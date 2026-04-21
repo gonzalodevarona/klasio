@@ -73,7 +73,7 @@ class ListEnrollmentsServiceTest {
 
     private Student createStudent(UUID studentId, String firstName, String lastName) {
         return Student.reconstitute(
-                StudentId.of(studentId), TENANT_ID, firstName, lastName,
+                StudentId.of(studentId), TENANT_ID, null, firstName, lastName,
                 firstName.toLowerCase() + "@example.com",
                 LocalDate.of(1990, 1, 1), "Sura", "1234567890",
                 IdentityDocumentType.CC, BloodType.O_POSITIVE, null,

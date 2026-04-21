@@ -64,7 +64,7 @@ class EnrollStudentServiceTest {
     private Student createActiveStudent() {
         return Student.reconstitute(
                 com.klasio.student.domain.model.StudentId.of(STUDENT_ID),
-                TENANT_ID, "Carlos", "Garcia", "carlos@example.com",
+                TENANT_ID, null, "Carlos", "Garcia", "carlos@example.com",
                 java.time.LocalDate.of(2000, 1, 15), "Sura", "1234567890",
                 com.klasio.shared.domain.model.IdentityDocumentType.CC,
                 com.klasio.student.domain.model.BloodType.O_POSITIVE, "3001234567",
@@ -76,7 +76,7 @@ class EnrollStudentServiceTest {
     private Student createInactiveStudent() {
         return Student.reconstitute(
                 com.klasio.student.domain.model.StudentId.of(STUDENT_ID),
-                TENANT_ID, "Carlos", "Garcia", "carlos@example.com",
+                TENANT_ID, null, "Carlos", "Garcia", "carlos@example.com",
                 java.time.LocalDate.of(2000, 1, 15), "Sura", "1234567890",
                 com.klasio.shared.domain.model.IdentityDocumentType.CC,
                 com.klasio.student.domain.model.BloodType.O_POSITIVE, "3001234567",

@@ -42,7 +42,7 @@ class GetStudentServiceTest {
     @DisplayName("should return student when found")
     void shouldReturnStudentWhenFound() {
         Student student = Student.reconstitute(
-                StudentId.of(STUDENT_ID), TENANT_ID, "Carlos", "Garcia",
+                StudentId.of(STUDENT_ID), TENANT_ID, null, "Carlos", "Garcia",
                 "carlos@example.com",
                 LocalDate.of(2000, 1, 15), "Sura", "1234567890", IdentityDocumentType.CC,
                 BloodType.O_POSITIVE, "3001234567",

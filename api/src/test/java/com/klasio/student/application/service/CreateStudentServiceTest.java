@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -87,8 +88,10 @@ class CreateStudentServiceTest {
         assertThat(result.getStatus()).isEqualTo("ACTIVE");
 
         ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
-        verify(studentRepository).save(studentCaptor.capture());
-        assertThat(studentCaptor.getValue().getFirstName()).isEqualTo("Carlos");
+        verify(studentRepository, times(2)).save(studentCaptor.capture());
+        assertThat(studentCaptor.getAllValues().get(0).getFirstName()).isEqualTo("Carlos");
+        // Second save links userId after account creation
+        assertThat(studentCaptor.getAllValues().get(1).getUserId()).isEqualTo(userId);
 
         ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
         verify(eventPublisher).publishEvent(eventCaptor.capture());
