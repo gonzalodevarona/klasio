@@ -133,21 +133,22 @@ public class SessionEventsNotificationListener {
                 e.sessionId(), e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_CANCELLED);
 
         // Email fan-out for CLASS_SESSION_CHANGE
+        // Uses a separate set keyed on students.id — distinct namespace from notifiedStudents (users.id).
         String changeKind = "CANCELLED";
         String startsAt = e.sessionDate().toString() + " " + e.startTime().toString();
+        Set<UUID> emailedStudents = new HashSet<>();
         for (UUID studentId : e.affectedStudentIds()) {
-            if (notifiedStudents.add(studentId)) {
-                studentEmailPort.findEmail(studentId, e.tenantId()).ifPresent(email -> {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("studentName", email);
-                    params.put("className", className);
-                    params.put("startsAt", startsAt);
-                    params.put("changeKind", changeKind);
-                    params.put("reason", e.reason() != null ? e.reason() : "");
-                    emailService.send(EmailType.CLASS_SESSION_CHANGE,
-                            new EmailRecipient(email, email), e.tenantId(), params);
-                });
-            }
+            if (!emailedStudents.add(studentId)) continue;
+            studentEmailPort.findEmail(studentId, e.tenantId()).ifPresent(email -> {
+                Map<String, Object> params = new HashMap<>();
+                params.put("studentName", email);
+                params.put("className", className);
+                params.put("startsAt", startsAt);
+                params.put("changeKind", changeKind);
+                params.put("reason", e.reason() != null ? e.reason() : "");
+                emailService.send(EmailType.CLASS_SESSION_CHANGE,
+                        new EmailRecipient(email, email), e.tenantId(), params);
+            });
         }
     }
 
