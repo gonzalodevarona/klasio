@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <th:block th:fragment="subject" th:text="|You have been invited to join ${tenantName} as a professor|"></th:block>
+</head>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:20px">
+  <div style="max-width:600px;margin:0 auto;background:white;padding:30px;border-radius:8px">
+    <h2 th:text="${tenantName}" style="color:#2563eb">League</h2>
+    <p>Hi <strong th:text="${professorName}">Professor</strong>,</p>
+    <p>You have been invited to join <span th:text="${tenantName}"></span> as a professor on Klasio.</p>
+    <p style="margin:24px 0">
+      <a th:href="${activationUrl}"
+         style="background:#2563eb;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block">
+        Accept Invitation
+      </a>
+    </p>
+    <p style="color:#6b7280;font-size:14px">This invitation expires at <span th:text="${expiresAt}"></span>.</p>
+    <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb">
+    <p style="color:#9ca3af;font-size:12px">Sent by <span th:text="${tenantName}"></span> via Klasio.</p>
+  </div>
+</body>
+</html>

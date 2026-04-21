@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:20px;margin:0">
+  <div style="max-width:600px;margin:0 auto;background:white;padding:30px;border-radius:8px">
+    <h2 th:text="${tenantName}" style="color:#2563eb;margin-bottom:24px">League</h2>
+    <th:block th:fragment="body"><!-- content here --></th:block>
+    <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb">
+    <p style="color:#9ca3af;font-size:12px;text-align:center">
+      Sent by <span th:text="${tenantName}">League</span> via Klasio.
+      If you did not expect this email, please ignore it.
+    </p>
+  </div>
+</body>
+</html>
