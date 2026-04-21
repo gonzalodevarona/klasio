@@ -7,7 +7,7 @@ import { useNotificationCount } from "@/context/NotificationCountContext";
 import NotificationDropdown from "./NotificationDropdown";
 
 export default function NotificationBell() {
-  const { count, hasCancellation } = useNotificationCount();
+  const { count } = useNotificationCount();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,7 +43,6 @@ export default function NotificationBell() {
   }, [open]);
 
   const badgeLabel = count > 10 ? "10+" : String(count);
-  const bellColor = hasCancellation ? "text-red-400 hover:text-red-300" : "text-gray-300 hover:text-white";
 
   return (
     <>
@@ -52,7 +51,7 @@ export default function NotificationBell() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label="Notifications"
-        className={`relative p-1 transition-colors rounded ${bellColor}`}
+        className="relative p-1 text-gray-300 hover:text-white transition-colors rounded"
       >
         <Bell className="h-5 w-5" />
         {count > 0 && (

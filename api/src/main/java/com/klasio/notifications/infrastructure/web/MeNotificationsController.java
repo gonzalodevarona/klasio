@@ -48,8 +48,8 @@ public class MeNotificationsController {
 
     @GetMapping("/unread-count")
     public NotificationDtos.UnreadCountResponse unreadCount(Authentication auth) {
-        GetUnreadCountUseCase.Result r = unreadCountUseCase.execute(extractTenantId(auth), extractUserId(auth));
-        return new NotificationDtos.UnreadCountResponse(r.count(), r.hasCancellation());
+        long count = unreadCountUseCase.execute(extractTenantId(auth), extractUserId(auth));
+        return new NotificationDtos.UnreadCountResponse(count);
     }
 
     @PatchMapping("/{id}/read")

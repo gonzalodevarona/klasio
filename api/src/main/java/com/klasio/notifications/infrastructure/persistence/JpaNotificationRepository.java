@@ -57,13 +57,6 @@ public class JpaNotificationRepository extends TenantScopedRepository implements
     }
 
     @Override
-    public boolean hasUnreadCancellation(UUID tenantId, UUID recipientUserId) {
-        applyTenantContext();
-        return springRepo.existsByTenantIdAndRecipientUserIdAndTypeAndReadAtIsNull(
-                tenantId, recipientUserId, "CLASS_SESSION_CANCELLED");
-    }
-
-    @Override
     public int markOneRead(UUID tenantId, NotificationId id, Instant now) {
         applyTenantContext();
         return springRepo.markOneRead(id.value(), tenantId, now);
