@@ -180,6 +180,57 @@ class RegisterStudentServiceTest {
     }
 
     @Test
+    @DisplayName("minor student: tutor fields are passed to student profile creation")
+    void register_minorStudent_createWithTutorFields() {
+        RegisterStudentCommand command = new RegisterStudentCommand(
+                "test-league", "Carlos", "Ramirez", LocalDate.now().minusYears(14),
+                "TI", "987654321", "Sanitas", "carlos@example.com",
+                "Maria Garcia", "Mother", "3001234567");
+
+        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
+        when(userRepository.existsByEmailAndTenantId("carlos@example.com", TENANT_ID)).thenReturn(false);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, "987654321")).thenReturn(false);
+        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, "987654321")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(studentProfilePort.createStudentProfile(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(STUDENT_ID);
+        when(tokenGenerator.generateRawToken()).thenReturn("raw-token");
+        when(tokenGenerator.hashToken("raw-token")).thenReturn("hashed-token");
+
+        service.register(command);
+
+        verify(studentProfilePort).createStudentProfile(eq(TENANT_ID), eq("Carlos"), eq("Ramirez"),
+                eq("carlos@example.com"), any(), eq("TI"), eq("987654321"), eq("Sanitas"),
+                eq("Maria Garcia"), eq("Mother"), eq("3001234567"), any(UUID.class));
+    }
+
+    @Test
+    @DisplayName("adult student with optional tutor fields populated: tutor fields passed through")
+    void register_adultWithOptionalTutorFields_succeeds() {
+        RegisterStudentCommand command = new RegisterStudentCommand(
+                "test-league", "John", "Doe", LocalDate.of(2000, 1, 1),
+                "CC", "123456789", "Sura", "john@example.com",
+                "Optional Tutor", "Uncle", "3009999999");
+
+        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
+        when(userRepository.existsByEmailAndTenantId("john@example.com", TENANT_ID)).thenReturn(false);
+        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, "123456789")).thenReturn(false);
+        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, "123456789")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(studentProfilePort.createStudentProfile(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(STUDENT_ID);
+        when(tokenGenerator.generateRawToken()).thenReturn("raw-token");
+        when(tokenGenerator.hashToken("raw-token")).thenReturn("hashed-token");
+
+        service.register(command);
+
+        verify(studentProfilePort).createStudentProfile(eq(TENANT_ID), any(), any(), any(), any(), any(), any(), any(),
+                eq("Optional Tutor"), eq("Uncle"), eq("3009999999"), any(UUID.class));
+    }
+
+    @Test
     @DisplayName("throws IllegalArgumentException when identity document type is invalid")
     void register_invalidDocumentType_throwsIllegalArgumentException() {
         when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));

@@ -55,7 +55,7 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div role="alert" className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-800">
             {error.code === "ACCOUNT_LOCKED" && error.lockedUntil
               ? `Account locked until ${new Date(error.lockedUntil).toLocaleString()}`
