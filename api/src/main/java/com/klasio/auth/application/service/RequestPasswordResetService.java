@@ -53,9 +53,14 @@ public class RequestPasswordResetService {
         PasswordResetToken token = PasswordResetToken.create(user.getId(), hashedToken, expiresAt);
         prtRepository.save(token);
 
+        String first = user.getFirstName() != null ? user.getFirstName() : "";
+        String last = user.getLastName() != null ? user.getLastName() : "";
+        String recipientName = (first + " " + last).trim();
+        if (recipientName.isBlank()) recipientName = email;
+
         eventPublisher.publishEvent(new PasswordResetRequestedEvent(
                 user.getId(), user.getTenantId(), email,
-                rawToken, expiresAt,
+                recipientName, rawToken, expiresAt,
                 Instant.now()));
     }
 }

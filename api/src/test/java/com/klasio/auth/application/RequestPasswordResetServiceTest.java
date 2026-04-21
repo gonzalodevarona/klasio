@@ -60,6 +60,8 @@ class RequestPasswordResetServiceTest {
         PasswordResetRequestedEvent event = eventCaptor.getValue();
         assertEquals("raw-reset-token", event.rawToken());
         assertNotNull(event.expiresAt());
+        // User in this test has null first/last name, so fallback is the email
+        assertEquals(email, event.recipientName());
     }
 
     @Test
