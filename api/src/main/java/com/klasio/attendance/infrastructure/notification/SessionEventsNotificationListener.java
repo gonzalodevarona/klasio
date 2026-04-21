@@ -40,7 +40,6 @@ import java.util.UUID;
  *   - SESSION_ALERT_RAISED / UPDATED: registered students (except actor) + professor (except actor) + managers (except actor)
  *   - SESSION_CANCELLED: affected students + professor (except actor) + managers (except actor)
  *
- * In v1.0, email delivery is a stub pending RF-32 (Postmark adapter).
  */
 @Slf4j
 @Component
@@ -137,18 +136,18 @@ public class SessionEventsNotificationListener {
         String changeKind = "CANCELLED";
         String startsAt = e.sessionDate().toString() + " " + e.startTime().toString();
         for (UUID studentId : e.affectedStudentIds()) {
-            studentEmailPort.findEmail(studentId, e.tenantId()).ifPresent(email -> {
-                emailService.send(
-                        EmailType.CLASS_SESSION_CHANGE,
-                        new EmailRecipient(email, email),
-                        e.tenantId(),
-                        Map.of(
-                                "studentName", email,
-                                "className", className,
-                                "startsAt", startsAt,
-                                "changeKind", changeKind,
-                                "reason", e.reason() != null ? e.reason() : ""));
-            });
+            if (notifiedStudents.add(studentId)) {
+                studentEmailPort.findEmail(studentId, e.tenantId()).ifPresent(email -> {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("studentName", email);
+                    params.put("className", className);
+                    params.put("startsAt", startsAt);
+                    params.put("changeKind", changeKind);
+                    params.put("reason", e.reason() != null ? e.reason() : "");
+                    emailService.send(EmailType.CLASS_SESSION_CHANGE,
+                            new EmailRecipient(email, email), e.tenantId(), params);
+                });
+            }
         }
     }
 
@@ -187,16 +186,14 @@ public class SessionEventsNotificationListener {
         String startsAt = sessionDate.toString() + " " + startTime.toString();
         for (AttendanceRegistration reg : regs) {
             studentEmailPort.findEmail(reg.getStudentId(), tenantId).ifPresent(email -> {
-                emailService.send(
-                        EmailType.CLASS_SESSION_CHANGE,
-                        new EmailRecipient(email, email),
-                        tenantId,
-                        Map.of(
-                                "studentName", email,
-                                "className", title,
-                                "startsAt", startsAt,
-                                "changeKind", "ALERTED",
-                                "reason", body));
+                Map<String, Object> params = new HashMap<>();
+                params.put("studentName", email);
+                params.put("className", title);
+                params.put("startsAt", startsAt);
+                params.put("changeKind", "ALERTED");
+                params.put("reason", body);
+                emailService.send(EmailType.CLASS_SESSION_CHANGE,
+                        new EmailRecipient(email, email), tenantId, params);
             });
         }
     }
