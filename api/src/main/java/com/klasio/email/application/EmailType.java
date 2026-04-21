@@ -4,7 +4,7 @@ import java.util.Set;
 
 public enum EmailType {
     ACCOUNT_SETUP(Source.IN_REPO, "account-setup",
-            Set.of("recipientName", "role", "tenantName", "setupUrl", "expiresAt")),
+            Set.of("recipientName", "role", "setupUrl", "expiresAt")),
     PROFESSOR_INVITATION(Source.IN_REPO, "professor-invitation",
             Set.of("activationUrl", "expiresAt", "professorName")),
     PASSWORD_RECOVERY(Source.IN_REPO, "password-recovery",

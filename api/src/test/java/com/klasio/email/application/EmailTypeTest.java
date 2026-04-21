@@ -10,7 +10,7 @@ class EmailTypeTest {
         assertThat(EmailType.ACCOUNT_SETUP.source()).isEqualTo(EmailType.Source.IN_REPO);
         assertThat(EmailType.ACCOUNT_SETUP.templateRef()).isEqualTo("account-setup");
         assertThat(EmailType.ACCOUNT_SETUP.requiredKeys())
-                .containsExactlyInAnyOrder("recipientName", "role", "tenantName", "setupUrl", "expiresAt");
+                .containsExactlyInAnyOrder("recipientName", "role", "setupUrl", "expiresAt");
     }
 
     @Test
