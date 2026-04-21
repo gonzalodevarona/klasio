@@ -117,7 +117,7 @@ public class EmailDispatcherService implements EmailService {
     private static String sha256First8(String input) {
         try {
             byte[] hash = MessageDigest.getInstance("SHA-256")
-                    .digest(input.getBytes());
+                    .digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < 4; i++) sb.append(String.format("%02x", hash[i]));
             return sb.toString();
