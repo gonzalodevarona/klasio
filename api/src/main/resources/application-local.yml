@@ -5,16 +5,9 @@ spring:
     password: klasio_pass
   jpa:
     show-sql: true
-  mail:
-    host: localhost
-    port: 1025
-    username: ""
-    password: ""
-    properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
-
 klasio:
+  email:
+    transport: logging
   scheduler:
     delegation-reminder:
       enabled: false   # disable during local dev to avoid log noise
@@ -27,7 +20,6 @@ klasio:
     password-reset-expiry-minutes: 30
     max-failed-login-attempts: 5
     lockout-duration-minutes: 15
-    from-email: noreply@klasio.local
   s3:
     endpoint: http://localhost:4566
     bucket: klasio-logos-dev
