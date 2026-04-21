@@ -4,6 +4,7 @@ import com.klasio.auth.application.port.AccountSetupTokenRepository;
 import com.klasio.auth.application.port.TenantResolverPort;
 import com.klasio.auth.application.port.TokenGenerator;
 import com.klasio.auth.application.port.UserRepository;
+import com.klasio.auth.domain.event.AccountSetupInitiated;
 import com.klasio.auth.domain.model.AccountSetupToken;
 import com.klasio.auth.domain.model.UserStatus;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,6 +72,10 @@ public class ResendSetupEmailService {
         AccountSetupToken newToken = AccountSetupToken.create(user.getId(), hashedToken, expiresAt);
         accountSetupTokenRepository.save(newToken);
 
-        // TODO Task 3: publish AccountSetupInitiated event with rawToken so the email listener can send the email
+        eventPublisher.publishEvent(new AccountSetupInitiated(
+                user.getId(), user.getTenantId(), user.getEmail(),
+                user.getFirstName() != null ? user.getFirstName() + " " + user.getLastName() : user.getEmail(),
+                user.primaryRole() != null ? user.primaryRole().name() : "USER",
+                rawToken, expiresAt, Instant.now()));
     }
 }

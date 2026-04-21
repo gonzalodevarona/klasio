@@ -1,0 +1,12 @@
+Set up your account at [(${tenantName})]
+
+Hi [(${recipientName})],
+
+Your [(${role})] account on [(${tenantName})] is ready.
+
+Click the link below to create your password:
+[(${setupUrl})]
+
+This link expires at [(${expiresAt})]. If it expires, use the "Resend link" option on the login page.
+
+Klasio

@@ -3,6 +3,8 @@ package com.klasio.email.application;
 import java.util.Set;
 
 public enum EmailType {
+    ACCOUNT_SETUP(Source.IN_REPO, "account-setup",
+            Set.of("recipientName", "role", "tenantName", "setupUrl", "expiresAt")),
     PROFESSOR_INVITATION(Source.IN_REPO, "professor-invitation",
             Set.of("activationUrl", "expiresAt", "professorName")),
     STUDENT_VERIFICATION(Source.IN_REPO, "student-verification",
