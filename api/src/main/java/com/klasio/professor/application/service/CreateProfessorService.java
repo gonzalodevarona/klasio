@@ -67,8 +67,7 @@ public class CreateProfessorService implements CreateProfessorUseCase {
                 command.lastName(),
                 command.identityDocumentType(),
                 command.identityNumber(),
-                command.phoneNumber(),
-                professor.getId().value()
+                command.phoneNumber()
         );
 
         return professor;

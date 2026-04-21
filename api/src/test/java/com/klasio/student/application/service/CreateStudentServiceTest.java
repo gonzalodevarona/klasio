@@ -68,7 +68,7 @@ class CreateStudentServiceTest {
         UUID userId = UUID.randomUUID();
         when(studentRepository.existsByEmailInTenant(eq(tenantId), anyString())).thenReturn(false);
         when(accountSetupCreationPort.createAndDispatchSetup(
-                any(), any(), any(), any(), any(), any(), any(), any()))
+                any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(userId);
 
         CreateStudentCommand command = buildAdultCommand(tenantId, createdBy);
@@ -107,8 +107,7 @@ class CreateStudentServiceTest {
                 any(), any(),
                 eq(IdentityDocumentType.CC),
                 eq("1234567890"),
-                eq("3001234567"),
-                any() // studentId
+                eq("3001234567")
         );
     }
 
@@ -128,6 +127,6 @@ class CreateStudentServiceTest {
         verify(studentRepository, never()).save(any());
         verify(eventPublisher, never()).publishEvent(any());
         verify(accountSetupCreationPort, never()).createAndDispatchSetup(
-                any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
     }
 }

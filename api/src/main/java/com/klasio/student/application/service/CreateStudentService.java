@@ -68,8 +68,7 @@ public class CreateStudentService implements CreateStudentUseCase {
                 command.lastName(),
                 command.identityDocumentType(),
                 command.identityNumber(),
-                command.phone(),
-                student.getId().value()
+                command.phone()
         );
 
         return student;

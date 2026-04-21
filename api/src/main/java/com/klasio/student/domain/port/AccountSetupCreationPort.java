@@ -15,5 +15,5 @@ public interface AccountSetupCreationPort {
      * @return the newly created user's UUID
      */
     UUID createAndDispatchSetup(UUID tenantId, String email, String firstName, String lastName,
-            IdentityDocumentType docType, String identityNumber, String phone, UUID studentId);
+            IdentityDocumentType docType, String identityNumber, String phone);
 }

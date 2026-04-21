@@ -57,7 +57,7 @@ class CreateProfessorServiceTest {
         UUID userId = UUID.randomUUID();
         when(professorRepository.existsByEmailInTenant(TENANT_ID, "carlos@example.com")).thenReturn(false);
         when(accountSetupCreationPort.createAndDispatchSetup(
-                any(), any(), any(), any(), any(), any(), any(), any()))
+                any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(userId);
 
         CreateProfessorCommand command = new CreateProfessorCommand(
@@ -89,7 +89,7 @@ class CreateProfessorServiceTest {
 
         // Verify account setup dispatched for the new professor
         verify(accountSetupCreationPort).createAndDispatchSetup(
-                any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -110,7 +110,7 @@ class CreateProfessorServiceTest {
         verify(professorRepository, never()).save(any());
         verify(eventPublisher, never()).publishEvent(any());
         verify(accountSetupCreationPort, never()).createAndDispatchSetup(
-                any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -128,7 +128,7 @@ class CreateProfessorServiceTest {
 
         verify(professorRepository, never()).save(any());
         verify(accountSetupCreationPort, never()).createAndDispatchSetup(
-                any(), any(), any(), any(), any(), any(), any(), any());
+                any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -137,7 +137,7 @@ class CreateProfessorServiceTest {
         UUID userId = UUID.randomUUID();
         when(professorRepository.existsByEmailInTenant(TENANT_ID, "carlos@example.com")).thenReturn(false);
         when(accountSetupCreationPort.createAndDispatchSetup(
-                any(), any(), any(), any(), any(), any(), any(), any()))
+                any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(userId);
 
         CreateProfessorCommand command = new CreateProfessorCommand(
