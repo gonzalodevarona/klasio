@@ -29,12 +29,17 @@ export default function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        const err = (data as AuthError).error;
-        setError({
-          code: err.code,
-          message: err.message,
-          lockedUntil: err.lockedUntil,
-        });
+        const raw = (data as AuthError | { error: string }).error;
+        // Handle both flat `{ error: "CODE" }` and structured `{ error: { code, message } }`
+        if (typeof raw === "string") {
+          setError({ code: raw, message: raw });
+        } else {
+          setError({
+            code: raw.code,
+            message: raw.message,
+            lockedUntil: raw.lockedUntil,
+          });
+        }
         return;
       }
 
@@ -56,8 +61,18 @@ export default function LoginForm() {
               ? `Account locked until ${new Date(error.lockedUntil).toLocaleString()}`
               : error.code === "EMAIL_NOT_VERIFIED"
                 ? "Please verify your email address before logging in"
-                : error.message}
+                : error.code === "ACCOUNT_SETUP_PENDING"
+                  ? "Your account isn't set up yet. Check your email for the setup link."
+                  : error.message}
           </p>
+          {error.code === "ACCOUNT_SETUP_PENDING" && (
+            <p className="mt-2 text-sm text-red-700">
+              Didn&apos;t receive it?{" "}
+              <a href="/setup-account" className="underline text-indigo-700 hover:text-indigo-600">
+                Resend setup email
+              </a>
+            </p>
+          )}
         </div>
       )}
 

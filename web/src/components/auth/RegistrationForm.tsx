@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import PasswordPolicyChecker from "./PasswordPolicyChecker";
 import DocumentFields from "@/components/common/DocumentFields";
 import type { IdentityDocumentType } from "@/lib/types/identity";
 import type { AuthError } from "@/lib/types/auth";
@@ -19,7 +18,6 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
     identityNumber: "",
     eps: "",
     email: "",
-    password: "",
     tutorFullName: "",
     tutorRelationship: "",
     tutorContact: "",
@@ -64,7 +62,6 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
         identityNumber: formData.identityNumber,
         eps: formData.eps,
         email: formData.email,
-        password: formData.password,
         ...(formData.tutorFullName && { tutorFullName: formData.tutorFullName }),
         ...(formData.tutorRelationship && { tutorRelationship: formData.tutorRelationship }),
         ...(formData.tutorContact && { tutorContact: formData.tutorContact }),
@@ -99,8 +96,7 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
       <div className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
         <h2 className="text-lg font-semibold text-green-800 mb-2">Registration Successful!</h2>
         <p className="text-sm text-green-700">
-          We&apos;ve sent a verification email to <strong>{formData.email}</strong>.
-          Please check your inbox and click the verification link to activate your account.
+          Check your email to set up your account password.
         </p>
         <a
           href="/login"
@@ -171,22 +167,6 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
         />
-      </div>
-
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password *
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-        <PasswordPolicyChecker password={formData.password} />
       </div>
 
       <div>
