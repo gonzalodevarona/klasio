@@ -7,8 +7,10 @@ import com.klasio.auth.application.service.LoginService;
 import com.klasio.auth.application.service.LogoutService;
 import com.klasio.auth.application.service.RefreshTokenService;
 import com.klasio.auth.application.service.RequestPasswordResetService;
+import com.klasio.auth.application.service.ResendSetupEmailService;
 import com.klasio.auth.application.service.ResendVerificationEmailService;
 import com.klasio.auth.application.service.ResetPasswordService;
+import com.klasio.auth.application.service.SetupAccountService;
 import com.klasio.auth.application.service.VerifyEmailService;
 import com.klasio.auth.domain.model.User;
 import com.klasio.shared.infrastructure.config.JwtProperties;
@@ -37,6 +39,8 @@ public class AuthController {
     private final ResendVerificationEmailService resendVerificationEmailService;
     private final RequestPasswordResetService requestPasswordResetService;
     private final ResetPasswordService resetPasswordService;
+    private final SetupAccountService setupAccountService;
+    private final ResendSetupEmailService resendSetupEmailService;
     private final JwtProperties jwtProperties;
     private final UserRepository userRepository;
 
@@ -47,6 +51,8 @@ public class AuthController {
                           ResendVerificationEmailService resendVerificationEmailService,
                           RequestPasswordResetService requestPasswordResetService,
                           ResetPasswordService resetPasswordService,
+                          SetupAccountService setupAccountService,
+                          ResendSetupEmailService resendSetupEmailService,
                           JwtProperties jwtProperties,
                           UserRepository userRepository) {
         this.loginService = loginService;
@@ -56,6 +62,8 @@ public class AuthController {
         this.resendVerificationEmailService = resendVerificationEmailService;
         this.requestPasswordResetService = requestPasswordResetService;
         this.resetPasswordService = resetPasswordService;
+        this.setupAccountService = setupAccountService;
+        this.resendSetupEmailService = resendSetupEmailService;
         this.jwtProperties = jwtProperties;
         this.userRepository = userRepository;
     }
@@ -64,6 +72,8 @@ public class AuthController {
     public record ResendVerificationRequest(@NotBlank @Email String email, @NotBlank String tenantSlug) {}
     public record ForgotPasswordRequest(@NotBlank @Email String email) {}
     public record ResetPasswordRequest(@NotBlank String token, @NotBlank String newPassword) {}
+    public record SetupAccountRequest(@NotBlank String token, @NotBlank String newPassword) {}
+    public record ResendSetupRequest(@NotBlank @Email String email, @NotBlank String tenantSlug) {}
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -181,6 +191,20 @@ public class AuthController {
             @Valid @RequestBody ResetPasswordRequest request) {
         resetPasswordService.reset(request.token(), request.newPassword());
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+    }
+
+    @PostMapping("/setup-account")
+    public ResponseEntity<Map<String, Object>> setupAccount(
+            @Valid @RequestBody SetupAccountRequest request) {
+        setupAccountService.setup(request.token(), request.newPassword());
+        return ResponseEntity.ok(Map.of("message", "Account setup complete. You can now log in."));
+    }
+
+    @PostMapping("/resend-setup")
+    public ResponseEntity<Map<String, Object>> resendSetup(
+            @Valid @RequestBody ResendSetupRequest request) {
+        resendSetupEmailService.resend(request.email(), request.tenantSlug());
+        return ResponseEntity.ok(Map.of("message", "If an account exists, a new setup link has been sent."));
     }
 
     private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
