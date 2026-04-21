@@ -60,8 +60,14 @@ public class ResendVerificationEmailService {
         EmailVerificationToken token = EmailVerificationToken.create(user.getId(), hashedToken, expiresAt);
         evtRepository.save(token);
 
+        String firstName = user.getFirstName();
+        String lastName = user.getLastName();
+        String displayName = (firstName != null && lastName != null)
+                ? firstName + " " + lastName
+                : email;
+
         eventPublisher.publishEvent(new VerificationEmailResendRequested(
-                user.getId(), user.getTenantId(), email, tenantSlug,
+                user.getId(), user.getTenantId(), email, displayName, tenantSlug,
                 rawToken, expiresAt,
                 Instant.now()));
     }

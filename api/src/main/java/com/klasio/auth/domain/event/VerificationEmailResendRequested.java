@@ -8,6 +8,7 @@ public record VerificationEmailResendRequested(
         UUID userId,
         UUID tenantId,
         String email,
+        String displayName,
         String tenantSlug,
         String rawToken,
         Instant expiresAt,

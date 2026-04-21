@@ -9,6 +9,7 @@ import com.klasio.auth.infrastructure.config.AuthProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -16,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -50,7 +52,17 @@ class ResendVerificationEmailServiceTest {
 
         verify(evtRepository).invalidateAllByUserId(user.getId());
         verify(evtRepository).save(any());
-        verify(eventPublisher).publishEvent(any(VerificationEmailResendRequested.class));
+
+        ArgumentCaptor<VerificationEmailResendRequested> eventCaptor =
+                ArgumentCaptor.forClass(VerificationEmailResendRequested.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        VerificationEmailResendRequested event = eventCaptor.getValue();
+        assertEquals(email, event.email());
+        assertEquals("test-league", event.tenantSlug());
+        assertEquals("new-raw-token", event.rawToken());
+        // createUnverified sets firstName/lastName to null, so displayName falls back to email
+        assertEquals(email, event.displayName());
+        assertNotNull(event.expiresAt());
     }
 
     @Test

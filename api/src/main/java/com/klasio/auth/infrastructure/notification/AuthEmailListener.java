@@ -70,9 +70,9 @@ public class AuthEmailListener {
                 "/verify-email?token=" + e.rawToken());
         emailService.send(
                 EmailType.STUDENT_VERIFICATION,
-                new EmailRecipient(e.email(), e.email()),
+                new EmailRecipient(e.email(), e.displayName()),
                 e.tenantId(),
-                Map.of("studentName", e.email(),
+                Map.of("studentName", e.displayName(),
                        "verificationUrl", verificationUrl,
                        "expiresAt", e.expiresAt().toString()));
     }
