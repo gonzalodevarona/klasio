@@ -19,9 +19,9 @@ public class StudentEmailAdapter implements StudentEmailPort {
 
     @Override
     public Optional<String> findEmail(UUID studentId, UUID tenantId) {
-        @SuppressWarnings("unchecked")
         List<String> rows = em.createQuery(
-                        "SELECT s.email FROM StudentJpaEntity s WHERE s.id = :id AND s.tenantId = :tenantId")
+                        "SELECT s.email FROM StudentJpaEntity s WHERE s.id = :id AND s.tenantId = :tenantId",
+                        String.class)
                 .setParameter("id", studentId)
                 .setParameter("tenantId", tenantId)
                 .getResultList();

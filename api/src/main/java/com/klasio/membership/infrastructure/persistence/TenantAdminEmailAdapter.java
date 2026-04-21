@@ -18,10 +18,10 @@ public class TenantAdminEmailAdapter implements TenantAdminEmailPort {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<String> findAdminEmails(UUID tenantId) {
         return em.createQuery(
-                        "SELECT u.email FROM UserJpaEntity u WHERE u.tenantId = :tenantId AND :role MEMBER OF u.roles")
+                        "SELECT u.email FROM UserJpaEntity u WHERE u.tenantId = :tenantId AND :role MEMBER OF u.roles",
+                        String.class)
                 .setParameter("tenantId", tenantId)
                 .setParameter("role", Role.ADMIN)
                 .getResultList();
