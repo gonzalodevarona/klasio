@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.klasio.shared.domain.model.IdentityDocumentType;
@@ -72,10 +73,12 @@ class CreateProfessorServiceTest {
         assertThat(result).isNotNull();
 
         ArgumentCaptor<Professor> professorCaptor = ArgumentCaptor.forClass(Professor.class);
-        verify(professorRepository).save(professorCaptor.capture());
-        assertThat(professorCaptor.getValue().getFirstName()).isEqualTo("Carlos");
-        assertThat(professorCaptor.getValue().getLastName()).isEqualTo("Martinez");
-        assertThat(professorCaptor.getValue().getEmail()).isEqualTo("carlos@example.com");
+        verify(professorRepository, times(2)).save(professorCaptor.capture());
+        assertThat(professorCaptor.getAllValues().get(0).getFirstName()).isEqualTo("Carlos");
+        assertThat(professorCaptor.getAllValues().get(0).getLastName()).isEqualTo("Martinez");
+        assertThat(professorCaptor.getAllValues().get(0).getEmail()).isEqualTo("carlos@example.com");
+        // Second save links userId after account creation
+        assertThat(professorCaptor.getAllValues().get(1).getUserId()).isEqualTo(userId);
 
         ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
         verify(eventPublisher).publishEvent(eventCaptor.capture());

@@ -237,7 +237,7 @@ class ProfessorTest {
             Professor professor = Professor.create(TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null, com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
             // Activate first by reconstituting as ACTIVE
             Professor active = Professor.reconstitute(
-                    professor.getId(), TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null,
+                    professor.getId(), TENANT_ID, null, FIRST_NAME, LAST_NAME, EMAIL, null,
                     ProfessorStatus.ACTIVE, null, null,
                     Instant.now(), CREATED_BY, null, null,
                     com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
@@ -310,7 +310,7 @@ class ProfessorTest {
         @DisplayName("should throw when already active")
         void reactivate_fromActive_throwsIllegalState() {
             Professor active = Professor.reconstitute(
-                    ProfessorId.generate(), TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null,
+                    ProfessorId.generate(), TENANT_ID, null, FIRST_NAME, LAST_NAME, EMAIL, null,
                     ProfessorStatus.ACTIVE, null, null,
                     Instant.now(), CREATED_BY, null, null,
                     com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
@@ -357,7 +357,7 @@ class ProfessorTest {
         @DisplayName("should create professor without events")
         void reconstitute_createsWithoutEvents() {
             Professor professor = Professor.reconstitute(
-                    ProfessorId.generate(), TENANT_ID, FIRST_NAME, LAST_NAME, EMAIL, null,
+                    ProfessorId.generate(), TENANT_ID, null, FIRST_NAME, LAST_NAME, EMAIL, null,
                     ProfessorStatus.ACTIVE, null, null,
                     Instant.now(), CREATED_BY, null, null,
                     com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");

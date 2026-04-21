@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -60,7 +61,7 @@ public class CreateProfessorService implements CreateProfessorUseCase {
         events.forEach(eventPublisher::publishEvent);
 
         // Create user account in EMAIL_UNVERIFIED state and dispatch 15-min setup link.
-        accountSetupCreationPort.createAndDispatchSetup(
+        UUID userId = accountSetupCreationPort.createAndDispatchSetup(
                 command.tenantId(),
                 command.email(),
                 command.firstName(),
@@ -69,6 +70,8 @@ public class CreateProfessorService implements CreateProfessorUseCase {
                 command.identityNumber(),
                 command.phoneNumber()
         );
+        professor.linkUser(userId);
+        professorRepository.save(professor);
 
         return professor;
     }

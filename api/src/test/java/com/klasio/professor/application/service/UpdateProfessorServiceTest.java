@@ -53,7 +53,7 @@ class UpdateProfessorServiceTest {
     void execute_withValidCommand_updatesProfessor() {
         UUID professorId = UUID.randomUUID();
         Professor professor = Professor.reconstitute(
-                ProfessorId.of(professorId), TENANT_ID,
+                ProfessorId.of(professorId), TENANT_ID, null,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,
@@ -101,7 +101,7 @@ class UpdateProfessorServiceTest {
     void execute_withDuplicateEmail_throwsException() {
         UUID professorId = UUID.randomUUID();
         Professor professor = Professor.reconstitute(
-                ProfessorId.of(professorId), TENANT_ID,
+                ProfessorId.of(professorId), TENANT_ID, null,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,

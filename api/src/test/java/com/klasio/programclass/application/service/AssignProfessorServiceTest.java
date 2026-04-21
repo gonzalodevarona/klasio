@@ -74,7 +74,7 @@ class AssignProfessorServiceTest {
 
     private Professor createActiveProfessor(UUID professorId) {
         return Professor.reconstitute(
-                ProfessorId.of(professorId), TENANT_ID, "Carlos", "Martinez",
+                ProfessorId.of(professorId), TENANT_ID, null, "Carlos", "Martinez",
                 "carlos@example.com", null, ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), ASSIGNED_BY, null, null,
                 com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
@@ -132,7 +132,7 @@ class AssignProfessorServiceTest {
     void execute_withDeactivatedProfessor_throwsIllegalArgument() {
         ProgramClass pc = createTestClass(null);
         Professor deactivated = Professor.reconstitute(
-                ProfessorId.of(PROFESSOR_ID), TENANT_ID, "Carlos", "Martinez",
+                ProfessorId.of(PROFESSOR_ID), TENANT_ID, null, "Carlos", "Martinez",
                 "carlos@example.com", null, ProfessorStatus.DEACTIVATED, null, null,
                 Instant.now(), ASSIGNED_BY, null, null,
                 com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"

@@ -43,7 +43,7 @@ class GetProfessorDetailServiceTest {
     void execute_withExistingId_returnsProfessorDetail() {
         UUID professorId = UUID.randomUUID();
         Professor professor = Professor.reconstitute(
-                ProfessorId.of(professorId), TENANT_ID,
+                ProfessorId.of(professorId), TENANT_ID, null,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,
