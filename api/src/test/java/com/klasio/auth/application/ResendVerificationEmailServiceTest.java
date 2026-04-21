@@ -2,6 +2,7 @@ package com.klasio.auth.application;
 
 import com.klasio.auth.application.port.*;
 import com.klasio.auth.application.service.ResendVerificationEmailService;
+import com.klasio.auth.domain.event.VerificationEmailResendRequested;
 import com.klasio.auth.domain.model.User;
 import com.klasio.auth.domain.model.UserStatus;
 import com.klasio.auth.infrastructure.config.AuthProperties;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -23,7 +25,7 @@ class ResendVerificationEmailServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private EmailVerificationTokenRepository evtRepository;
     @Mock private TokenGenerator tokenGenerator;
-    @Mock private AuthEmailSender authEmailSender;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     private ResendVerificationEmailService service;
 
@@ -31,7 +33,7 @@ class ResendVerificationEmailServiceTest {
     void setUp() {
         AuthProperties authProperties = new AuthProperties(24, 30, 5, 15, "noreply@klasio.com");
         service = new ResendVerificationEmailService(
-                userRepository, evtRepository, tokenGenerator, authEmailSender, authProperties);
+                userRepository, evtRepository, tokenGenerator, authProperties, eventPublisher);
     }
 
     @Test
@@ -48,7 +50,7 @@ class ResendVerificationEmailServiceTest {
 
         verify(evtRepository).invalidateAllByUserId(user.getId());
         verify(evtRepository).save(any());
-        verify(authEmailSender).sendVerificationEmail(eq(email), eq("new-raw-token"), eq("test-league"));
+        verify(eventPublisher).publishEvent(any(VerificationEmailResendRequested.class));
     }
 
     @Test
@@ -59,7 +61,7 @@ class ResendVerificationEmailServiceTest {
 
         verify(evtRepository, never()).invalidateAllByUserId(any());
         verify(evtRepository, never()).save(any());
-        verify(authEmailSender, never()).sendVerificationEmail(any(), any(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
@@ -74,6 +76,6 @@ class ResendVerificationEmailServiceTest {
 
         verify(evtRepository, never()).invalidateAllByUserId(any());
         verify(evtRepository, never()).save(any());
-        verify(authEmailSender, never()).sendVerificationEmail(any(), any(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 }

@@ -29,7 +29,6 @@ public class RegisterStudentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenGenerator tokenGenerator;
     private final EmailVerificationTokenRepository evtRepository;
-    private final AuthEmailSender authEmailSender;
     private final AuthProperties authProperties;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -39,7 +38,6 @@ public class RegisterStudentService {
                                   PasswordEncoder passwordEncoder,
                                   TokenGenerator tokenGenerator,
                                   EmailVerificationTokenRepository evtRepository,
-                                  AuthEmailSender authEmailSender,
                                   AuthProperties authProperties,
                                   ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
@@ -48,7 +46,6 @@ public class RegisterStudentService {
         this.passwordEncoder = passwordEncoder;
         this.tokenGenerator = tokenGenerator;
         this.evtRepository = evtRepository;
-        this.authEmailSender = authEmailSender;
         this.authProperties = authProperties;
         this.eventPublisher = eventPublisher;
     }
@@ -95,10 +92,11 @@ public class RegisterStudentService {
         EmailVerificationToken token = EmailVerificationToken.create(user.getId(), hashedToken, expiresAt);
         evtRepository.save(token);
 
-        authEmailSender.sendVerificationEmail(command.email(), rawToken, command.tenantSlug());
-
         eventPublisher.publishEvent(new StudentRegisteredEvent(
-                user.getId(), tenantId, studentId, command.email(), Instant.now()));
+                user.getId(), tenantId, studentId, command.email(),
+                rawToken, expiresAt,
+                command.firstName() + " " + command.lastName(),
+                Instant.now()));
     }
 
     private IdentityDocumentType parseDocumentType(String value) {

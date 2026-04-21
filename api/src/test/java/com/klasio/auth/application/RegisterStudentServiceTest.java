@@ -36,7 +36,6 @@ class RegisterStudentServiceTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private TokenGenerator tokenGenerator;
     @Mock private EmailVerificationTokenRepository evtRepository;
-    @Mock private AuthEmailSender authEmailSender;
     @Mock private ApplicationEventPublisher eventPublisher;
 
     private RegisterStudentService service;
@@ -51,7 +50,7 @@ class RegisterStudentServiceTest {
         service = new RegisterStudentService(
                 userRepository, studentProfilePort, tenantResolverPort,
                 passwordEncoder, tokenGenerator, evtRepository,
-                authEmailSender, authProperties, eventPublisher);
+                authProperties, eventPublisher);
     }
 
     @Test
@@ -87,8 +86,14 @@ class RegisterStudentServiceTest {
                 isNull(), isNull(), isNull(), any(UUID.class));
 
         verify(evtRepository).save(any());
-        verify(authEmailSender).sendVerificationEmail(eq(command.email()), eq("raw-token"), eq(TENANT_SLUG));
-        verify(eventPublisher).publishEvent(any(StudentRegisteredEvent.class));
+
+        ArgumentCaptor<StudentRegisteredEvent> eventCaptor = ArgumentCaptor.forClass(StudentRegisteredEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        StudentRegisteredEvent event = eventCaptor.getValue();
+        assertEquals(command.email(), event.email());
+        assertEquals("John Doe", event.displayName());
+        assertEquals("raw-token", event.rawToken());
+        assertNotNull(event.expiresAt());
     }
 
     @Test

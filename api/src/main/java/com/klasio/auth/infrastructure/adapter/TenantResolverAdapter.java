@@ -21,4 +21,10 @@ public class TenantResolverAdapter implements TenantResolverPort {
         return tenantRepository.findBySlug(slug)
                 .map(entity -> entity.getId());
     }
+
+    @Override
+    public Optional<String> resolveSlugByTenantId(UUID tenantId) {
+        return tenantRepository.findById(tenantId)
+                .map(entity -> entity.getSlug());
+    }
 }

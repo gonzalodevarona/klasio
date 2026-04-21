@@ -19,20 +19,17 @@ public class RequestPasswordResetService {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository prtRepository;
     private final TokenGenerator tokenGenerator;
-    private final AuthEmailSender authEmailSender;
     private final AuthProperties authProperties;
     private final ApplicationEventPublisher eventPublisher;
 
     public RequestPasswordResetService(UserRepository userRepository,
                                        PasswordResetTokenRepository prtRepository,
                                        TokenGenerator tokenGenerator,
-                                       AuthEmailSender authEmailSender,
                                        AuthProperties authProperties,
                                        ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.prtRepository = prtRepository;
         this.tokenGenerator = tokenGenerator;
-        this.authEmailSender = authEmailSender;
         this.authProperties = authProperties;
         this.eventPublisher = eventPublisher;
     }
@@ -56,9 +53,9 @@ public class RequestPasswordResetService {
         PasswordResetToken token = PasswordResetToken.create(user.getId(), hashedToken, expiresAt);
         prtRepository.save(token);
 
-        authEmailSender.sendPasswordResetEmail(email, rawToken);
-
         eventPublisher.publishEvent(new PasswordResetRequestedEvent(
-                user.getId(), user.getTenantId(), email, Instant.now()));
+                user.getId(), user.getTenantId(), email,
+                rawToken, expiresAt,
+                Instant.now()));
     }
 }
