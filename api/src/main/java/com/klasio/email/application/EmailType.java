@@ -7,8 +7,6 @@ public enum EmailType {
             Set.of("recipientName", "role", "tenantName", "setupUrl", "expiresAt")),
     PROFESSOR_INVITATION(Source.IN_REPO, "professor-invitation",
             Set.of("activationUrl", "expiresAt", "professorName")),
-    STUDENT_VERIFICATION(Source.IN_REPO, "student-verification",
-            Set.of("verificationUrl", "expiresAt", "studentName")),
     PASSWORD_RECOVERY(Source.IN_REPO, "password-recovery",
             Set.of("resetUrl", "expiresAt")),
     PAYMENT_PROOF_UPLOADED(Source.IN_REPO, "payment-proof-uploaded",

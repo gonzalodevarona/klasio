@@ -48,19 +48,20 @@ class EmailDispatcherServiceTest {
 
     @Test
     void inRepoType_rendersTemplateAndPassesToTransport() {
-        when(renderer.render(eq("student-verification"), anyMap()))
-                .thenReturn(new RenderedTemplate("Verify your account", "<html/>", "plain text"));
+        when(renderer.render(eq("account-setup"), anyMap()))
+                .thenReturn(new RenderedTemplate("Set up your account", "<html/>", "plain text"));
 
-        service.send(EmailType.STUDENT_VERIFICATION,
+        service.send(EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("user@example.com", "Juan"),
                 tenantId,
-                Map.of("verificationUrl", "https://x.com", "expiresAt", "2026-05-01", "studentName", "Juan"));
+                Map.of("recipientName", "Juan", "role", "student", "tenantName", "Test League",
+                       "setupUrl", "https://x.com", "expiresAt", "2026-05-01"));
 
         var captor = org.mockito.ArgumentCaptor.forClass(OutboundEmail.class);
         verify(transport).send(captor.capture());
         OutboundEmail sent = captor.getValue();
-        assertThat(sent.type()).isEqualTo(EmailType.STUDENT_VERIFICATION);
-        assertThat(sent.subject()).isEqualTo("Verify your account");
+        assertThat(sent.type()).isEqualTo(EmailType.ACCOUNT_SETUP);
+        assertThat(sent.subject()).isEqualTo("Set up your account");
         assertThat(sent.htmlBody()).isEqualTo("<html/>");
         assertThat(sent.brevoTemplateId()).isNull();
         assertThat(sent.from().email()).isEqualTo("noreply@klasio.app");
@@ -102,10 +103,10 @@ class EmailDispatcherServiceTest {
     @Test
     void missingRequiredParam_throwsIllegalArgument() {
         assertThatThrownBy(() -> service.send(
-                EmailType.STUDENT_VERIFICATION,
+                EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("u@x.com", "U"),
                 tenantId,
-                Map.of("verificationUrl", "https://x.com"))) // missing expiresAt, studentName
+                Map.of("recipientName", "U"))) // missing role, tenantName, setupUrl, expiresAt
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Missing required params");
     }
@@ -117,10 +118,11 @@ class EmailDispatcherServiceTest {
         doThrow(new RuntimeException("Brevo is down")).when(transport).send(any());
 
         assertThatCode(() -> service.send(
-                EmailType.STUDENT_VERIFICATION,
+                EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("u@x.com", "U"),
                 tenantId,
-                Map.of("verificationUrl", "https://x.com", "expiresAt", "2026-05-01", "studentName", "U")))
+                Map.of("recipientName", "U", "role", "student", "tenantName", "T",
+                       "setupUrl", "https://x.com", "expiresAt", "2026-05-01")))
                 .doesNotThrowAnyException();
     }
 
@@ -128,10 +130,11 @@ class EmailDispatcherServiceTest {
     void eachSendCallGeneratesDistinctIdempotencyKey() {
         when(renderer.render(anyString(), anyMap()))
                 .thenReturn(new RenderedTemplate("s", "<h/>", "t"));
-        Map<String, Object> params = Map.of("verificationUrl", "u", "expiresAt", "e", "studentName", "n");
+        Map<String, Object> params = Map.of("recipientName", "n", "role", "student",
+                "tenantName", "T", "setupUrl", "u", "expiresAt", "e");
 
-        service.send(EmailType.STUDENT_VERIFICATION, new EmailRecipient("a@x.com", "A"), tenantId, params);
-        service.send(EmailType.STUDENT_VERIFICATION, new EmailRecipient("b@x.com", "B"), tenantId, params);
+        service.send(EmailType.ACCOUNT_SETUP, new EmailRecipient("a@x.com", "A"), tenantId, params);
+        service.send(EmailType.ACCOUNT_SETUP, new EmailRecipient("b@x.com", "B"), tenantId, params);
 
         var captor = org.mockito.ArgumentCaptor.forClass(OutboundEmail.class);
         verify(transport, times(2)).send(captor.capture());

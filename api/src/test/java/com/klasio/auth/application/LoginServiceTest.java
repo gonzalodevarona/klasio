@@ -8,6 +8,7 @@ import com.klasio.auth.application.port.TokenGenerator;
 import com.klasio.auth.application.port.UserRepository;
 import com.klasio.auth.application.service.LoginService;
 import com.klasio.auth.domain.exception.AccountLockedException;
+import com.klasio.auth.domain.exception.AccountSetupPendingException;
 import com.klasio.auth.domain.exception.EmailNotVerifiedException;
 import com.klasio.auth.domain.exception.InvalidCredentialsException;
 import com.klasio.auth.domain.model.Role;
@@ -147,12 +148,13 @@ class LoginServiceTest {
     }
 
     @Test
-    void login_unverifiedEmail_throwsEmailNotVerified() {
-        User user = User.createUnverified(UUID.randomUUID(), "test@example.com", "encoded_pass",
-                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678");
+    void login_pendingSetupAccount_throwsAccountSetupPending() {
+        // Users who have not completed account setup have a null password hash
+        User user = User.createPendingSetup(UUID.randomUUID(), "test@example.com", Role.STUDENT,
+                com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", null, null, null);
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        assertThrows(EmailNotVerifiedException.class,
+        assertThrows(AccountSetupPendingException.class,
                 () -> loginService.login(new LoginCommand("test@example.com", "password")));
     }
 

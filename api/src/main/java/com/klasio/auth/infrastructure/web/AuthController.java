@@ -8,10 +8,8 @@ import com.klasio.auth.application.service.LogoutService;
 import com.klasio.auth.application.service.RefreshTokenService;
 import com.klasio.auth.application.service.RequestPasswordResetService;
 import com.klasio.auth.application.service.ResendSetupEmailService;
-import com.klasio.auth.application.service.ResendVerificationEmailService;
 import com.klasio.auth.application.service.ResetPasswordService;
 import com.klasio.auth.application.service.SetupAccountService;
-import com.klasio.auth.application.service.VerifyEmailService;
 import com.klasio.auth.domain.model.User;
 import com.klasio.shared.infrastructure.config.JwtProperties;
 import jakarta.servlet.http.Cookie;
@@ -35,8 +33,6 @@ public class AuthController {
     private final LoginService loginService;
     private final LogoutService logoutService;
     private final RefreshTokenService refreshTokenService;
-    private final VerifyEmailService verifyEmailService;
-    private final ResendVerificationEmailService resendVerificationEmailService;
     private final RequestPasswordResetService requestPasswordResetService;
     private final ResetPasswordService resetPasswordService;
     private final SetupAccountService setupAccountService;
@@ -47,8 +43,6 @@ public class AuthController {
     public AuthController(LoginService loginService,
                           LogoutService logoutService,
                           RefreshTokenService refreshTokenService,
-                          VerifyEmailService verifyEmailService,
-                          ResendVerificationEmailService resendVerificationEmailService,
                           RequestPasswordResetService requestPasswordResetService,
                           ResetPasswordService resetPasswordService,
                           SetupAccountService setupAccountService,
@@ -58,8 +52,6 @@ public class AuthController {
         this.loginService = loginService;
         this.logoutService = logoutService;
         this.refreshTokenService = refreshTokenService;
-        this.verifyEmailService = verifyEmailService;
-        this.resendVerificationEmailService = resendVerificationEmailService;
         this.requestPasswordResetService = requestPasswordResetService;
         this.resetPasswordService = resetPasswordService;
         this.setupAccountService = setupAccountService;
@@ -69,7 +61,6 @@ public class AuthController {
     }
 
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {}
-    public record ResendVerificationRequest(@NotBlank @Email String email, @NotBlank String tenantSlug) {}
     public record ForgotPasswordRequest(@NotBlank @Email String email) {}
     public record ResetPasswordRequest(@NotBlank String token, @NotBlank String newPassword) {}
     public record SetupAccountRequest(@NotBlank String token, @NotBlank String newPassword) {}
@@ -162,20 +153,6 @@ public class AuthController {
                 "userId", result.userId().toString(),
                 "role", result.primaryRole().name()
         ));
-    }
-
-    @GetMapping("/verify-email")
-    public ResponseEntity<Map<String, String>> verifyEmail(@RequestParam String token) {
-        verifyEmailService.verify(token);
-        return ResponseEntity.ok(Map.of("message", "Email verified successfully"));
-    }
-
-    @PostMapping("/resend-verification")
-    public ResponseEntity<Map<String, String>> resendVerification(
-            @Valid @RequestBody ResendVerificationRequest request) {
-        resendVerificationEmailService.resend(request.email(), request.tenantSlug());
-        return ResponseEntity.accepted().body(Map.of(
-                "message", "If an unverified account exists with this email, a new verification email has been sent"));
     }
 
     @PostMapping("/forgot-password")

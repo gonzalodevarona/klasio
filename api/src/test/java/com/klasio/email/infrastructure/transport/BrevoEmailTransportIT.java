@@ -41,10 +41,10 @@ class BrevoEmailTransportIT {
                         .withBody("{\"messageId\":\"<fake@brevo.com>\"}")));
 
         transport().send(new OutboundEmail(
-                EmailType.STUDENT_VERIFICATION,
+                EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("user@example.com", "Juan"),
                 new EmailSender("noreply@klasio.app", "Test League via Klasio"),
-                "Verify your account", "<html>body</html>", "plain text",
+                "Set up your account", "<html>body</html>", "plain text",
                 null, null, "idem-key-123"));
 
         verify(postRequestedFor(urlEqualTo("/smtp/email"))
@@ -53,7 +53,7 @@ class BrevoEmailTransportIT {
                 .withRequestBody(matchingJsonPath("$.sender.email", equalTo("noreply@klasio.app")))
                 .withRequestBody(matchingJsonPath("$.sender.name", equalTo("Test League via Klasio")))
                 .withRequestBody(matchingJsonPath("$.to[0].email", equalTo("user@example.com")))
-                .withRequestBody(matchingJsonPath("$.subject", equalTo("Verify your account")))
+                .withRequestBody(matchingJsonPath("$.subject", equalTo("Set up your account")))
                 .withRequestBody(matchingJsonPath("$.htmlContent"))
                 .withRequestBody(matchingJsonPath("$.textContent")));
 
@@ -95,7 +95,7 @@ class BrevoEmailTransportIT {
                         .withBody("{\"messageId\":\"ok\"}")));
 
         assertThatCode(() -> transport().send(new OutboundEmail(
-                EmailType.STUDENT_VERIFICATION,
+                EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("u@x.com", "U"),
                 new EmailSender("from@x.com", "League via Klasio"),
                 "subj", "<h/>", "t", null, null, "idem")))
@@ -110,7 +110,7 @@ class BrevoEmailTransportIT {
                 .willReturn(aResponse().withStatus(500)));
 
         assertThatCode(() -> transport().send(new OutboundEmail(
-                EmailType.STUDENT_VERIFICATION,
+                EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("u@x.com", "U"),
                 new EmailSender("from@x.com", "L via Klasio"),
                 "s", "<h/>", "t", null, null, "idem")))

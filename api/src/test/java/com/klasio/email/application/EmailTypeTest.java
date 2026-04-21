@@ -7,10 +7,10 @@ class EmailTypeTest {
 
     @Test
     void inRepoTypesHaveTemplateRefWithoutPrefix() {
-        assertThat(EmailType.STUDENT_VERIFICATION.source()).isEqualTo(EmailType.Source.IN_REPO);
-        assertThat(EmailType.STUDENT_VERIFICATION.templateRef()).isEqualTo("student-verification");
-        assertThat(EmailType.STUDENT_VERIFICATION.requiredKeys())
-                .containsExactlyInAnyOrder("verificationUrl", "expiresAt", "studentName");
+        assertThat(EmailType.ACCOUNT_SETUP.source()).isEqualTo(EmailType.Source.IN_REPO);
+        assertThat(EmailType.ACCOUNT_SETUP.templateRef()).isEqualTo("account-setup");
+        assertThat(EmailType.ACCOUNT_SETUP.requiredKeys())
+                .containsExactlyInAnyOrder("recipientName", "role", "tenantName", "setupUrl", "expiresAt");
     }
 
     @Test

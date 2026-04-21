@@ -105,17 +105,6 @@ public class User {
                 phoneNumber == null || phoneNumber.isBlank() ? null : phoneNumber.trim());
     }
 
-    public static User createUnverified(UUID tenantId, String email, String passwordHash,
-                                        IdentityDocumentType identityDocumentType, String identityNumber) {
-        Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
-        validateNotBlank(identityNumber, "Identity number");
-
-        Instant now = Instant.now();
-        return new User(UUID.randomUUID(), tenantId, email, passwordHash,
-                Role.STUDENT.impliedRoles(), UserStatus.EMAIL_UNVERIFIED, 0, null, now, now,
-                identityDocumentType, identityNumber.trim(), null, null, null);
-    }
-
     public boolean isLocked() {
         return lockedUntil != null && Instant.now().isBefore(lockedUntil);
     }

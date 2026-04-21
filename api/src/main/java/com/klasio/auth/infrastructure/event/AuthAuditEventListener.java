@@ -2,7 +2,14 @@ package com.klasio.auth.infrastructure.event;
 
 import com.klasio.audit.domain.model.AuditLogEntry;
 import com.klasio.audit.infrastructure.persistence.JpaAuditLogRepository;
-import com.klasio.auth.domain.event.*;
+import com.klasio.auth.domain.event.EmailVerifiedEvent;
+import com.klasio.auth.domain.event.PasswordResetCompletedEvent;
+import com.klasio.auth.domain.event.PasswordResetRequestedEvent;
+import com.klasio.auth.domain.event.RoleAssignedEvent;
+import com.klasio.auth.domain.event.UserAccountLockedEvent;
+import com.klasio.auth.domain.event.UserLoggedInEvent;
+import com.klasio.auth.domain.event.UserLoggedOutEvent;
+import com.klasio.auth.domain.event.UserLoginFailedEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -70,18 +77,6 @@ public class AuthAuditEventListener {
         log.info("Auth audit: user logged out userId={}", event.userId());
 
         saveEntry("AUTH_LOGOUT", event.userId(), "USER", event.userId(), event.occurredAt(), "{}");
-    }
-
-    @Async
-    @EventListener
-    public void onStudentRegistered(StudentRegisteredEvent event) {
-        log.info("Auth audit: student registered userId={}, studentId={}", event.userId(), event.studentId());
-
-        String details = toJson(Map.of(
-                "email", event.email(),
-                "studentId", event.studentId().toString()));
-
-        saveEntry("STUDENT_SELF_REGISTERED", event.userId(), "USER", event.userId(), event.occurredAt(), details);
     }
 
     @Async
