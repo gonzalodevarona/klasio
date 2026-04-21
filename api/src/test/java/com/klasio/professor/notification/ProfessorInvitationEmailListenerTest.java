@@ -87,8 +87,10 @@ class ProfessorInvitationEmailListenerTest {
 
         verify(emailService).send(
                 eq(EmailType.PROFESSOR_INVITATION),
-                any(EmailRecipient.class),
+                eq(new EmailRecipient("carlos@example.com", "Carlos Reyes")),
                 eq(TENANT_ID),
-                any());
+                argThat(params ->
+                        ("http://localhost:3000/activate-professor?token=" + INVITATION_TOKEN)
+                                .equals(params.get("activationUrl"))));
     }
 }

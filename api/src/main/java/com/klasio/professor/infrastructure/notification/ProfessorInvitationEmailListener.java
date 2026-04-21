@@ -33,6 +33,10 @@ public class ProfessorInvitationEmailListener {
     @Async("emailListenerExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onProfessorCreated(ProfessorCreated event) {
+        if (event.email() == null || event.email().isBlank()) {
+            log.warn("[EMAIL] Skipping PROFESSOR_INVITATION: blank email for professorId={}", event.professorId());
+            return;
+        }
         String tenantSlug = tenantResolverPort.resolveSlugByTenantId(event.tenantId())
                 .orElse("app");
         String activationUrl = urlBuilder.build(tenantSlug,

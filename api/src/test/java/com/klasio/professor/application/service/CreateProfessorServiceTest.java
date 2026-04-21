@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,6 +76,8 @@ class CreateProfessorServiceTest {
         ProfessorCreated event = (ProfessorCreated) eventCaptor.getValue();
         assertThat(event.tenantId()).isEqualTo(TENANT_ID);
         assertThat(event.createdBy()).isEqualTo(CREATED_BY);
+        assertThat(event.invitationExpiresAt()).isNotNull();
+        assertThat(event.invitationExpiresAt()).isAfter(Instant.now().minus(1, ChronoUnit.SECONDS));
     }
 
     @Test
