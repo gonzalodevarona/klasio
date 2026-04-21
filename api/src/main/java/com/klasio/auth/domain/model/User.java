@@ -82,6 +82,29 @@ public class User {
                 phoneNumber == null || phoneNumber.isBlank() ? null : phoneNumber.trim());
     }
 
+    /**
+     * Creates a user with no password hash (null) and EMAIL_UNVERIFIED status.
+     * Used in the unified account setup flow where users set their password
+     * by clicking a one-time link sent to their email.
+     */
+    public static User createPendingSetup(UUID tenantId, String email, Role role,
+                                          IdentityDocumentType identityDocumentType, String identityNumber,
+                                          String firstName, String lastName, String phoneNumber) {
+        Objects.requireNonNull(role, "Role must not be null");
+        Objects.requireNonNull(tenantId, "Tenant id must not be null");
+        Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
+        validateNotBlank(identityNumber, "Identity number");
+        Instant now = Instant.now();
+        return new User(UUID.randomUUID(), tenantId, email,
+                null,   // passwordHash is null until account setup is completed
+                role.impliedRoles(), UserStatus.EMAIL_UNVERIFIED,
+                0, null, now, now,
+                identityDocumentType, identityNumber.trim(),
+                firstName == null ? null : firstName.trim(),
+                lastName == null ? null : lastName.trim(),
+                phoneNumber == null || phoneNumber.isBlank() ? null : phoneNumber.trim());
+    }
+
     public static User createUnverified(UUID tenantId, String email, String passwordHash,
                                         IdentityDocumentType identityDocumentType, String identityNumber) {
         Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
@@ -125,6 +148,16 @@ public class User {
         if (this.status != UserStatus.EMAIL_UNVERIFIED) {
             return;
         }
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = Instant.now();
+    }
+
+    /**
+     * Completes the unified account setup flow: sets the user's password and
+     * transitions status from EMAIL_UNVERIFIED to ACTIVE.
+     */
+    public void setupAccount(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
         this.status = UserStatus.ACTIVE;
         this.updatedAt = Instant.now();
     }
