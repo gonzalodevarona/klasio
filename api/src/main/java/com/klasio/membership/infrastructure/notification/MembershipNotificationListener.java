@@ -36,11 +36,17 @@ public class MembershipNotificationListener {
         this.programNamePort = programNamePort;
     }
 
+    // MembershipExpired is intentionally not handled here — expiration emails are not in scope for RF-32.
+    // The 3-day expiry-warning email covers the pre-expiration student notification path.
+
     @Async("emailListenerExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onMembershipActivated(MembershipActivated event) {
         String email = studentEmailPort.findEmail(event.studentId(), event.tenantId()).orElse(null);
-        if (email == null) return;
+        if (email == null) {
+            log.warn("[membership] skipping email — no email on file for studentId={}", event.studentId());
+            return;
+        }
         String name = studentNamePort.findFullName(event.studentId(), event.tenantId()).orElse(email);
         String program = programNamePort.findName(event.programId(), event.tenantId()).orElse("your program");
 
@@ -59,7 +65,10 @@ public class MembershipNotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onMembershipExpiryWarning(MembershipExpiryWarning event) {
         String email = studentEmailPort.findEmail(event.studentId(), event.tenantId()).orElse(null);
-        if (email == null) return;
+        if (email == null) {
+            log.warn("[membership] skipping email — no email on file for studentId={}", event.studentId());
+            return;
+        }
         String name = studentNamePort.findFullName(event.studentId(), event.tenantId()).orElse(email);
         String program = programNamePort.findName(event.programId(), event.tenantId()).orElse("your program");
 
@@ -77,7 +86,10 @@ public class MembershipNotificationListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onMembershipDepleted(MembershipDepleted event) {
         String email = studentEmailPort.findEmail(event.studentId(), event.tenantId()).orElse(null);
-        if (email == null) return;
+        if (email == null) {
+            log.warn("[membership] skipping email — no email on file for studentId={}", event.studentId());
+            return;
+        }
         String name = studentNamePort.findFullName(event.studentId(), event.tenantId()).orElse(email);
         String program = programNamePort.findName(event.programId(), event.tenantId()).orElse("your program");
 
