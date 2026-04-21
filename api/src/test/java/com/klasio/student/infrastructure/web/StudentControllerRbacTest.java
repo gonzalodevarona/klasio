@@ -10,6 +10,7 @@ import com.klasio.student.application.port.input.UpdateStudentUseCase;
 import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.port.StudentRepository;
+import com.klasio.membership.domain.port.StudentIdPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -98,6 +99,9 @@ class StudentControllerRbacTest {
     @MockitoBean
     private ApplicationEventPublisher eventPublisher;
 
+    @MockitoBean
+    private StudentIdPort studentIdPort;
+
     private static final UUID USER_ID = UUID.randomUUID();
     private static final UUID TENANT_ID = UUID.randomUUID();
     private static final UUID STUDENT_ID = UUID.randomUUID();
@@ -146,7 +150,8 @@ class StudentControllerRbacTest {
               "dateOfBirth": "2000-01-15",
               "eps": "Sura",
               "identityNumber": "123456",
-              "identityDocumentType": "CC"
+              "identityDocumentType": "CC",
+              "phone": "+573001234567"
             }
             """;
 
@@ -158,7 +163,8 @@ class StudentControllerRbacTest {
               "dateOfBirth": "2000-01-15",
               "eps": "Sura",
               "identityNumber": "123456",
-              "identityDocumentType": "CC"
+              "identityDocumentType": "CC",
+              "phone": "+573001234567"
             }
             """;
 
