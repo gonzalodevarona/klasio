@@ -222,7 +222,8 @@ public class Membership {
             this.activatedBy = validatedBy;
             this.activatedAt = now;
             domainEvents.add(new MembershipActivated(
-                    id.value(), tenantId, studentId, programId, validatedBy, now));
+                    id.value(), tenantId, studentId, programId, validatedBy,
+                    planName, purchasedHours, expirationDate, now));
         } else {
             this.status = MembershipStatus.PENDING_MANAGER_ACTIVATION;
             domainEvents.add(new MembershipPendingManagerActivation(
@@ -245,7 +246,8 @@ public class Membership {
         this.updatedBy = activatedBy;
 
         domainEvents.add(new MembershipActivated(
-                id.value(), tenantId, studentId, programId, activatedBy, now));
+                id.value(), tenantId, studentId, programId, activatedBy,
+                planName, purchasedHours, expirationDate, now));
     }
 
     public void deductHours(int hours, UUID actorId, String actorRole) {
