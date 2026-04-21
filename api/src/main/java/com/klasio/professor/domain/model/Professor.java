@@ -111,7 +111,9 @@ public class Professor {
 
         professor.domainEvents.add(new ProfessorCreated(
                 id.value(), tenantId, normalizedFirstName, normalizedLastName, normalizedEmail, phoneNumber,
-                identityDocumentType, normalizedIdentityNumber, token, createdBy, now));
+                identityDocumentType, normalizedIdentityNumber, token, createdBy,
+                expiresAt,  // invitation expiry already computed above
+                now));
 
         return professor;
     }

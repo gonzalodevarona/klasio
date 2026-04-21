@@ -17,5 +17,6 @@ public record ProfessorCreated(
         String identityNumber,
         UUID invitationToken,
         UUID createdBy,
+        Instant invitationExpiresAt,
         Instant occurredAt
 ) implements DomainEvent {}
