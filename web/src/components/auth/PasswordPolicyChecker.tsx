@@ -10,7 +10,7 @@ interface Rule {
   test: (password: string) => boolean;
 }
 
-const rules: Rule[] = [
+export const PASSWORD_RULES: Rule[] = [
   {
     key: "minLength",
     label: "At least 8 characters",
@@ -33,10 +33,17 @@ const rules: Rule[] = [
   },
 ];
 
+/**
+ * Returns true if the password satisfies all policy rules.
+ */
+export function validatePassword(password: string): boolean {
+  return PASSWORD_RULES.every((rule) => rule.test(password));
+}
+
 export default function PasswordPolicyChecker({ password }: PasswordPolicyCheckerProps) {
   return (
     <ul className="mt-2 space-y-1">
-      {rules.map((rule) => {
+      {PASSWORD_RULES.map((rule) => {
         const satisfied = password.length > 0 && rule.test(password);
         return (
           <li

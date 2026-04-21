@@ -69,7 +69,7 @@ export default function LoginForm() {
             <p className="mt-2 text-sm text-red-700">
               Didn&apos;t receive it?{" "}
               <a href="/setup-account" className="underline text-indigo-700 hover:text-indigo-600">
-                Resend setup email
+                Request a new setup link
               </a>
             </p>
           )}

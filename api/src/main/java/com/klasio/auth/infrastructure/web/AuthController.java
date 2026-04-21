@@ -73,7 +73,7 @@ public class AuthController {
     public record ForgotPasswordRequest(@NotBlank @Email String email) {}
     public record ResetPasswordRequest(@NotBlank String token, @NotBlank String newPassword) {}
     public record SetupAccountRequest(@NotBlank String token, @NotBlank String newPassword) {}
-    public record ResendSetupRequest(@NotBlank @Email String email, @NotBlank String tenantSlug) {}
+    public record ResendSetupRequest(@NotBlank @Email String email, String tenantSlug) {}
 
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")

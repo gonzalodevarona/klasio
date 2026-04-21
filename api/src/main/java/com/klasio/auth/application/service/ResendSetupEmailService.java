@@ -6,6 +6,7 @@ import com.klasio.auth.application.port.TokenGenerator;
 import com.klasio.auth.application.port.UserRepository;
 import com.klasio.auth.domain.event.AccountSetupInitiated;
 import com.klasio.auth.domain.model.AccountSetupToken;
+import com.klasio.auth.domain.model.User;
 import com.klasio.auth.domain.model.UserStatus;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -37,24 +38,36 @@ public class ResendSetupEmailService {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * Resends the account-setup email.
+     *
+     * When {@code tenantSlug} is blank (e.g. the user reached the expired-link
+     * screen without tenant context), we fall back to an email-only lookup across
+     * all tenants and send to the first EMAIL_UNVERIFIED account found for that
+     * address.  In practice a given email lives in a single tenant, so this is safe.
+     */
     @Transactional
     public void resend(String email, String tenantSlug) {
-        Optional<UUID> tenantIdOpt = tenantResolverPort.resolveTenantIdBySlug(tenantSlug);
-        if (tenantIdOpt.isEmpty()) {
-            // Silently return — do not expose whether the tenant exists
-            return;
+        Optional<User> userOpt;
+
+        if (tenantSlug == null || tenantSlug.isBlank()) {
+            // No tenant context — look up by email + pending-setup status only
+            userOpt = userRepository.findFirstByEmailAndStatus(email, UserStatus.EMAIL_UNVERIFIED);
+        } else {
+            Optional<UUID> tenantIdOpt = tenantResolverPort.resolveTenantIdBySlug(tenantSlug);
+            if (tenantIdOpt.isEmpty()) {
+                // Silently return — do not expose whether the tenant exists
+                return;
+            }
+            userOpt = userRepository.findByEmailAndTenantId(email, tenantIdOpt.get());
         }
 
-        UUID tenantId = tenantIdOpt.get();
-
-        Optional<com.klasio.auth.domain.model.User> userOpt =
-                userRepository.findByEmailAndTenantId(email, tenantId);
         if (userOpt.isEmpty()) {
             // Silently return — do not expose whether the email exists
             return;
         }
 
-        com.klasio.auth.domain.model.User user = userOpt.get();
+        User user = userOpt.get();
 
         if (user.getStatus() == UserStatus.ACTIVE) {
             // Setup already completed — silently return

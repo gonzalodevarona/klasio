@@ -23,10 +23,11 @@ afterEach(() => {
 
 describe("SetupAccountForm", () => {
   describe("when token is missing", () => {
-    it("shows an invalid link message", () => {
+    it("shows the resend email form directly", () => {
       render(<SetupAccountForm token={null} />);
 
-      expect(screen.getByText(/invalid setup link/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /send new link/i })).toBeInTheDocument();
     });
 
     it("does not render the password form", () => {
@@ -63,6 +64,58 @@ describe("SetupAccountForm", () => {
       fireEvent.click(screen.getByRole("button", { name: /set password/i }));
 
       expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
+    });
+
+    it("shows error when password does not meet policy requirements", async () => {
+      render(<SetupAccountForm {...buildProps()} />);
+
+      // Weak password: matches confirmPassword but fails policy
+      fireEvent.change(screen.getByLabelText(/^new password/i), {
+        target: { value: "weakpass" },
+      });
+      fireEvent.change(screen.getByLabelText(/confirm new password/i), {
+        target: { value: "weakpass" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: /set password/i }));
+
+      expect(await screen.findByText(/password does not meet the requirements/i)).toBeInTheDocument();
+    });
+
+    it("does not call the API when passwords do not match", async () => {
+      global.fetch = jest.fn();
+
+      render(<SetupAccountForm {...buildProps()} />);
+
+      fireEvent.change(screen.getByLabelText(/^new password/i), {
+        target: { value: "Password1!" },
+      });
+      fireEvent.change(screen.getByLabelText(/confirm new password/i), {
+        target: { value: "Different1!" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: /set password/i }));
+
+      await screen.findByText(/passwords do not match/i);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it("does not call the API when password fails policy", async () => {
+      global.fetch = jest.fn();
+
+      render(<SetupAccountForm {...buildProps()} />);
+
+      fireEvent.change(screen.getByLabelText(/^new password/i), {
+        target: { value: "weakpass" },
+      });
+      fireEvent.change(screen.getByLabelText(/confirm new password/i), {
+        target: { value: "weakpass" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: /set password/i }));
+
+      await screen.findByText(/password does not meet the requirements/i);
+      expect(global.fetch).not.toHaveBeenCalled();
     });
   });
 

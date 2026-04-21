@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import PasswordPolicyChecker from "./PasswordPolicyChecker";
+import PasswordPolicyChecker, { validatePassword } from "./PasswordPolicyChecker";
 
 interface SetupAccountFormProps {
   token: string | null;
@@ -18,27 +18,13 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [phase, setPhase] = useState<Phase>("form");
+  // When no token is present, skip straight to the resend form
+  const [phase, setPhase] = useState<Phase>(token ? "form" : "resend");
   const [formError, setFormError] = useState<string | null>(null);
 
   // Resend sub-form
   const [resendEmail, setResendEmail] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
-
-  // ---------------------------------------------------------------------------
-  // Missing token guard
-  // ---------------------------------------------------------------------------
-
-  if (!token) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
-        <h2 className="text-lg font-semibold text-red-800 mb-2">Invalid Setup Link</h2>
-        <p className="text-sm text-red-700">
-          This setup link is invalid. Please use the link from your invitation email.
-        </p>
-      </div>
-    );
-  }
 
   // ---------------------------------------------------------------------------
   // Setup form submission
@@ -49,7 +35,12 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
     setFormError(null);
 
     if (password !== confirmPassword) {
-      setFormError("Passwords do not match");
+      setFormError("Passwords do not match.");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setFormError("Password does not meet the requirements.");
       return;
     }
 
@@ -99,7 +90,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
       await fetch(`${apiBase}/auth/resend-setup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: resendEmail, tenantSlug: "" }),
+        body: JSON.stringify({ email: resendEmail }),
         credentials: "include",
       });
     } catch {
@@ -116,7 +107,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
 
   if (phase === "success") {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
+      <div role="status" className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
         <h2 className="text-lg font-semibold text-green-800 mb-2">Account Setup Complete</h2>
         <p className="text-sm text-green-700 mb-4">
           Your account is ready! You can now log in.
@@ -138,7 +129,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
   if (phase === "expired") {
     return (
       <div className="space-y-6">
-        <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
+        <div role="alert" className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
           <h2 className="text-lg font-semibold text-red-800 mb-2">Setup Link Expired</h2>
           <p className="text-sm text-red-700 mb-4">
             This setup link has expired or is no longer valid.
@@ -200,7 +191,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
 
   if (phase === "resend-done") {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
+      <div role="status" className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
         <h2 className="text-lg font-semibold text-green-800 mb-2">Email Sent</h2>
         <p className="text-sm text-green-700">
           A new setup link has been sent to your email.
@@ -216,7 +207,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {formError && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div role="alert" className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-800">{formError}</p>
         </div>
       )}
