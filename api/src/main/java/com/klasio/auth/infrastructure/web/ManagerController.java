@@ -59,7 +59,6 @@ public class ManagerController {
     public record CreateManagerRequest(
             @NotNull UUID tenantId,
             @NotBlank @Email String email,
-            String password, // optional — auto-generated when omitted
             @NotBlank String identityDocumentType,
             @NotBlank @Size(min = 3, max = 30) String identityNumber,
             @NotBlank @Size(max = 100) String firstName,
@@ -165,7 +164,6 @@ public class ManagerController {
         CreateAdminCommand command = new CreateAdminCommand(
                 effectiveTenantId,
                 request.email(),
-                request.password(),
                 request.identityDocumentType(),
                 request.identityNumber(),
                 request.firstName(),

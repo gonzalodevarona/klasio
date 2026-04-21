@@ -6,6 +6,7 @@ import com.klasio.student.domain.event.StudentCreated;
 import com.klasio.student.domain.model.BloodType;
 import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
+import com.klasio.student.domain.port.AccountSetupCreationPort;
 import com.klasio.student.domain.port.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,13 +38,16 @@ class CreateStudentServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private AccountSetupCreationPort accountSetupCreationPort;
+
     private CreateStudentService service;
 
     private static final LocalDate ADULT_DATE_OF_BIRTH = LocalDate.of(2000, 1, 15);
 
     @BeforeEach
     void setUp() {
-        service = new CreateStudentService(studentRepository, eventPublisher);
+        service = new CreateStudentService(studentRepository, eventPublisher, accountSetupCreationPort);
     }
 
     private CreateStudentCommand buildAdultCommand(UUID tenantId, UUID createdBy) {
@@ -57,11 +61,15 @@ class CreateStudentServiceTest {
     }
 
     @Test
-    @DisplayName("should create student, save it, and publish domain events")
-    void happyPath_createsStudentAndPublishesEvents() {
+    @DisplayName("should create student, save it, publish domain events, and trigger account setup")
+    void happyPath_createsStudentAndPublishesEventsAndDispatchesSetup() {
         UUID tenantId = UUID.randomUUID();
         UUID createdBy = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         when(studentRepository.existsByEmailInTenant(eq(tenantId), anyString())).thenReturn(false);
+        when(accountSetupCreationPort.createAndDispatchSetup(
+                any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(userId);
 
         CreateStudentCommand command = buildAdultCommand(tenantId, createdBy);
 
@@ -91,6 +99,17 @@ class CreateStudentServiceTest {
         assertThat(event.lastName()).isEqualTo("Garcia");
         assertThat(event.email()).isEqualTo("carlos.garcia@example.com");
         assertThat(event.createdBy()).isEqualTo(createdBy);
+
+        // Verify account setup was triggered for the newly created student
+        verify(accountSetupCreationPort).createAndDispatchSetup(
+                eq(tenantId),
+                eq("carlos.garcia@example.com"),
+                any(), any(),
+                eq(IdentityDocumentType.CC),
+                eq("1234567890"),
+                eq("3001234567"),
+                any() // studentId
+        );
     }
 
     @Test
@@ -108,5 +127,7 @@ class CreateStudentServiceTest {
 
         verify(studentRepository, never()).save(any());
         verify(eventPublisher, never()).publishEvent(any());
+        verify(accountSetupCreationPort, never()).createAndDispatchSetup(
+                any(), any(), any(), any(), any(), any(), any(), any());
     }
 }

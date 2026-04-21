@@ -4,6 +4,7 @@ import com.klasio.professor.application.dto.CreateProfessorCommand;
 import com.klasio.professor.domain.event.ProfessorCreated;
 import com.klasio.professor.domain.model.Professor;
 import com.klasio.professor.domain.model.ProfessorStatus;
+import com.klasio.professor.domain.port.AccountSetupCreationPort;
 import com.klasio.professor.domain.port.ProfessorRepository;
 import com.klasio.shared.infrastructure.exception.ProfessorEmailAlreadyExistsException;
 import com.klasio.shared.infrastructure.exception.ProfessorIdentityNumberAlreadyExistsException;
@@ -37,6 +38,9 @@ class CreateProfessorServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private AccountSetupCreationPort accountSetupCreationPort;
+
     private CreateProfessorService service;
 
     private static final UUID TENANT_ID = UUID.randomUUID();
@@ -44,20 +48,24 @@ class CreateProfessorServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CreateProfessorService(professorRepository, eventPublisher);
+        service = new CreateProfessorService(professorRepository, eventPublisher, accountSetupCreationPort);
     }
 
     @Test
-    @DisplayName("should create professor, save it, and publish domain events")
-    void execute_withValidCommand_createsProfessor() {
+    @DisplayName("should create professor, save it, publish domain events, and trigger account setup")
+    void execute_withValidCommand_createsProfessorAndDispatchesSetup() {
+        UUID userId = UUID.randomUUID();
         when(professorRepository.existsByEmailInTenant(TENANT_ID, "carlos@example.com")).thenReturn(false);
+        when(accountSetupCreationPort.createAndDispatchSetup(
+                any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(userId);
 
         CreateProfessorCommand command = new CreateProfessorCommand(
                 TENANT_ID,
                 "Carlos",
                 "Martinez",
                 "carlos@example.com",
-                "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
+                "+573001234567", IdentityDocumentType.CC, "12345678", CREATED_BY);
 
         Professor result = service.execute(command);
 
@@ -78,6 +86,10 @@ class CreateProfessorServiceTest {
         assertThat(event.createdBy()).isEqualTo(CREATED_BY);
         assertThat(event.invitationExpiresAt()).isNotNull();
         assertThat(event.invitationExpiresAt()).isAfter(Instant.now().minus(1, ChronoUnit.SECONDS));
+
+        // Verify account setup dispatched for the new professor
+        verify(accountSetupCreationPort).createAndDispatchSetup(
+                any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -90,13 +102,15 @@ class CreateProfessorServiceTest {
                 "Carlos",
                 "Martinez",
                 "carlos@example.com",
-                "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
+                "+573001234567", IdentityDocumentType.CC, "12345678", CREATED_BY);
 
         assertThatThrownBy(() -> service.execute(command))
                 .isInstanceOf(ProfessorEmailAlreadyExistsException.class);
 
         verify(professorRepository, never()).save(any());
         verify(eventPublisher, never()).publishEvent(any());
+        verify(accountSetupCreationPort, never()).createAndDispatchSetup(
+                any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -113,20 +127,25 @@ class CreateProfessorServiceTest {
                 .isInstanceOf(ProfessorIdentityNumberAlreadyExistsException.class);
 
         verify(professorRepository, never()).save(any());
-        verify(eventPublisher, never()).publishEvent(any());
+        verify(accountSetupCreationPort, never()).createAndDispatchSetup(
+                any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
     @DisplayName("should return created professor with correct fields")
     void execute_returnsCreatedProfessor() {
+        UUID userId = UUID.randomUUID();
         when(professorRepository.existsByEmailInTenant(TENANT_ID, "carlos@example.com")).thenReturn(false);
+        when(accountSetupCreationPort.createAndDispatchSetup(
+                any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(userId);
 
         CreateProfessorCommand command = new CreateProfessorCommand(
                 TENANT_ID,
                 "Carlos",
                 "Martinez",
                 "carlos@example.com",
-                "+573001234567", com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678", CREATED_BY);
+                "+573001234567", IdentityDocumentType.CC, "12345678", CREATED_BY);
 
         Professor result = service.execute(command);
 

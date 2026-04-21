@@ -1,14 +1,18 @@
 package com.klasio.auth.application;
 
 import com.klasio.auth.application.dto.RegisterStudentCommand;
-import com.klasio.auth.application.port.*;
+import com.klasio.auth.application.port.AccountSetupTokenRepository;
+import com.klasio.auth.application.port.StudentProfilePort;
+import com.klasio.auth.application.port.TenantResolverPort;
+import com.klasio.auth.application.port.TokenGenerator;
+import com.klasio.auth.application.port.UserRepository;
 import com.klasio.auth.application.service.RegisterStudentService;
+import com.klasio.auth.domain.event.AccountSetupInitiated;
 import com.klasio.auth.domain.exception.EmailAlreadyRegisteredException;
 import com.klasio.auth.domain.exception.IdentityNumberAlreadyRegisteredException;
-import com.klasio.auth.domain.exception.PasswordPolicyViolationException;
+import com.klasio.auth.domain.model.AccountSetupToken;
 import com.klasio.auth.domain.model.User;
 import com.klasio.auth.domain.model.UserStatus;
-import com.klasio.auth.infrastructure.config.AuthProperties;
 import com.klasio.shared.domain.model.IdentityDocumentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,14 +22,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import com.klasio.auth.domain.event.StudentRegisteredEvent;
 
 @ExtendWith(MockitoExtension.class)
 class RegisterStudentServiceTest {
@@ -33,9 +38,8 @@ class RegisterStudentServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private StudentProfilePort studentProfilePort;
     @Mock private TenantResolverPort tenantResolverPort;
-    @Mock private PasswordEncoder passwordEncoder;
     @Mock private TokenGenerator tokenGenerator;
-    @Mock private EmailVerificationTokenRepository evtRepository;
+    @Mock private AccountSetupTokenRepository accountSetupTokenRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
 
     private RegisterStudentService service;
@@ -46,11 +50,9 @@ class RegisterStudentServiceTest {
 
     @BeforeEach
     void setUp() {
-        AuthProperties authProperties = new AuthProperties(24, 30, 5, 15, "noreply@klasio.com");
         service = new RegisterStudentService(
                 userRepository, studentProfilePort, tenantResolverPort,
-                passwordEncoder, tokenGenerator, evtRepository,
-                authProperties, eventPublisher);
+                tokenGenerator, accountSetupTokenRepository, eventPublisher);
     }
 
     @Test
@@ -61,7 +63,6 @@ class RegisterStudentServiceTest {
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
         when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
         when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
-        when(passwordEncoder.encode(command.password())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(studentProfilePort.createStudentProfile(eq(TENANT_ID), anyString(), anyString(),
                 anyString(), any(), anyString(), anyString(), anyString(),
@@ -71,10 +72,12 @@ class RegisterStudentServiceTest {
 
         service.register(command);
 
+        // User created with null password and EMAIL_UNVERIFIED status
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
         assertEquals(UserStatus.EMAIL_UNVERIFIED, savedUser.getStatus());
+        assertNull(savedUser.getPasswordHash());
         assertEquals(command.email(), savedUser.getEmail());
         assertEquals(TENANT_ID, savedUser.getTenantId());
         assertEquals(IdentityDocumentType.CC, savedUser.getIdentityDocumentType());
@@ -85,14 +88,23 @@ class RegisterStudentServiceTest {
                 eq(command.identityDocumentType()), eq(command.identityNumber()), eq(command.eps()),
                 isNull(), isNull(), isNull(), any(UUID.class));
 
-        verify(evtRepository).save(any());
+        // AccountSetupToken saved
+        ArgumentCaptor<AccountSetupToken> tokenCaptor = ArgumentCaptor.forClass(AccountSetupToken.class);
+        verify(accountSetupTokenRepository).save(tokenCaptor.capture());
+        AccountSetupToken savedToken = tokenCaptor.getValue();
+        assertEquals("hashed-token", savedToken.getTokenHash());
+        Instant expectedExpiry = Instant.now().plus(15, ChronoUnit.MINUTES);
+        assertTrue(savedToken.getExpiresAt().isAfter(expectedExpiry.minusSeconds(5)));
+        assertTrue(savedToken.getExpiresAt().isBefore(expectedExpiry.plusSeconds(5)));
 
-        ArgumentCaptor<StudentRegisteredEvent> eventCaptor = ArgumentCaptor.forClass(StudentRegisteredEvent.class);
+        // AccountSetupInitiated published (not StudentRegisteredEvent)
+        ArgumentCaptor<AccountSetupInitiated> eventCaptor = ArgumentCaptor.forClass(AccountSetupInitiated.class);
         verify(eventPublisher).publishEvent(eventCaptor.capture());
-        StudentRegisteredEvent event = eventCaptor.getValue();
+        AccountSetupInitiated event = eventCaptor.getValue();
         assertEquals(command.email(), event.email());
-        assertEquals("John Doe", event.displayName());
+        assertEquals("John Doe", event.recipientName());
         assertEquals("raw-token", event.rawToken());
+        assertEquals("student", event.role());
         assertNotNull(event.expiresAt());
     }
 
@@ -104,7 +116,6 @@ class RegisterStudentServiceTest {
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
         when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
         when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
-        when(passwordEncoder.encode(command.password())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(studentProfilePort.createStudentProfile(eq(TENANT_ID), anyString(), anyString(),
                 anyString(), any(), anyString(), anyString(), anyString(),
@@ -173,34 +184,16 @@ class RegisterStudentServiceTest {
     }
 
     @Test
-    void weakPassword_throwsPasswordPolicyViolationException() {
-        RegisterStudentCommand command = new RegisterStudentCommand(
-                TENANT_SLUG, "John", "Doe", LocalDate.of(2000, 1, 1),
-                "CC", "123456789", "Sura", "john@example.com",
-                "weak", null, null, null);
-
-        when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
-        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
-
-        PasswordPolicyViolationException ex = assertThrows(
-                PasswordPolicyViolationException.class, () -> service.register(command));
-        assertFalse(ex.getViolations().isEmpty());
-    }
-
-    @Test
     void adultWithOptionalTutorFields_succeeds() {
         RegisterStudentCommand command = new RegisterStudentCommand(
                 TENANT_SLUG, "John", "Doe", LocalDate.of(2000, 1, 1),
                 "CC", "123456789", "Sura", "john@example.com",
-                "SecurePass1!", "Optional Tutor", "Uncle", "3009999999");
+                "Optional Tutor", "Uncle", "3009999999");
 
         when(tenantResolverPort.resolveTenantIdBySlug(TENANT_SLUG)).thenReturn(Optional.of(TENANT_ID));
         when(userRepository.existsByEmailAndTenantId(command.email(), TENANT_ID)).thenReturn(false);
         when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, command.identityNumber())).thenReturn(false);
         when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, command.identityNumber())).thenReturn(false);
-        when(passwordEncoder.encode(command.password())).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(studentProfilePort.createStudentProfile(eq(TENANT_ID), anyString(), anyString(),
                 anyString(), any(), anyString(), anyString(), anyString(),
@@ -218,13 +211,13 @@ class RegisterStudentServiceTest {
         return new RegisterStudentCommand(
                 TENANT_SLUG, "John", "Doe", LocalDate.of(2000, 1, 1),
                 "CC", "123456789", "Sura", "john@example.com",
-                "SecurePass1!", null, null, null);
+                null, null, null);
     }
 
     private RegisterStudentCommand minorStudentCommand() {
         return new RegisterStudentCommand(
                 TENANT_SLUG, "Carlos", "Ramirez", LocalDate.now().minusYears(14),
                 "TI", "987654321", "Sanitas", "carlos@example.com",
-                "SecurePass1!", "Maria Garcia", "Mother", "3001234567");
+                "Maria Garcia", "Mother", "3001234567");
     }
 }

@@ -59,7 +59,6 @@ public class AdminController {
     public record CreateAdminRequest(
             @NotNull UUID tenantId,
             @NotBlank @Email String email,
-            @NotBlank @Size(min = 8, max = 72) String password,
             @NotBlank String identityDocumentType,
             @NotBlank @Size(min = 3, max = 30) String identityNumber,
             @NotBlank @Size(max = 100) String firstName,
@@ -124,7 +123,6 @@ public class AdminController {
         CreateAdminCommand command = new CreateAdminCommand(
                 request.tenantId(),
                 request.email(),
-                request.password(),
                 request.identityDocumentType(),
                 request.identityNumber(),
                 request.firstName(),

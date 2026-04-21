@@ -5,6 +5,7 @@ import com.klasio.shared.infrastructure.exception.StudentEmailAlreadyExistsExcep
 import com.klasio.student.application.dto.CreateStudentCommand;
 import com.klasio.student.application.port.input.CreateStudentUseCase;
 import com.klasio.student.domain.model.Student;
+import com.klasio.student.domain.port.AccountSetupCreationPort;
 import com.klasio.student.domain.port.StudentRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,14 @@ public class CreateStudentService implements CreateStudentUseCase {
 
     private final StudentRepository studentRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final AccountSetupCreationPort accountSetupCreationPort;
 
     public CreateStudentService(StudentRepository studentRepository,
-                                ApplicationEventPublisher eventPublisher) {
+                                ApplicationEventPublisher eventPublisher,
+                                AccountSetupCreationPort accountSetupCreationPort) {
         this.studentRepository = studentRepository;
         this.eventPublisher = eventPublisher;
+        this.accountSetupCreationPort = accountSetupCreationPort;
     }
 
     @Override
@@ -52,11 +56,21 @@ public class CreateStudentService implements CreateStudentUseCase {
         );
 
         List<DomainEvent> events = List.copyOf(student.getDomainEvents());
-
         studentRepository.save(student);
-
         student.clearDomainEvents();
         events.forEach(eventPublisher::publishEvent);
+
+        // Create user account in EMAIL_UNVERIFIED state and dispatch 15-min setup link.
+        accountSetupCreationPort.createAndDispatchSetup(
+                command.tenantId(),
+                command.email(),
+                command.firstName(),
+                command.lastName(),
+                command.identityDocumentType(),
+                command.identityNumber(),
+                command.phone(),
+                student.getId().value()
+        );
 
         return student;
     }
