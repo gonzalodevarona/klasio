@@ -1,7 +1,7 @@
 package com.klasio.auth.infrastructure.persistence;
 
 import com.klasio.auth.domain.model.AccountSetupToken;
-import com.klasio.auth.domain.port.AccountSetupTokenRepository;
+import com.klasio.auth.application.port.AccountSetupTokenRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -28,7 +28,7 @@ public class JpaAccountSetupTokenRepository implements AccountSetupTokenReposito
     }
 
     @Override
-    public void invalidateAllForUser(UUID userId) {
+    public void invalidateAllByUserId(UUID userId) {
         var tokens = springDataRepo.findAllByUserId(userId);
         tokens.forEach(t -> t.setUsed(true));
         springDataRepo.saveAll(tokens);
