@@ -8,7 +8,11 @@ import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ProfessorUserIdPort;
 import com.klasio.attendance.domain.port.ProgramManagerPort;
+import com.klasio.attendance.domain.port.StudentEmailPort;
 import com.klasio.attendance.domain.port.StudentUserIdPort;
+import com.klasio.email.application.EmailRecipient;
+import com.klasio.email.application.EmailService;
+import com.klasio.email.application.EmailType;
 import com.klasio.notifications.application.dto.CreateNotificationCommand;
 import com.klasio.notifications.application.port.input.CreateNotificationUseCase;
 import com.klasio.notifications.domain.model.NotificationType;
@@ -18,6 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,19 +52,25 @@ public class SessionEventsNotificationListener {
     private final CreateNotificationUseCase createNotification;
     private final StudentUserIdPort studentUserIdPort;
     private final ProfessorUserIdPort professorUserIdPort;
+    private final EmailService emailService;
+    private final StudentEmailPort studentEmailPort;
 
     public SessionEventsNotificationListener(ClassDetailsPort classDetailsPort,
                                              AttendanceRegistrationRepository registrationRepository,
                                              ProgramManagerPort programManagerPort,
                                              CreateNotificationUseCase createNotification,
                                              StudentUserIdPort studentUserIdPort,
-                                             ProfessorUserIdPort professorUserIdPort) {
+                                             ProfessorUserIdPort professorUserIdPort,
+                                             EmailService emailService,
+                                             StudentEmailPort studentEmailPort) {
         this.classDetailsPort = classDetailsPort;
         this.registrationRepository = registrationRepository;
         this.programManagerPort = programManagerPort;
         this.createNotification = createNotification;
         this.studentUserIdPort = studentUserIdPort;
         this.professorUserIdPort = professorUserIdPort;
+        this.emailService = emailService;
+        this.studentEmailPort = studentEmailPort;
     }
 
     @Async
@@ -70,7 +82,8 @@ public class SessionEventsNotificationListener {
         String title = SessionNotificationTemplates.alertTitle(className, e.sessionDate(), e.startTime(), e.endTime());
         String body = SessionNotificationTemplates.alertBody(e.reason());
         fanOutAlertLike(e.tenantId(), e.classId(), e.sessionId(), title, body,
-                e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_ALERTED);
+                e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_ALERTED,
+                e.sessionDate(), e.startTime());
     }
 
     @Async
@@ -83,7 +96,8 @@ public class SessionEventsNotificationListener {
         String body = SessionNotificationTemplates.alertBody(e.newReason());
         // Updated alerts reuse CLASS_SESSION_ALERTED — student sees a refreshed alert, not a new notification type.
         fanOutAlertLike(e.tenantId(), e.classId(), e.sessionId(), title, body,
-                e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_ALERTED);
+                e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_ALERTED,
+                e.sessionDate(), e.startTime());
     }
 
     @Async
@@ -118,6 +132,24 @@ public class SessionEventsNotificationListener {
         // Notify professor and managers (skipping the actor)
         notifyProfessorAndManager(e.tenantId(), e.classId(), title, body,
                 e.sessionId(), e.actorId(), e.actorRole(), NotificationType.CLASS_SESSION_CANCELLED);
+
+        // Email fan-out for CLASS_SESSION_CHANGE
+        String changeKind = "CANCELLED";
+        String startsAt = e.sessionDate().toString() + " " + e.startTime().toString();
+        for (UUID studentId : e.affectedStudentIds()) {
+            studentEmailPort.findEmail(studentId, e.tenantId()).ifPresent(email -> {
+                emailService.send(
+                        EmailType.CLASS_SESSION_CHANGE,
+                        new EmailRecipient(email, email),
+                        e.tenantId(),
+                        Map.of(
+                                "studentName", email,
+                                "className", className,
+                                "startsAt", startsAt,
+                                "changeKind", changeKind,
+                                "reason", e.reason() != null ? e.reason() : ""));
+            });
+        }
     }
 
     // ── private helpers ──────────────────────────────────────────────────────
@@ -128,7 +160,8 @@ public class SessionEventsNotificationListener {
      */
     private void fanOutAlertLike(UUID tenantId, UUID classId, UUID sessionId,
                                  String title, String body,
-                                 UUID actorId, String actorRole, NotificationType type) {
+                                 UUID actorId, String actorRole, NotificationType type,
+                                 LocalDate sessionDate, LocalTime startTime) {
         List<AttendanceRegistration> regs = registrationRepository
                 .findAllNonCancelledBySessionId(tenantId, sessionId);
 
@@ -149,6 +182,23 @@ public class SessionEventsNotificationListener {
 
         notifyProfessorAndManager(tenantId, classId, title, body,
                 sessionId, actorId, actorRole, type);
+
+        // Email fan-out for alert events
+        String startsAt = sessionDate.toString() + " " + startTime.toString();
+        for (AttendanceRegistration reg : regs) {
+            studentEmailPort.findEmail(reg.getStudentId(), tenantId).ifPresent(email -> {
+                emailService.send(
+                        EmailType.CLASS_SESSION_CHANGE,
+                        new EmailRecipient(email, email),
+                        tenantId,
+                        Map.of(
+                                "studentName", email,
+                                "className", title,
+                                "startsAt", startsAt,
+                                "changeKind", "ALERTED",
+                                "reason", body));
+            });
+        }
     }
 
     /**
