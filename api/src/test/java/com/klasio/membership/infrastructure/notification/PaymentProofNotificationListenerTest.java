@@ -68,7 +68,8 @@ class PaymentProofNotificationListenerTest {
                 eq(TENANT_ID),
                 argThat(params ->
                         "John Doe".equals(params.get("studentName")) &&
-                        "Tennis Youth".equals(params.get("programName"))));
+                        "Tennis Youth".equals(params.get("programName")) &&
+                        "http://localhost:3000/payment-proofs".equals(params.get("reviewUrl"))));
     }
 
     @Test
@@ -106,7 +107,28 @@ class PaymentProofNotificationListenerTest {
                 argThat(params ->
                         "Blurry image".equals(params.get("reason")) &&
                         "John Doe".equals(params.get("studentName")) &&
-                        "Tennis Youth".equals(params.get("programName"))));
+                        "Tennis Youth".equals(params.get("programName")) &&
+                        "http://localhost:3000/memberships".equals(params.get("retryUrl"))));
+    }
+
+    @Test
+    void onPaymentProofUploaded_fallbackWhenStudentNameAbsent_sendsEmail() {
+        MembershipPlanSnapshotPort.PlanSnapshot snapshot = new MembershipPlanSnapshotPort.PlanSnapshot(
+                "Monthly 10h", "Tennis Youth", 10, java.math.BigDecimal.TEN);
+        when(studentNamePort.findFullName(STUDENT_ID, TENANT_ID)).thenReturn(Optional.empty());
+        when(planSnapshotPort.findSnapshot(MEMBERSHIP_ID, TENANT_ID)).thenReturn(Optional.of(snapshot));
+        when(tenantAdminEmailPort.findAdminEmails(TENANT_ID)).thenReturn(List.of("admin@test.com"));
+        when(urlBuilder.build("app", "/payment-proofs")).thenReturn("http://localhost:3000/payment-proofs");
+
+        PaymentProofUploaded event = new PaymentProofUploaded(PROOF_ID, TENANT_ID, MEMBERSHIP_ID, STUDENT_ID, Instant.now());
+
+        listener.onPaymentProofUploaded(event);
+
+        verify(emailService).send(
+                eq(EmailType.PAYMENT_PROOF_UPLOADED),
+                any(EmailRecipient.class),
+                eq(TENANT_ID),
+                argThat(params -> "A student".equals(params.get("studentName"))));
     }
 
     @Test
