@@ -10,5 +10,8 @@ public record StudentRegisteredEvent(
         UUID tenantId,
         UUID studentId,
         String email,
+        String rawToken,
+        Instant expiresAt,
+        String displayName,
         Instant occurredAt
 ) implements DomainEvent {}
