@@ -108,6 +108,13 @@ export default function TenantDetail({
             </div>
 
             <div>
+              <dt className="text-sm font-medium text-gray-500">Language</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {tenant.language === "es" ? "Spanish" : "English"}
+              </dd>
+            </div>
+
+            <div>
               <dt className="text-sm font-medium text-gray-500">
                 Contact Email
               </dt>
@@ -121,7 +128,7 @@ export default function TenantDetail({
                 Contact Phone
               </dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {tenant.contactPhoneIndicator} {tenant.contactPhone}
+                +{tenant.contactPhoneIndicator} {tenant.contactPhone}
               </dd>
             </div>
 
