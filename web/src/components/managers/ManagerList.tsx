@@ -38,9 +38,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("badges.managerStatus");
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"}`}>
-      {status}
+      {t(status)}
     </span>
   );
 }

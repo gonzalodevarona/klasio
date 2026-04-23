@@ -253,6 +253,19 @@
       "ACTIVE": "Activo",
       "DEACTIVATED": "Desactivado"
     },
+    "programStatus": {
+      "ACTIVE": "Activo",
+      "INACTIVE": "Inactivo"
+    },
+    "classStatus": {
+      "ACTIVE": "Activa",
+      "INACTIVE": "Inactiva"
+    },
+    "managerStatus": {
+      "ACTIVE": "Activo",
+      "INVITED": "Invitado",
+      "INACTIVE": "Inactivo"
+    },
     "studentStatus": {
       "ACTIVE": "Activo",
       "INACTIVE": "Inactivo"
