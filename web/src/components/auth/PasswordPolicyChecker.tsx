@@ -1,34 +1,31 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface PasswordPolicyCheckerProps {
   password: string;
 }
 
 interface Rule {
-  key: string;
-  label: string;
+  key: "minLength" | "uppercase" | "digit" | "special";
   test: (password: string) => boolean;
 }
 
 export const PASSWORD_RULES: Rule[] = [
   {
     key: "minLength",
-    label: "At least 8 characters",
     test: (p) => p.length >= 8,
   },
   {
     key: "uppercase",
-    label: "At least 1 uppercase letter",
     test: (p) => /[A-Z]/.test(p),
   },
   {
     key: "digit",
-    label: "At least 1 digit",
     test: (p) => /\d/.test(p),
   },
   {
     key: "special",
-    label: "At least 1 special character",
     test: (p) => /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(p),
   },
 ];
@@ -41,6 +38,8 @@ export function validatePassword(password: string): boolean {
 }
 
 export default function PasswordPolicyChecker({ password }: PasswordPolicyCheckerProps) {
+  const t = useTranslations("auth.passwordPolicy");
+
   return (
     <ul className="mt-2 space-y-1">
       {PASSWORD_RULES.map((rule) => {
@@ -57,7 +56,7 @@ export default function PasswordPolicyChecker({ password }: PasswordPolicyChecke
             }`}
           >
             <span className="mr-1.5">{satisfied ? "\u2713" : "\u2717"}</span>
-            {rule.label}
+            {t(rule.key)}
           </li>
         );
       })}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import PasswordPolicyChecker from "./PasswordPolicyChecker";
 import type { AuthError } from "@/lib/types/auth";
 
@@ -9,6 +10,7 @@ interface ResetPasswordFormProps {
 }
 
 export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const t = useTranslations("auth.resetPassword");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError({ code: "MISMATCH", message: "Passwords do not match" });
+      setError({ code: "MISMATCH", message: t("errorMismatch") });
       return;
     }
 
@@ -52,7 +54,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       window.location.href = "/login?reset=true";
     } catch {
-      setError({ code: "NETWORK_ERROR", message: "Unable to connect to server" });
+      setError({ code: "NETWORK_ERROR", message: t("errorNetwork") });
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          New Password
+          {t("newPasswordLabel")}
         </label>
         <input
           id="password"
@@ -90,7 +92,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       <div>
         <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-          Confirm New Password
+          {t("confirmPasswordLabel")}
         </label>
         <input
           id="confirmPassword"
@@ -107,7 +109,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         disabled={loading}
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
       >
-        {loading ? "Resetting..." : "Reset Password"}
+        {loading ? t("submitting") : t("submit")}
       </button>
     </form>
   );
