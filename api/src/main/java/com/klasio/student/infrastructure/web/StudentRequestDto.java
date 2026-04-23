@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -46,8 +45,6 @@ public final class StudentRequestDto {
             String bloodType,
 
             @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^\\+[1-9]\\d{6,19}$",
-                     message = "Phone number must be a valid WhatsApp number in E.164 format (e.g. +573001234567)")
             @Size(max = 20, message = "Phone must be at most 20 characters")
             String phone,
 
@@ -101,8 +98,6 @@ public final class StudentRequestDto {
             String bloodType,
 
             @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^\\+[1-9]\\d{6,19}$",
-                     message = "Phone number must be a valid WhatsApp number in E.164 format (e.g. +573001234567)")
             @Size(max = 20, message = "Phone must be at most 20 characters")
             String phone,
 

@@ -27,7 +27,6 @@ public final class ProfessorRequestDto {
             String email,
 
             @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^\\+[1-9]\\d{6,19}$", message = "Phone number must be a valid WhatsApp number in E.164 format (e.g. +573001234567)")
             @Size(max = 20, message = "Phone number must be at most 20 characters")
             String phoneNumber,
 
@@ -56,7 +55,6 @@ public final class ProfessorRequestDto {
             String email,
 
             @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^\\+[1-9]\\d{6,19}$", message = "Phone number must be a valid WhatsApp number in E.164 format (e.g. +573001234567)")
             @Size(max = 20, message = "Phone number must be at most 20 characters")
             String phoneNumber,
 

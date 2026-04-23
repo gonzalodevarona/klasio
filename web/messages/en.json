@@ -46,7 +46,9 @@
       "invalid": "Please enter a valid email address.",
       "maxLength": "Email must be at most 255 characters."
     },
-    "dateOfBirth": { "required": "Date of birth is required." },
+    "dateOfBirth": {
+      "required": "Date of birth is required."
+    },
     "eps": {
       "required": "EPS is required.",
       "maxLength": "EPS must be at most 100 characters."
@@ -55,21 +57,32 @@
       "required": "Identity number is required.",
       "maxLength": "Identity number must be at most 30 characters."
     },
-    "documentType": { "required": "Document type is required." },
+    "documentType": {
+      "required": "Document type is required."
+    },
     "documentNumber": {
       "required": "Document number is required.",
       "maxLength": "Document number must be at most 30 characters."
     },
     "phone": {
       "required": "Phone number is required.",
-      "invalid": "Enter a valid WhatsApp number in E.164 format, e.g. +573001234567",
       "maxLength": "Phone number must be at most 20 characters."
     },
-    "tutorFirstName": { "required": "Tutor first name is required for minors." },
-    "tutorLastName": { "required": "Tutor last name is required for minors." },
-    "tutorRelationship": { "required": "Tutor relationship is required for minors." },
-    "tutorPhone": { "required": "Tutor phone is required for minors." },
-    "tutorEmail": { "invalid": "Please enter a valid tutor email address." }
+    "tutorFirstName": {
+      "required": "Tutor first name is required for minors."
+    },
+    "tutorLastName": {
+      "required": "Tutor last name is required for minors."
+    },
+    "tutorRelationship": {
+      "required": "Tutor relationship is required for minors."
+    },
+    "tutorPhone": {
+      "required": "Tutor phone is required for minors."
+    },
+    "tutorEmail": {
+      "invalid": "Please enter a valid tutor email address."
+    }
   },
   "pagination": {
     "previous": "Previous",
@@ -273,8 +286,8 @@
     "formLastNamePlaceholder": "e.g. Rodriguez",
     "formEmailLabel": "Email *",
     "formEmailPlaceholder": "e.g. maria@example.com",
-    "formPhoneLabel": "Phone (WhatsApp) *",
-    "formPhonePlaceholder": "e.g. +573001234567",
+    "formPhoneLabel": "Phone *",
+    "formPhonePlaceholder": "e.g. 3001234567",
     "formDateOfBirthLabel": "Date of Birth *",
     "formAgeInfo": "Age: {age} years{minor}",
     "formAgeMinor": " (minor)",
@@ -363,8 +376,16 @@
     "formLastNamePlaceholder": "e.g. Martinez",
     "formEmailLabel": "Email *",
     "formEmailPlaceholder": "e.g. carlos@example.com",
-    "formPhoneLabel": "Phone Number (must be valid for WhatsApp)",
-    "formPhonePlaceholder": "e.g. +573001234567",
+    "formPhoneLabel": "Phone Number *",
+    "formPhonePlaceholder": "e.g. 3001234567",
+    "formCreateTitle": "Create Professor",
+    "formEditTitle": "Edit Professor",
+    "formFirstNameEditLabel": "First Name",
+    "formLastNameEditLabel": "Last Name",
+    "formDocTypeLabel": "Doc. Type *",
+    "formIdNumberLabel": "ID Number *",
+    "formIdNumberPlaceholder": "Document number",
+    "formCancelButton": "Cancel",
     "formSaveButton": "Save Changes",
     "formCreateButton": "Create Professor",
     "formSavingButton": "Saving...",
@@ -426,8 +447,8 @@
     "formLastNameEditLabel": "Last Name",
     "formEmailLabel": "Email *",
     "formEmailPlaceholder": "manager@example.com",
-    "formPhoneLabel": "Phone (WhatsApp) *",
-    "formPhonePlaceholder": "+573001234567",
+    "formPhoneLabel": "Phone *",
+    "formPhonePlaceholder": "3001234567",
     "formDocTypeLabel": "Doc. Type *",
     "formIdNumberLabel": "ID Number *",
     "formIdNumberPlaceholder": "Document number",
@@ -473,8 +494,8 @@
     "formLastNameEditLabel": "Last Name",
     "formEmailLabel": "Email *",
     "formEmailPlaceholder": "admin@example.com",
-    "formPhoneLabel": "Phone (WhatsApp) *",
-    "formPhonePlaceholder": "+573001234567",
+    "formPhoneLabel": "Phone *",
+    "formPhonePlaceholder": "3001234567",
     "formPasswordLabel": "Password *",
     "formPasswordPlaceholder": "Min. 8 characters",
     "formDocTypeLabel": "Doc. Type *",
@@ -576,7 +597,6 @@
     "planDetailBreadcrumb": "Plan",
     "planDetailLoadingText": "Loading plan details...",
     "planDetailModality": "Modality",
-    "planDetailManagerId": "Manager ID",
     "planDetailHours": "Hours",
     "planDetailCreatedAt": "Created At",
     "planDetailCreatedBy": "Created By",
@@ -602,7 +622,20 @@
     "classDetailLoadingText": "Loading class details...",
     "classEditBreadcrumb": "Edit",
     "classEditPageTitle": "Edit Class",
-    "classEditLoadingText": "Loading class..."
+    "classEditLoadingText": "Loading class...",
+    "planDetailManager": "Manager",
+    "allPlansPageTitle": "All Plans",
+    "allPlansLoading": "Loading plans...",
+    "allPlansEmpty": "No plans found",
+    "allPlansColPlanName": "Plan Name",
+    "allPlansColProgram": "Program",
+    "dayMonday": "Monday",
+    "dayTuesday": "Tuesday",
+    "dayWednesday": "Wednesday",
+    "dayThursday": "Thursday",
+    "dayFriday": "Friday",
+    "daySaturday": "Saturday",
+    "daySunday": "Sunday"
   },
   "classes": {
     "pageTitle": "All Classes",
@@ -710,7 +743,38 @@
     "professorAssignSuccess": "Professor has been assigned successfully.",
     "professorAssignError": "Failed to assign professor. Please try again.",
     "professorRemoveSuccess": "Professor has been removed successfully.",
-    "professorRemoveError": "Failed to remove professor. Please try again."
+    "professorRemoveError": "Failed to remove professor. Please try again.",
+    "rosterTitle": "Session Roster",
+    "rosterPrevWeekAriaLabel": "Previous week",
+    "rosterNextWeekAriaLabel": "Next week",
+    "rosterLoading": "Loading roster…",
+    "rosterNoSessions": "No registrations this week.",
+    "rosterRegistrantCount": "{count, plural, one {# registrant} other {# registrants}}",
+    "rosterNoRegistrants": "No registrants.",
+    "rosterColStudent": "Student",
+    "rosterColLevel": "Level",
+    "rosterColHours": "Hours",
+    "rosterColStatus": "Status",
+    "markingWindowOpenToast": "Attendance marking is now open for this session — mark away!",
+    "markingWindowOpenDismiss": "Dismiss",
+    "markingWindowLockedBanner": "Attendance marking is only available from {before} minutes before the session starts until {after} minutes after it ends. The panel will unlock automatically when the window opens.",
+    "markingColMark": "Mark",
+    "markingColCorrect": "Correct",
+    "markingAlreadyMarked": "already marked",
+    "markingPresent": "Present",
+    "markingAbsent": "Absent",
+    "markingSubmitButton": "Submit Marks",
+    "markingNoHoursWarning": "No membership hours available",
+    "markingSubmitError": "Failed to submit marks",
+    "correctTitle": "Correct Attendance Mark",
+    "correctCurrentStatus": "Current status:",
+    "correctToLabel": "Correct to",
+    "correctReasonLabel": "Reason",
+    "correctReasonHint": "(5–500 characters)",
+    "correctReasonPlaceholder": "Explain why this mark is being corrected…",
+    "correctReasonMinError": "Reason must be at least 5 characters.",
+    "correctFailedError": "Failed to correct mark",
+    "correctSaveButton": "Save Correction"
   },
   "memberships": {
     "listEmpty": "No memberships found.",

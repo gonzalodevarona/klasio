@@ -46,7 +46,9 @@
       "invalid": "Por favor ingresa una dirección de correo válida.",
       "maxLength": "El correo no puede tener más de 255 caracteres."
     },
-    "dateOfBirth": { "required": "La fecha de nacimiento es obligatoria." },
+    "dateOfBirth": {
+      "required": "La fecha de nacimiento es obligatoria."
+    },
     "eps": {
       "required": "La EPS es obligatoria.",
       "maxLength": "La EPS no puede tener más de 100 caracteres."
@@ -55,21 +57,32 @@
       "required": "El número de documento es obligatorio.",
       "maxLength": "El número de documento no puede tener más de 30 caracteres."
     },
-    "documentType": { "required": "El tipo de documento es obligatorio." },
+    "documentType": {
+      "required": "El tipo de documento es obligatorio."
+    },
     "documentNumber": {
       "required": "El número de documento es obligatorio.",
       "maxLength": "El número de documento no puede tener más de 30 caracteres."
     },
     "phone": {
       "required": "El número de teléfono es obligatorio.",
-      "invalid": "Ingresa un número de WhatsApp válido en formato E.164, ej. +573001234567",
       "maxLength": "El número de teléfono no puede tener más de 20 caracteres."
     },
-    "tutorFirstName": { "required": "El nombre del acudiente es obligatorio para menores." },
-    "tutorLastName": { "required": "El apellido del acudiente es obligatorio para menores." },
-    "tutorRelationship": { "required": "El parentesco del acudiente es obligatorio para menores." },
-    "tutorPhone": { "required": "El teléfono del acudiente es obligatorio para menores." },
-    "tutorEmail": { "invalid": "Por favor ingresa una dirección de correo válida para el acudiente." }
+    "tutorFirstName": {
+      "required": "El nombre del acudiente es obligatorio para menores."
+    },
+    "tutorLastName": {
+      "required": "El apellido del acudiente es obligatorio para menores."
+    },
+    "tutorRelationship": {
+      "required": "El parentesco del acudiente es obligatorio para menores."
+    },
+    "tutorPhone": {
+      "required": "El teléfono del acudiente es obligatorio para menores."
+    },
+    "tutorEmail": {
+      "invalid": "Por favor ingresa una dirección de correo válida para el acudiente."
+    }
   },
   "pagination": {
     "previous": "Anterior",
@@ -273,8 +286,8 @@
     "formLastNamePlaceholder": "ej. Rodríguez",
     "formEmailLabel": "Correo electrónico *",
     "formEmailPlaceholder": "ej. maria@ejemplo.com",
-    "formPhoneLabel": "Teléfono (WhatsApp) *",
-    "formPhonePlaceholder": "ej. +573001234567",
+    "formPhoneLabel": "Teléfono *",
+    "formPhonePlaceholder": "ej. 3001234567",
     "formDateOfBirthLabel": "Fecha de nacimiento *",
     "formAgeInfo": "Edad: {age} años{minor}",
     "formAgeMinor": " (menor de edad)",
@@ -363,8 +376,16 @@
     "formLastNamePlaceholder": "ej. Martínez",
     "formEmailLabel": "Correo electrónico *",
     "formEmailPlaceholder": "ej. carlos@ejemplo.com",
-    "formPhoneLabel": "Número de teléfono (debe ser válido para WhatsApp)",
-    "formPhonePlaceholder": "ej. +573001234567",
+    "formPhoneLabel": "Número de teléfono *",
+    "formPhonePlaceholder": "ej. 3001234567",
+    "formCreateTitle": "Crear profesor",
+    "formEditTitle": "Editar profesor",
+    "formFirstNameEditLabel": "Nombre",
+    "formLastNameEditLabel": "Apellido",
+    "formDocTypeLabel": "Tipo de doc. *",
+    "formIdNumberLabel": "Número de ID *",
+    "formIdNumberPlaceholder": "Número de documento",
+    "formCancelButton": "Cancelar",
     "formSaveButton": "Guardar cambios",
     "formCreateButton": "Crear profesor",
     "formSavingButton": "Guardando...",
@@ -426,8 +447,8 @@
     "formLastNameEditLabel": "Apellido",
     "formEmailLabel": "Correo electrónico *",
     "formEmailPlaceholder": "coordinador@ejemplo.com",
-    "formPhoneLabel": "Teléfono (WhatsApp) *",
-    "formPhonePlaceholder": "+573001234567",
+    "formPhoneLabel": "Teléfono *",
+    "formPhonePlaceholder": "3001234567",
     "formDocTypeLabel": "Tipo de doc. *",
     "formIdNumberLabel": "Número de doc. *",
     "formIdNumberPlaceholder": "Número de documento",
@@ -473,8 +494,8 @@
     "formLastNameEditLabel": "Apellido",
     "formEmailLabel": "Correo electrónico *",
     "formEmailPlaceholder": "admin@ejemplo.com",
-    "formPhoneLabel": "Teléfono (WhatsApp) *",
-    "formPhonePlaceholder": "+573001234567",
+    "formPhoneLabel": "Teléfono *",
+    "formPhonePlaceholder": "3001234567",
     "formPasswordLabel": "Contraseña *",
     "formPasswordPlaceholder": "Mín. 8 caracteres",
     "formDocTypeLabel": "Tipo de doc. *",
@@ -576,7 +597,6 @@
     "planDetailBreadcrumb": "Plan",
     "planDetailLoadingText": "Cargando detalles del plan...",
     "planDetailModality": "Modalidad",
-    "planDetailManagerId": "ID de coordinador",
     "planDetailHours": "Horas",
     "planDetailCreatedAt": "Fecha de creación",
     "planDetailCreatedBy": "Creado por",
@@ -602,7 +622,20 @@
     "classDetailLoadingText": "Cargando detalles de la clase...",
     "classEditBreadcrumb": "Editar",
     "classEditPageTitle": "Editar clase",
-    "classEditLoadingText": "Cargando clase..."
+    "classEditLoadingText": "Cargando clase...",
+    "planDetailManager": "Coordinador",
+    "allPlansPageTitle": "Todos los planes",
+    "allPlansLoading": "Cargando planes...",
+    "allPlansEmpty": "No se encontraron planes",
+    "allPlansColPlanName": "Nombre del plan",
+    "allPlansColProgram": "Programa",
+    "dayMonday": "Lunes",
+    "dayTuesday": "Martes",
+    "dayWednesday": "Miércoles",
+    "dayThursday": "Jueves",
+    "dayFriday": "Viernes",
+    "daySaturday": "Sábado",
+    "daySunday": "Domingo"
   },
   "classes": {
     "pageTitle": "Todas las clases",
@@ -710,7 +743,38 @@
     "professorAssignSuccess": "El profesor ha sido asignado correctamente.",
     "professorAssignError": "No se pudo asignar el profesor. Por favor intenta de nuevo.",
     "professorRemoveSuccess": "El profesor ha sido removido correctamente.",
-    "professorRemoveError": "No se pudo remover el profesor. Por favor intenta de nuevo."
+    "professorRemoveError": "No se pudo remover el profesor. Por favor intenta de nuevo.",
+    "rosterTitle": "Asistencia de sesión",
+    "rosterPrevWeekAriaLabel": "Semana anterior",
+    "rosterNextWeekAriaLabel": "Semana siguiente",
+    "rosterLoading": "Cargando asistencia…",
+    "rosterNoSessions": "Sin registros esta semana.",
+    "rosterRegistrantCount": "{count, plural, one {# inscrito} other {# inscritos}}",
+    "rosterNoRegistrants": "Sin inscritos.",
+    "rosterColStudent": "Estudiante",
+    "rosterColLevel": "Nivel",
+    "rosterColHours": "Horas",
+    "rosterColStatus": "Estado",
+    "markingWindowOpenToast": "El registro de asistencia ya está abierto para esta sesión — ¡a marcar!",
+    "markingWindowOpenDismiss": "Descartar",
+    "markingWindowLockedBanner": "El registro de asistencia solo está disponible desde {before} minutos antes de que comience la sesión hasta {after} minutos después de que finalice. El panel se desbloqueará automáticamente cuando se abra la ventana.",
+    "markingColMark": "Marcar",
+    "markingColCorrect": "Corregir",
+    "markingAlreadyMarked": "ya marcado",
+    "markingPresent": "Presente",
+    "markingAbsent": "Ausente",
+    "markingSubmitButton": "Enviar marcas",
+    "markingNoHoursWarning": "Sin horas de membresía disponibles",
+    "markingSubmitError": "Error al enviar las marcas",
+    "correctTitle": "Corregir marca de asistencia",
+    "correctCurrentStatus": "Estado actual:",
+    "correctToLabel": "Corregir a",
+    "correctReasonLabel": "Motivo",
+    "correctReasonHint": "(5–500 caracteres)",
+    "correctReasonPlaceholder": "Explica por qué se está corrigiendo esta marca…",
+    "correctReasonMinError": "El motivo debe tener al menos 5 caracteres.",
+    "correctFailedError": "Error al corregir la marca",
+    "correctSaveButton": "Guardar corrección"
   },
   "memberships": {
     "listEmpty": "No se encontraron membresías.",
