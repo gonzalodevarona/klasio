@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
@@ -90,9 +91,16 @@ public class TenantController {
             @RequestParam("contactState") String contactState,
             @RequestParam("contactCountry") String contactCountry,
             @RequestParam("logo") MultipartFile logo,
-            @RequestParam(value = "slug", required = false) String slug) throws IOException {
+            @RequestParam(value = "slug", required = false) String slug) {
 
         UUID userId = extractUserId();
+
+        InputStream logoStream;
+        try {
+            logoStream = logo.getInputStream();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read uploaded logo file");
+        }
 
         CreateTenantCommand command = new CreateTenantCommand(
                 name,
@@ -106,7 +114,7 @@ public class TenantController {
                 contactCity,
                 contactState,
                 contactCountry,
-                logo.getInputStream(),
+                logoStream,
                 logo.getContentType(),
                 logo.getSize(),
                 userId
