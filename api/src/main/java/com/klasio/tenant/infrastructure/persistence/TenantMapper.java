@@ -11,13 +11,25 @@ import org.springframework.stereotype.Component;
 public class TenantMapper {
 
     public Tenant toDomain(TenantJpaEntity entity) {
+        // TODO(Task-5): map language, phoneIndicator, street, city, state, country
+        // from dedicated columns once V06x migrations are applied.
+        ContactInfo contactInfo = new ContactInfo(
+                entity.getContactEmail(),
+                entity.getContactPhone(),
+                null,           // phoneIndicator — column added in Task-5 migration
+                entity.getContactAddress(), // street — reuses legacy contact_address temporarily
+                null,           // city
+                null,           // state
+                null            // country
+        );
         return Tenant.reconstitute(
                 TenantId.of(entity.getId()),
                 new TenantSlug(entity.getSlug()),
                 entity.getName(),
-                entity.getSportDiscipline(),
+                entity.getSportDiscipline(), // column renamed to discipline in Task-5 migration
+                null,           // language — column added in Task-5 migration
                 entity.getLogoKey(),
-                new ContactInfo(entity.getContactEmail(), entity.getContactPhone(), entity.getContactAddress()),
+                contactInfo,
                 TenantStatus.valueOf(entity.getStatus()),
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
@@ -27,15 +39,17 @@ public class TenantMapper {
     }
 
     public TenantJpaEntity toEntity(Tenant tenant) {
+        // TODO(Task-5): persist language, phoneIndicator, street, city, state, country
+        // to dedicated columns once V06x migrations are applied.
         TenantJpaEntity entity = new TenantJpaEntity();
         entity.setId(tenant.getId().value());
         entity.setSlug(tenant.getSlug().value());
         entity.setName(tenant.getName());
-        entity.setSportDiscipline(tenant.getSportDiscipline());
+        entity.setSportDiscipline(tenant.getDiscipline());
         entity.setLogoKey(tenant.getLogoKey());
         entity.setContactEmail(tenant.getContactInfo().email());
         entity.setContactPhone(tenant.getContactInfo().phone());
-        entity.setContactAddress(tenant.getContactInfo().address());
+        entity.setContactAddress(tenant.getContactInfo().street());
         entity.setStatus(tenant.getStatus().name());
         entity.setCreatedAt(tenant.getCreatedAt());
         entity.setCreatedBy(tenant.getCreatedBy());

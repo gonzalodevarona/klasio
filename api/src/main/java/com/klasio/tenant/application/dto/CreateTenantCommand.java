@@ -5,11 +5,16 @@ import java.util.UUID;
 
 public record CreateTenantCommand(
         String name,
-        String sportDiscipline,
+        String discipline,
+        String language,
         String slug,
         String contactEmail,
         String contactPhone,
-        String contactAddress,
+        String contactPhoneIndicator,
+        String contactStreet,
+        String contactCity,
+        String contactState,
+        String contactCountry,
         InputStream logoData,
         String logoContentType,
         long logoSize,

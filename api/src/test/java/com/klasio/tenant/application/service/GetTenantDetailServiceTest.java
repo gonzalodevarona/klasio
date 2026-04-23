@@ -34,6 +34,11 @@ class GetTenantDetailServiceTest {
 
     private GetTenantDetailService service;
 
+    private static final ContactInfo CONTACT = new ContactInfo(
+            "contact@liga.com", "3001234567", "57",
+            "Calle 50 #45-12", "Bogotá", "Cundinamarca", "Colombia"
+    );
+
     @BeforeEach
     void setUp() {
         service = new GetTenantDetailService(tenantRepository, logoStorage);
@@ -49,8 +54,9 @@ class GetTenantDetailServiceTest {
         Tenant tenant = Tenant.create(
                 "Liga Bogota",
                 "Football",
+                "es",
                 TenantSlug.fromName("Liga Bogota"),
-                new ContactInfo("contact@liga.com", "+57 300 1234567", "Bogota"),
+                CONTACT,
                 UUID.randomUUID(),
                 logoKey
         );
@@ -65,8 +71,8 @@ class GetTenantDetailServiceTest {
         assertThat(result.slug()).isEqualTo("liga-bogota");
         assertThat(result.logoUrl()).isEqualTo(presignedUrl);
         assertThat(result.contactEmail()).isEqualTo("contact@liga.com");
-        assertThat(result.contactPhone()).isEqualTo("+57 300 1234567");
-        assertThat(result.contactAddress()).isEqualTo("Bogota");
+        assertThat(result.contactPhone()).isEqualTo("3001234567");
+        assertThat(result.contactStreet()).isEqualTo("Calle 50 #45-12");
         assertThat(result.status()).isEqualTo("ACTIVE");
 
         verify(tenantRepository).findBySlug(slug);
@@ -81,8 +87,9 @@ class GetTenantDetailServiceTest {
         Tenant tenant = Tenant.create(
                 "Liga Bogota",
                 "Football",
+                "es",
                 TenantSlug.fromName("Liga Bogota"),
-                new ContactInfo("contact@liga.com", "+57 300 1234567", "Bogota"),
+                CONTACT,
                 UUID.randomUUID(),
                 null
         );

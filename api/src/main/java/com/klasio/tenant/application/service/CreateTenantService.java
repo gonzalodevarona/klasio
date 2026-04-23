@@ -50,12 +50,17 @@ public class CreateTenantService implements CreateTenantUseCase {
             ContactInfo contactInfo = new ContactInfo(
                     command.contactEmail(),
                     command.contactPhone(),
-                    command.contactAddress()
+                    command.contactPhoneIndicator(),
+                    command.contactStreet(),
+                    command.contactCity(),
+                    command.contactState(),
+                    command.contactCountry()
             );
 
             Tenant tenant = Tenant.create(
                     command.name(),
-                    command.sportDiscipline(),
+                    command.discipline(),
+                    command.language(),
                     slug,
                     contactInfo,
                     command.createdBy(),

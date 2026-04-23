@@ -58,8 +58,9 @@ class DeactivateTenantServiceTest {
         Tenant tenant = Tenant.create(
                 "Liga de Futbol Bogota",
                 "Football",
+                "es",
                 new TenantSlug(SLUG),
-                new ContactInfo("admin@liga.com", null, null),
+                new ContactInfo("admin@liga.com", "3001234567", "57", "Calle 1", "Bogotá", "Cundinamarca", "Colombia"),
                 UUID.randomUUID(),
                 null
         );

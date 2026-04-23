@@ -47,14 +47,19 @@ class JpaTenantRepositoryIntegrationTest {
     @Autowired
     private SpringDataTenantRepository springDataRepository;
 
+    private static ContactInfo contact(String email) {
+        return new ContactInfo(email, "3001234567", "57", "Calle 1", "Bogotá", "Cundinamarca", "Colombia");
+    }
+
     @Test
     @DisplayName("should save tenant and find it by slug")
     void saveTenant_findBySlug_returnsTenant() {
         Tenant tenant = Tenant.create(
                 "Liga Bogota",
                 "Football",
+                "es",
                 TenantSlug.fromName("Liga Bogota"),
-                new ContactInfo("contact@liga.com", "+57 300 1234567", "Bogota"),
+                contact("contact@liga.com"),
                 UUID.randomUUID(),
                 null
         );
@@ -65,7 +70,7 @@ class JpaTenantRepositoryIntegrationTest {
         Optional<Tenant> found = repository.findBySlug("liga-bogota");
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("Liga Bogota");
-        assertThat(found.get().getSportDiscipline()).isEqualTo("Football");
+        assertThat(found.get().getDiscipline()).isEqualTo("Football");
         assertThat(found.get().getContactInfo().email()).isEqualTo("contact@liga.com");
     }
 
@@ -75,8 +80,9 @@ class JpaTenantRepositoryIntegrationTest {
         Tenant tenant = Tenant.create(
                 "Liga Cali",
                 "Basketball",
+                "es",
                 TenantSlug.fromName("Liga Cali"),
-                new ContactInfo("cali@liga.com", null, null),
+                contact("cali@liga.com"),
                 UUID.randomUUID(),
                 null
         );
@@ -99,8 +105,9 @@ class JpaTenantRepositoryIntegrationTest {
         Tenant first = Tenant.create(
                 "Liga Medellin",
                 "Tennis",
+                "es",
                 TenantSlug.fromName("Liga Medellin"),
-                new ContactInfo("medellin@liga.com", null, null),
+                contact("medellin@liga.com"),
                 UUID.randomUUID(),
                 null
         );
@@ -110,8 +117,9 @@ class JpaTenantRepositoryIntegrationTest {
         Tenant duplicate = Tenant.create(
                 "Liga Medellin Duplicate",
                 "Swimming",
+                "es",
                 new TenantSlug("liga-medellin"),
-                new ContactInfo("dup@liga.com", null, null),
+                contact("dup@liga.com"),
                 UUID.randomUUID(),
                 null
         );

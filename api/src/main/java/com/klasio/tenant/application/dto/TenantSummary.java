@@ -9,7 +9,7 @@ public record TenantSummary(
         UUID id,
         String slug,
         String name,
-        String sportDiscipline,
+        String discipline,
         String status,
         Instant createdAt
 ) {
@@ -19,7 +19,7 @@ public record TenantSummary(
                 tenant.getId().value(),
                 tenant.getSlug().value(),
                 tenant.getName(),
-                tenant.getSportDiscipline(),
+                tenant.getDiscipline(),
                 tenant.getStatus().name(),
                 tenant.getCreatedAt()
         );

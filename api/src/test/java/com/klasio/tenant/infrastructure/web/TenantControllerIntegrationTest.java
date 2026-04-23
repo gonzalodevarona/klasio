@@ -99,6 +99,10 @@ class TenantControllerIntegrationTest {
     private LogoStorage logoStorage;
 
     private static final UUID USER_ID = UUID.randomUUID();
+    private static final ContactInfo CONTACT = new ContactInfo(
+            "contact@liga.com", "3001234567", "57",
+            "Calle 50 #45-12", "Bogotá", "Cundinamarca", "Colombia"
+    );
 
     private static UsernamePasswordAuthenticationToken superadminAuth() {
         var auth = new UsernamePasswordAuthenticationToken(
@@ -130,8 +134,9 @@ class TenantControllerIntegrationTest {
         Tenant tenant = Tenant.create(
                 "Liga Bogota",
                 "Football",
+                "es",
                 TenantSlug.fromName("Liga Bogota"),
-                new ContactInfo("contact@liga.com", "+57 300 1234567", "Bogota"),
+                CONTACT,
                 USER_ID,
                 null
         );
@@ -141,15 +146,20 @@ class TenantControllerIntegrationTest {
 
         mockMvc.perform(multipart("/api/v1/tenants")
                         .param("name", "Liga Bogota")
-                        .param("sportDiscipline", "Football")
+                        .param("discipline", "Football")
+                        .param("language", "es")
                         .param("contactEmail", "contact@liga.com")
-                        .param("contactPhone", "+57 300 1234567")
-                        .param("contactAddress", "Bogota")
+                        .param("contactPhone", "3001234567")
+                        .param("contactPhoneIndicator", "57")
+                        .param("contactStreet", "Calle 50 #45-12")
+                        .param("contactCity", "Bogotá")
+                        .param("contactState", "Cundinamarca")
+                        .param("contactCountry", "Colombia")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(authentication(superadminAuth())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Liga Bogota"))
-                .andExpect(jsonPath("$.sportDiscipline").value("Football"))
+                .andExpect(jsonPath("$.discipline").value("Football"))
                 .andExpect(jsonPath("$.slug").value("liga-bogota"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"));
     }
@@ -161,7 +171,7 @@ class TenantControllerIntegrationTest {
                 .thenThrow(new IllegalArgumentException("Name must not be blank"));
 
         mockMvc.perform(multipart("/api/v1/tenants")
-                        .param("sportDiscipline", "Football")
+                        .param("discipline", "Football")
                         .param("contactEmail", "contact@liga.com")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(authentication(superadminAuth())))
@@ -179,7 +189,7 @@ class TenantControllerIntegrationTest {
 
         mockMvc.perform(multipart("/api/v1/tenants")
                         .param("name", "Liga Bogota")
-                        .param("sportDiscipline", "Football")
+                        .param("discipline", "Football")
                         .param("contactEmail", "contact@liga.com")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(authentication(superadminAuth())))
@@ -193,7 +203,7 @@ class TenantControllerIntegrationTest {
     void createTenant_nonSuperadmin_returns403() throws Exception {
         mockMvc.perform(multipart("/api/v1/tenants")
                         .param("name", "Liga Bogota")
-                        .param("sportDiscipline", "Football")
+                        .param("discipline", "Football")
                         .param("contactEmail", "contact@liga.com")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(authentication(adminAuth())))
@@ -208,8 +218,9 @@ class TenantControllerIntegrationTest {
         Tenant tenant = Tenant.create(
                 "Liga Bogota",
                 "Football",
+                "es",
                 TenantSlug.fromName("Liga Bogota"),
-                new ContactInfo("contact@liga.com", "+57 300 1234567", "Bogota"),
+                CONTACT,
                 USER_ID,
                 null
         );
@@ -344,11 +355,16 @@ class TenantControllerIntegrationTest {
                 "liga-bogota",
                 "Liga Bogota",
                 "Football",
+                "es",
                 "ACTIVE",
                 "https://s3.example.com/logo.png",
                 "contact@liga.com",
-                "+57 300 1234567",
-                "Bogota",
+                "3001234567",
+                "57",
+                "Calle 50 #45-12",
+                "Bogotá",
+                "Cundinamarca",
+                "Colombia",
                 USER_ID,
                 Instant.now(),
                 null,

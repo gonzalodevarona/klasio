@@ -50,8 +50,9 @@ class ListTenantsServiceTest {
         Tenant tenant = Tenant.create(
                 "Liga Bogota",
                 "Football",
+                "es",
                 TenantSlug.fromName("Liga Bogota"),
-                new ContactInfo("contact@liga.com", "+57 300 1234567", "Bogota"),
+                new ContactInfo("contact@liga.com", "3001234567", "57", "Calle 1", "Bogotá", "Cundinamarca", "Colombia"),
                 UUID.randomUUID(),
                 null
         );
@@ -77,8 +78,9 @@ class ListTenantsServiceTest {
         Tenant tenant = Tenant.create(
                 "Liga Bogota",
                 "Football",
+                "es",
                 TenantSlug.fromName("Liga Bogota"),
-                new ContactInfo("contact@liga.com", "+57 300 1234567", "Bogota"),
+                new ContactInfo("contact@liga.com", "3001234567", "57", "Calle 1", "Bogotá", "Cundinamarca", "Colombia"),
                 UUID.randomUUID(),
                 null
         );

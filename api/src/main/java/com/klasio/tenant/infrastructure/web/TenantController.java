@@ -81,11 +81,16 @@ public class TenantController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TenantResponseDto.TenantDetailResponse> createTenant(
             @RequestParam("name") String name,
-            @RequestParam("sportDiscipline") String sportDiscipline,
+            @RequestParam("discipline") String discipline,
+            @RequestParam(value = "language", required = false) String language,
             @RequestParam("contactEmail") String contactEmail,
             @RequestParam(value = "slug", required = false) String slug,
             @RequestParam(value = "contactPhone", required = false) String contactPhone,
-            @RequestParam(value = "contactAddress", required = false) String contactAddress,
+            @RequestParam(value = "contactPhoneIndicator", required = false) String contactPhoneIndicator,
+            @RequestParam(value = "contactStreet", required = false) String contactStreet,
+            @RequestParam(value = "contactCity", required = false) String contactCity,
+            @RequestParam(value = "contactState", required = false) String contactState,
+            @RequestParam(value = "contactCountry", required = false) String contactCountry,
             @RequestParam(value = "logo", required = false) MultipartFile logo) throws IOException {
 
         UUID userId = extractUserId();
@@ -102,11 +107,16 @@ public class TenantController {
 
         CreateTenantCommand command = new CreateTenantCommand(
                 name,
-                sportDiscipline,
+                discipline,
+                language,
                 slug,
                 contactEmail,
                 contactPhone,
-                contactAddress,
+                contactPhoneIndicator,
+                contactStreet,
+                contactCity,
+                contactState,
+                contactCountry,
                 logoData,
                 logoContentType,
                 logoSize,

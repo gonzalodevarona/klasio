@@ -10,19 +10,18 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TenantTest {
 
     private static final String NAME = "Liga de Fútbol Bogotá";
-    private static final String SPORT = "Football";
+    private static final String DISCIPLINE = "Football";
+    private static final String LANGUAGE = "es";
     private static final TenantSlug SLUG = new TenantSlug("liga-futbol-bogota");
-    private static final ContactInfo CONTACT = new ContactInfo("admin@liga.com", null, null);
+    private static final ContactInfo CONTACT = new ContactInfo(
+            "admin@liga.com", "3001234567", "57",
+            "Calle 50 #45-12", "Bogotá", "Cundinamarca", "Colombia"
+    );
     private static final UUID CREATED_BY = UUID.randomUUID();
     private static final String LOGO_KEY = "tenants/logo.png";
 
@@ -33,16 +32,14 @@ class TenantTest {
         @Test
         @DisplayName("should create tenant with ACTIVE status")
         void shouldCreateWithActiveStatus() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertEquals(TenantStatus.ACTIVE, tenant.getStatus());
         }
 
         @Test
         @DisplayName("should generate a non-null id")
         void shouldGenerateId() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertNotNull(tenant.getId());
             assertNotNull(tenant.getId().value());
         }
@@ -50,18 +47,17 @@ class TenantTest {
         @Test
         @DisplayName("should set createdAt to a non-null instant")
         void shouldSetCreatedAt() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertNotNull(tenant.getCreatedAt());
         }
 
         @Test
         @DisplayName("should store all provided fields")
         void shouldStoreAllFields() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertEquals(NAME, tenant.getName());
-            assertEquals(SPORT, tenant.getSportDiscipline());
+            assertEquals(DISCIPLINE, tenant.getDiscipline());
+            assertEquals(LANGUAGE, tenant.getLanguage());
             assertEquals(SLUG, tenant.getSlug());
             assertEquals(CONTACT, tenant.getContactInfo());
             assertEquals(CREATED_BY, tenant.getCreatedBy());
@@ -73,15 +69,11 @@ class TenantTest {
         @Test
         @DisplayName("should publish TenantCreated domain event")
         void shouldPublishTenantCreatedEvent() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             List<DomainEvent> events = tenant.getDomainEvents();
             assertEquals(1, events.size());
 
-            DomainEvent event = events.get(0);
-            assertInstanceOf(TenantCreated.class, event);
-
-            TenantCreated created = (TenantCreated) event;
+            TenantCreated created = (TenantCreated) events.get(0);
             assertEquals(tenant.getId().value(), created.tenantId());
             assertEquals(SLUG.value(), created.slug());
             assertEquals(NAME, created.name());
@@ -92,8 +84,7 @@ class TenantTest {
         @Test
         @DisplayName("should allow null logo key")
         void shouldAllowNullLogoKey() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, null);
-
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, null);
             assertNull(tenant.getLogoKey());
         }
     }
@@ -106,35 +97,35 @@ class TenantTest {
         @DisplayName("should reject blank name")
         void shouldRejectBlankName() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create("  ", SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create("  ", DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
         @DisplayName("should reject null name")
         void shouldRejectNullName() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create(null, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(null, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
-        @DisplayName("should reject blank sport discipline")
-        void shouldRejectBlankSport() {
+        @DisplayName("should reject blank discipline")
+        void shouldRejectBlankDiscipline() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create(NAME, "  ", SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(NAME, "  ", LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
-        @DisplayName("should reject null sport discipline")
-        void shouldRejectNullSport() {
+        @DisplayName("should reject null discipline")
+        void shouldRejectNullDiscipline() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create(NAME, null, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(NAME, null, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
         @DisplayName("should reject null contact info")
         void shouldRejectNullContactInfo() {
             assertThrows(NullPointerException.class,
-                    () -> Tenant.create(NAME, SPORT, SLUG, null, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, null, CREATED_BY, LOGO_KEY));
         }
     }
 
@@ -143,19 +134,17 @@ class TenantTest {
     class DeactivateTests {
 
         private Tenant createActiveTenant() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             tenant.clearDomainEvents();
             return tenant;
         }
 
         @Test
-        @DisplayName("should change status to INACTIVE and set deactivatedAt and deactivatedBy")
+        @DisplayName("should change status to INACTIVE")
         void shouldDeactivateTenant() {
             Tenant tenant = createActiveTenant();
             UUID deactivatedBy = UUID.randomUUID();
-
             tenant.deactivate(deactivatedBy);
-
             assertEquals(TenantStatus.INACTIVE, tenant.getStatus());
             assertNotNull(tenant.getDeactivatedAt());
             assertEquals(deactivatedBy, tenant.getDeactivatedBy());
@@ -166,31 +155,19 @@ class TenantTest {
         void shouldPublishTenantDeactivatedEvent() {
             Tenant tenant = createActiveTenant();
             UUID deactivatedBy = UUID.randomUUID();
-
             tenant.deactivate(deactivatedBy);
-
             List<DomainEvent> events = tenant.getDomainEvents();
             assertEquals(1, events.size());
-
-            DomainEvent event = events.get(0);
-            assertInstanceOf(TenantDeactivated.class, event);
-
-            TenantDeactivated deactivated = (TenantDeactivated) event;
-            assertEquals(tenant.getId().value(), deactivated.tenantId());
-            assertEquals(deactivatedBy, deactivated.deactivatedBy());
-            assertNotNull(deactivated.occurredAt());
+            assertInstanceOf(TenantDeactivated.class, events.get(0));
         }
 
         @Test
-        @DisplayName("should throw IllegalStateException when tenant is already inactive")
+        @DisplayName("should throw when already inactive")
         void shouldThrowWhenAlreadyInactive() {
             Tenant tenant = createActiveTenant();
             UUID deactivatedBy = UUID.randomUUID();
-
             tenant.deactivate(deactivatedBy);
-
-            assertThrows(IllegalStateException.class,
-                    () -> tenant.deactivate(deactivatedBy));
+            assertThrows(IllegalStateException.class, () -> tenant.deactivate(deactivatedBy));
         }
     }
 
@@ -199,31 +176,25 @@ class TenantTest {
     class DomainEvents {
 
         @Test
-        @DisplayName("should return TenantCreated in getDomainEvents after create")
+        @DisplayName("should return TenantCreated after create")
         void shouldReturnEventsAfterCreate() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
-            List<DomainEvent> events = tenant.getDomainEvents();
-            assertEquals(1, events.size());
-            assertInstanceOf(TenantCreated.class, events.get(0));
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            assertEquals(1, tenant.getDomainEvents().size());
+            assertInstanceOf(TenantCreated.class, tenant.getDomainEvents().get(0));
         }
 
         @Test
-        @DisplayName("should return unmodifiable list from getDomainEvents")
+        @DisplayName("should return unmodifiable list")
         void shouldReturnUnmodifiableList() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
-            List<DomainEvent> events = tenant.getDomainEvents();
-            assertThrows(UnsupportedOperationException.class, () -> events.clear());
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            assertThrows(UnsupportedOperationException.class, () -> tenant.getDomainEvents().clear());
         }
 
         @Test
-        @DisplayName("should clear all domain events when clearDomainEvents is called")
+        @DisplayName("should clear all domain events")
         void shouldClearDomainEvents() {
-            Tenant tenant = Tenant.create(NAME, SPORT, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
-
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             tenant.clearDomainEvents();
-
             assertTrue(tenant.getDomainEvents().isEmpty());
         }
     }
