@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { ClassLevel } from "@/lib/types/programClass";
 
 interface ClassLevelBadgeProps {
@@ -5,23 +8,16 @@ interface ClassLevelBadgeProps {
 }
 
 const LEVEL_STYLES: Record<ClassLevel, string> = {
-  BEGINNER: "bg-green-100 text-green-800",
+  BEGINNER:     "bg-green-100 text-green-800",
   INTERMEDIATE: "bg-yellow-100 text-yellow-800",
-  ADVANCED: "bg-red-100 text-red-800",
-};
-
-const LEVEL_LABELS: Record<ClassLevel, string> = {
-  BEGINNER: "Beginner",
-  INTERMEDIATE: "Intermediate",
-  ADVANCED: "Advanced",
+  ADVANCED:     "bg-red-100 text-red-800",
 };
 
 export default function ClassLevelBadge({ level }: ClassLevelBadgeProps) {
+  const t = useTranslations("badges.classLevel");
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${LEVEL_STYLES[level]}`}
-    >
-      {LEVEL_LABELS[level]}
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${LEVEL_STYLES[level]}`}>
+      {t(level)}
     </span>
   );
 }

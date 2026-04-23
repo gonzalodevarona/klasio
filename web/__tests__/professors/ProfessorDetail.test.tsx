@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithIntl as render } from "../../__test-support__/renderWithIntl";
 import ProfessorDetail from "@/components/professors/ProfessorDetail";
 import { api, ApiError } from "@/lib/api";
 import { ProfessorDetail as ProfessorDetailType } from "@/lib/types/professor";
@@ -70,7 +71,7 @@ describe("ProfessorDetail", () => {
     render(<ProfessorDetail professor={activeProfessor} />);
 
     expect(screen.getAllByText("carlos@example.com").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("ACTIVE").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Active").length).toBeGreaterThanOrEqual(1);
   });
 
   it("shows Edit link when professor is not deactivated", () => {

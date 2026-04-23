@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithIntl as render } from "../../__test-support__/renderWithIntl";
 import ClassDetail from "@/components/classes/ClassDetail";
 import { api, ApiError } from "@/lib/api";
 import { ProgramClassDetail } from "@/lib/types/programClass";

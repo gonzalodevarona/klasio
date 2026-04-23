@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { RegistrationStatus } from "@/lib/types/attendance";
 
 interface RegistrationStatusBadgeProps {
@@ -16,25 +17,11 @@ const STATUS_STYLES: Record<RegistrationStatus, string> = {
   ABSENT:               "bg-red-100 text-red-700",
 };
 
-const STATUS_LABELS: Record<RegistrationStatus, string> = {
-  REGISTERED:           "Registered",
-  CANCELLED_BY_STUDENT: "Cancelled",
-  CANCELLED_BY_SYSTEM:  "Cancelled (System)",
-  SESSION_CANCELLED:    "Cancelled by league",
-  PRESENT:              "Present",
-  PRESENT_NO_HOURS:     "Present (No Hours)",
-  ABSENT:               "Absent",
-};
-
 export default function RegistrationStatusBadge({ status }: RegistrationStatusBadgeProps) {
-  const styles = STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500";
-  const label = STATUS_LABELS[status] ?? status;
-
+  const t = useTranslations("badges.registrationStatus");
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${styles}`}
-    >
-      {label}
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray-500"}`}>
+      {t(status)}
     </span>
   );
 }
