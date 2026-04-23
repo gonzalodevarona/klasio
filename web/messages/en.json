@@ -814,9 +814,21 @@
   },
   "notifications": {
     "bellAriaLabel": "Notifications",
-    "badgeMax": "10+"
+    "badgeMax": "10+",
+    "dropdownTitle": "Notifications",
+    "markAllRead": "Mark all read",
+    "dropdownLoading": "Loading…",
+    "dropdownEmpty": "No notifications.",
+    "viewAll": "View all",
+    "tabAll": "All",
+    "tabUnreadOnly": "Unread only",
+    "markAllAsRead": "Mark all as read",
+    "listEmpty": "No notifications found.",
+    "pageTitle": "Notifications"
   },
   "tenants": {
+    "pageTitle": "Tenants",
+    "createButton": "Create New League",
     "filterStatusLabel": "Status:",
     "filterAll": "All",
     "filterActive": "Active",
@@ -825,7 +837,7 @@
     "listEmpty": "No tenants found",
     "colName": "Name",
     "colSlug": "Slug",
-    "colSport": "Sport",
+    "colDiscipline": "Discipline",
     "colStatus": "Status",
     "colCreatedAt": "Created At"
   },

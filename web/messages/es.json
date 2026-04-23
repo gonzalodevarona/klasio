@@ -814,9 +814,21 @@
   },
   "notifications": {
     "bellAriaLabel": "Notificaciones",
-    "badgeMax": "10+"
+    "badgeMax": "10+",
+    "dropdownTitle": "Notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "dropdownLoading": "Cargando…",
+    "dropdownEmpty": "Sin notificaciones.",
+    "viewAll": "Ver todas",
+    "tabAll": "Todas",
+    "tabUnreadOnly": "Solo no leídas",
+    "markAllAsRead": "Marcar todo como leído",
+    "listEmpty": "No se encontraron notificaciones.",
+    "pageTitle": "Notificaciones"
   },
   "tenants": {
+    "pageTitle": "Ligas",
+    "createButton": "Crear nueva liga",
     "filterStatusLabel": "Estado:",
     "filterAll": "Todos",
     "filterActive": "Activos",
@@ -825,7 +837,7 @@
     "listEmpty": "No se encontraron ligas",
     "colName": "Nombre",
     "colSlug": "Identificador",
-    "colSport": "Deporte",
+    "colDiscipline": "Disciplina",
     "colStatus": "Estado",
     "colCreatedAt": "Fecha de creación"
   },

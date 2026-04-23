@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithIntl as render } from "../../__test-support__/renderWithIntl";
 import TenantList from "@/components/tenants/TenantList";
 import { TenantSummary } from "@/lib/types/tenant";
 

@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { TenantStatus } from "@/lib/types/tenant";
 import { useTenants } from "@/hooks/useTenants";
 import TenantStatusBadge from "./TenantStatusBadge";
 
 export default function TenantList() {
+  const t = useTranslations("tenants");
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<TenantStatus | undefined>(
     undefined
@@ -48,7 +50,7 @@ export default function TenantList() {
       {/* Filter */}
       <div className="flex items-center gap-3">
         <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700">
-          Status:
+          {t("filterStatusLabel")}
         </label>
         <select
           id="statusFilter"
@@ -56,19 +58,19 @@ export default function TenantList() {
           onChange={(e) => handleStatusChange(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">All</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
+          <option value="">{t("filterAll")}</option>
+          <option value="ACTIVE">{t("filterActive")}</option>
+          <option value="INACTIVE">{t("filterInactive")}</option>
         </select>
       </div>
 
       {loading ? (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading tenants...
+          {t("listLoading")}
         </div>
       ) : tenants.length === 0 ? (
         <div className="text-center py-8 text-sm text-gray-500">
-          No tenants found
+          {t("listEmpty")}
         </div>
       ) : (
         <>
@@ -77,19 +79,19 @@ export default function TenantList() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
+                    {t("colName")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Slug
+                    {t("colSlug")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Discipline
+                    {t("colDiscipline")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t("colStatus")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
+                    {t("colCreatedAt")}
                   </th>
                 </tr>
               </thead>

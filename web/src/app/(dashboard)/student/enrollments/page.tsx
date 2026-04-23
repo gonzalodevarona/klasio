@@ -1,14 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import LevelBadge from "@/components/enrollments/LevelBadge";
-
-const STATUS_OPTIONS = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "", label: "All" },
-];
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -16,6 +11,15 @@ function formatDate(iso: string | null): string {
 }
 
 export default function StudentEnrollmentsPage() {
+  const t = useTranslations("studentEnrollmentsPage");
+  const tCommon = useTranslations("common");
+
+  const STATUS_OPTIONS = [
+    { value: "ACTIVE", label: tCommon("active") },
+    { value: "INACTIVE", label: tCommon("inactive") },
+    { value: "", label: tCommon("all") },
+  ];
+
   const [statusFilter, setStatusFilter] = useState<string>("ACTIVE");
   const { enrollments, loading, error } = useMyEnrollments(statusFilter || undefined);
 
@@ -23,14 +27,14 @@ export default function StudentEnrollmentsPage() {
     <div>
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Enrollments</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Programs you are enrolled in and your current level.
+            {t("subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2 pt-1">
           <label htmlFor="statusFilter" className="text-sm text-gray-600 whitespace-nowrap">
-            Status:
+            {t("statusLabel")}
           </label>
           <select
             id="statusFilter"
@@ -48,7 +52,7 @@ export default function StudentEnrollmentsPage() {
       </div>
 
       {loading && (
-        <p className="py-8 text-center text-sm text-gray-500">Loading…</p>
+        <p className="py-8 text-center text-sm text-gray-500">{t("loading")}</p>
       )}
 
       {error && (
@@ -59,7 +63,7 @@ export default function StudentEnrollmentsPage() {
 
       {!loading && !error && enrollments.length === 0 && (
         <p className="py-8 text-center text-sm text-gray-400">
-          No {statusFilter ? statusFilter.toLowerCase() : ""} enrollments found.
+          {t("empty", { status: statusFilter ? statusFilter.toLowerCase() : "" })}
         </p>
       )}
 
@@ -69,16 +73,16 @@ export default function StudentEnrollmentsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Program
+                  {t("colProgram")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Level
+                  {t("colLevel")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {t("colStatus")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Enrolled
+                  {t("colEnrolled")}
                 </th>
               </tr>
             </thead>
