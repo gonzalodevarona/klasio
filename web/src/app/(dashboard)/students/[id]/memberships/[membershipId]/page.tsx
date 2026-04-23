@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMembershipDetail } from "@/hooks/useMemberships";
 import { useStudentDetail } from "@/hooks/useStudents";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +15,8 @@ interface Props {
 
 export default function MembershipDetailPage({ params }: Props) {
   const { id: studentId, membershipId } = use(params);
+  const t = useTranslations("memberships");
+  const tStudents = useTranslations("students");
   const { membership, loading, error, refetch } = useMembershipDetail(membershipId);
   const { student } = useStudentDetail(studentId);
   const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
@@ -25,7 +28,7 @@ export default function MembershipDetailPage({ params }: Props) {
     <div>
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/students" className="hover:text-gray-700 hover:underline">
-          Students
+          {tStudents("pageTitle")}
         </Link>
         <span className="mx-2">/</span>
         <Link href={`/students/${studentId}`} className="hover:text-gray-700 hover:underline">
@@ -36,14 +39,14 @@ export default function MembershipDetailPage({ params }: Props) {
           href={`/students/${studentId}/memberships`}
           className="hover:text-gray-700 hover:underline"
         >
-          Memberships
+          {t("detailBreadcrumb")}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">Detail</span>
+        <span className="text-gray-900">{t("detailBreadcrumbDetail")}</span>
       </nav>
 
       {loading && (
-        <div className="py-8 text-center text-sm text-gray-500">Loading membership...</div>
+        <div className="py-8 text-center text-sm text-gray-500">{t("detailLoading")}</div>
       )}
 
       {error && (

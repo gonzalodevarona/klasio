@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useProgramPlansByProgram } from "@/hooks/usePrograms";
 import { ProgramPlanSummary } from "@/lib/types/program";
@@ -31,6 +32,9 @@ export default function StudentMembershipCreationForm({
   onSubmit,
   onCancel,
 }: Props) {
+  const t = useTranslations("memberships");
+  const tCommon = useTranslations("common");
+  const tPaymentProofs = useTranslations("paymentProofs");
   const { enrollments, loading: enrollmentsLoading } = useMyEnrollments();
 
   const [selectedProgramId, setSelectedProgramId] = useState<string>(initialProgramId ?? "");
@@ -82,11 +86,11 @@ export default function StudentMembershipCreationForm({
     setFileError(null);
 
     if (file.size > MAX_SIZE_BYTES) {
-      setFileError("File exceeds the 5 MB size limit.");
+      setFileError(tPaymentProofs("fileSizeError"));
       return;
     }
     if (!["application/pdf", "image/jpeg", "image/png"].includes(file.type)) {
-      setFileError("Unsupported type. Upload a PDF, JPG, or PNG.");
+      setFileError(tPaymentProofs("fileTypeError"));
       return;
     }
 
@@ -111,20 +115,20 @@ export default function StudentMembershipCreationForm({
     try {
       await onSubmit(selectedPlanId, pendingFile!);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setSubmitError(err instanceof Error ? err.message : tCommon("unexpectedError"));
     } finally {
       setSubmitting(false);
     }
   }
 
   if (enrollmentsLoading) {
-    return <p className="py-8 text-center text-sm text-gray-500">Loading your enrollments…</p>;
+    return <p className="py-8 text-center text-sm text-gray-500">{tCommon("loading")}</p>;
   }
 
   if (activeEnrollments.length === 0) {
     return (
       <div className="rounded-md bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
-        You are not enrolled in any program. Please contact your league administrator to get enrolled before creating a membership.
+        {t("newNoEnrollments")}
       </div>
     );
   }
@@ -140,14 +144,14 @@ export default function StudentMembershipCreationForm({
       {/* Program selector */}
       {activeEnrollments.length > 1 && !initialProgramId && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Program</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("formProgramLabel")}</label>
           <select
             value={selectedProgramId}
             onChange={(e) => setSelectedProgramId(e.target.value)}
             required
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            <option value="">— Select a program —</option>
+            <option value="">{t("formSelectProgram")}</option>
             {activeEnrollments.map((e) => (
               <option key={e.programId} value={e.programId}>
                 {e.programName} ({e.level})
@@ -160,11 +164,11 @@ export default function StudentMembershipCreationForm({
       {/* Plan selector */}
       {selectedProgramId && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Plan</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("formPlanLabel")}</label>
           {plansLoading ? (
-            <p className="text-sm text-gray-400">Loading plans…</p>
+            <p className="text-sm text-gray-400">{t("newLoadingPlans")}</p>
           ) : plans.length === 0 ? (
-            <p className="text-sm text-gray-400">No active plans available for this program.</p>
+            <p className="text-sm text-gray-400">{t("newNoPlans")}</p>
           ) : (
             <select
               value={selectedPlanId}
@@ -172,7 +176,7 @@ export default function StudentMembershipCreationForm({
               required
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="">— Select a plan —</option>
+              <option value="">{t("formPlanSelectPlaceholder")}</option>
               {plans.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -189,19 +193,19 @@ export default function StudentMembershipCreationForm({
           <p className="text-sm font-semibold text-indigo-900">{selectedPlan.name}</p>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
             <div>
-              <span className="text-indigo-600 font-medium">Modality: </span>
+              <span className="text-indigo-600 font-medium">{t("formModalityLabel")}</span>
               <span className="text-indigo-800">
-                {selectedPlan.modality === "HOURS_BASED" ? "Hours-based" : "Classes per week"}
+                {selectedPlan.modality === "HOURS_BASED" ? t("formModalityHoursBased") : t("formModalityClassesPerWeek")}
               </span>
             </div>
             {selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null && (
               <div>
-                <span className="text-indigo-600 font-medium">Hours included: </span>
+                <span className="text-indigo-600 font-medium">{t("formHoursLabel")}</span>
                 <span className="text-indigo-800">{selectedPlan.hours}h</span>
               </div>
             )}
             <div>
-              <span className="text-indigo-600 font-medium">Cost: </span>
+              <span className="text-indigo-600 font-medium">{t("formCostLabel")}</span>
               <span className="text-indigo-800">${selectedPlan.cost.toLocaleString()}</span>
             </div>
           </div>
@@ -212,8 +216,8 @@ export default function StudentMembershipCreationForm({
       {selectedPlanId && (
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-medium text-gray-700">Payment proof <span className="text-red-500">*</span></p>
-            <p className="text-xs text-gray-400 mt-0.5">PDF, JPG, or PNG · Max 5 MB</p>
+            <p className="text-sm font-medium text-gray-700">{tPaymentProofs("panelTitle")} <span className="text-red-500">*</span></p>
+            <p className="text-xs text-gray-400 mt-0.5">{tPaymentProofs("fileHint")}</p>
           </div>
 
           {!pendingFile ? (
@@ -246,7 +250,7 @@ export default function StudentMembershipCreationForm({
                   onClick={handleRemoveFile}
                   className="text-xs text-red-500 hover:text-red-700 shrink-0"
                 >
-                  Remove
+                  {tCommon("delete")}
                 </button>
               </div>
 
@@ -278,18 +282,14 @@ export default function StudentMembershipCreationForm({
           disabled={submitting}
           className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
-          Cancel
+          {tCommon("cancel")}
         </button>
         <button
           type="submit"
           disabled={!isValid || submitting}
           className="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
         >
-          {submitting
-            ? pendingFile
-              ? "Creating & uploading…"
-              : "Creating…"
-            : "Subscribe to plan"}
+          {submitting ? t("formCreatingBtn") : t("formCreateBtn")}
         </button>
       </div>
     </form>

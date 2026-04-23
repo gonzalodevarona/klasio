@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMemberships, useMembershipActions } from "@/hooks/useMemberships";
 import { useStudentDetail } from "@/hooks/useStudents";
 import MembershipList from "@/components/memberships/MembershipList";
@@ -12,6 +13,8 @@ interface Props {
 
 export default function StudentMembershipsPage({ params }: Props) {
   const { id: studentId } = use(params);
+  const t = useTranslations("memberships");
+  const tStudents = useTranslations("students");
   const { memberships, loading, error, refetch } = useMemberships(studentId);
   const { student } = useStudentDetail(studentId);
   const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
@@ -38,23 +41,23 @@ export default function StudentMembershipsPage({ params }: Props) {
     <div>
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/students" className="hover:text-gray-700 hover:underline">
-          Students
+          {tStudents("pageTitle")}
         </Link>
         <span className="mx-2">/</span>
         <Link href={`/students/${studentId}`} className="hover:text-gray-700 hover:underline">
           {studentName}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">Memberships</span>
+        <span className="text-gray-900">{t("detailBreadcrumb")}</span>
       </nav>
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Memberships</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("adminPageTitle")}</h1>
         <Link
           href={`/students/${studentId}/memberships/new`}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
         >
-          New Membership
+          {t("adminNewButton")}
         </Link>
       </div>
 
@@ -71,7 +74,7 @@ export default function StudentMembershipsPage({ params }: Props) {
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {s === "" ? "All" : s.replace(/_/g, " ")}
+              {s === "" ? t("adminFilterAll") : s.replace(/_/g, " ")}
             </button>
           )
         )}
@@ -84,7 +87,7 @@ export default function StudentMembershipsPage({ params }: Props) {
       )}
 
       {loading ? (
-        <div className="py-8 text-center text-sm text-gray-500">Loading memberships...</div>
+        <div className="py-8 text-center text-sm text-gray-500">{t("adminLoading")}</div>
       ) : (
         <MembershipList
           memberships={filtered}
