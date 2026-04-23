@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { NotificationCountProvider } from "@/context/NotificationCountContext";
 
 export const metadata: Metadata = {
@@ -7,15 +9,20 @@ export const metadata: Metadata = {
   description: "Multitenant platform for managing sports leagues",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className="min-h-screen bg-gray-50">
-        <NotificationCountProvider>{children}</NotificationCountProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <NotificationCountProvider>{children}</NotificationCountProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
