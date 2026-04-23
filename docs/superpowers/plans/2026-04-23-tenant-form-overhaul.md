@@ -38,6 +38,8 @@
 | MODIFY | `web/src/components/tenants/TenantDetail.tsx` |
 | MODIFY | `web/src/components/tenants/TenantList.tsx` |
 | MODIFY | `web/src/app/(dashboard)/tenants/new/page.tsx` |
+| MODIFY | `web/src/app/api/auth/login/route.ts` |
+| MODIFY | `web/src/app/api/auth/logout/route.ts` |
 
 ---
 
@@ -2371,4 +2373,154 @@ Navigate to /tenants — confirm the Sport column now shows the discipline value
 ```bash
 # IntelliJ: Run > All Tests in module
 # Expected: all green
+```
+
+---
+
+## Task 11: Set NEXT_LOCALE Cookie on Login / Clear on Logout
+
+**Context:** The i18n feature (separate worktree) needs a `NEXT_LOCALE` cookie set at login time. Value comes from `tenant.language` returned by `GET /me/tenant`. Superadmins have no tenant → always `en`. If the tenant endpoint fails or returns no language, fallback is `es`.
+
+**Files:**
+- Modify: `web/src/app/api/auth/login/route.ts`
+- Modify: `web/src/app/api/auth/logout/route.ts`
+
+- [ ] **Step 1: Update login/route.ts**
+
+Full replacement:
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+
+const API_BASE_URL =
+  process.env.BACKEND_URL ?? "http://localhost:8080/api/v1";
+
+const LOCALE_MAX_AGE = 60 * 60 * 8; // 8 hours — matches accessToken lifetime
+
+async function fetchTenantLanguage(accessToken: string): Promise<string> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/me/tenant`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) return "es";
+    const data = await res.json();
+    const lang = data?.language;
+    return lang === "en" || lang === "es" ? lang : "es";
+  } catch {
+    return "es";
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+
+  const backendResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const data = await backendResponse.json();
+  const nextResponse = NextResponse.json(data, {
+    status: backendResponse.status,
+  });
+
+  // Forward all HttpOnly JWT cookies from backend.
+  // We use headers.append() for ALL cookies to avoid mixing with cookies.set(),
+  // which internally calls headers.set() and would overwrite previously appended cookies.
+  const setCookieHeaders = backendResponse.headers.getSetCookie();
+  for (const cookie of setCookieHeaders) {
+    nextResponse.headers.append("Set-Cookie", cookie);
+  }
+
+  if (backendResponse.ok) {
+    const { userId, role, tenantId } = data as {
+      userId: string;
+      role: string;
+      tenantId: string | null;
+      dashboardUrl: string;
+    };
+
+    const userInfoValue = encodeURIComponent(
+      JSON.stringify({ userId, roles: [role], tenantId: tenantId || null })
+    );
+    nextResponse.headers.append(
+      "Set-Cookie",
+      `userInfo=${userInfoValue}; Path=/; SameSite=Lax; Max-Age=${LOCALE_MAX_AGE}`
+    );
+
+    // Resolve locale: superadmin has no tenantId → "en"
+    // Tenant user: read language from /me/tenant using the accessToken just issued
+    let locale = "en";
+    if (tenantId) {
+      // Extract accessToken value from the Set-Cookie headers the backend just sent
+      const atCookie = setCookieHeaders.find((c) => c.startsWith("accessToken="));
+      const accessToken = atCookie
+        ? atCookie.split(";")[0].substring("accessToken=".length)
+        : null;
+
+      locale = accessToken ? await fetchTenantLanguage(accessToken) : "es";
+    }
+
+    nextResponse.headers.append(
+      "Set-Cookie",
+      `NEXT_LOCALE=${locale}; Path=/; SameSite=Lax; Max-Age=${LOCALE_MAX_AGE}`
+    );
+  }
+
+  return nextResponse;
+}
+```
+
+- [ ] **Step 2: Update logout/route.ts — clear NEXT_LOCALE**
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+
+const API_BASE_URL =
+  process.env.BACKEND_URL ?? "http://localhost:8080/api/v1";
+
+export async function POST(request: NextRequest) {
+  const cookieHeader = request.headers.get("cookie") ?? "";
+
+  await fetch(`${API_BASE_URL}/auth/logout`, {
+    method: "POST",
+    headers: { Cookie: cookieHeader },
+  });
+
+  const response = NextResponse.json({ message: "Logged out" });
+
+  response.cookies.set("accessToken", "", { maxAge: 0, path: "/" });
+  response.cookies.set("refreshToken", "", { maxAge: 0, path: "/" });
+  response.cookies.set("userInfo", "", { maxAge: 0, path: "/" });
+  response.cookies.set("NEXT_LOCALE", "", { maxAge: 0, path: "/" });
+
+  return response;
+}
+```
+
+- [ ] **Step 3: Smoke test login locale cookie**
+
+1. Log in as a tenant user (admin, manager, professor, student)
+2. Open browser DevTools → Application → Cookies
+3. Verify `NEXT_LOCALE` cookie is set to the tenant's language (`es` or `en`)
+4. Log in as superadmin
+5. Verify `NEXT_LOCALE=en`
+6. Log out → verify `NEXT_LOCALE` cookie is cleared
+
+- [ ] **Step 4: Verify fallback when /me/tenant returns no language field**
+
+The `fetchTenantLanguage` helper returns `"es"` if:
+- The backend returns a non-200 status
+- `data.language` is absent or not `"es"` / `"en"`
+- The fetch throws (network error)
+
+This ensures the i18n worktree can deploy independently — if `language` isn't yet in the tenant API response, login still works and defaults to `"es"`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add web/src/app/api/auth/login/route.ts \
+        web/src/app/api/auth/logout/route.ts
+git commit -m "feat(auth): set NEXT_LOCALE cookie on login from tenant language, clear on logout"
 ```
