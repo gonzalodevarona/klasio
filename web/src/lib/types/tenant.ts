@@ -4,16 +4,21 @@ export interface TenantSummary {
   id: string;
   slug: string;
   name: string;
-  sportDiscipline: string;
+  discipline: string;
   status: TenantStatus;
   createdAt: string;
 }
 
 export interface TenantDetail extends TenantSummary {
+  language: string;
   logoUrl: string | null;
   contactEmail: string;
-  contactPhone: string | null;
-  contactAddress: string | null;
+  contactPhone: string;
+  contactPhoneIndicator: string;
+  contactStreet: string;
+  contactCity: string;
+  contactState: string;
+  contactCountry: string;
   createdBy: string;
   deactivatedAt: string | null;
   deactivatedBy: string | null;
@@ -29,10 +34,15 @@ export interface TenantListResponse {
 
 export interface CreateTenantRequest {
   name: string;
-  sportDiscipline: string;
+  discipline: string;
+  language: string;
   slug?: string;
   contactEmail: string;
-  contactPhone?: string;
-  contactAddress?: string;
-  logo?: File;
+  contactPhone: string;
+  contactPhoneIndicator: string;
+  contactStreet: string;
+  contactCity: string;
+  contactState: string;
+  contactCountry: string;
+  logo: File;
 }

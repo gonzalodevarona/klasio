@@ -100,10 +100,10 @@ export default function TenantDetail({
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div>
               <dt className="text-sm font-medium text-gray-500">
-                Sport Discipline
+                Discipline
               </dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {tenant.sportDiscipline}
+                {tenant.discipline}
               </dd>
             </div>
 
@@ -121,16 +121,17 @@ export default function TenantDetail({
                 Contact Phone
               </dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {tenant.contactPhone ?? "-"}
+                {tenant.contactPhoneIndicator} {tenant.contactPhone}
               </dd>
             </div>
 
             <div>
               <dt className="text-sm font-medium text-gray-500">
-                Contact Address
+                Address
               </dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {tenant.contactAddress ?? "-"}
+                {tenant.contactStreet}, {tenant.contactCity},{" "}
+                {tenant.contactState}, {tenant.contactCountry}
               </dd>
             </div>
 

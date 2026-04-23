@@ -30,7 +30,7 @@ function createTenant(overrides: Partial<TenantSummary> = {}): TenantSummary {
     id: "1",
     slug: "test-league",
     name: "Test League",
-    sportDiscipline: "Soccer",
+    discipline: "Soccer",
     status: "ACTIVE",
     createdAt: "2026-03-15T00:00:00Z",
     ...overrides,
@@ -45,7 +45,7 @@ describe("TenantList", () => {
         id: "2",
         name: "Tennis Club",
         slug: "tennis-club",
-        sportDiscipline: "Tennis",
+        discipline: "Tennis",
         status: "INACTIVE",
       }),
     ];

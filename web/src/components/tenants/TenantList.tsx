@@ -108,7 +108,7 @@ export default function TenantList() {
                       {tenant.slug}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {tenant.sportDiscipline}
+                      {tenant.discipline}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <TenantStatusBadge status={tenant.status} />
