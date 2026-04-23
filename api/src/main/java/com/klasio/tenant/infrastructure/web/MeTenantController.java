@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/me/tenant")
 public class MeTenantController {
 
-    record TenantInfoResponse(UUID id, String name, String discipline) {}
+    record TenantInfoResponse(UUID id, String name, String discipline, String language) {}
 
     private final TenantRepository tenantRepository;
 
@@ -39,7 +39,7 @@ public class MeTenantController {
                 .orElseThrow(() -> new IllegalStateException("Tenant not found: " + tenantId));
 
         return ResponseEntity.ok(
-                new TenantInfoResponse(tenant.getId().value(), tenant.getName(), tenant.getDiscipline())
+                new TenantInfoResponse(tenant.getId().value(), tenant.getName(), tenant.getDiscipline(), tenant.getLanguage())
         );
     }
 

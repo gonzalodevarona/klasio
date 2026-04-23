@@ -6,7 +6,8 @@ import type { Role } from "@/lib/types/auth";
 interface TenantInfo {
   id: string;
   name: string;
-  sportDiscipline: string;
+  discipline: string;
+  language: string;
 }
 
 interface PersonInfo {

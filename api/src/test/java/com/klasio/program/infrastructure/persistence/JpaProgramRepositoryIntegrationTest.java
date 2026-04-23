@@ -59,8 +59,8 @@ class JpaProgramRepositoryIntegrationTest {
     @BeforeEach
     void setUp() {
         entityManager.createNativeQuery(
-                        "INSERT INTO tenants (id, name, sport_discipline, slug, contact_email, status, created_at, created_by) " +
-                                "VALUES (:id, :name, :sport, :slug, :email, 'ACTIVE', NOW(), :createdBy) " +
+                        "INSERT INTO tenants (id, name, discipline, slug, contact_email, contact_phone, contact_street, contact_city, contact_state, contact_country, contact_phone_indicator, language, status, created_at, created_by) " +
+                                "VALUES (:id, :name, :sport, :slug, :email, '', '', '', '', '', '', 'es', 'ACTIVE', NOW(), :createdBy) " +
                                 "ON CONFLICT (id) DO NOTHING")
                 .setParameter("id", TENANT_ID)
                 .setParameter("name", "Test League")
