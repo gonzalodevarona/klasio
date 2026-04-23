@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api, ApiError } from "@/lib/api";
 import { ProgramModality } from "@/lib/types/programPlan";
 import {
@@ -43,6 +44,7 @@ export default function ProgramPlanForm({
   tenantId,
   plan,
 }: ProgramPlanFormProps) {
+  const t = useTranslations("programs");
   const router = useRouter();
   const isEdit = !!plan;
 
@@ -93,7 +95,7 @@ export default function ProgramPlanForm({
 
     const costNum = parseFloat(cost);
     if (isNaN(costNum) || costNum <= 0) {
-      setError("Cost must be a positive number.");
+      setError(t("formPlanCostError"));
       setSubmitting(false);
       return;
     }
@@ -101,20 +103,20 @@ export default function ProgramPlanForm({
     if (modality === "HOURS_BASED") {
       const hoursNum = parseInt(hours, 10);
       if (isNaN(hoursNum) || hoursNum <= 0) {
-        setError("Hours must be a positive integer.");
+        setError(t("formPlanHoursError"));
         setSubmitting(false);
         return;
       }
     }
 
     if (modality === "CLASSES_PER_WEEK" && scheduleEntries.length === 0) {
-      setError("At least one schedule entry is required.");
+      setError(t("formPlanScheduleError"));
       setSubmitting(false);
       return;
     }
 
     if (!managerId.trim()) {
-      setError("Manager is required.");
+      setError(t("formPlanManagerError"));
       setSubmitting(false);
       return;
     }
@@ -170,7 +172,7 @@ export default function ProgramPlanForm({
           htmlFor="name"
           className="block text-sm font-medium text-gray-700"
         >
-          Plan Name
+          {t("formNameLabel")}
         </label>
         <input
           type="text"
@@ -183,8 +185,8 @@ export default function ProgramPlanForm({
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           placeholder={
             modality === "HOURS_BASED"
-              ? "e.g., 4 Hours"
-              : "e.g., Mon/Wed/Thu Evening"
+              ? t("formNamePlaceholderHours")
+              : t("formNamePlaceholderSchedule")
           }
         />
       </div>
@@ -195,19 +197,19 @@ export default function ProgramPlanForm({
           htmlFor="modality"
           className="block text-sm font-medium text-gray-700"
         >
-          Modality
+          {t("formModalityLabel")}
         </label>
         {isEdit ? (
           <>
             <input
               type="text"
               id="modality"
-              value={modality === "HOURS_BASED" ? "Hours Based" : "Classes per Week"}
+              value={modality === "HOURS_BASED" ? t("modalityHoursBased") : t("modalityClassesPerWeek")}
               disabled
               className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm cursor-not-allowed"
             />
             <p className="mt-1 text-xs text-gray-500">
-              Modality cannot be changed after creation.
+              {t("formModalityCannotChange")}
             </p>
           </>
         ) : (
@@ -217,8 +219,8 @@ export default function ProgramPlanForm({
             onChange={(e) => setModality(e.target.value as ProgramModality)}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
-            <option value="HOURS_BASED">Hours Based</option>
-            <option value="CLASSES_PER_WEEK">Classes per Week</option>
+            <option value="HOURS_BASED">{t("modalityHoursBased")}</option>
+            <option value="CLASSES_PER_WEEK">{t("modalityClassesPerWeek")}</option>
           </select>
         )}
       </div>
@@ -228,7 +230,7 @@ export default function ProgramPlanForm({
           htmlFor="cost"
           className="block text-sm font-medium text-gray-700"
         >
-          Cost (COP)
+          {t("formCostLabel")}
         </label>
         <input
           type="number"
@@ -249,7 +251,7 @@ export default function ProgramPlanForm({
           htmlFor="managerId"
           className="block text-sm font-medium text-gray-700"
         >
-          Manager
+          {t("formManagerLabel")}
         </label>
         <select
           id="managerId"
@@ -260,7 +262,7 @@ export default function ProgramPlanForm({
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-100"
         >
           <option value="">
-            {loadingManagers ? "Loading managers..." : "Select a manager..."}
+            {loadingManagers ? t("formManagerLoading") : t("formManagerPlaceholder")}
           </option>
           {managers.map((m) => (
             <option key={m.id} value={m.id}>
@@ -270,7 +272,7 @@ export default function ProgramPlanForm({
         </select>
         {!loadingManagers && managers.length === 0 && (
           <p className="mt-1 text-xs text-amber-600">
-            No active managers available for this program.
+            {t("formManagerNone")}
           </p>
         )}
       </div>
@@ -281,7 +283,7 @@ export default function ProgramPlanForm({
             htmlFor="hours"
             className="block text-sm font-medium text-gray-700"
           >
-            Hours
+            {t("formHoursLabel")}
           </label>
           <input
             type="number"
@@ -295,7 +297,7 @@ export default function ProgramPlanForm({
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
           <p className="mt-1 text-xs text-gray-500">
-            Number of hours included in this plan.
+            {t("formHoursHint")}
           </p>
         </div>
       )}
@@ -304,21 +306,20 @@ export default function ProgramPlanForm({
         <div>
           <div className="flex items-center justify-between mb-3">
             <label className="block text-sm font-medium text-gray-700">
-              Schedule Entries
+              {t("formScheduleLabel")}
             </label>
             <button
               type="button"
               onClick={addScheduleEntry}
               className="inline-flex items-center rounded-md bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
             >
-              + Add Entry
+              {t("formScheduleAddEntry")}
             </button>
           </div>
 
           {scheduleEntries.length === 0 && (
             <p className="text-sm text-gray-500 italic">
-              No schedule entries. Click &quot;Add Entry&quot; to define class
-              times.
+              {t("formScheduleEmpty")}
             </p>
           )}
 
@@ -353,7 +354,7 @@ export default function ProgramPlanForm({
                   aria-label="Start time"
                 />
 
-                <span className="text-gray-400 text-sm">to</span>
+                <span className="text-gray-400 text-sm">{t("formScheduleTo")}</span>
 
                 <input
                   type="time"
@@ -371,7 +372,7 @@ export default function ProgramPlanForm({
                   className="text-red-500 hover:text-red-700 text-sm font-medium"
                   aria-label="Remove entry"
                 >
-                  Remove
+                  {t("formScheduleRemove")}
                 </button>
               </div>
             ))}
@@ -385,7 +386,7 @@ export default function ProgramPlanForm({
           onClick={() => router.push(`/programs/${programId}`)}
           className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50"
         >
-          Cancel
+          {t("formCancelButton")}
         </button>
         <button
           type="submit"
@@ -394,11 +395,11 @@ export default function ProgramPlanForm({
         >
           {submitting
             ? isEdit
-              ? "Updating..."
-              : "Creating..."
+              ? t("formUpdatingButton")
+              : t("formCreatingButton")
             : isEdit
-              ? "Update Plan"
-              : "Create Plan"}
+              ? t("formUpdateButton")
+              : t("formCreatePlanButton")}
         </button>
       </div>
     </form>

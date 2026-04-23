@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProgramForm from "@/components/programs/ProgramForm";
 import { useProgramDetail } from "@/hooks/usePrograms";
 
@@ -10,6 +11,7 @@ interface EditProgramPageProps {
 }
 
 export default function EditProgramPage({ params }: EditProgramPageProps) {
+  const t = useTranslations("programs");
   const { id } = use(params);
   const { program, loading, error } = useProgramDetail(id);
 
@@ -17,7 +19,7 @@ export default function EditProgramPage({ params }: EditProgramPageProps) {
     <div>
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/programs" className="hover:text-gray-700 hover:underline">
-          Programs
+          {t("detailBreadcrumb")}
         </Link>
         <span className="mx-2">/</span>
         <Link
@@ -27,14 +29,14 @@ export default function EditProgramPage({ params }: EditProgramPageProps) {
           {program?.name ?? id}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">Edit</span>
+        <span className="text-gray-900">{t("planEditBreadcrumb")}</span>
       </nav>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Edit Program</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">{t("editPageTitle")}</h1>
 
       {loading && (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading program...
+          {t("editLoadingText")}
         </div>
       )}
 

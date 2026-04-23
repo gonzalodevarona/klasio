@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ClassDetail from "@/components/classes/ClassDetail";
 import { useProgramClassDetail } from "@/hooks/useProgramClasses";
 
@@ -10,6 +11,7 @@ interface ClassDetailPageProps {
 }
 
 export default function ClassDetailPage({ params }: ClassDetailPageProps) {
+  const t = useTranslations("programs");
   const { id, classId } = use(params);
   const { programClass, loading, error, refetch } = useProgramClassDetail(
     id,
@@ -20,14 +22,14 @@ export default function ClassDetailPage({ params }: ClassDetailPageProps) {
     <div>
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/programs" className="hover:text-gray-700 hover:underline">
-          Programs
+          {t("detailBreadcrumb")}
         </Link>
         <span className="mx-2">/</span>
         <Link
           href={`/programs/${id}/classes`}
           className="hover:text-gray-700 hover:underline"
         >
-          Classes
+          {t("classDetailBreadcrumb")}
         </Link>
         <span className="mx-2">/</span>
         <span className="text-gray-900">
@@ -37,7 +39,7 @@ export default function ClassDetailPage({ params }: ClassDetailPageProps) {
 
       {loading && (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading class details...
+          {t("classDetailLoadingText")}
         </div>
       )}
 

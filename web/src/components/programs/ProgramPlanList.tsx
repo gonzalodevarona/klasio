@@ -1,13 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ProgramPlanSummary } from "@/lib/types/programPlan";
 import ProgramStatusBadge from "./ProgramStatusBadge";
-
-const MODALITY_LABELS: Record<string, string> = {
-  HOURS_BASED: "Hours Based",
-  CLASSES_PER_WEEK: "Classes per Week",
-};
 
 interface ProgramPlanListProps {
   programId: string;
@@ -31,6 +27,8 @@ export default function ProgramPlanList({
   loading,
   error,
 }: ProgramPlanListProps) {
+  const t = useTranslations("programs");
+
   if (loading) {
     return (
       <div className="animate-pulse space-y-3">
@@ -53,14 +51,13 @@ export default function ProgramPlanList({
     return (
       <div className="text-center py-8">
         <p className="text-gray-500 text-sm">
-          No plans configured yet. Add a plan to define pricing tiers for this
-          program.
+          {t("plansEmpty")}
         </p>
         <Link
           href={`/programs/${programId}/plans/new`}
           className="mt-3 inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
         >
-          Add First Plan
+          {t("plansAddFirstButton")}
         </Link>
       </div>
     );
@@ -72,25 +69,25 @@ export default function ProgramPlanList({
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
+              {t("plansColName")}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Modality
+              {t("plansColModality")}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Cost
+              {t("plansColCost")}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Hours
+              {t("plansColHours")}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Manager
+              {t("plansColManager")}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
+              {t("plansColStatus")}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
+              {t("plansColActions")}
             </th>
           </tr>
         </thead>
@@ -106,7 +103,11 @@ export default function ProgramPlanList({
                 </Link>
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                {MODALITY_LABELS[plan.modality] ?? plan.modality}
+                {plan.modality === "HOURS_BASED"
+                  ? t("modalityHoursBased")
+                  : plan.modality === "CLASSES_PER_WEEK"
+                  ? t("modalityClassesPerWeek")
+                  : plan.modality}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                 {formatCost(plan.cost)}
@@ -125,7 +126,7 @@ export default function ProgramPlanList({
                   href={`/programs/${programId}/plans/${plan.id}`}
                   className="text-blue-600 hover:text-blue-800"
                 >
-                  View
+                  {t("plansView")}
                 </Link>
               </td>
             </tr>

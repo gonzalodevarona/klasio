@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ProgramStatus } from "@/lib/types/program";
 import { usePrograms } from "@/hooks/usePrograms";
 import ProgramStatusBadge from "./ProgramStatusBadge";
 
 export default function ProgramList() {
+  const t = useTranslations("programs");
+  const tPagination = useTranslations("pagination");
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<ProgramStatus | undefined>(
     undefined
@@ -48,7 +51,7 @@ export default function ProgramList() {
       {/* Filter */}
       <div className="flex items-center gap-3">
         <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700">
-          Status:
+          {t("filterStatusLabel")}
         </label>
         <select
           id="statusFilter"
@@ -56,19 +59,19 @@ export default function ProgramList() {
           onChange={(e) => handleStatusChange(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">All</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
+          <option value="">{t("filterAll")}</option>
+          <option value="ACTIVE">{t("filterActive")}</option>
+          <option value="INACTIVE">{t("filterInactive")}</option>
         </select>
       </div>
 
       {loading ? (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading programs...
+          {t("listLoading")}
         </div>
       ) : programs.length === 0 ? (
         <div className="text-center py-8 text-sm text-gray-500">
-          No programs found
+          {t("listEmpty")}
         </div>
       ) : (
         <>
@@ -77,13 +80,13 @@ export default function ProgramList() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
+                    {t("colName")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t("colStatus")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
+                    {t("colCreatedAt")}
                   </th>
                 </tr>
               </thead>
@@ -113,7 +116,7 @@ export default function ProgramList() {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
             <p className="text-sm text-gray-700">
-              Page {page + 1} of {totalPages} ({totalElements} total)
+              {tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}
             </p>
             <div className="flex gap-2">
               <button
@@ -122,7 +125,7 @@ export default function ProgramList() {
                 disabled={page === 0}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Previous
+                {tPagination("previous")}
               </button>
               <button
                 type="button"
@@ -130,7 +133,7 @@ export default function ProgramList() {
                 disabled={page >= totalPages - 1}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {tPagination("next")}
               </button>
             </div>
           </div>

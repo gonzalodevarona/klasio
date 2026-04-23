@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api, ApiError } from "@/lib/api";
 import {
   ProgramDetail,
@@ -19,6 +20,8 @@ interface ProgramFormProps {
 }
 
 export default function ProgramForm({ program }: ProgramFormProps) {
+  const t = useTranslations("programs");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const isEdit = !!program;
 
@@ -32,9 +35,9 @@ export default function ProgramForm({ program }: ProgramFormProps) {
     const errors: FieldErrors = {};
 
     if (!name.trim()) {
-      errors.name = "Name is required.";
+      errors.name = t("formNameProgramRequired");
     } else if (name.trim().length > 150) {
-      errors.name = "Name must be at most 150 characters.";
+      errors.name = t("formNameProgramMaxLength");
     }
 
     return errors;
@@ -78,7 +81,7 @@ export default function ProgramForm({ program }: ProgramFormProps) {
         }
         setApiError(err.message);
       } else {
-        setApiError("An unexpected error occurred. Please try again.");
+        setApiError(tCommon("unexpectedError"));
       }
     } finally {
       setSubmitting(false);
@@ -102,7 +105,7 @@ export default function ProgramForm({ program }: ProgramFormProps) {
           htmlFor="name"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Name <span className="text-red-500">*</span>
+          {t("formNameProgramLabel")} <span className="text-red-500">*</span>
         </label>
         <input
           id="name"
@@ -112,7 +115,7 @@ export default function ProgramForm({ program }: ProgramFormProps) {
           className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             fieldErrors.name ? "border-red-500" : "border-gray-300"
           }`}
-          placeholder="e.g. Kids Football"
+          placeholder={t("formNameProgramPlaceholder")}
         />
         {fieldErrors.name && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
@@ -128,11 +131,11 @@ export default function ProgramForm({ program }: ProgramFormProps) {
         >
           {submitting
             ? isEdit
-              ? "Saving..."
-              : "Creating..."
+              ? t("formSavingButton")
+              : t("formCreatingButton")
             : isEdit
-              ? "Save Changes"
-              : "Create Program"}
+              ? t("formSaveButton")
+              : t("formCreateProgramButton")}
         </button>
       </div>
     </form>
