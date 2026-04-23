@@ -8,9 +8,10 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png"];
 interface LogoUploadProps {
   onFileSelect: (file: File | null) => void;
   error?: string;
+  required?: boolean;
 }
 
-export default function LogoUpload({ onFileSelect, error }: LogoUploadProps) {
+export default function LogoUpload({ onFileSelect, error, required }: LogoUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,20 +49,15 @@ export default function LogoUpload({ onFileSelect, error }: LogoUploadProps) {
     setPreview(null);
     setLocalError(null);
     onFileSelect(null);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
+    if (inputRef.current) inputRef.current.value = "";
   }
 
   const displayError = localError ?? error;
 
   return (
     <div>
-      <label
-        htmlFor="logo-upload"
-        className="block text-sm font-medium text-gray-700 mb-1"
-      >
-        Logo
+      <label htmlFor="logo-upload" className="block text-sm font-medium text-gray-700 mb-1">
+        Logo {required && <span className="text-red-500">*</span>}
       </label>
 
       {preview ? (
@@ -71,11 +67,7 @@ export default function LogoUpload({ onFileSelect, error }: LogoUploadProps) {
             alt="Logo preview"
             className="h-20 w-20 rounded-lg object-cover border border-gray-200"
           />
-          <button
-            type="button"
-            onClick={handleRemove}
-            className="text-sm text-red-600 hover:text-red-800"
-          >
+          <button type="button" onClick={handleRemove} className="text-sm text-red-600 hover:text-red-800">
             Remove
           </button>
         </div>
@@ -90,15 +82,9 @@ export default function LogoUpload({ onFileSelect, error }: LogoUploadProps) {
         />
       )}
 
-      {displayError && (
-        <p className="mt-1 text-sm text-red-600" role="alert">
-          {displayError}
-        </p>
-      )}
+      {displayError && <p className="mt-1 text-sm text-red-600" role="alert">{displayError}</p>}
 
-      <p className="mt-1 text-xs text-gray-400">
-        JPEG or PNG, max 5 MB.
-      </p>
+      <p className="mt-1 text-xs text-gray-400">JPEG or PNG, max 5 MB.</p>
     </div>
   );
 }

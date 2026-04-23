@@ -2,7 +2,7 @@ import Link from "next/link";
 import TenantForm from "@/components/tenants/TenantForm";
 
 export const metadata = {
-  title: "Create New League - Klasio",
+  title: "Create New Tenant - Klasio",
 };
 
 export default function NewTenantPage() {
@@ -16,9 +16,7 @@ export default function NewTenantPage() {
         <span className="text-gray-900">New</span>
       </nav>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">
-        Create New League
-      </h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">Create New Tenant</h1>
 
       <TenantForm />
     </div>
