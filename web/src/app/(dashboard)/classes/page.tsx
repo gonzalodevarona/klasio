@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { ClassLevel, ClassStatus } from "@/lib/types/programClass";
 import { useAllClasses } from "@/hooks/useProgramClasses";
@@ -13,6 +14,8 @@ import ClassStatusBadge from "@/components/classes/ClassStatusBadge";
 import ClassRosterPanel from "@/components/attendance/ClassRosterPanel";
 
 export default function AllClassesPage() {
+  const t = useTranslations("classes");
+  const tPagination = useTranslations("pagination");
   const { user } = useAuth();
   const [page, setPage] = useState(0);
   const [levelFilter, setLevelFilter] = useState<ClassLevel | undefined>(undefined);
@@ -58,28 +61,28 @@ export default function AllClassesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Classes</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("pageTitle")}</h1>
       </div>
 
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <label htmlFor="programNameFilter" className="text-sm font-medium text-gray-700">
-              Program:
+              {t("filterProgramLabel")}
             </label>
             <input
               id="programNameFilter"
               type="text"
               value={programNameInput}
               onChange={(e) => setProgramNameInput(e.target.value)}
-              placeholder="Filter by program name..."
+              placeholder={t("filterProgramPlaceholder")}
               className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
             />
           </div>
 
           <div className="flex items-center gap-2">
             <label htmlFor="levelFilter" className="text-sm font-medium text-gray-700">
-              Level:
+              {t("filterLevelLabel")}
             </label>
             <select
               id="levelFilter"
@@ -90,16 +93,16 @@ export default function AllClassesPage() {
               }}
               className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All</option>
-              <option value="BEGINNER">Beginner</option>
-              <option value="INTERMEDIATE">Intermediate</option>
-              <option value="ADVANCED">Advanced</option>
+              <option value="">{t("filterAll")}</option>
+              <option value="BEGINNER">{t("filterBeginnerOption")}</option>
+              <option value="INTERMEDIATE">{t("filterIntermediateOption")}</option>
+              <option value="ADVANCED">{t("filterAdvancedOption")}</option>
             </select>
           </div>
 
           <div className="flex items-center gap-2">
             <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700">
-              Status:
+              {t("filterStatusLabel")}
             </label>
             <select
               id="statusFilter"
@@ -110,15 +113,15 @@ export default function AllClassesPage() {
               }}
               className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All</option>
-              <option value="ACTIVE">Active</option>
-              <option value="INACTIVE">Inactive</option>
+              <option value="">{t("filterAll")}</option>
+              <option value="ACTIVE">{t("filterActive")}</option>
+              <option value="INACTIVE">{t("filterInactive")}</option>
             </select>
           </div>
         </div>
 
         {loading && (
-          <div className="text-center py-8 text-sm text-gray-500">Loading classes...</div>
+          <div className="text-center py-8 text-sm text-gray-500">{t("listLoading")}</div>
         )}
 
         {error && (
@@ -131,7 +134,7 @@ export default function AllClassesPage() {
         )}
 
         {!loading && !error && classes.length === 0 && (
-          <div className="text-center py-8 text-sm text-gray-500">No classes found</div>
+          <div className="text-center py-8 text-sm text-gray-500">{t("listEmpty")}</div>
         )}
 
         {!loading && !error && classes.length > 0 && (
@@ -142,28 +145,28 @@ export default function AllClassesPage() {
                   <tr>
                     <th className="w-10 px-3 py-3" aria-label="Expand" />
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
+                      {t("colName")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Program
+                      {t("colProgram")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Level
+                      {t("colLevel")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
+                      {t("colType")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Professor
+                      {t("colProfessor")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Max Students
+                      {t("colMaxStudents")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      {t("colStatus")}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Created
+                      {t("colCreated")}
                     </th>
                   </tr>
                 </thead>
@@ -206,7 +209,7 @@ export default function AllClassesPage() {
                           <ClassTypeBadge type={c.type} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {c.professorName ?? <span className="text-gray-400 italic">Unassigned</span>}
+                          {c.professorName ?? <span className="text-gray-400 italic">{t("colUnassigned")}</span>}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {c.maxStudents}
@@ -234,7 +237,7 @@ export default function AllClassesPage() {
 
             <div className="flex items-center justify-between border-t border-gray-200 pt-4">
               <p className="text-sm text-gray-700">
-                Page {page + 1} of {totalPages} ({totalElements} total)
+                {tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}
               </p>
               <div className="flex gap-2">
                 <button
@@ -243,7 +246,7 @@ export default function AllClassesPage() {
                   disabled={page === 0}
                   className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Previous
+                  {tPagination("previous")}
                 </button>
                 <button
                   type="button"
@@ -251,7 +254,7 @@ export default function AllClassesPage() {
                   disabled={page >= totalPages - 1}
                   className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Next
+                  {tPagination("next")}
                 </button>
               </div>
             </div>
