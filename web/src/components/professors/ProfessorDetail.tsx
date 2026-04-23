@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ProfessorDetail as ProfessorDetailType } from "@/lib/types/professor";
 import { api, ApiError } from "@/lib/api";
 import ProfessorStatusBadge from "./ProfessorStatusBadge";
@@ -16,6 +17,7 @@ export default function ProfessorDetail({
   professor,
   onStatusChanged,
 }: ProfessorDetailProps) {
+  const t = useTranslations("professors");
   const [showConfirm, setShowConfirm] = useState<"deactivate" | "reactivate" | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [feedback, setFeedback] = useState<{
@@ -29,10 +31,10 @@ export default function ProfessorDetail({
 
     try {
       await api.post(`/professors/${professor.id}/${action}`);
-      const label = action === "deactivate" ? "deactivated" : "reactivated";
+      const pastTense = action === "deactivate" ? "deactivated" : "reactivated";
       setFeedback({
         type: "success",
-        message: `Professor has been ${label} successfully.`,
+        message: t("detailSuccessFeedback", { action: pastTense }),
       });
       setShowConfirm(null);
       onStatusChanged?.();
@@ -40,7 +42,7 @@ export default function ProfessorDetail({
       const message =
         err instanceof ApiError
           ? err.message
-          : `Failed to ${action} professor. Please try again.`;
+          : t("detailErrorFeedback", { action });
       setFeedback({ type: "error", message });
     } finally {
       setActionLoading(false);
@@ -89,7 +91,7 @@ export default function ProfessorDetail({
                 href={`/professors/${professor.id}/edit`}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Edit
+                {t("detailEditButton")}
               </Link>
             )}
           </div>
@@ -99,53 +101,53 @@ export default function ProfessorDetail({
         <div className="px-6 py-5">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div>
-              <dt className="text-sm font-medium text-gray-500">First Name</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailFirstName")}</dt>
               <dd className="mt-1 text-sm text-gray-900">{professor.firstName}</dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Last Name</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailLastName")}</dt>
               <dd className="mt-1 text-sm text-gray-900">{professor.lastName}</dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Email</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailEmail")}</dt>
               <dd className="mt-1 text-sm text-gray-900">{professor.email}</dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailPhone")}</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {professor.phoneNumber || "-"}
               </dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Document Type</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailDocType")}</dt>
               <dd className="mt-1 text-sm text-gray-900">{professor.identityDocumentType}</dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Document Number</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailDocNumber")}</dt>
               <dd className="mt-1 text-sm text-gray-900">{professor.identityNumber}</dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Status</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailStatus")}</dt>
               <dd className="mt-1">
                 <ProfessorStatusBadge status={professor.status} />
               </dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Created At</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailCreatedAt")}</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {formatDate(professor.createdAt)}
               </dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Created By</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailCreatedBy")}</dt>
               <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
                 {professor.createdBy}
               </dd>
@@ -155,7 +157,7 @@ export default function ProfessorDetail({
               <>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
-                    Last Updated
+                    {t("detailUpdatedAt")}
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {formatDate(professor.updatedAt)}
@@ -164,7 +166,7 @@ export default function ProfessorDetail({
 
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
-                    Updated By
+                    {t("detailUpdatedBy")}
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
                     {professor.updatedBy}
@@ -189,14 +191,14 @@ export default function ProfessorDetail({
                 onClick={() => setShowConfirm("deactivate")}
                 className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
-                Deactivate Professor
+                {t("detailDeactivateButton")}
               </button>
             )}
 
           {showConfirm === "deactivate" && (
             <div className="space-y-3">
               <p className="text-sm text-gray-700">
-                Are you sure you want to deactivate this professor?
+                {t("detailDeactivateConfirm")}
               </p>
               <div className="flex gap-3">
                 <button
@@ -205,7 +207,7 @@ export default function ProfessorDetail({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading ? "Deactivating..." : "Confirm Deactivation"}
+                  {actionLoading ? t("detailDeactivatingButton") : t("detailDeactivateModalTitle")}
                 </button>
                 <button
                   type="button"
@@ -213,7 +215,7 @@ export default function ProfessorDetail({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {t("detailCancelButton")}
                 </button>
               </div>
             </div>
@@ -226,7 +228,7 @@ export default function ProfessorDetail({
               disabled={actionLoading}
               className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {actionLoading ? "Reactivating..." : "Reactivate Professor"}
+              {actionLoading ? t("detailReactivatingButton") : t("detailReactivateButton")}
             </button>
           )}
         </div>

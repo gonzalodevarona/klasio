@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api, ApiError } from "@/lib/api";
 import {
   ProfessorDetail,
@@ -29,6 +30,9 @@ const EMAIL_REGEX = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
 export default function ProfessorForm({ professor }: ProfessorFormProps) {
   const router = useRouter();
+  const t = useTranslations("professors");
+  const tValidation = useTranslations("validation");
+  const tCommon = useTranslations("common");
   const isEdit = !!professor;
 
   const [firstName, setFirstName] = useState(professor?.firstName ?? "");
@@ -48,33 +52,33 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
     const errors: FieldErrors = {};
 
     if (!firstName.trim()) {
-      errors.firstName = "First name is required.";
+      errors.firstName = tValidation("firstName.required");
     } else if (firstName.trim().length > 100) {
-      errors.firstName = "First name must be at most 100 characters.";
+      errors.firstName = tValidation("firstName.maxLength");
     }
 
     if (!lastName.trim()) {
-      errors.lastName = "Last name is required.";
+      errors.lastName = tValidation("lastName.required");
     } else if (lastName.trim().length > 100) {
-      errors.lastName = "Last name must be at most 100 characters.";
+      errors.lastName = tValidation("lastName.maxLength");
     }
 
     if (!email.trim()) {
-      errors.email = "Email is required.";
+      errors.email = tValidation("email.required");
     } else if (!EMAIL_REGEX.test(email.trim())) {
-      errors.email = "Please enter a valid email address.";
+      errors.email = tValidation("email.invalid");
     } else if (email.trim().length > 255) {
-      errors.email = "Email must be at most 255 characters.";
+      errors.email = tValidation("email.maxLength");
     }
 
     if (phoneNumber.trim().length > 20) {
-      errors.phoneNumber = "Phone number must be at most 20 characters.";
+      errors.phoneNumber = tValidation("phone.maxLength");
     }
 
     if (!identityNumber.trim()) {
-      errors.identityNumber = "Document number is required.";
+      errors.identityNumber = tValidation("documentNumber.required");
     } else if (identityNumber.trim().length > 30) {
-      errors.identityNumber = "Document number must be at most 30 characters.";
+      errors.identityNumber = tValidation("documentNumber.maxLength");
     }
 
     return errors;
@@ -128,7 +132,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
         }
         setApiError(err.message);
       } else {
-        setApiError("An unexpected error occurred. Please try again.");
+        setApiError(tCommon("unexpectedError"));
       }
     } finally {
       setSubmitting(false);
@@ -152,7 +156,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           htmlFor="firstName"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          First Name <span className="text-red-500">*</span>
+          {t("formFirstNameLabel")}
         </label>
         <input
           id="firstName"
@@ -162,7 +166,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             fieldErrors.firstName ? "border-red-500" : "border-gray-300"
           }`}
-          placeholder="e.g. Carlos"
+          placeholder={t("formFirstNamePlaceholder")}
         />
         {fieldErrors.firstName && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.firstName}</p>
@@ -175,7 +179,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           htmlFor="lastName"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Last Name <span className="text-red-500">*</span>
+          {t("formLastNameLabel")}
         </label>
         <input
           id="lastName"
@@ -185,7 +189,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             fieldErrors.lastName ? "border-red-500" : "border-gray-300"
           }`}
-          placeholder="e.g. Martinez"
+          placeholder={t("formLastNamePlaceholder")}
         />
         {fieldErrors.lastName && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.lastName}</p>
@@ -198,7 +202,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           htmlFor="email"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Email <span className="text-red-500">*</span>
+          {t("formEmailLabel")}
         </label>
         <input
           id="email"
@@ -208,7 +212,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             fieldErrors.email ? "border-red-500" : "border-gray-300"
           }`}
-          placeholder="e.g. carlos@example.com"
+          placeholder={t("formEmailPlaceholder")}
         />
         {fieldErrors.email && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
@@ -221,10 +225,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           htmlFor="phoneNumber"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Phone Number{" "}
-          <span className="text-gray-400 font-normal">
-            (must be valid for WhatsApp)
-          </span>
+          {t("formPhoneLabel")}
         </label>
         <input
           id="phoneNumber"
@@ -234,7 +235,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
           className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             fieldErrors.phoneNumber ? "border-red-500" : "border-gray-300"
           }`}
-          placeholder="e.g. +573001234567"
+          placeholder={t("formPhonePlaceholder")}
         />
         {fieldErrors.phoneNumber && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.phoneNumber}</p>
@@ -263,11 +264,11 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
         >
           {submitting
             ? isEdit
-              ? "Saving..."
-              : "Creating..."
+              ? t("formSavingButton")
+              : t("formCreatingButton")
             : isEdit
-              ? "Save Changes"
-              : "Create Professor"}
+              ? t("formSaveButton")
+              : t("formCreateButton")}
         </button>
       </div>
     </form>

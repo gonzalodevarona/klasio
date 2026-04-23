@@ -40,6 +40,8 @@ const existingProfessor: ProfessorDetail = {
   lastName: "Martinez",
   email: "carlos@example.com",
   phoneNumber: "+573001234567",
+  identityDocumentType: "CC",
+  identityNumber: "123456789",
   status: "ACTIVE" as const,
   createdAt: "2025-01-15T10:00:00Z",
   createdBy: "44444444-4444-4444-4444-444444444444",
@@ -160,6 +162,9 @@ describe("ProfessorForm (create mode)", () => {
     fireEvent.change(screen.getByLabelText(/Email/), {
       target: { value: "carlos@example.com" },
     });
+    fireEvent.change(screen.getByLabelText(/Document Number/), {
+      target: { value: "1234567890" },
+    });
     fireEvent.click(screen.getByText("Create Professor"));
 
     await waitFor(() => {
@@ -168,6 +173,8 @@ describe("ProfessorForm (create mode)", () => {
         lastName: "Martinez",
         email: "carlos@example.com",
         phoneNumber: undefined,
+        identityDocumentType: "CC",
+        identityNumber: "1234567890",
       });
     });
 
@@ -192,6 +199,9 @@ describe("ProfessorForm (create mode)", () => {
     });
     fireEvent.change(screen.getByLabelText(/Email/), {
       target: { value: "carlos@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/Document Number/), {
+      target: { value: "1234567890" },
     });
     fireEvent.click(screen.getByText("Create Professor"));
 
@@ -224,6 +234,9 @@ describe("ProfessorForm (create mode)", () => {
     });
     fireEvent.change(screen.getByLabelText(/Email/), {
       target: { value: "carlos@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/Document Number/), {
+      target: { value: "1234567890" },
     });
     fireEvent.click(screen.getByText("Create Professor"));
 
@@ -273,6 +286,8 @@ describe("ProfessorForm (edit mode)", () => {
           lastName: "Martinez Updated",
           email: "carlos.updated@example.com",
           phoneNumber: "+573001234567",
+          identityDocumentType: "CC",
+          identityNumber: "123456789",
         }
       );
     });
