@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { StudentStatus } from "@/lib/types/student";
 import { useStudents } from "@/hooks/useStudents";
 import StudentStatusBadge from "./StudentStatusBadge";
 
 export default function StudentList() {
+  const t = useTranslations("students");
+  const tCommon = useTranslations("common");
+  const tPagination = useTranslations("pagination");
+
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<StudentStatus | undefined>(
     undefined
@@ -68,7 +73,7 @@ export default function StudentList() {
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700">
-          Status:
+          {t("filterStatusLabel")}
         </label>
         <select
           id="statusFilter"
@@ -76,9 +81,9 @@ export default function StudentList() {
           onChange={(e) => handleStatusChange(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">All</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
+          <option value="">{tCommon("all")}</option>
+          <option value="ACTIVE">{tCommon("active")}</option>
+          <option value="INACTIVE">{tCommon("inactive")}</option>
         </select>
 
         <div className="flex items-center gap-2">
@@ -87,7 +92,7 @@ export default function StudentList() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={handleSearchKeyDown}
-            placeholder="Search by name, email, or ID..."
+            placeholder={t("filterSearchPlaceholder")}
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
           />
           <button
@@ -95,7 +100,7 @@ export default function StudentList() {
             onClick={handleSearch}
             className="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Search
+            {tCommon("search")}
           </button>
           {search && (
             <button
@@ -103,7 +108,7 @@ export default function StudentList() {
               onClick={handleClearSearch}
               className="inline-flex items-center rounded-md bg-white px-3 py-1.5 text-sm font-medium text-gray-500 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Clear
+              {tCommon("clear")}
             </button>
           )}
         </div>
@@ -111,16 +116,16 @@ export default function StudentList() {
 
       {loading ? (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading students...
+          {t("listLoading")}
         </div>
       ) : students.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-sm text-gray-500">No students found</p>
+          <p className="text-sm text-gray-500">{t("listEmpty")}</p>
           <Link
             href="/students/new"
             className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-700"
           >
-            Add your first student
+            {t("listEmptyAction")}
           </Link>
         </div>
       ) : (
@@ -130,22 +135,22 @@ export default function StudentList() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
+                    {t("colName")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Document
+                    {t("colDocument")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
+                    {t("colEmail")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Age
+                    {t("colAge")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t("colStatus")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Membership
+                    {t("colMembership")}
                   </th>
                 </tr>
               </thead>
@@ -175,11 +180,11 @@ export default function StudentList() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {student.hasActiveMembership ? (
                         <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                          Active
+                          {t("membershipActive")}
                         </span>
                       ) : (
                         <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                          No active
+                          {t("membershipNone")}
                         </span>
                       )}
                     </td>
@@ -192,7 +197,7 @@ export default function StudentList() {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
             <p className="text-sm text-gray-700">
-              Page {page + 1} of {totalPages} ({totalElements} total)
+              {tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}
             </p>
             <div className="flex gap-2">
               <button
@@ -201,7 +206,7 @@ export default function StudentList() {
                 disabled={page === 0}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Previous
+                {tPagination("previous")}
               </button>
               <button
                 type="button"
@@ -209,7 +214,7 @@ export default function StudentList() {
                 disabled={page >= totalPages - 1}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {tPagination("next")}
               </button>
             </div>
           </div>
