@@ -1,5 +1,6 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithIntl } from "../../../../__test-support__/renderWithIntl";
 import SetupAccountForm from "../SetupAccountForm";
 
 // ---------------------------------------------------------------------------
@@ -24,14 +25,14 @@ afterEach(() => {
 describe("SetupAccountForm", () => {
   describe("when token is missing", () => {
     it("shows the resend email form directly", () => {
-      render(<SetupAccountForm token={null} />);
+      renderWithIntl(<SetupAccountForm token={null} />);
 
       expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /send new link/i })).toBeInTheDocument();
     });
 
     it("does not render the password form", () => {
-      render(<SetupAccountForm token={null} />);
+      renderWithIntl(<SetupAccountForm token={null} />);
 
       expect(screen.queryByLabelText(/new password/i)).not.toBeInTheDocument();
     });
@@ -39,20 +40,20 @@ describe("SetupAccountForm", () => {
 
   describe("with a valid token", () => {
     it("renders the password form", () => {
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       expect(screen.getByLabelText("New Password")).toBeInTheDocument();
       expect(screen.getByLabelText("Confirm New Password")).toBeInTheDocument();
     });
 
     it("shows password policy checker below the password field", () => {
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument();
     });
 
     it("shows error when passwords do not match", async () => {
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "Password1!" },
@@ -67,7 +68,7 @@ describe("SetupAccountForm", () => {
     });
 
     it("shows error when password does not meet policy requirements", async () => {
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       // Weak password: matches confirmPassword but fails policy
       fireEvent.change(screen.getByLabelText(/^new password/i), {
@@ -85,7 +86,7 @@ describe("SetupAccountForm", () => {
     it("does not call the API when passwords do not match", async () => {
       global.fetch = jest.fn();
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "Password1!" },
@@ -103,7 +104,7 @@ describe("SetupAccountForm", () => {
     it("does not call the API when password fails policy", async () => {
       global.fetch = jest.fn();
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "weakpass" },
@@ -127,7 +128,7 @@ describe("SetupAccountForm", () => {
         json: async () => ({}),
       });
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "SecurePass1!" },
@@ -155,7 +156,7 @@ describe("SetupAccountForm", () => {
         json: async () => ({}),
       });
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "SecurePass1!" },
@@ -183,7 +184,7 @@ describe("SetupAccountForm", () => {
         json: async () => ({}),
       });
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "SecurePass1!" },
@@ -220,7 +221,7 @@ describe("SetupAccountForm", () => {
           json: async () => ({}),
         });
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       // Submit the setup form to get the 410
       fireEvent.change(screen.getByLabelText(/^new password/i), {
@@ -260,7 +261,7 @@ describe("SetupAccountForm", () => {
         json: async () => ({}),
       });
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "SecurePass1!" },
@@ -280,7 +281,7 @@ describe("SetupAccountForm", () => {
     it("shows generic error message on network failure", async () => {
       global.fetch = jest.fn().mockRejectedValue(new Error("Network error"));
 
-      render(<SetupAccountForm {...buildProps()} />);
+      renderWithIntl(<SetupAccountForm {...buildProps()} />);
 
       fireEvent.change(screen.getByLabelText(/^new password/i), {
         target: { value: "SecurePass1!" },
