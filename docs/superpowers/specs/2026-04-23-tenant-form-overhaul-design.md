@@ -17,7 +17,7 @@ Replace the partial "Create New League" form with a complete "Create New Tenant"
 | Field | Type | Validation |
 |---|---|---|
 | Name | text | non-empty |
-| Sport Discipline | text | non-empty |
+| Discipline | text | non-empty |
 | Language | dropdown | `es` or `en` only |
 | Slug | text | auto-fills from name, editable, non-empty |
 | Contact Email | email | valid email format |
@@ -119,6 +119,35 @@ Update fixtures in:
 | `TenantForm.tsx` | Full rework — 4 address states, phone disabled until country set, `CountrySelect`, digits-only phone validation, logo required validation, slug required validation, slug auto-fills from name in real time, button → "Create Tenant" |
 | `LogoUpload.tsx` | Add `*` required indicator to label |
 | `TenantDetail.tsx` | Display new address fields; display phone as `+{indicator} {phone}` |
+
+---
+
+## Field Rename: sportDiscipline → discipline
+
+Rename everywhere — DB column, domain model, DTOs, controller params, frontend state + types.
+
+| Layer | Before | After |
+|---|---|---|
+| DB column | `sport_discipline VARCHAR(100)` | `discipline VARCHAR(100)` |
+| `Tenant` domain | `sportDiscipline` | `discipline` |
+| `CreateTenantCommand` | `sportDiscipline` | `discipline` |
+| `TenantController` @RequestParam | `sportDiscipline` | `discipline` |
+| `TenantJpaEntity` | `sportDiscipline` / `sport_discipline` | `discipline` / `discipline` |
+| `TenantMapper` | `getSportDiscipline()` | `getDiscipline()` |
+| `TenantResponseDto` | `sportDiscipline` | `discipline` |
+| `TenantDetail` (app DTO) | `sportDiscipline` | `discipline` |
+| `TenantSummaryResponse` | `sportDiscipline` | `discipline` |
+| `lib/types/tenant.ts` | `sportDiscipline` | `discipline` |
+| `TenantForm.tsx` state | `sportDiscipline` | `discipline` |
+| `TenantDetail.tsx` display | `sportDiscipline` | `discipline` |
+| `TenantList.tsx` | `sportDiscipline` | `discipline` |
+| Form label | "Sport Discipline" | "Discipline" |
+
+DB migration included in V060:
+
+```sql
+ALTER TABLE tenants RENAME COLUMN sport_discipline TO discipline;
+```
 
 ---
 
