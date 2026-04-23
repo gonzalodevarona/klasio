@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithIntl } from "../../__test-support__/renderWithIntl";
 import ProfessorForm from "@/components/professors/ProfessorForm";
 import { api, ApiError } from "@/lib/api";
 import { ProfessorDetail } from "@/lib/types/professor";
@@ -52,7 +53,7 @@ beforeEach(() => {
 
 describe("ProfessorForm (create mode)", () => {
   it("renders firstName, lastName, and email fields", () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     expect(screen.getByLabelText(/First Name/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Last Name/)).toBeInTheDocument();
@@ -61,7 +62,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates firstName is required on submit", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/Last Name/), {
       target: { value: "Martinez" },
@@ -81,7 +82,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates lastName is required on submit", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -101,7 +102,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates email is required on submit", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -119,7 +120,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates email format", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -148,7 +149,7 @@ describe("ProfessorForm (create mode)", () => {
     };
     (api.post as jest.Mock).mockResolvedValue(created);
 
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -181,7 +182,7 @@ describe("ProfessorForm (create mode)", () => {
     );
     (api.post as jest.Mock).mockRejectedValue(err);
 
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -213,7 +214,7 @@ describe("ProfessorForm (create mode)", () => {
     );
     (api.post as jest.Mock).mockRejectedValue(err);
 
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -240,7 +241,7 @@ describe("ProfessorForm (create mode)", () => {
 
 describe("ProfessorForm (edit mode)", () => {
   it("pre-fills fields with existing professor data", () => {
-    render(<ProfessorForm professor={existingProfessor} />);
+    renderWithIntl(<ProfessorForm professor={existingProfessor} />);
 
     expect(screen.getByLabelText(/First Name/)).toHaveValue("Carlos");
     expect(screen.getByLabelText(/Last Name/)).toHaveValue("Martinez");
@@ -251,7 +252,7 @@ describe("ProfessorForm (edit mode)", () => {
   it("submits update request via PUT", async () => {
     (api.put as jest.Mock).mockResolvedValue(existingProfessor);
 
-    render(<ProfessorForm professor={existingProfessor} />);
+    renderWithIntl(<ProfessorForm professor={existingProfessor} />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos Updated" },

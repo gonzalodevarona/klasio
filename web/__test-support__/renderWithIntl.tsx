@@ -2,8 +2,13 @@ import { render, RenderOptions } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import React from "react";
 
-// Minimal en messages covering all badge namespaces used in tests
+// Minimal en messages covering all namespaces used in tests
 const testMessages = {
+  commonFields: {
+    documentTypeLabel: "Document Type *",
+    documentNumberLabel: "Document Number *",
+    documentNumberPlaceholder: "e.g. 1234567890",
+  },
   badges: {
     membershipStatus: {
       EXPIRED: "Expired",

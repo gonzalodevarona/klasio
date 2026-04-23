@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { IDENTITY_DOCUMENT_TYPES } from "@/lib/types/identity";
 import type { IdentityDocumentType } from "@/lib/types/identity";
 
@@ -27,11 +28,12 @@ export default function DocumentFields({
   labelClassName = "block text-sm font-medium text-gray-700 mb-1",
   inputClassName = "block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
 }: DocumentFieldsProps) {
+  const t = useTranslations("commonFields");
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
         <label htmlFor="identityDocumentType" className={labelClassName}>
-          Document Type <span className="text-red-500">*</span>
+          {t("documentTypeLabel")}
         </label>
         <select
           id="identityDocumentType"
@@ -55,7 +57,7 @@ export default function DocumentFields({
 
       <div>
         <label htmlFor="identityNumber" className={labelClassName}>
-          Document Number <span className="text-red-500">*</span>
+          {t("documentNumberLabel")}
         </label>
         <input
           id="identityNumber"
@@ -64,7 +66,7 @@ export default function DocumentFields({
           onChange={(e) => onDocumentNumberChange(e.target.value)}
           disabled={disabled}
           maxLength={30}
-          placeholder="e.g. 1234567890"
+          placeholder={t("documentNumberPlaceholder")}
           className={`${inputClassName} ${
             errors.documentNumber ? "border-red-500" : "border-gray-300"
           }`}
