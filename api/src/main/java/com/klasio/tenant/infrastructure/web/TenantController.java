@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
@@ -82,28 +81,18 @@ public class TenantController {
     public ResponseEntity<TenantResponseDto.TenantDetailResponse> createTenant(
             @RequestParam("name") String name,
             @RequestParam("discipline") String discipline,
-            @RequestParam(value = "language", required = false) String language,
+            @RequestParam("language") String language,
             @RequestParam("contactEmail") String contactEmail,
-            @RequestParam(value = "slug", required = false) String slug,
-            @RequestParam(value = "contactPhone", required = false) String contactPhone,
-            @RequestParam(value = "contactPhoneIndicator", required = false) String contactPhoneIndicator,
-            @RequestParam(value = "contactStreet", required = false) String contactStreet,
-            @RequestParam(value = "contactCity", required = false) String contactCity,
-            @RequestParam(value = "contactState", required = false) String contactState,
-            @RequestParam(value = "contactCountry", required = false) String contactCountry,
-            @RequestParam(value = "logo", required = false) MultipartFile logo) throws IOException {
+            @RequestParam("contactPhone") String contactPhone,
+            @RequestParam("contactPhoneIndicator") String contactPhoneIndicator,
+            @RequestParam("contactStreet") String contactStreet,
+            @RequestParam("contactCity") String contactCity,
+            @RequestParam("contactState") String contactState,
+            @RequestParam("contactCountry") String contactCountry,
+            @RequestParam("logo") MultipartFile logo,
+            @RequestParam(value = "slug", required = false) String slug) throws IOException {
 
         UUID userId = extractUserId();
-
-        InputStream logoData = null;
-        String logoContentType = null;
-        long logoSize = 0;
-
-        if (logo != null && !logo.isEmpty()) {
-            logoData = logo.getInputStream();
-            logoContentType = logo.getContentType();
-            logoSize = logo.getSize();
-        }
 
         CreateTenantCommand command = new CreateTenantCommand(
                 name,
@@ -117,9 +106,9 @@ public class TenantController {
                 contactCity,
                 contactState,
                 contactCountry,
-                logoData,
-                logoContentType,
-                logoSize,
+                logo.getInputStream(),
+                logo.getContentType(),
+                logo.getSize(),
                 userId
         );
 

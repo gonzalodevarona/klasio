@@ -11,25 +11,22 @@ import org.springframework.stereotype.Component;
 public class TenantMapper {
 
     public Tenant toDomain(TenantJpaEntity entity) {
-        // TODO(Task-5): map language, phoneIndicator, street, city, state, country
-        // from dedicated columns once V06x migrations are applied.
-        ContactInfo contactInfo = new ContactInfo(
-                entity.getContactEmail(),
-                entity.getContactPhone(),
-                "0",            // phoneIndicator — sentinel until Task-5 migration adds the column
-                entity.getContactAddress() != null ? entity.getContactAddress() : "-", // street
-                "-",            // city — sentinel until Task-5 migration adds the column
-                "-",            // state — sentinel until Task-5 migration adds the column
-                "-"             // country — sentinel until Task-5 migration adds the column
-        );
         return Tenant.reconstitute(
                 TenantId.of(entity.getId()),
                 new TenantSlug(entity.getSlug()),
                 entity.getName(),
-                entity.getSportDiscipline(), // column renamed to discipline in Task-5 migration
-                null,           // language — column added in Task-5 migration
+                entity.getDiscipline(),
+                entity.getLanguage(),
                 entity.getLogoKey(),
-                contactInfo,
+                new ContactInfo(
+                        entity.getContactEmail(),
+                        entity.getContactPhone(),
+                        entity.getContactPhoneIndicator(),
+                        entity.getContactStreet(),
+                        entity.getContactCity(),
+                        entity.getContactState(),
+                        entity.getContactCountry()
+                ),
                 TenantStatus.valueOf(entity.getStatus()),
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
@@ -39,17 +36,20 @@ public class TenantMapper {
     }
 
     public TenantJpaEntity toEntity(Tenant tenant) {
-        // TODO(Task-5): persist language, phoneIndicator, street, city, state, country
-        // to dedicated columns once V06x migrations are applied.
         TenantJpaEntity entity = new TenantJpaEntity();
         entity.setId(tenant.getId().value());
         entity.setSlug(tenant.getSlug().value());
         entity.setName(tenant.getName());
-        entity.setSportDiscipline(tenant.getDiscipline());
+        entity.setDiscipline(tenant.getDiscipline());
+        entity.setLanguage(tenant.getLanguage());
         entity.setLogoKey(tenant.getLogoKey());
         entity.setContactEmail(tenant.getContactInfo().email());
         entity.setContactPhone(tenant.getContactInfo().phone());
-        entity.setContactAddress(tenant.getContactInfo().street());
+        entity.setContactPhoneIndicator(tenant.getContactInfo().phoneIndicator());
+        entity.setContactStreet(tenant.getContactInfo().street());
+        entity.setContactCity(tenant.getContactInfo().city());
+        entity.setContactState(tenant.getContactInfo().state());
+        entity.setContactCountry(tenant.getContactInfo().country());
         entity.setStatus(tenant.getStatus().name());
         entity.setCreatedAt(tenant.getCreatedAt());
         entity.setCreatedBy(tenant.getCreatedBy());
