@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { usePaymentProofs } from "@/hooks/usePaymentProofs";
 import { ProofReviewModal } from "./ProofReviewModal";
 import type { ProofQueueItem } from "@/lib/types/paymentProof";
@@ -15,6 +16,7 @@ function formatDocType(code: string): string {
 }
 
 export function ProofQueue() {
+  const t = useTranslations("paymentProofs");
   const { listPendingProofs, loading, error } = usePaymentProofs();
   const [queue, setQueue] = useState<ProofQueueItem[]>([]);
   const [selected, setSelected] = useState<ProofQueueItem | null>(null);
@@ -47,11 +49,11 @@ export function ProofQueue() {
       )}
 
       {loading && queue.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-500">Loading queue…</p>
+        <p className="py-8 text-center text-sm text-gray-500">{t("queueLoading")}</p>
       )}
 
       {!loading && queue.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-400">No pending proofs.</p>
+        <p className="py-8 text-center text-sm text-gray-400">{t("queueEmpty")}</p>
       )}
 
       {queue.length > 0 && (
@@ -60,19 +62,19 @@ export function ProofQueue() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student
+                  {t("colStudent")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID Document
+                  {t("colIdDocument")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Plan
+                  {t("colPlan")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Uploaded
+                  {t("colUploaded")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
+                  {t("colType")}
                 </th>
                 <th className="px-4 py-3" />
               </tr>
@@ -95,7 +97,7 @@ export function ProofQueue() {
                       onClick={() => setSelected(item)}
                       className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
                     >
-                      Review
+                      {t("reviewBtn")}
                     </button>
                   </td>
                 </tr>
