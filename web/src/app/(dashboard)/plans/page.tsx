@@ -2,13 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useAllPlans } from "@/hooks/usePlans";
 import ProgramStatusBadge from "@/components/programs/ProgramStatusBadge";
-
-const MODALITY_LABELS: Record<string, string> = {
-  HOURS_BASED: "Hours Based",
-  CLASSES_PER_WEEK: "Classes per Week",
-};
 
 function formatCost(cost: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -20,6 +16,7 @@ function formatCost(cost: number): string {
 }
 
 export default function PlansPage() {
+  const t = useTranslations("programs");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(
     undefined
   );
@@ -32,17 +29,16 @@ export default function PlansPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Plans</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("allPlansPageTitle")}</h1>
       </div>
 
       <div className="space-y-4">
-        {/* Filter */}
         <div className="flex items-center gap-3">
           <label
             htmlFor="statusFilter"
             className="text-sm font-medium text-gray-700"
           >
-            Status:
+            {t("filterStatusLabel")}
           </label>
           <select
             id="statusFilter"
@@ -50,15 +46,15 @@ export default function PlansPage() {
             onChange={(e) => handleStatusChange(e.target.value)}
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
+            <option value="">{t("filterAll")}</option>
+            <option value="ACTIVE">{t("filterActive")}</option>
+            <option value="INACTIVE">{t("filterInactive")}</option>
           </select>
         </div>
 
         {loading && (
           <div className="text-center py-8 text-sm text-gray-500">
-            Loading plans...
+            {t("allPlansLoading")}
           </div>
         )}
 
@@ -73,7 +69,7 @@ export default function PlansPage() {
 
         {!loading && !error && plans.length === 0 && (
           <div className="text-center py-8 text-sm text-gray-500">
-            No plans found
+            {t("allPlansEmpty")}
           </div>
         )}
 
@@ -83,22 +79,22 @@ export default function PlansPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Plan Name
+                    {t("allPlansColPlanName")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Program
+                    {t("allPlansColProgram")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Modality
+                    {t("plansColModality")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cost
+                    {t("plansColCost")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Manager
+                    {t("plansColManager")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t("plansColStatus")}
                   </th>
                 </tr>
               </thead>
@@ -117,13 +113,17 @@ export default function PlansPage() {
                       {plan.programName ?? "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {MODALITY_LABELS[plan.modality] ?? plan.modality}
+                      {plan.modality === "HOURS_BASED"
+                        ? t("modalityHoursBased")
+                        : plan.modality === "CLASSES_PER_WEEK"
+                        ? t("modalityClassesPerWeek")
+                        : plan.modality}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatCost(plan.cost)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono text-xs">
-                      {plan.managerId}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {plan.managerName ?? plan.managerId}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <ProgramStatusBadge status={plan.status} />

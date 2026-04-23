@@ -34,9 +34,9 @@ public final class StudentResponseDto {
             String tutorEmail,
             String status,
             Instant createdAt,
-            UUID createdBy,
+            String createdBy,
             Instant updatedAt,
-            UUID updatedBy,
+            String updatedBy,
             List<EnrollmentResponseDto.EnrollmentSummaryResponse> enrollments
     ) {
 
@@ -69,9 +69,9 @@ public final class StudentResponseDto {
                     student.getTutorEmail(),
                     student.getStatus(),
                     student.getCreatedAt(),
-                    student.getCreatedBy(),
+                    student.getCreatedBy().toString(),
                     student.getUpdatedAt(),
-                    student.getUpdatedBy(),
+                    student.getUpdatedBy() != null ? student.getUpdatedBy().toString() : null,
                     enrollmentResponses
             );
         }

@@ -20,13 +20,14 @@ public record TenantDetail(
         String contactCity,
         String contactState,
         String contactCountry,
-        UUID createdBy,
+        String createdBy,
         Instant createdAt,
         Instant deactivatedAt,
-        UUID deactivatedBy
+        String deactivatedBy
 ) {
 
-    public static TenantDetail fromDomain(Tenant tenant, String logoUrl) {
+    public static TenantDetail fromDomain(Tenant tenant, String logoUrl,
+                                          String createdByName, String deactivatedByName) {
         return new TenantDetail(
                 tenant.getId().value(),
                 tenant.getSlug().value(),
@@ -42,10 +43,10 @@ public record TenantDetail(
                 tenant.getContactInfo().city(),
                 tenant.getContactInfo().state(),
                 tenant.getContactInfo().country(),
-                tenant.getCreatedBy(),
+                createdByName,
                 tenant.getCreatedAt(),
                 tenant.getDeactivatedAt(),
-                tenant.getDeactivatedBy()
+                deactivatedByName
         );
     }
 }

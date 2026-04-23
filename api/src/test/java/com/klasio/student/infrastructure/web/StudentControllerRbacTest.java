@@ -3,6 +3,7 @@ package com.klasio.student.infrastructure.web;
 import com.klasio.shared.infrastructure.config.JwtProperties;
 import com.klasio.shared.infrastructure.exception.GlobalExceptionHandler;
 import com.klasio.student.application.port.input.CreateStudentUseCase;
+import com.klasio.student.application.port.input.GetStudentDetailUseCase;
 import com.klasio.student.application.port.input.GetStudentUseCase;
 import com.klasio.student.application.port.input.ListEnrollmentsUseCase;
 import com.klasio.student.application.port.input.ListStudentsUseCase;
@@ -83,6 +84,9 @@ class StudentControllerRbacTest {
 
     @MockitoBean
     private GetStudentUseCase getStudentUseCase;
+
+    @MockitoBean
+    private GetStudentDetailUseCase getStudentDetailUseCase;
 
     @MockitoBean
     private ListStudentsUseCase listStudentsUseCase;

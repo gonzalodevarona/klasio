@@ -14,8 +14,6 @@ const IDENTITY_DOCUMENT_TYPES = [
   { value: "NIT", label: "NIT" },
 ];
 
-// E.164: +<country code><number>, 8-20 chars total
-const PHONE_REGEX = /^\+[1-9]\d{6,19}$/;
 
 interface Props {
   manager: ManagerSummary;
@@ -52,13 +50,8 @@ export default function EditManagerModal({ manager, onClose, onUpdated }: Props)
   }
 
   function validatePhone(): boolean {
-    const phone = form.phoneNumber.trim();
-    if (!phone) {
+    if (!form.phoneNumber.trim()) {
       setPhoneError(tValidation("phone.required"));
-      return false;
-    }
-    if (!PHONE_REGEX.test(phone)) {
-      setPhoneError(tValidation("phone.invalid"));
       return false;
     }
     return true;

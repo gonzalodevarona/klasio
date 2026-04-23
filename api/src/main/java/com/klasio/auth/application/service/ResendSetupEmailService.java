@@ -43,7 +43,7 @@ public class ResendSetupEmailService {
      *
      * When {@code tenantSlug} is blank (e.g. the user reached the expired-link
      * screen without tenant context), we fall back to an email-only lookup across
-     * all tenants and send to the first EMAIL_UNVERIFIED account found for that
+     * all tenants and send to the first INVITED account found for that
      * address.  In practice a given email lives in a single tenant, so this is safe.
      */
     @Transactional
@@ -52,7 +52,7 @@ public class ResendSetupEmailService {
 
         if (tenantSlug == null || tenantSlug.isBlank()) {
             // No tenant context — look up by email + pending-setup status only
-            userOpt = userRepository.findFirstByEmailAndStatus(email, UserStatus.EMAIL_UNVERIFIED);
+            userOpt = userRepository.findFirstByEmailAndStatus(email, UserStatus.INVITED);
         } else {
             Optional<UUID> tenantIdOpt = tenantResolverPort.resolveTenantIdBySlug(tenantSlug);
             if (tenantIdOpt.isEmpty()) {

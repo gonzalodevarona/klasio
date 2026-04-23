@@ -115,8 +115,8 @@ export default function ProgramPlanList({
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                 {plan.hours != null ? `${plan.hours}h` : "-"}
               </td>
-              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-mono text-xs">
-                {plan.managerId}
+              <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                {plan.managerName ?? plan.managerId}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">
                 <ProgramStatusBadge status={plan.status} />

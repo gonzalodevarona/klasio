@@ -90,12 +90,12 @@ class RegisterStudentServiceTest {
 
         service.register(buildCommand());
 
-        // Verify user saved with null password (EMAIL_UNVERIFIED)
+        // Verify user saved with null password and INVITED status
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
         assertThat(savedUser.getPasswordHash()).isNull();
-        assertThat(savedUser.getStatus()).isEqualTo(UserStatus.EMAIL_UNVERIFIED);
+        assertThat(savedUser.getStatus()).isEqualTo(UserStatus.INVITED);
         assertThat(savedUser.getFirstName()).isEqualTo("Maria");
         assertThat(savedUser.getLastName()).isEqualTo("Lopez");
 

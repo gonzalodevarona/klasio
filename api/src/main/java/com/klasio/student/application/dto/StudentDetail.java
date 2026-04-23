@@ -26,13 +26,16 @@ public record StudentDetail(
         String tutorEmail,
         String status,
         Instant createdAt,
-        UUID createdBy,
+        String createdBy,
         Instant updatedAt,
-        UUID updatedBy,
+        String updatedBy,
         Instant deactivatedAt,
-        UUID deactivatedBy
+        String deactivatedBy
 ) {
-    public static StudentDetail fromDomain(Student student) {
+    public static StudentDetail fromDomain(Student student,
+                                           String createdByName,
+                                           String updatedByName,
+                                           String deactivatedByName) {
         return new StudentDetail(
                 student.getId().value(),
                 student.getTenantId(),
@@ -53,11 +56,11 @@ public record StudentDetail(
                 student.getTutorEmail(),
                 student.getStatus(),
                 student.getCreatedAt(),
-                student.getCreatedBy(),
+                createdByName,
                 student.getUpdatedAt(),
-                student.getUpdatedBy(),
+                updatedByName,
                 student.getDeactivatedAt(),
-                student.getDeactivatedBy()
+                deactivatedByName
         );
     }
 }

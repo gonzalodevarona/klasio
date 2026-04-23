@@ -13,11 +13,12 @@ public record ProgramPlanSummary(
         BigDecimal cost,
         Integer hours,
         UUID managerId,
+        String managerName,
         String status,
         String programName
 ) {
 
-    public static ProgramPlanSummary fromDomain(ProgramPlan plan) {
+    public static ProgramPlanSummary fromDomain(ProgramPlan plan, String managerName) {
         return new ProgramPlanSummary(
                 plan.getId().value(),
                 plan.getProgramId(),
@@ -26,12 +27,13 @@ public record ProgramPlanSummary(
                 plan.getCost(),
                 plan.getHours(),
                 plan.getManagerId(),
+                managerName,
                 plan.getStatus().name(),
                 null
         );
     }
 
-    public static ProgramPlanSummary fromDomain(ProgramPlan plan, String programName) {
+    public static ProgramPlanSummary fromDomain(ProgramPlan plan, String managerName, String programName) {
         return new ProgramPlanSummary(
                 plan.getId().value(),
                 plan.getProgramId(),
@@ -40,6 +42,7 @@ public record ProgramPlanSummary(
                 plan.getCost(),
                 plan.getHours(),
                 plan.getManagerId(),
+                managerName,
                 plan.getStatus().name(),
                 programName
         );

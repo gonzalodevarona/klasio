@@ -47,9 +47,9 @@ public final class TenantResponseDto {
             String contactCity,
             String contactState,
             String contactCountry,
-            UUID createdBy,
+            String createdBy,
             Instant deactivatedAt,
-            UUID deactivatedBy
+            String deactivatedBy
     ) {
 
         public static TenantDetailResponse fromDomain(Tenant tenant) {
@@ -73,9 +73,9 @@ public final class TenantResponseDto {
                     tenant.getContactInfo().city(),
                     tenant.getContactInfo().state(),
                     tenant.getContactInfo().country(),
-                    tenant.getCreatedBy(),
+                    tenant.getCreatedBy().toString(),
                     tenant.getDeactivatedAt(),
-                    tenant.getDeactivatedBy()
+                    tenant.getDeactivatedBy() != null ? tenant.getDeactivatedBy().toString() : null
             );
         }
     }

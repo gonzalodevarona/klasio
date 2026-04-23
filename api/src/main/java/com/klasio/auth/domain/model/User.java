@@ -83,9 +83,9 @@ public class User {
     }
 
     /**
-     * Creates a user with no password hash (null) and EMAIL_UNVERIFIED status.
-     * Used in the unified account setup flow where users set their password
-     * by clicking a one-time link sent to their email.
+     * Creates a user with no password hash and INVITED status.
+     * Used for all roles (students, professors, managers, admins) when their account
+     * is first created and they must complete setup via a one-time email link.
      */
     public static User createPendingSetup(UUID tenantId, String email, Role role,
                                           IdentityDocumentType identityDocumentType, String identityNumber,
@@ -97,7 +97,7 @@ public class User {
         Instant now = Instant.now();
         return new User(UUID.randomUUID(), tenantId, email,
                 null,   // passwordHash is null until account setup is completed
-                role.impliedRoles(), UserStatus.EMAIL_UNVERIFIED,
+                role.impliedRoles(), UserStatus.INVITED,
                 0, null, now, now,
                 identityDocumentType, identityNumber.trim(),
                 firstName == null ? null : firstName.trim(),
@@ -113,7 +113,7 @@ public class User {
         if (isLocked()) {
             throw new AccountLockedException(lockedUntil);
         }
-        if (status == UserStatus.EMAIL_UNVERIFIED) {
+        if (status == UserStatus.INVITED) {
             throw new EmailNotVerifiedException();
         }
     }
@@ -134,7 +134,7 @@ public class User {
     }
 
     public void verifyEmail() {
-        if (this.status != UserStatus.EMAIL_UNVERIFIED) {
+        if (this.status != UserStatus.INVITED) {
             return;
         }
         this.status = UserStatus.ACTIVE;
@@ -143,7 +143,7 @@ public class User {
 
     /**
      * Completes the unified account setup flow: sets the user's password and
-     * transitions status from EMAIL_UNVERIFIED to ACTIVE.
+     * transitions status from INVITED to ACTIVE.
      */
     public void setupAccount(String newPasswordHash) {
         this.passwordHash = newPasswordHash;

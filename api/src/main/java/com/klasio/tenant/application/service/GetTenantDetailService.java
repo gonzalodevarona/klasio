@@ -1,5 +1,6 @@
 package com.klasio.tenant.application.service;
 
+import com.klasio.shared.domain.port.UserDisplayNamePort;
 import com.klasio.shared.infrastructure.exception.TenantNotFoundException;
 import com.klasio.tenant.application.dto.TenantDetail;
 import com.klasio.tenant.application.port.input.GetTenantDetailUseCase;
@@ -9,16 +10,22 @@ import com.klasio.tenant.domain.port.TenantRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @Transactional(readOnly = true)
 public class GetTenantDetailService implements GetTenantDetailUseCase {
 
     private final TenantRepository tenantRepository;
     private final LogoStorage logoStorage;
+    private final UserDisplayNamePort userDisplayNamePort;
 
-    public GetTenantDetailService(TenantRepository tenantRepository, LogoStorage logoStorage) {
+    public GetTenantDetailService(TenantRepository tenantRepository,
+                                  LogoStorage logoStorage,
+                                  UserDisplayNamePort userDisplayNamePort) {
         this.tenantRepository = tenantRepository;
         this.logoStorage = logoStorage;
+        this.userDisplayNamePort = userDisplayNamePort;
     }
 
     @Override
@@ -32,6 +39,14 @@ public class GetTenantDetailService implements GetTenantDetailUseCase {
             logoUrl = logoStorage.generatePresignedUrl(tenant.getLogoKey());
         }
 
-        return TenantDetail.fromDomain(tenant, logoUrl);
+        String createdByName = resolveName(tenant.getCreatedBy());
+        String deactivatedByName = tenant.getDeactivatedBy() != null
+                ? resolveName(tenant.getDeactivatedBy()) : null;
+
+        return TenantDetail.fromDomain(tenant, logoUrl, createdByName, deactivatedByName);
+    }
+
+    private String resolveName(UUID userId) {
+        return userDisplayNamePort.findDisplayName(userId).orElse(userId.toString());
     }
 }

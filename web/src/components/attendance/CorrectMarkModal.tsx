@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { X, Loader2 } from "lucide-react";
 import { RosterRegistrantView } from "@/lib/types/attendance";
 import { useCorrectAttendance } from "@/hooks/useCorrectAttendance";
@@ -21,6 +22,8 @@ export default function CorrectMarkModal({
   onClose,
   onCorrected,
 }: CorrectMarkModalProps) {
+  const t = useTranslations("classes");
+  const tCommon = useTranslations("common");
   const { correctMark, loading } = useCorrectAttendance();
 
   const [newMark, setNewMark] = useState<"PRESENT" | "ABSENT">(
@@ -32,7 +35,7 @@ export default function CorrectMarkModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (reason.trim().length < 5) {
-      setError("Reason must be at least 5 characters.");
+      setError(t("correctReasonMinError"));
       return;
     }
     setError(null);
@@ -43,7 +46,7 @@ export default function CorrectMarkModal({
       });
       onCorrected();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to correct mark");
+      setError(err instanceof Error ? err.message : t("correctFailedError"));
     }
   };
 
@@ -57,12 +60,12 @@ export default function CorrectMarkModal({
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Correct Attendance Mark</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t("correctTitle")}</h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded p-1 text-gray-400 hover:text-gray-600 focus:outline-none"
-            aria-label="Close"
+            aria-label={tCommon("close")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -72,7 +75,7 @@ export default function CorrectMarkModal({
         <div className="bg-gray-50 rounded-lg px-4 py-3 mb-4 text-sm">
           <p className="font-medium text-gray-900">{registration.studentName}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-gray-500">Current status:</span>
+            <span className="text-gray-500">{t("correctCurrentStatus")}</span>
             <RegistrationStatusBadge status={registration.status} />
           </div>
         </div>
@@ -81,7 +84,7 @@ export default function CorrectMarkModal({
           {/* New mark selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Correct to
+              {t("correctToLabel")}
             </label>
             <div className="flex gap-3">
               <button
@@ -93,7 +96,7 @@ export default function CorrectMarkModal({
                     : "bg-white text-blue-600 border-blue-300 hover:bg-blue-50"
                 }`}
               >
-                Present
+                {t("markingPresent")}
               </button>
               <button
                 type="button"
@@ -104,7 +107,7 @@ export default function CorrectMarkModal({
                     : "bg-white text-red-600 border-red-300 hover:bg-red-50"
                 }`}
               >
-                Absent
+                {t("markingAbsent")}
               </button>
             </div>
           </div>
@@ -115,7 +118,8 @@ export default function CorrectMarkModal({
               htmlFor="correction-reason"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Reason <span className="text-gray-400 font-normal">(5–500 characters)</span>
+              {t("correctReasonLabel")}{" "}
+              <span className="text-gray-400 font-normal">{t("correctReasonHint")}</span>
             </label>
             <textarea
               id="correction-reason"
@@ -123,7 +127,7 @@ export default function CorrectMarkModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               maxLength={500}
-              placeholder="Explain why this mark is being corrected…"
+              placeholder={t("correctReasonPlaceholder")}
               className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
             <p className="mt-1 text-xs text-gray-400 text-right">{reason.length}/500</p>
@@ -142,7 +146,7 @@ export default function CorrectMarkModal({
               onClick={onClose}
               className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+              {tCommon("cancel")}
             </button>
             <button
               type="submit"
@@ -150,7 +154,7 @@ export default function CorrectMarkModal({
               className="flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Save Correction
+              {t("correctSaveButton")}
             </button>
           </div>
         </form>

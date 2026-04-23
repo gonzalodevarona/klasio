@@ -365,7 +365,7 @@ class TenantControllerIntegrationTest {
                 "Bogotá",
                 "Cundinamarca",
                 "Colombia",
-                USER_ID,
+                USER_ID.toString(),
                 Instant.now(),
                 null,
                 null

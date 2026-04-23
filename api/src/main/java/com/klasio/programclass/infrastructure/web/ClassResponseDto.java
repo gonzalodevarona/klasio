@@ -26,9 +26,9 @@ public final class ClassResponseDto {
             String status,
             List<ScheduleEntryResponse> scheduleEntries,
             Instant createdAt,
-            UUID createdBy,
+            String createdBy,
             Instant updatedAt,
-            UUID updatedBy
+            String updatedBy
     ) {
         public static ClassDetailResponse fromDomain(ProgramClass pc) {
             return new ClassDetailResponse(
@@ -46,9 +46,9 @@ public final class ClassResponseDto {
                             .map(ScheduleEntryResponse::fromDomain)
                             .toList(),
                     pc.getCreatedAt(),
-                    pc.getCreatedBy(),
+                    pc.getCreatedBy().toString(),
                     pc.getUpdatedAt(),
-                    pc.getUpdatedBy()
+                    pc.getUpdatedBy() != null ? pc.getUpdatedBy().toString() : null
             );
         }
 

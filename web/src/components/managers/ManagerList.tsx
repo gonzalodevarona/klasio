@@ -11,7 +11,7 @@ import EditManagerModal from "./EditManagerModal";
 
 // ── Status filter ─────────────────────────────────────────────────────────────
 
-type StatusFilter = "ACTIVE" | "INACTIVE" | "";
+type StatusFilter = "ACTIVE" | "INVITED" | "INACTIVE" | "";
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +33,7 @@ function Toggle({ checked, disabled, onChange }: { checked: boolean; disabled?: 
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE:   "bg-green-100 text-green-700",
+  INVITED:  "bg-yellow-100 text-yellow-700",
   INACTIVE: "bg-gray-100 text-gray-500",
 };
 
@@ -242,7 +243,7 @@ export default function ManagerList() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {managers.map((m: ManagerSummary) => (
-                  <tr key={m.id} className={`hover:bg-gray-50 ${m.status === "INACTIVE" ? "opacity-60" : ""}`}>
+                  <tr key={m.id} className={`hover:bg-gray-50 ${m.status === "INACTIVE" || m.status === "INVITED" ? "opacity-60" : ""}`}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {m.firstName || m.lastName
                         ? [m.firstName, m.lastName].filter(Boolean).join(" ")
@@ -263,7 +264,7 @@ export default function ManagerList() {
                         </button>
                         <Toggle
                           checked={m.status === "ACTIVE"}
-                          disabled={togglingId === m.id}
+                          disabled={togglingId === m.id || m.status === "INVITED"}
                           onChange={() => handleToggleClick(m)}
                         />
                       </div>

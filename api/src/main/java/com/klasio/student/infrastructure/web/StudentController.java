@@ -4,10 +4,12 @@ import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.persistence.TenantContextInterceptor;
 import com.klasio.student.application.dto.CreateStudentCommand;
 import com.klasio.student.application.dto.EnrollmentSummary;
+import com.klasio.student.application.dto.StudentDetail;
 import com.klasio.student.application.dto.StudentSummary;
 import com.klasio.student.application.dto.UpdateStudentCommand;
 import com.klasio.membership.domain.port.StudentIdPort;
 import com.klasio.student.application.port.input.CreateStudentUseCase;
+import com.klasio.student.application.port.input.GetStudentDetailUseCase;
 import com.klasio.student.application.port.input.GetStudentUseCase;
 import com.klasio.student.application.port.input.ListEnrollmentsUseCase;
 import com.klasio.student.application.port.input.ListStudentsUseCase;
@@ -43,6 +45,7 @@ public class StudentController {
 
     private final CreateStudentUseCase createStudentUseCase;
     private final GetStudentUseCase getStudentUseCase;
+    private final GetStudentDetailUseCase getStudentDetailUseCase;
     private final ListStudentsUseCase listStudentsUseCase;
     private final UpdateStudentUseCase updateStudentUseCase;
     private final ListEnrollmentsUseCase listEnrollmentsUseCase;
@@ -52,6 +55,7 @@ public class StudentController {
 
     public StudentController(CreateStudentUseCase createStudentUseCase,
                              GetStudentUseCase getStudentUseCase,
+                             GetStudentDetailUseCase getStudentDetailUseCase,
                              ListStudentsUseCase listStudentsUseCase,
                              UpdateStudentUseCase updateStudentUseCase,
                              ListEnrollmentsUseCase listEnrollmentsUseCase,
@@ -60,6 +64,7 @@ public class StudentController {
                              StudentIdPort studentIdPort) {
         this.createStudentUseCase = createStudentUseCase;
         this.getStudentUseCase = getStudentUseCase;
+        this.getStudentDetailUseCase = getStudentDetailUseCase;
         this.listStudentsUseCase = listStudentsUseCase;
         this.updateStudentUseCase = updateStudentUseCase;
         this.listEnrollmentsUseCase = listEnrollmentsUseCase;
@@ -117,12 +122,22 @@ public class StudentController {
 
         UUID tenantId = extractTenantId();
 
-        Student student = getStudentUseCase.execute(tenantId, studentId);
+        StudentDetail detail = getStudentDetailUseCase.execute(tenantId, studentId);
 
         Page<EnrollmentSummary> enrollments = listEnrollmentsUseCase.byStudent(tenantId, studentId, 0, 100, null);
 
-        return ResponseEntity.ok(
-                StudentResponseDto.StudentDetailResponse.fromDomain(student, enrollments.getContent()));
+        return ResponseEntity.ok(new StudentResponseDto.StudentDetailResponse(
+                detail.id(), detail.tenantId(), detail.firstName(), detail.lastName(),
+                detail.email(), detail.dateOfBirth(), detail.age(), detail.eps(),
+                detail.identityNumber(), detail.identityDocumentType(), detail.bloodType(),
+                detail.phone(), detail.tutorFirstName(), detail.tutorLastName(),
+                detail.tutorRelationship(), detail.tutorPhone(), detail.tutorEmail(),
+                detail.status(), detail.createdAt(), detail.createdBy(),
+                detail.updatedAt(), detail.updatedBy(),
+                enrollments.getContent().stream()
+                        .map(EnrollmentResponseDto.EnrollmentSummaryResponse::fromSummary)
+                        .toList()
+        ));
     }
 
     @PutMapping("/{studentId}")
@@ -207,12 +222,22 @@ public class StudentController {
         UUID studentId = studentIdPort.findStudentIdByUserId(tenantId, userId)
                 .orElseThrow(() -> new IllegalStateException("No student profile found for this user"));
 
-        Student student = getStudentUseCase.execute(tenantId, studentId);
-        Page<com.klasio.student.application.dto.EnrollmentSummary> enrollments =
+        StudentDetail detail = getStudentDetailUseCase.execute(tenantId, studentId);
+        Page<EnrollmentSummary> enrollments =
                 listEnrollmentsUseCase.byStudent(tenantId, studentId, 0, 100, null);
 
-        return ResponseEntity.ok(
-                StudentResponseDto.StudentDetailResponse.fromDomain(student, enrollments.getContent()));
+        return ResponseEntity.ok(new StudentResponseDto.StudentDetailResponse(
+                detail.id(), detail.tenantId(), detail.firstName(), detail.lastName(),
+                detail.email(), detail.dateOfBirth(), detail.age(), detail.eps(),
+                detail.identityNumber(), detail.identityDocumentType(), detail.bloodType(),
+                detail.phone(), detail.tutorFirstName(), detail.tutorLastName(),
+                detail.tutorRelationship(), detail.tutorPhone(), detail.tutorEmail(),
+                detail.status(), detail.createdAt(), detail.createdBy(),
+                detail.updatedAt(), detail.updatedBy(),
+                enrollments.getContent().stream()
+                        .map(EnrollmentResponseDto.EnrollmentSummaryResponse::fromSummary)
+                        .toList()
+        ));
     }
 
     @SuppressWarnings("unchecked")

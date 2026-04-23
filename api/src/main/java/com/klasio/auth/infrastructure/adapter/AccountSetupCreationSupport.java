@@ -41,7 +41,7 @@ class AccountSetupCreationSupport {
     }
 
     /**
-     * Creates a {@link User} in {@code EMAIL_UNVERIFIED} state, persists a 15-minute
+     * Creates a {@link User} in {@code INVITED} state, persists a 15-minute
      * {@link AccountSetupToken}, and publishes an {@link AccountSetupInitiated} event
      * so the user receives a one-time setup link by email.
      *

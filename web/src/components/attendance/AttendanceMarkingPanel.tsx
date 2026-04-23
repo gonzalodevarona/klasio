@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle, XCircle, Loader2, AlertTriangle, Clock, Bell } from "lucide-react";
 import {
   ClassSessionRoster,
@@ -37,6 +38,8 @@ export default function AttendanceMarkingPanel({
   userRole,
   onMarked,
 }: AttendanceMarkingPanelProps) {
+  const t = useTranslations("classes");
+  const tBadges = useTranslations("badges.classLevel");
   const { markAttendance, loading } = useMarkAttendance();
 
   // Re-evaluate the window every 30 s so the UI unlocks automatically when the time comes.
@@ -115,7 +118,7 @@ export default function AttendanceMarkingPanel({
       setResults(response.results);
       onMarked?.();
     } catch (err: unknown) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to submit marks");
+      setSubmitError(err instanceof Error ? err.message : t("markingSubmitError"));
     }
   }, [classId, session, localMarks, markAttendance, onMarked]);
 
@@ -133,14 +136,14 @@ export default function AttendanceMarkingPanel({
         <div className="flex items-center gap-2 text-sm text-green-800 bg-green-50 border border-green-300 rounded-md px-3 py-2 mb-3 shadow-sm">
           <Bell className="w-4 h-4 shrink-0 text-green-600" />
           <span className="font-medium">
-            Attendance marking is now open for this session — mark away!
+            {t("markingWindowOpenToast")}
           </span>
           <button
             type="button"
             onClick={() => setShowWindowOpenToast(false)}
             className="ml-auto text-green-700 hover:text-green-900 text-xs underline"
           >
-            Dismiss
+            {t("markingWindowOpenDismiss")}
           </button>
         </div>
       )}
@@ -150,15 +153,10 @@ export default function AttendanceMarkingPanel({
         <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
           <Clock className="w-4 h-4 shrink-0" />
           <span>
-            Attendance marking is only available from{" "}
-            <strong>
-              {AttendanceTimeConstants.MARKING_WINDOW_MINUTES_BEFORE} minutes before
-            </strong>{" "}
-            the session starts until{" "}
-            <strong>
-              {AttendanceTimeConstants.MARKING_WINDOW_MINUTES_AFTER} minutes after
-            </strong>{" "}
-            it ends. The panel will unlock automatically when the window opens.
+            {t("markingWindowLockedBanner", {
+              before: AttendanceTimeConstants.MARKING_WINDOW_MINUTES_BEFORE,
+              after: AttendanceTimeConstants.MARKING_WINDOW_MINUTES_AFTER,
+            })}
           </span>
         </div>
       )}
@@ -166,15 +164,15 @@ export default function AttendanceMarkingPanel({
       <table className="min-w-full text-sm">
         <thead>
           <tr className="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
-            <th className="px-4 py-2 text-left font-medium">Student</th>
-            <th className="px-4 py-2 text-left font-medium">Level</th>
-            <th className="px-4 py-2 text-left font-medium">Hours</th>
-            <th className="px-4 py-2 text-left font-medium">Status</th>
+            <th className="px-4 py-2 text-left font-medium">{t("rosterColStudent")}</th>
+            <th className="px-4 py-2 text-left font-medium">{t("rosterColLevel")}</th>
+            <th className="px-4 py-2 text-left font-medium">{t("rosterColHours")}</th>
+            <th className="px-4 py-2 text-left font-medium">{t("rosterColStatus")}</th>
             {canMark && (
-              <th className="px-4 py-2 text-left font-medium">Mark</th>
+              <th className="px-4 py-2 text-left font-medium">{t("markingColMark")}</th>
             )}
             {canCorrect && (
-              <th className="px-4 py-2 text-left font-medium">Correct</th>
+              <th className="px-4 py-2 text-left font-medium">{t("markingColCorrect")}</th>
             )}
           </tr>
         </thead>
@@ -194,7 +192,7 @@ export default function AttendanceMarkingPanel({
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL_STYLES[r.level] ?? "bg-gray-100 text-gray-600"}`}
                   >
-                    {r.level.charAt(0) + r.level.slice(1).toLowerCase()}
+                    {tBadges(r.level)}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-gray-600">{r.intendedHours}h</td>
@@ -204,7 +202,7 @@ export default function AttendanceMarkingPanel({
                       <RegistrationStatusBadge status={apiResult.status} />
                       {apiResult.noHoursWarning && (
                         <span
-                          title="No membership hours available"
+                          title={t("markingNoHoursWarning")}
                           className="text-amber-500"
                         >
                           <AlertTriangle className="w-3.5 h-3.5" />
@@ -218,7 +216,7 @@ export default function AttendanceMarkingPanel({
                 {canMark && (
                   <td className="px-4 py-2">
                     {isAlreadyMarked ? (
-                      <span className="text-xs text-gray-400 italic">already marked</span>
+                      <span className="text-xs text-gray-400 italic">{t("markingAlreadyMarked")}</span>
                     ) : (
                       <div className="flex items-center gap-2">
                         <button
@@ -237,7 +235,7 @@ export default function AttendanceMarkingPanel({
                           }`}
                         >
                           <CheckCircle className="w-3.5 h-3.5" />
-                          Present
+                          {t("markingPresent")}
                         </button>
                         <button
                           type="button"
@@ -255,7 +253,7 @@ export default function AttendanceMarkingPanel({
                           }`}
                         >
                           <XCircle className="w-3.5 h-3.5" />
-                          Absent
+                          {t("markingAbsent")}
                         </button>
                       </div>
                     )}
@@ -269,7 +267,7 @@ export default function AttendanceMarkingPanel({
                         onClick={() => setCorrectingReg(r)}
                         className="text-xs text-indigo-600 hover:underline"
                       >
-                        Correct
+                        {t("markingColCorrect")}
                       </button>
                     )}
                   </td>
@@ -289,7 +287,7 @@ export default function AttendanceMarkingPanel({
             className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            Submit Marks
+            {t("markingSubmitButton")}
           </button>
           {submitError && (
             <span className="text-sm text-red-600">{submitError}</span>

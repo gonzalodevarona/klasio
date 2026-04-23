@@ -8,13 +8,13 @@ import static org.assertj.core.api.Assertions.*;
 class UserPendingSetupTest {
 
     @Test
-    void createPendingSetup_hasNullPasswordHashAndEmailUnverifiedStatus() {
+    void createPendingSetup_hasNullPasswordHashAndInvitedStatus() {
         var user = User.createPendingSetup(
                 UUID.randomUUID(), "student@test.com", Role.STUDENT,
                 IdentityDocumentType.CC, "12345678",
                 "Carlos", "López", "+573001234567");
         assertThat(user.getPasswordHash()).isNull();
-        assertThat(user.getStatus()).isEqualTo(UserStatus.EMAIL_UNVERIFIED);
+        assertThat(user.getStatus()).isEqualTo(UserStatus.INVITED);
         assertThat(user.getRoles()).contains(Role.STUDENT);
     }
 
@@ -25,7 +25,7 @@ class UserPendingSetupTest {
             var user = User.createPendingSetup(tenantId, "u@test.com", role,
                     IdentityDocumentType.CC, "123", "A", "B", null);
             assertThat(user.getPasswordHash()).isNull();
-            assertThat(user.getStatus()).isEqualTo(UserStatus.EMAIL_UNVERIFIED);
+            assertThat(user.getStatus()).isEqualTo(UserStatus.INVITED);
             assertThat(user.getRoles()).containsAll(role.impliedRoles());
         }
     }

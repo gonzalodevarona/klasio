@@ -10,7 +10,7 @@ import EditAdminModal from "./EditAdminModal";
 
 // ── Status filter tabs ───────────────────────────────────────────────────────
 
-type StatusFilter = "ACTIVE" | "INACTIVE" | "";
+type StatusFilter = "ACTIVE" | "INVITED" | "INACTIVE" | "";
 
 // ── Toggle switch ─────────────────────────────────────────────────────────────
 
@@ -50,6 +50,7 @@ function Toggle({ checked, disabled, onChange }: ToggleProps) {
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE:   "bg-green-100 text-green-700",
+  INVITED:  "bg-yellow-100 text-yellow-700",
   INACTIVE: "bg-gray-100 text-gray-500",
 };
 
@@ -299,7 +300,7 @@ export default function AdminList() {
                 {admins.map((admin: AdminSummary) => (
                   <tr
                     key={admin.id}
-                    className={`hover:bg-gray-50 ${admin.status === "INACTIVE" ? "opacity-60" : ""}`}
+                    className={`hover:bg-gray-50 ${admin.status === "INACTIVE" || admin.status === "INVITED" ? "opacity-60" : ""}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {admin.firstName || admin.lastName
@@ -328,7 +329,7 @@ export default function AdminList() {
                         </button>
                         <Toggle
                           checked={admin.status === "ACTIVE"}
-                          disabled={togglingId === admin.id}
+                          disabled={togglingId === admin.id || admin.status === "INVITED"}
                           onChange={() => handleToggleClick(admin)}
                         />
                       </div>

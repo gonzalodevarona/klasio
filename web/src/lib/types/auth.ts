@@ -1,6 +1,6 @@
 export type Role = "SUPERADMIN" | "ADMIN" | "MANAGER" | "PROFESSOR" | "STUDENT";
 
-export type UserStatus = "ACTIVE" | "EMAIL_UNVERIFIED";
+export type UserStatus = "ACTIVE" | "INVITED" | "INACTIVE";
 
 /** Ordered from highest to lowest privilege. */
 const ROLE_HIERARCHY: Role[] = ["SUPERADMIN", "ADMIN", "MANAGER", "PROFESSOR", "STUDENT"];

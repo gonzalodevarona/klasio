@@ -8,15 +8,6 @@ import { useProgramPlanDetail } from "@/hooks/useProgramPlans";
 import { api, ApiError } from "@/lib/api";
 import ProgramStatusBadge from "@/components/programs/ProgramStatusBadge";
 
-const DAY_LABELS: Record<string, string> = {
-  MONDAY: "Monday",
-  TUESDAY: "Tuesday",
-  WEDNESDAY: "Wednesday",
-  THURSDAY: "Thursday",
-  FRIDAY: "Friday",
-  SATURDAY: "Saturday",
-  SUNDAY: "Sunday",
-};
 
 interface PlanDetailPageProps {
   params: Promise<{ id: string; planId: string }>;
@@ -161,9 +152,9 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                 </div>
 
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">{t("planDetailManagerId")}</dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
-                    {plan.managerId}
+                  <dt className="text-sm font-medium text-gray-500">{t("planDetailManager")}</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {plan.managerName ?? plan.managerId}
                   </dd>
                 </div>
 
@@ -189,7 +180,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                   <dt className="text-sm font-medium text-gray-500">
                     {t("planDetailCreatedBy")}
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                  <dd className="mt-1 text-sm text-gray-900">
                     {plan.createdBy}
                   </dd>
                 </div>
@@ -208,7 +199,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                       <dt className="text-sm font-medium text-gray-500">
                         {t("planDetailUpdatedBy")}
                       </dt>
-                      <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                      <dd className="mt-1 text-sm text-gray-900">
                         {plan.updatedBy}
                       </dd>
                     </div>
@@ -229,7 +220,15 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                       className="flex items-center gap-3 text-sm text-gray-900 bg-gray-50 rounded-md px-3 py-2"
                     >
                       <span className="font-medium w-24">
-                        {DAY_LABELS[entry.dayOfWeek] ?? entry.dayOfWeek}
+                        {{
+                          MONDAY: t("dayMonday"),
+                          TUESDAY: t("dayTuesday"),
+                          WEDNESDAY: t("dayWednesday"),
+                          THURSDAY: t("dayThursday"),
+                          FRIDAY: t("dayFriday"),
+                          SATURDAY: t("daySaturday"),
+                          SUNDAY: t("daySunday"),
+                        }[entry.dayOfWeek] ?? entry.dayOfWeek}
                       </span>
                       <span>
                         {entry.startTime} - {entry.endTime}

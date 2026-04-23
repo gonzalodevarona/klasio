@@ -235,7 +235,7 @@ export default function StudentDetail({
             </div>
             <div>
               <dt className="font-medium text-gray-500">{t("detailCreatedBy")}</dt>
-              <dd className="mt-1 text-gray-900 font-mono">{student.createdBy}</dd>
+              <dd className="mt-1 text-gray-900">{student.createdBy}</dd>
             </div>
             {student.updatedAt && (
               <>
@@ -245,7 +245,7 @@ export default function StudentDetail({
                 </div>
                 <div>
                   <dt className="font-medium text-gray-500">{t("detailUpdatedBy")}</dt>
-                  <dd className="mt-1 text-gray-900 font-mono">{student.updatedBy}</dd>
+                  <dd className="mt-1 text-gray-900">{student.updatedBy}</dd>
                 </div>
               </>
             )}

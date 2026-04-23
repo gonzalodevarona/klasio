@@ -60,7 +60,7 @@ public class CreateProfessorService implements CreateProfessorUseCase {
         professor.clearDomainEvents();
         events.forEach(eventPublisher::publishEvent);
 
-        // Create user account in EMAIL_UNVERIFIED state and dispatch 15-min setup link.
+        // Create user account in INVITED state and dispatch 15-min setup link.
         UUID userId = accountSetupCreationPort.createAndDispatchSetup(
                 command.tenantId(),
                 command.email(),

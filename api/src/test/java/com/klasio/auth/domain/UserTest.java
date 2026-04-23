@@ -66,9 +66,9 @@ class UserTest {
     // ── createPendingSetup ───────────────────────────────────────────────────
 
     @Test
-    void createPendingSetup_setsEmailUnverifiedStatusAndNullPassword() {
+    void createPendingSetup_setsInvitedStatusAndNullPassword() {
         User user = unverifiedUser();
-        assertEquals(UserStatus.EMAIL_UNVERIFIED, user.getStatus());
+        assertEquals(UserStatus.INVITED, user.getStatus());
         assertNull(user.getPasswordHash());
         assertEquals(Role.STUDENT, user.primaryRole());
         assertTrue(user.hasRole(Role.STUDENT));

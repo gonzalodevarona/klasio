@@ -148,7 +148,7 @@ export default function ProfessorDetail({
 
             <div>
               <dt className="text-sm font-medium text-gray-500">{t("detailCreatedBy")}</dt>
-              <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+              <dd className="mt-1 text-sm text-gray-900">
                 {professor.createdBy}
               </dd>
             </div>
@@ -168,7 +168,7 @@ export default function ProfessorDetail({
                   <dt className="text-sm font-medium text-gray-500">
                     {t("detailUpdatedBy")}
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                  <dd className="mt-1 text-sm text-gray-900">
                     {professor.updatedBy}
                   </dd>
                 </div>

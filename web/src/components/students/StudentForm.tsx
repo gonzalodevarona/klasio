@@ -22,7 +22,6 @@ interface StudentFormProps {
 }
 
 const EMAIL_REGEX = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-const PHONE_REGEX = /^\+[1-9]\d{6,19}$/;
 
 function calculateAge(dateOfBirth: string): number {
   const dob = new Date(dateOfBirth);
@@ -92,7 +91,6 @@ export default function StudentForm({ student }: StudentFormProps) {
     if (!identityDocumentType) errors.identityDocumentType = tValidation("documentType.required");
 
     if (!phone.trim()) errors.phone = tValidation("phone.required");
-    else if (!PHONE_REGEX.test(phone.trim())) errors.phone = tValidation("phone.invalid");
 
     if (isMinor) {
       if (!tutorFirstName.trim()) errors.tutorFirstName = tValidation("tutorFirstName.required");

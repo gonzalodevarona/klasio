@@ -18,21 +18,23 @@ public final class ProgramResponseDto {
             String name,
             String status,
             Instant createdAt,
-            UUID createdBy,
+            String createdBy,
             Instant updatedAt,
-            UUID updatedBy
+            String updatedBy
     ) {
 
         public static ProgramDetailResponse fromDomain(Program program) {
+            String createdBy = program.getCreatedBy() != null ? program.getCreatedBy().toString() : null;
+            String updatedBy = program.getUpdatedBy() != null ? program.getUpdatedBy().toString() : null;
             return new ProgramDetailResponse(
                     program.getId().value(),
                     program.getTenantId(),
                     program.getName(),
                     program.getStatus().name(),
                     program.getCreatedAt(),
-                    program.getCreatedBy(),
+                    createdBy,
                     program.getUpdatedAt(),
-                    program.getUpdatedBy()
+                    updatedBy
             );
         }
 

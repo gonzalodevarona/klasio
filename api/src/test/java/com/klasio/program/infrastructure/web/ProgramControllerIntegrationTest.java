@@ -340,7 +340,7 @@ class ProgramControllerIntegrationTest {
             UUID programId = UUID.randomUUID();
             var detail = new ProgramDetail(
                     programId, TENANT_ID, "Kids Soccer", "ACTIVE",
-                    Instant.now(), USER_ID, null, null);
+                    Instant.now(), USER_ID.toString(), null, null);
 
             when(getProgramDetailUseCase.execute(TENANT_ID, programId)).thenReturn(detail);
 
@@ -370,7 +370,7 @@ class ProgramControllerIntegrationTest {
             UUID programId = UUID.randomUUID();
             var detail = new ProgramDetail(
                     programId, TENANT_ID, "Kids Soccer", "ACTIVE",
-                    Instant.now(), USER_ID, null, null);
+                    Instant.now(), USER_ID.toString(), null, null);
 
             when(getProgramDetailUseCase.execute(TENANT_ID, programId)).thenReturn(detail);
 

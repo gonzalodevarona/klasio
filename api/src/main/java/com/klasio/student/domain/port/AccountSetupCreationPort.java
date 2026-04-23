@@ -7,7 +7,7 @@ import java.util.UUID;
 public interface AccountSetupCreationPort {
 
     /**
-     * Creates a user account in EMAIL_UNVERIFIED state (passwordHash=null),
+     * Creates a user account in INVITED state (passwordHash=null),
      * and dispatches an AccountSetupInitiated event so the user receives a
      * 15-minute link to set their password.
      * Must be called within an existing transaction (MANDATORY propagation).

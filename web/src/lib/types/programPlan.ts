@@ -15,6 +15,7 @@ export interface ProgramPlanSummary {
   cost: number;
   hours: number | null;
   managerId: string;
+  managerName?: string;
   status: PlanStatus;
   programId?: string;
   programName?: string;

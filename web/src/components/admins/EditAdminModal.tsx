@@ -14,7 +14,6 @@ const IDENTITY_DOCUMENT_TYPES = [
   { value: "NIT", label: "NIT" },
 ];
 
-const PHONE_REGEX = /^\+[1-9]\d{6,19}$/;
 
 interface Props {
   admin: AdminSummary;
@@ -53,10 +52,6 @@ export default function EditAdminModal({ admin, onClose, onUpdated }: Props) {
   function validatePhone(): boolean {
     if (!form.phoneNumber.trim()) {
       setPhoneError(tValidation("phone.required"));
-      return false;
-    }
-    if (!PHONE_REGEX.test(form.phoneNumber.trim())) {
-      setPhoneError(tValidation("phone.invalid"));
       return false;
     }
     return true;

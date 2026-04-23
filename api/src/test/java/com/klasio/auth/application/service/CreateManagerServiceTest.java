@@ -81,12 +81,12 @@ class CreateManagerServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.email()).isEqualTo("ana.gomez@example.com");
 
-        // User must have null password and EMAIL_UNVERIFIED status
+        // User must have null password and INVITED status
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
         assertThat(savedUser.getPasswordHash()).isNull();
-        assertThat(savedUser.getStatus()).isEqualTo(UserStatus.EMAIL_UNVERIFIED);
+        assertThat(savedUser.getStatus()).isEqualTo(UserStatus.INVITED);
 
         // AccountSetupToken saved with ~15-min expiry
         ArgumentCaptor<AccountSetupToken> tokenCaptor = ArgumentCaptor.forClass(AccountSetupToken.class);
