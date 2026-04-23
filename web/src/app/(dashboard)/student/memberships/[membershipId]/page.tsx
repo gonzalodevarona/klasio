@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMembershipDetail } from "@/hooks/useMemberships";
 import MembershipDetail from "@/components/memberships/MembershipDetail";
 import { PaymentProofPanel } from "@/components/payment-proofs/PaymentProofPanel";
@@ -13,20 +14,22 @@ interface Props {
 
 export default function StudentMembershipDetailPage({ params }: Props) {
   const { membershipId } = use(params);
+  const t = useTranslations("memberships");
+  const tPage = useTranslations("studentMembershipsPage");
   const { membership, loading, error, refetch } = useMembershipDetail(membershipId);
 
   return (
     <div>
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/student/memberships" className="hover:text-gray-700 hover:underline">
-          My Memberships
+          {tPage("title")}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">Detail</span>
+        <span className="text-gray-900">{t("detailBreadcrumbDetail")}</span>
       </nav>
 
       {loading && (
-        <div className="py-8 text-center text-sm text-gray-500">Loading membership...</div>
+        <div className="py-8 text-center text-sm text-gray-500">{t("detailLoading")}</div>
       )}
 
       {error && (

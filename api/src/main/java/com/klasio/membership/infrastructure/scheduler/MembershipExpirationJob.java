@@ -74,6 +74,7 @@ public class MembershipExpirationJob {
                     membership.getStudentId(),
                     membership.getProgramId(),
                     membership.getExpirationDate(),
+                    membership.getAvailableHours(),
                     Instant.now()
             );
             eventPublisher.publishEvent(warning);

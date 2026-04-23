@@ -18,14 +18,16 @@ public record ProgramPlanDetail(
         Integer hours,
         List<ScheduleEntry> scheduleEntries,
         UUID managerId,
+        String managerName,
         String status,
         Instant createdAt,
-        UUID createdBy,
+        String createdBy,
         Instant updatedAt,
-        UUID updatedBy
+        String updatedBy
 ) {
 
-    public static ProgramPlanDetail fromDomain(ProgramPlan plan) {
+    public static ProgramPlanDetail fromDomain(ProgramPlan plan, String managerName,
+                                               String createdByName, String updatedByName) {
         return new ProgramPlanDetail(
                 plan.getId().value(),
                 plan.getProgramId(),
@@ -36,11 +38,12 @@ public record ProgramPlanDetail(
                 plan.getHours(),
                 plan.getScheduleEntries(),
                 plan.getManagerId(),
+                managerName,
                 plan.getStatus().name(),
                 plan.getCreatedAt(),
-                plan.getCreatedBy(),
+                createdByName,
                 plan.getUpdatedAt(),
-                plan.getUpdatedBy()
+                updatedByName
         );
     }
 }

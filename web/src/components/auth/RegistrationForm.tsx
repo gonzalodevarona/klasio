@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import PasswordPolicyChecker from "./PasswordPolicyChecker";
+import { useTranslations } from "next-intl";
 import DocumentFields from "@/components/common/DocumentFields";
 import type { IdentityDocumentType } from "@/lib/types/identity";
 import type { AuthError } from "@/lib/types/auth";
@@ -11,6 +11,7 @@ interface RegistrationFormProps {
 }
 
 export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) {
+  const t = useTranslations("auth.register");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,7 +20,6 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
     identityNumber: "",
     eps: "",
     email: "",
-    password: "",
     tutorFullName: "",
     tutorRelationship: "",
     tutorContact: "",
@@ -64,7 +64,6 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
         identityNumber: formData.identityNumber,
         eps: formData.eps,
         email: formData.email,
-        password: formData.password,
         ...(formData.tutorFullName && { tutorFullName: formData.tutorFullName }),
         ...(formData.tutorRelationship && { tutorRelationship: formData.tutorRelationship }),
         ...(formData.tutorContact && { tutorContact: formData.tutorContact }),
@@ -88,7 +87,7 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
 
       setSuccess(true);
     } catch {
-      setError({ code: "NETWORK_ERROR", message: "Unable to connect to server" });
+      setError({ code: "NETWORK_ERROR", message: t("errorNetwork") });
     } finally {
       setLoading(false);
     }
@@ -97,16 +96,13 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
   if (success) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
-        <h2 className="text-lg font-semibold text-green-800 mb-2">Registration Successful!</h2>
-        <p className="text-sm text-green-700">
-          We&apos;ve sent a verification email to <strong>{formData.email}</strong>.
-          Please check your inbox and click the verification link to activate your account.
-        </p>
+        <h2 className="text-lg font-semibold text-green-800 mb-2">{t("successTitle")}</h2>
+        <p className="text-sm text-green-700">{t("successMessage")}</p>
         <a
           href="/login"
           className="mt-4 inline-block text-sm text-indigo-600 hover:text-indigo-500"
         >
-          Go to Login
+          {t("goToLogin")}
         </a>
       </div>
     );
@@ -130,7 +126,7 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-            First Name *
+            {t("firstNameLabel")}
           </label>
           <input
             id="firstName"
@@ -144,7 +140,7 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
         </div>
         <div>
           <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-            Last Name *
+            {t("lastNameLabel")}
           </label>
           <input
             id="lastName"
@@ -160,7 +156,7 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email *
+          {t("emailLabel")}
         </label>
         <input
           id="email"
@@ -174,24 +170,8 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password *
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-        <PasswordPolicyChecker password={formData.password} />
-      </div>
-
-      <div>
         <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
-          Date of Birth *
+          {t("dateOfBirthLabel")}
         </label>
         <input
           id="dateOfBirth"
@@ -219,7 +199,7 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
 
       <div>
         <label htmlFor="eps" className="block text-sm font-medium text-gray-700">
-          EPS *
+          {t("epsLabel")}
         </label>
         <input
           id="eps"
@@ -235,11 +215,11 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
       {isMinor && (
         <fieldset className="border border-amber-200 bg-amber-50 rounded-md p-4 space-y-4">
           <legend className="text-sm font-medium text-amber-800 px-2">
-            Tutor Information (required for minors)
+            {t("tutorInfoLegend")}
           </legend>
           <div>
             <label htmlFor="tutorFullName" className="block text-sm font-medium text-gray-700">
-              Tutor Full Name *
+              {t("tutorFullNameLabel")}
             </label>
             <input
               id="tutorFullName"
@@ -253,7 +233,7 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
           </div>
           <div>
             <label htmlFor="tutorRelationship" className="block text-sm font-medium text-gray-700">
-              Relationship *
+              {t("tutorRelationshipLabel")}
             </label>
             <input
               id="tutorRelationship"
@@ -262,13 +242,13 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
               value={formData.tutorRelationship}
               onChange={handleChange}
               required={isMinor}
-              placeholder="e.g., Mother, Father, Legal Guardian"
+              placeholder={t("tutorRelationshipPlaceholder")}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
           <div>
             <label htmlFor="tutorContact" className="block text-sm font-medium text-gray-700">
-              Tutor Phone *
+              {t("tutorPhoneLabel")}
             </label>
             <input
               id="tutorContact"
@@ -288,13 +268,13 @@ export default function RegistrationForm({ tenantSlug }: RegistrationFormProps) 
         disabled={loading}
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
       >
-        {loading ? "Creating account..." : "Create Account"}
+        {loading ? t("submitting") : t("submit")}
       </button>
 
       <p className="text-center text-sm text-gray-600">
-        Already have an account?{" "}
+        {t("signInText")}{" "}
         <a href="/login" className="text-indigo-600 hover:text-indigo-500">
-          Sign in
+          {t("signInLink")}
         </a>
       </p>
     </form>

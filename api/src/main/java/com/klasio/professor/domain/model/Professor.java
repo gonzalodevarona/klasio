@@ -23,6 +23,7 @@ public class Professor {
 
     private final ProfessorId id;
     private final UUID tenantId;
+    private UUID userId;
     private String firstName;
     private String lastName;
     private String email;
@@ -41,6 +42,7 @@ public class Professor {
 
     private Professor(ProfessorId id,
                       UUID tenantId,
+                      UUID userId,
                       String firstName,
                       String lastName,
                       String email,
@@ -56,6 +58,7 @@ public class Professor {
                       String identityNumber) {
         this.id = id;
         this.tenantId = tenantId;
+        this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -103,7 +106,7 @@ public class Professor {
         Instant expiresAt = now.plus(72, ChronoUnit.HOURS);
 
         Professor professor = new Professor(
-                id, tenantId, normalizedFirstName, normalizedLastName, normalizedEmail, phoneNumber,
+                id, tenantId, null, normalizedFirstName, normalizedLastName, normalizedEmail, phoneNumber,
                 ProfessorStatus.INVITED, token, expiresAt,
                 now, createdBy, null, null,
                 identityDocumentType, normalizedIdentityNumber
@@ -111,7 +114,9 @@ public class Professor {
 
         professor.domainEvents.add(new ProfessorCreated(
                 id.value(), tenantId, normalizedFirstName, normalizedLastName, normalizedEmail, phoneNumber,
-                identityDocumentType, normalizedIdentityNumber, token, createdBy, now));
+                identityDocumentType, normalizedIdentityNumber, token, createdBy,
+                expiresAt,  // invitation expiry already computed above
+                now));
 
         return professor;
     }
@@ -140,7 +145,7 @@ public class Professor {
 
         Instant now = Instant.now();
         return new Professor(
-                ProfessorId.of(userId), tenantId,
+                ProfessorId.of(userId), tenantId, userId,
                 capitalize(firstName), capitalize(lastName),
                 email.trim().toLowerCase(), phoneNumber,
                 ProfessorStatus.ACTIVE, null, null,
@@ -154,6 +159,7 @@ public class Professor {
 
     public static Professor reconstitute(ProfessorId id,
                                          UUID tenantId,
+                                         UUID userId,
                                          String firstName,
                                          String lastName,
                                          String email,
@@ -167,7 +173,7 @@ public class Professor {
                                          UUID updatedBy,
                                          IdentityDocumentType identityDocumentType,
                                          String identityNumber) {
-        return new Professor(id, tenantId, firstName, lastName, email, phoneNumber, status,
+        return new Professor(id, tenantId, userId, firstName, lastName, email, phoneNumber, status,
                 invitationToken, invitationExpiresAt, createdAt, createdBy, updatedAt, updatedBy,
                 identityDocumentType, identityNumber);
     }
@@ -232,8 +238,14 @@ public class Professor {
         domainEvents.clear();
     }
 
+    public void linkUser(UUID userId) {
+        Objects.requireNonNull(userId, "userId must not be null");
+        this.userId = userId;
+    }
+
     public ProfessorId getId() { return id; }
     public UUID getTenantId() { return tenantId; }
+    public UUID getUserId() { return userId; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
     public String getEmail() { return email; }

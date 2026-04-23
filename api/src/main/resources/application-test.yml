@@ -1,0 +1,21 @@
+klasio:
+  email:
+    transport: inmemory
+    from:
+      address: noreply@klasio.app
+      name-suffix: " via Klasio"
+    retry:
+      max-attempts: 1
+      initial-delay-ms: 0
+      multiplier: 1
+      max-delay-ms: 0
+    brevo:
+      api-key: test-key
+      api-base-url: http://localhost:9999
+      template-ids:
+        membership-activated: 42
+        membership-expiry-warning: 43
+        membership-depleted: 44
+        class-session-change: 45
+  frontend:
+    url-template: http://localhost:3000

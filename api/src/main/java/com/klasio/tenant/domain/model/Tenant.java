@@ -16,7 +16,8 @@ public class Tenant {
     private final TenantId id;
     private final TenantSlug slug;
     private final String name;
-    private final String sportDiscipline;
+    private final String discipline;
+    private final String language;
     private final String logoKey;
     private final ContactInfo contactInfo;
     private TenantStatus status;
@@ -27,21 +28,15 @@ public class Tenant {
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
-    private Tenant(TenantId id,
-                   TenantSlug slug,
-                   String name,
-                   String sportDiscipline,
-                   String logoKey,
-                   ContactInfo contactInfo,
-                   TenantStatus status,
-                   Instant createdAt,
-                   UUID createdBy,
-                   Instant deactivatedAt,
-                   UUID deactivatedBy) {
+    private Tenant(TenantId id, TenantSlug slug, String name, String discipline,
+                   String language, String logoKey, ContactInfo contactInfo,
+                   TenantStatus status, Instant createdAt, UUID createdBy,
+                   Instant deactivatedAt, UUID deactivatedBy) {
         this.id = id;
         this.slug = slug;
         this.name = name;
-        this.sportDiscipline = sportDiscipline;
+        this.discipline = discipline;
+        this.language = language;
         this.logoKey = logoKey;
         this.contactInfo = contactInfo;
         this.status = status;
@@ -51,56 +46,29 @@ public class Tenant {
         this.deactivatedBy = deactivatedBy;
     }
 
-    public static Tenant create(String name,
-                                String sportDiscipline,
-                                TenantSlug slug,
-                                ContactInfo contactInfo,
-                                UUID createdBy,
-                                String logoKey) {
+    public static Tenant create(String name, String discipline, String language,
+                                TenantSlug slug, ContactInfo contactInfo,
+                                UUID createdBy, String logoKey) {
         Objects.requireNonNull(contactInfo, "Contact info must not be null");
         validateNotBlank(name, "Name");
-        validateNotBlank(sportDiscipline, "Sport discipline");
+        validateNotBlank(discipline, "Discipline");
 
         Instant now = Instant.now();
         TenantId id = TenantId.generate();
 
-        Tenant tenant = new Tenant(
-                id,
-                slug,
-                name,
-                sportDiscipline,
-                logoKey,
-                contactInfo,
-                TenantStatus.ACTIVE,
-                now,
-                createdBy,
-                null,
-                null
-        );
+        Tenant tenant = new Tenant(id, slug, name, discipline, language, logoKey,
+                contactInfo, TenantStatus.ACTIVE, now, createdBy, null, null);
 
-        tenant.domainEvents.add(new TenantCreated(
-                id.value(),
-                slug.value(),
-                name,
-                createdBy,
-                now
-        ));
-
+        tenant.domainEvents.add(new TenantCreated(id.value(), slug.value(), name, createdBy, now));
         return tenant;
     }
 
-    public static Tenant reconstitute(TenantId id,
-                               TenantSlug slug,
-                               String name,
-                               String sportDiscipline,
-                               String logoKey,
-                               ContactInfo contactInfo,
-                               TenantStatus status,
-                               Instant createdAt,
-                               UUID createdBy,
-                               Instant deactivatedAt,
-                               UUID deactivatedBy) {
-        return new Tenant(id, slug, name, sportDiscipline, logoKey, contactInfo,
+    public static Tenant reconstitute(TenantId id, TenantSlug slug, String name,
+                                      String discipline, String language, String logoKey,
+                                      ContactInfo contactInfo, TenantStatus status,
+                                      Instant createdAt, UUID createdBy,
+                                      Instant deactivatedAt, UUID deactivatedBy) {
+        return new Tenant(id, slug, name, discipline, language, logoKey, contactInfo,
                 status, createdAt, createdBy, deactivatedAt, deactivatedBy);
     }
 
@@ -108,74 +76,30 @@ public class Tenant {
         if (this.status != TenantStatus.ACTIVE) {
             throw new IllegalStateException("Tenant is already inactive");
         }
-
         Instant now = Instant.now();
         this.status = TenantStatus.INACTIVE;
         this.deactivatedAt = now;
         this.deactivatedBy = deactivatedBy;
-
-        domainEvents.add(new TenantDeactivated(
-                id.value(),
-                deactivatedBy,
-                now
-        ));
+        domainEvents.add(new TenantDeactivated(id.value(), deactivatedBy, now));
     }
 
-    public List<DomainEvent> getDomainEvents() {
-        return Collections.unmodifiableList(domainEvents);
-    }
-
-    public void clearDomainEvents() {
-        domainEvents.clear();
-    }
-
-    public TenantId getId() {
-        return id;
-    }
-
-    public TenantSlug getSlug() {
-        return slug;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSportDiscipline() {
-        return sportDiscipline;
-    }
-
-    public String getLogoKey() {
-        return logoKey;
-    }
-
-    public ContactInfo getContactInfo() {
-        return contactInfo;
-    }
-
-    public TenantStatus getStatus() {
-        return status;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public UUID getCreatedBy() {
-        return createdBy;
-    }
-
-    public Instant getDeactivatedAt() {
-        return deactivatedAt;
-    }
-
-    public UUID getDeactivatedBy() {
-        return deactivatedBy;
-    }
+    public List<DomainEvent> getDomainEvents() { return Collections.unmodifiableList(domainEvents); }
+    public void clearDomainEvents() { domainEvents.clear(); }
+    public TenantId getId() { return id; }
+    public TenantSlug getSlug() { return slug; }
+    public String getName() { return name; }
+    public String getDiscipline() { return discipline; }
+    public String getLanguage() { return language; }
+    public String getLogoKey() { return logoKey; }
+    public ContactInfo getContactInfo() { return contactInfo; }
+    public TenantStatus getStatus() { return status; }
+    public Instant getCreatedAt() { return createdAt; }
+    public UUID getCreatedBy() { return createdBy; }
+    public Instant getDeactivatedAt() { return deactivatedAt; }
+    public UUID getDeactivatedBy() { return deactivatedBy; }
 
     private static void validateNotBlank(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
+        if (value == null || value.isBlank())
             throw new IllegalArgumentException("%s must not be blank".formatted(fieldName));
-        }
     }
 }

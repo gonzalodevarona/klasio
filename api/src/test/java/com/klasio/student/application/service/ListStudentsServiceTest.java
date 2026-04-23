@@ -47,7 +47,7 @@ class ListStudentsServiceTest {
 
     private Student reconstitute(String firstName, String lastName, String email) {
         return Student.reconstitute(
-                StudentId.generate(), TENANT_ID, firstName, lastName, email,
+                StudentId.generate(), TENANT_ID, null, firstName, lastName, email,
                 LocalDate.of(2000, 1, 15), "Sura", "1234567890", IdentityDocumentType.CC,
                 BloodType.O_POSITIVE, "3001234567",
                 null, null, null, null, null,

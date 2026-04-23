@@ -11,6 +11,7 @@ import com.klasio.student.application.port.input.UnenrollStudentUseCase;
 import com.klasio.student.domain.model.Level;
 import com.klasio.student.domain.model.StudentEnrollment;
 import com.klasio.student.domain.port.StudentEnrollmentRepository;
+import com.klasio.membership.domain.port.StudentIdPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -98,6 +99,9 @@ class EnrollmentControllerRbacTest {
 
     @MockitoBean
     private ApplicationEventPublisher eventPublisher;
+
+    @MockitoBean
+    private StudentIdPort studentIdPort;
 
     private static final UUID USER_ID = UUID.randomUUID();
     private static final UUID TENANT_ID = UUID.randomUUID();

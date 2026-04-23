@@ -9,33 +9,44 @@ public record TenantDetail(
         UUID id,
         String slug,
         String name,
-        String sportDiscipline,
+        String discipline,
+        String language,
         String status,
         String logoUrl,
         String contactEmail,
         String contactPhone,
-        String contactAddress,
-        UUID createdBy,
+        String contactPhoneIndicator,
+        String contactStreet,
+        String contactCity,
+        String contactState,
+        String contactCountry,
+        String createdBy,
         Instant createdAt,
         Instant deactivatedAt,
-        UUID deactivatedBy
+        String deactivatedBy
 ) {
 
-    public static TenantDetail fromDomain(Tenant tenant, String logoUrl) {
+    public static TenantDetail fromDomain(Tenant tenant, String logoUrl,
+                                          String createdByName, String deactivatedByName) {
         return new TenantDetail(
                 tenant.getId().value(),
                 tenant.getSlug().value(),
                 tenant.getName(),
-                tenant.getSportDiscipline(),
+                tenant.getDiscipline(),
+                tenant.getLanguage(),
                 tenant.getStatus().name(),
                 logoUrl,
                 tenant.getContactInfo().email(),
                 tenant.getContactInfo().phone(),
-                tenant.getContactInfo().address(),
-                tenant.getCreatedBy(),
+                tenant.getContactInfo().phoneIndicator(),
+                tenant.getContactInfo().street(),
+                tenant.getContactInfo().city(),
+                tenant.getContactInfo().state(),
+                tenant.getContactInfo().country(),
+                createdByName,
                 tenant.getCreatedAt(),
                 tenant.getDeactivatedAt(),
-                tenant.getDeactivatedBy()
+                deactivatedByName
         );
     }
 }

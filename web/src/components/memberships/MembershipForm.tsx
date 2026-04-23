@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { CreateMembershipRequest } from "@/lib/types/membership";
 import { ProgramPlanSummary } from "@/lib/types/program";
 
@@ -17,6 +18,9 @@ export default function MembershipForm({
   onSubmit,
   onCancel,
 }: MembershipFormProps) {
+  const t = useTranslations("memberships");
+  const tCommon = useTranslations("common");
+
   const today = new Date();
   const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
@@ -44,7 +48,7 @@ export default function MembershipForm({
         activateDirectly: paymentValidated ? activateDirectly : false,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create membership.");
+      setError(err instanceof Error ? err.message : tCommon("unexpectedError"));
     } finally {
       setSubmitting(false);
     }
@@ -53,14 +57,14 @@ export default function MembershipForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Plan</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t("formPlanLabel")}</label>
         <select
           value={planId}
           onChange={(e) => setPlanId(e.target.value)}
           required
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">— Select a plan —</option>
+          <option value="">{t("formPlanSelectPlaceholder")}</option>
           {plans.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name} — {p.hours} hours
@@ -72,19 +76,19 @@ export default function MembershipForm({
             <p className="text-sm font-semibold text-blue-900">{selectedPlan.name}</p>
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
               <div>
-                <span className="text-blue-600 font-medium">Modality: </span>
+                <span className="text-blue-600 font-medium">{t("formModalityLabel")}</span>
                 <span className="text-blue-800">
-                  {selectedPlan.modality === "HOURS_BASED" ? "Hours-based" : "Classes per week"}
+                  {selectedPlan.modality === "HOURS_BASED" ? t("formModalityHoursBased") : t("formModalityClassesPerWeek")}
                 </span>
               </div>
               {selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null && (
                 <div>
-                  <span className="text-blue-600 font-medium">Hours: </span>
+                  <span className="text-blue-600 font-medium">{t("formHoursLabel")}</span>
                   <span className="text-blue-800">{selectedPlan.hours}h / month</span>
                 </div>
               )}
               <div>
-                <span className="text-blue-600 font-medium">Cost: </span>
+                <span className="text-blue-600 font-medium">{t("formCostLabel")}</span>
                 <span className="text-blue-800">${Number(selectedPlan.cost).toLocaleString()}</span>
               </div>
             </div>
@@ -94,7 +98,7 @@ export default function MembershipForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Start date
+          {t("formStartDateLabel")}
         </label>
         <input
           type="date"
@@ -103,7 +107,7 @@ export default function MembershipForm({
           required
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <p className="mt-1 text-xs text-gray-500">Membership expires on the last day of the selected month.</p>
+        <p className="mt-1 text-xs text-gray-500">{t("formExpiresHint")}</p>
       </div>
 
       <div className="space-y-2">
@@ -117,7 +121,7 @@ export default function MembershipForm({
             }}
             className="h-4 w-4 rounded border-gray-300 text-blue-600"
           />
-          Payment already validated
+          {t("formPaymentValidated")}
         </label>
 
         {paymentValidated && (
@@ -128,7 +132,7 @@ export default function MembershipForm({
               onChange={(e) => setActivateDirectly(e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-blue-600"
             />
-            Activate directly (skip manager delegation)
+            {t("formActivateDirectly")}
           </label>
         )}
       </div>
@@ -146,14 +150,14 @@ export default function MembershipForm({
           disabled={submitting}
           className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
-          Cancel
+          {tCommon("cancel")}
         </button>
         <button
           type="submit"
           disabled={!isValid || submitting}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {submitting ? "Creating..." : "Create Membership"}
+          {submitting ? t("formCreatingBtn") : t("formCreateBtn")}
         </button>
       </div>
     </form>

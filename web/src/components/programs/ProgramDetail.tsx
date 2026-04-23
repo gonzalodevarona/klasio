@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ProgramDetail as ProgramDetailType } from "@/lib/types/program";
 import { api, ApiError } from "@/lib/api";
 import ProgramStatusBadge from "./ProgramStatusBadge";
@@ -19,6 +20,7 @@ export default function ProgramDetail({
   program,
   onStatusChanged,
 }: ProgramDetailProps) {
+  const t = useTranslations("programs");
   const { plans, loading: plansLoading, error: plansError } = useProgramPlans(program.id);
   const [activeTab, setActiveTab] = useState<Tab>("details");
   const [showConfirm, setShowConfirm] = useState(false);
@@ -37,7 +39,7 @@ export default function ProgramDetail({
       const label = action === "deactivate" ? "deactivated" : "reactivated";
       setFeedback({
         type: "success",
-        message: `Program has been ${label} successfully.`,
+        message: t("detailSuccessFeedback", { action: label }),
       });
       setShowConfirm(false);
       onStatusChanged?.();
@@ -45,7 +47,7 @@ export default function ProgramDetail({
       const message =
         err instanceof ApiError
           ? err.message
-          : `Failed to ${action} program. Please try again.`;
+          : t("detailErrorFeedback", { action });
       setFeedback({ type: "error", message });
     } finally {
       setActionLoading(false);
@@ -93,7 +95,7 @@ export default function ProgramDetail({
                 href={`/programs/${program.id}/edit`}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Edit
+                {t("detailEditButton")}
               </Link>
             )}
           </div>
@@ -111,7 +113,7 @@ export default function ProgramDetail({
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              Details
+              {t("detailTabDetails")}
             </button>
             <button
               type="button"
@@ -122,13 +124,13 @@ export default function ProgramDetail({
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
-              Plans
+              {t("detailTabPlans")}
             </button>
             <Link
               href={`/programs/${program.id}/classes`}
               className="py-3 px-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             >
-              Classes
+              {t("detailTabClasses")}
             </Link>
           </nav>
         </div>
@@ -139,29 +141,29 @@ export default function ProgramDetail({
             <div className="px-6 py-5">
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Name</dt>
+                  <dt className="text-sm font-medium text-gray-500">{t("detailName")}</dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {program.name}
                   </dd>
                 </div>
 
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
+                  <dt className="text-sm font-medium text-gray-500">{t("detailStatus")}</dt>
                   <dd className="mt-1">
                     <ProgramStatusBadge status={program.status} />
                   </dd>
                 </div>
 
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Created At</dt>
+                  <dt className="text-sm font-medium text-gray-500">{t("detailCreatedAt")}</dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {formatDate(program.createdAt)}
                   </dd>
                 </div>
 
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Created By</dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                  <dt className="text-sm font-medium text-gray-500">{t("detailCreatedBy")}</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
                     {program.createdBy}
                   </dd>
                 </div>
@@ -170,7 +172,7 @@ export default function ProgramDetail({
                   <>
                     <div>
                       <dt className="text-sm font-medium text-gray-500">
-                        Last Updated
+                        {t("detailLastUpdated")}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
                         {formatDate(program.updatedAt)}
@@ -179,9 +181,9 @@ export default function ProgramDetail({
 
                     <div>
                       <dt className="text-sm font-medium text-gray-500">
-                        Updated By
+                        {t("detailUpdatedBy")}
                       </dt>
-                      <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                      <dd className="mt-1 text-sm text-gray-900">
                         {program.updatedBy}
                       </dd>
                     </div>
@@ -198,14 +200,14 @@ export default function ProgramDetail({
                   onClick={() => setShowConfirm(true)}
                   className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
-                  Deactivate Program
+                  {t("detailDeactivateButton")}
                 </button>
               )}
 
               {program.status === "ACTIVE" && showConfirm && (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-700">
-                    Are you sure you want to deactivate this program?
+                    {t("detailConfirmDeactivate")}
                   </p>
                   <div className="flex gap-3">
                     <button
@@ -214,7 +216,7 @@ export default function ProgramDetail({
                       disabled={actionLoading}
                       className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {actionLoading ? "Deactivating..." : "Confirm Deactivation"}
+                      {actionLoading ? t("detailDeactivatingButton") : t("detailConfirmDeactivateButton")}
                     </button>
                     <button
                       type="button"
@@ -222,7 +224,7 @@ export default function ProgramDetail({
                       disabled={actionLoading}
                       className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Cancel
+                      {t("detailCancelButton")}
                     </button>
                   </div>
                 </div>
@@ -235,7 +237,7 @@ export default function ProgramDetail({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading ? "Reactivating..." : "Reactivate Program"}
+                  {actionLoading ? t("detailReactivatingButton") : t("detailReactivateButton")}
                 </button>
               )}
             </div>
@@ -246,13 +248,13 @@ export default function ProgramDetail({
         {activeTab === "plans" && (
           <div className="px-6 py-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Plans</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t("plansTitle")}</h3>
               {program.status === "ACTIVE" && (
                 <Link
                   href={`/programs/${program.id}/plans/new`}
                   className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
                 >
-                  Add Plan
+                  {t("plansAddButton")}
                 </Link>
               )}
             </div>

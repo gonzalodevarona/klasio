@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import ProgramPlanForm from "@/components/programs/ProgramPlanForm";
 import { useProgramDetail } from "@/hooks/usePrograms";
 
@@ -10,6 +11,7 @@ interface NewPlanPageProps {
 }
 
 export default function NewPlanPage({ params }: NewPlanPageProps) {
+  const t = useTranslations("programs");
   const { id } = use(params);
   const { program, loading, error } = useProgramDetail(id);
 
@@ -17,7 +19,7 @@ export default function NewPlanPage({ params }: NewPlanPageProps) {
     <div>
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/programs" className="hover:text-gray-700 hover:underline">
-          Programs
+          {t("detailBreadcrumb")}
         </Link>
         <span className="mx-2">/</span>
         <Link
@@ -27,14 +29,14 @@ export default function NewPlanPage({ params }: NewPlanPageProps) {
           {program?.name ?? id}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">New Plan</span>
+        <span className="text-gray-900">{t("planNewBreadcrumb")}</span>
       </nav>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Add New Plan</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">{t("planNewPageTitle")}</h1>
 
       {loading && (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading program...
+          {t("planNewLoadingText")}
         </div>
       )}
 

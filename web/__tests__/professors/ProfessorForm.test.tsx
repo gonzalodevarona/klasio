@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithIntl } from "../../__test-support__/renderWithIntl";
 import ProfessorForm from "@/components/professors/ProfessorForm";
 import { api, ApiError } from "@/lib/api";
 import { ProfessorDetail } from "@/lib/types/professor";
@@ -39,6 +40,8 @@ const existingProfessor: ProfessorDetail = {
   lastName: "Martinez",
   email: "carlos@example.com",
   phoneNumber: "+573001234567",
+  identityDocumentType: "CC",
+  identityNumber: "123456789",
   status: "ACTIVE" as const,
   createdAt: "2025-01-15T10:00:00Z",
   createdBy: "44444444-4444-4444-4444-444444444444",
@@ -52,7 +55,7 @@ beforeEach(() => {
 
 describe("ProfessorForm (create mode)", () => {
   it("renders firstName, lastName, and email fields", () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     expect(screen.getByLabelText(/First Name/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Last Name/)).toBeInTheDocument();
@@ -61,7 +64,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates firstName is required on submit", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/Last Name/), {
       target: { value: "Martinez" },
@@ -81,7 +84,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates lastName is required on submit", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -101,7 +104,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates email is required on submit", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -119,7 +122,7 @@ describe("ProfessorForm (create mode)", () => {
   });
 
   it("validates email format", async () => {
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -148,7 +151,7 @@ describe("ProfessorForm (create mode)", () => {
     };
     (api.post as jest.Mock).mockResolvedValue(created);
 
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -159,6 +162,9 @@ describe("ProfessorForm (create mode)", () => {
     fireEvent.change(screen.getByLabelText(/Email/), {
       target: { value: "carlos@example.com" },
     });
+    fireEvent.change(screen.getByLabelText(/Document Number/), {
+      target: { value: "1234567890" },
+    });
     fireEvent.click(screen.getByText("Create Professor"));
 
     await waitFor(() => {
@@ -167,6 +173,8 @@ describe("ProfessorForm (create mode)", () => {
         lastName: "Martinez",
         email: "carlos@example.com",
         phoneNumber: undefined,
+        identityDocumentType: "CC",
+        identityNumber: "1234567890",
       });
     });
 
@@ -181,7 +189,7 @@ describe("ProfessorForm (create mode)", () => {
     );
     (api.post as jest.Mock).mockRejectedValue(err);
 
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -191,6 +199,9 @@ describe("ProfessorForm (create mode)", () => {
     });
     fireEvent.change(screen.getByLabelText(/Email/), {
       target: { value: "carlos@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/Document Number/), {
+      target: { value: "1234567890" },
     });
     fireEvent.click(screen.getByText("Create Professor"));
 
@@ -213,7 +224,7 @@ describe("ProfessorForm (create mode)", () => {
     );
     (api.post as jest.Mock).mockRejectedValue(err);
 
-    render(<ProfessorForm />);
+    renderWithIntl(<ProfessorForm />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos" },
@@ -223,6 +234,9 @@ describe("ProfessorForm (create mode)", () => {
     });
     fireEvent.change(screen.getByLabelText(/Email/), {
       target: { value: "carlos@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/Document Number/), {
+      target: { value: "1234567890" },
     });
     fireEvent.click(screen.getByText("Create Professor"));
 
@@ -240,7 +254,7 @@ describe("ProfessorForm (create mode)", () => {
 
 describe("ProfessorForm (edit mode)", () => {
   it("pre-fills fields with existing professor data", () => {
-    render(<ProfessorForm professor={existingProfessor} />);
+    renderWithIntl(<ProfessorForm professor={existingProfessor} />);
 
     expect(screen.getByLabelText(/First Name/)).toHaveValue("Carlos");
     expect(screen.getByLabelText(/Last Name/)).toHaveValue("Martinez");
@@ -251,7 +265,7 @@ describe("ProfessorForm (edit mode)", () => {
   it("submits update request via PUT", async () => {
     (api.put as jest.Mock).mockResolvedValue(existingProfessor);
 
-    render(<ProfessorForm professor={existingProfessor} />);
+    renderWithIntl(<ProfessorForm professor={existingProfessor} />);
 
     fireEvent.change(screen.getByLabelText(/First Name/), {
       target: { value: "Carlos Updated" },
@@ -272,6 +286,8 @@ describe("ProfessorForm (edit mode)", () => {
           lastName: "Martinez Updated",
           email: "carlos.updated@example.com",
           phoneNumber: "+573001234567",
+          identityDocumentType: "CC",
+          identityNumber: "123456789",
         }
       );
     });

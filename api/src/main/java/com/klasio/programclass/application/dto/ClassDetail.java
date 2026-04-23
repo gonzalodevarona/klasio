@@ -20,11 +20,11 @@ public record ClassDetail(
         String status,
         List<ClassScheduleEntry> scheduleEntries,
         Instant createdAt,
-        UUID createdBy,
+        String createdBy,
         Instant updatedAt,
-        UUID updatedBy
+        String updatedBy
 ) {
-    public static ClassDetail fromDomain(ProgramClass pc) {
+    public static ClassDetail fromDomain(ProgramClass pc, String createdByName, String updatedByName) {
         return new ClassDetail(
                 pc.getId().value(),
                 pc.getTenantId(),
@@ -38,9 +38,9 @@ public record ClassDetail(
                 pc.getStatus().name(),
                 pc.getScheduleEntries(),
                 pc.getCreatedAt(),
-                pc.getCreatedBy(),
+                createdByName,
                 pc.getUpdatedAt(),
-                pc.getUpdatedBy()
+                updatedByName
         );
     }
 }

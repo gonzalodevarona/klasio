@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   useProfessors,
   useDeactivateProfessor,
@@ -14,12 +15,6 @@ import EditProfessorModal from "./EditProfessorModal";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type StatusFilter = "ACTIVE" | "DEACTIVATED" | "";
-
-const STATUS_TABS: { label: string; value: StatusFilter }[] = [
-  { label: "Active",      value: "ACTIVE" },
-  { label: "Deactivated", value: "DEACTIVATED" },
-  { label: "All",         value: "" },
-];
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
 
@@ -48,9 +43,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("badges.professorStatus");
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"}`}>
-      {status.charAt(0) + status.slice(1).toLowerCase()}
+      {t(status)}
     </span>
   );
 }
@@ -67,17 +63,18 @@ function DeactivateModal({ professor, loading, error, onConfirm, onCancel }: {
   professor: ProfessorSummary; loading: boolean; error: string | null;
   onConfirm: () => void; onCancel: () => void;
 }) {
+  const t = useTranslations("professors");
   const name = [professor.firstName, professor.lastName].filter(Boolean).join(" ") || professor.email;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-2">Deactivate Professor</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-2">{t("modalDeactivateTitle")}</h2>
         <p className="text-sm text-gray-600 mb-1">
-          Are you sure you want to deactivate <span className="font-medium text-gray-900">{name}</span>?
+          {t("modalDeactivateConfirm", { name: <span className="font-medium text-gray-900">{name}</span> })}
         </p>
         <p className="text-xs text-gray-500 mb-6">
-          The account will be disabled immediately. You can re-activate it at any time.
+          {t("modalDeactivateHint")}
         </p>
         {error && (
           <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">{error}</div>
@@ -85,11 +82,11 @@ function DeactivateModal({ professor, loading, error, onConfirm, onCancel }: {
         <div className="flex justify-end gap-3">
           <button onClick={onCancel}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-            Cancel
+            {t("modalCancelButton")}
           </button>
           <button onClick={onConfirm} disabled={loading}
             className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            {loading ? "Deactivating..." : "Deactivate"}
+            {loading ? t("modalDeactivatingButton") : t("modalDeactivateButton")}
           </button>
         </div>
       </div>
@@ -100,6 +97,9 @@ function DeactivateModal({ professor, loading, error, onConfirm, onCancel }: {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ProfessorList() {
+  const t = useTranslations("professors");
+  const tPagination = useTranslations("pagination");
+
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ACTIVE");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -157,6 +157,22 @@ export default function ProfessorList() {
     }
   }
 
+  const STATUS_TABS: { label: string; value: StatusFilter }[] = [
+    { label: t("filterActive"),      value: "ACTIVE" },
+    { label: t("filterDeactivated"), value: "DEACTIVATED" },
+    { label: t("filterAll"),         value: "" },
+  ];
+
+  const COLUMNS = [
+    { key: "colName",     label: t("colName") },
+    { key: "colEmail",    label: t("colEmail") },
+    { key: "colPhone",    label: t("colPhone") },
+    { key: "colDocument", label: t("colDocument") },
+    { key: "colStatus",   label: t("colStatus") },
+    { key: "colCreated",  label: t("colCreated") },
+    { key: "colActions",  label: t("colActions") },
+  ];
+
   return (
     <div className="space-y-4">
       {/* Controls */}
@@ -175,7 +191,7 @@ export default function ProfessorList() {
         <button onClick={() => setShowCreateModal(true)}
           className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
           <Plus className="h-4 w-4" />
-          Add Professor
+          {t("addButton")}
         </button>
       </div>
 
@@ -186,18 +202,18 @@ export default function ProfessorList() {
       )}
 
       {loading ? (
-        <div className="text-center py-10 text-sm text-gray-500">Loading professors...</div>
+        <div className="text-center py-10 text-sm text-gray-500">{t("listLoading")}</div>
       ) : professors.length === 0 ? (
-        <div className="text-center py-10 text-sm text-gray-500">No professors match the current filter.</div>
+        <div className="text-center py-10 text-sm text-gray-500">{t("listEmpty")}</div>
       ) : (
         <>
           <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {["Name", "Email", "Phone", "Document", "Status", "Created", "Actions"].map((h) => (
-                    <th key={h} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${h === "Actions" ? "text-right" : "text-left"}`}>
-                      {h}
+                  {COLUMNS.map((col) => (
+                    <th key={col.key} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${col.key === "colActions" ? "text-right" : "text-left"}`}>
+                      {col.label}
                     </th>
                   ))}
                 </tr>
@@ -239,15 +255,15 @@ export default function ProfessorList() {
           </div>
 
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-700">Page {page + 1} of {totalPages} ({totalElements} total)</p>
+            <p className="text-sm text-gray-700">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
             <div className="flex gap-2">
               <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                Previous
+                {tPagination("previous")}
               </button>
               <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages - 1}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                Next
+                {tPagination("next")}
               </button>
             </div>
           </div>

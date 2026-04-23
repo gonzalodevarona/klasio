@@ -26,6 +26,9 @@ public class ProfessorJpaEntity implements Persistable<UUID> {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
+    @Column(name = "user_id")
+    private UUID userId;
+
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
@@ -84,6 +87,14 @@ public class ProfessorJpaEntity implements Persistable<UUID> {
 
     public void setTenantId(UUID tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 
     public String getFirstName() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { usePaymentProofs } from "@/hooks/usePaymentProofs";
 import type { ProofQueueItem } from "@/lib/types/paymentProof";
 import { IDENTITY_DOCUMENT_TYPES } from "@/lib/types/student";
@@ -16,6 +17,7 @@ function formatDocType(code: string): string {
 }
 
 export function ProofReviewModal({ proof, onClose, onDone }: Props) {
+  const t = useTranslations("paymentProofs");
   const { getDownloadUrl, approveProof, rejectProof, loading } = usePaymentProofs();
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [urlError, setUrlError] = useState<string | null>(null);
@@ -37,13 +39,13 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
       await approveProof(proof.proofId, activateDirectly);
       onDone();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Approval failed.");
+      setActionError(err instanceof Error ? err.message : t("approvingBtn"));
     }
   }
 
   async function handleReject() {
     if (!rejectionReason.trim()) {
-      setActionError("Rejection reason is required.");
+      setActionError(t("rejectionReasonLabel") + " is required.");
       return;
     }
     setActionError(null);
@@ -51,7 +53,7 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
       await rejectProof(proof.proofId, rejectionReason.trim());
       onDone();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Rejection failed.");
+      setActionError(err instanceof Error ? err.message : t("rejectingBtn"));
     }
   }
 
@@ -63,7 +65,7 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
         {/* Header */}
         <div className="flex items-start justify-between px-5 py-4 border-b border-gray-200 gap-4">
           <div className="min-w-0 space-y-2">
-            <h2 className="text-base font-semibold text-gray-900">Review Payment Proof</h2>
+            <h2 className="text-base font-semibold text-gray-900">{t("reviewModalTitle")}</h2>
 
             {/* Student identity */}
             <p className="text-xs text-gray-500">
@@ -75,23 +77,23 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
             {/* Plan details card */}
             <div className="rounded-md bg-indigo-50 border border-indigo-100 px-3 py-2 space-y-1">
               <p className="text-xs font-semibold text-indigo-800 uppercase tracking-wide">
-                Plan Details
+                {t("planDetailsTitle")}
               </p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                 <div>
-                  <span className="text-gray-500">Program: </span>
+                  <span className="text-gray-500">{t("labelProgram")}</span>
                   <span className="font-medium text-gray-800">{proof.programName}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Plan: </span>
+                  <span className="text-gray-500">{t("labelPlan")}</span>
                   <span className="font-medium text-gray-800">{proof.planName}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Hours: </span>
+                  <span className="text-gray-500">{t("labelHours")}</span>
                   <span className="font-medium text-gray-800">{proof.purchasedHours} h</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">Cost: </span>
+                  <span className="text-gray-500">{t("labelCost")}</span>
                   <span className="font-medium text-gray-800">
                     {new Intl.NumberFormat("es-CO", {
                       style: "currency",
@@ -119,7 +121,7 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
             <p className="text-sm text-red-600">{urlError}</p>
           )}
           {!downloadUrl && !urlError && (
-            <p className="text-sm text-gray-400">Loading preview…</p>
+            <p className="text-sm text-gray-400">{t("previewLoading")}</p>
           )}
           {downloadUrl && isPdf && (
             <iframe
@@ -154,10 +156,10 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
                     onChange={(e) => setActivateDirectly(e.target.checked)}
                     className="rounded border-gray-300"
                   />
-                  Activate membership directly
+                  {t("activateDirectlyLabel")}
                 </label>
                 <span className="text-xs text-gray-400">
-                  (uncheck to delegate to manager)
+                  {t("activateDirectlyHint")}
                 </span>
               </div>
 
@@ -167,14 +169,14 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
                   disabled={loading || !downloadUrl}
                   className="flex-1 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                 >
-                  {loading ? "Processing…" : "Approve"}
+                  {loading ? t("approvingBtn") : t("approveBtn")}
                 </button>
                 <button
                   onClick={() => { setMode("reject"); setActionError(null); }}
                   disabled={loading}
                   className="flex-1 rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
                 >
-                  Reject
+                  {t("rejectBtn")}
                 </button>
               </div>
             </>
@@ -183,13 +185,13 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
           {mode === "reject" && (
             <div className="space-y-2">
               <label className="block text-xs font-medium text-gray-700">
-                Rejection reason <span className="text-red-500">*</span>
+                {t("rejectionReasonLabel")} <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 rows={3}
-                placeholder="Explain why this proof is being rejected…"
+                placeholder={t("rejectionReasonPlaceholder")}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
               <div className="flex gap-2">
@@ -198,14 +200,14 @@ export function ProofReviewModal({ proof, onClose, onDone }: Props) {
                   disabled={loading}
                   className="flex-1 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
                 >
-                  {loading ? "Processing…" : "Confirm Reject"}
+                  {loading ? t("rejectingBtn") : t("confirmRejectBtn")}
                 </button>
                 <button
                   onClick={() => { setMode("view"); setActionError(null); }}
                   disabled={loading}
                   className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  Back
+                  {t("backBtn")}
                 </button>
               </div>
             </div>

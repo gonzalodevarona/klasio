@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Pencil } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useManagers, useDeactivateManager, useActivateManager, useManagerTenantOptions } from "@/hooks/useManagers";
 import { useAuth } from "@/hooks/useAuth";
 import { ManagerSummary } from "@/lib/types/manager";
@@ -10,13 +11,7 @@ import EditManagerModal from "./EditManagerModal";
 
 // ── Status filter ─────────────────────────────────────────────────────────────
 
-type StatusFilter = "ACTIVE" | "INACTIVE" | "";
-
-const STATUS_TABS: { label: string; value: StatusFilter }[] = [
-  { label: "Active",   value: "ACTIVE" },
-  { label: "Inactive", value: "INACTIVE" },
-  { label: "All",      value: "" },
-];
+type StatusFilter = "ACTIVE" | "INVITED" | "INACTIVE" | "";
 
 // ── Toggle ────────────────────────────────────────────────────────────────────
 
@@ -38,13 +33,15 @@ function Toggle({ checked, disabled, onChange }: { checked: boolean; disabled?: 
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE:   "bg-green-100 text-green-700",
+  INVITED:  "bg-yellow-100 text-yellow-700",
   INACTIVE: "bg-gray-100 text-gray-500",
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations("badges.managerStatus");
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"}`}>
-      {status}
+      {t(status)}
     </span>
   );
 }
@@ -59,17 +56,18 @@ function DeactivateModal({ manager, loading, error, onConfirm, onCancel }: {
   manager: ManagerSummary; loading: boolean; error: string | null;
   onConfirm: () => void; onCancel: () => void;
 }) {
+  const t = useTranslations("managers");
   const name = [manager.firstName, manager.lastName].filter(Boolean).join(" ") || manager.email;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-2">Deactivate Manager</h2>
+        <h2 className="text-base font-semibold text-gray-900 mb-2">{t("modalDeactivateTitle")}</h2>
         <p className="text-sm text-gray-600 mb-1">
-          Are you sure you want to deactivate <span className="font-medium text-gray-900">{name}</span>?
+          {t("modalDeactivateConfirm", { name: <span className="font-medium text-gray-900">{name}</span> })}
         </p>
         <p className="text-xs text-gray-500 mb-6">
-          The account will be disabled immediately. You can re-activate it at any time.
+          {t("modalDeactivateHint")}
         </p>
         {error && (
           <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">{error}</div>
@@ -77,11 +75,11 @@ function DeactivateModal({ manager, loading, error, onConfirm, onCancel }: {
         <div className="flex justify-end gap-3">
           <button onClick={onCancel}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-            Cancel
+            {t("modalCancelButton")}
           </button>
           <button onClick={onConfirm} disabled={loading}
             className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            {loading ? "Deactivating..." : "Deactivate"}
+            {loading ? t("modalDeactivatingButton") : t("modalDeactivateButton")}
           </button>
         </div>
       </div>
@@ -92,6 +90,8 @@ function DeactivateModal({ manager, loading, error, onConfirm, onCancel }: {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ManagerList() {
+  const t = useTranslations("managers");
+  const tPagination = useTranslations("pagination");
   const { user } = useAuth();
   // ADMIN users are always scoped to their own tenant — they cannot select another tenant.
   const isAdmin = user?.roles.includes("ADMIN") ?? false;
@@ -162,6 +162,22 @@ export default function ManagerList() {
     }
   }
 
+  const STATUS_TABS: { label: string; value: StatusFilter }[] = [
+    { label: t("filterActive"),   value: "ACTIVE" },
+    { label: t("filterInactive"), value: "INACTIVE" },
+    { label: t("filterAll"),      value: "" },
+  ];
+
+  const COLUMNS = [
+    { key: "colName",     label: t("colName"),     right: false },
+    { key: "colEmail",    label: t("colEmail"),    right: false },
+    { key: "colTenant",   label: t("colTenant"),   right: false },
+    { key: "colDocument", label: t("colDocument"), right: false },
+    { key: "colStatus",   label: t("colStatus"),   right: false },
+    { key: "colCreated",  label: t("colCreated"),  right: false },
+    { key: "colActions",  label: t("colActions"),  right: true },
+  ];
+
   return (
     <div className="space-y-4">
       {/* Controls */}
@@ -170,13 +186,13 @@ export default function ManagerList() {
           {/* Tenant filter — hidden for ADMIN (they are scoped to their own tenant) */}
           {!isAdmin && (
             <>
-              <label htmlFor="tenantFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">Tenant:</label>
+              <label htmlFor="tenantFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">{t("filterTenantLabel")}</label>
               <select
                 id="tenantFilter" value={tenantFilter} onChange={(e) => { setTenantFilter(e.target.value); setPage(0); }}
                 disabled={loadingTenants}
                 className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               >
-                <option value="">All Tenants</option>
+                <option value="">{t("filterAllTenants")}</option>
                 {Object.entries(tenantOptions).map(([id, name]) => (
                   <option key={id} value={id}>{name}</option>
                 ))}
@@ -199,7 +215,7 @@ export default function ManagerList() {
         <button onClick={() => setShowCreateModal(true)}
           className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
           <Plus className="h-4 w-4" />
-          Create Manager
+          {t("createButton")}
         </button>
       </div>
 
@@ -210,23 +226,25 @@ export default function ManagerList() {
       )}
 
       {loading ? (
-        <div className="text-center py-10 text-sm text-gray-500">Loading managers...</div>
+        <div className="text-center py-10 text-sm text-gray-500">{t("listLoading")}</div>
       ) : managers.length === 0 ? (
-        <div className="text-center py-10 text-sm text-gray-500">No managers match the current filter.</div>
+        <div className="text-center py-10 text-sm text-gray-500">{t("listEmpty")}</div>
       ) : (
         <>
           <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {["Name", "Email", "Tenant", "Document", "Status", "Created", "Actions"].map((h) => (
-                    <th key={h} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${h === "Actions" ? "text-right" : "text-left"}`}>{h}</th>
+                  {COLUMNS.map((col) => (
+                    <th key={col.key} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${col.right ? "text-right" : "text-left"}`}>
+                      {col.label}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {managers.map((m: ManagerSummary) => (
-                  <tr key={m.id} className={`hover:bg-gray-50 ${m.status === "INACTIVE" ? "opacity-60" : ""}`}>
+                  <tr key={m.id} className={`hover:bg-gray-50 ${m.status === "INACTIVE" || m.status === "INVITED" ? "opacity-60" : ""}`}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {m.firstName || m.lastName
                         ? [m.firstName, m.lastName].filter(Boolean).join(" ")
@@ -247,7 +265,7 @@ export default function ManagerList() {
                         </button>
                         <Toggle
                           checked={m.status === "ACTIVE"}
-                          disabled={togglingId === m.id}
+                          disabled={togglingId === m.id || m.status === "INVITED"}
                           onChange={() => handleToggleClick(m)}
                         />
                       </div>
@@ -259,15 +277,15 @@ export default function ManagerList() {
           </div>
 
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-700">Page {page + 1} of {totalPages} ({totalElements} total)</p>
+            <p className="text-sm text-gray-700">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
             <div className="flex gap-2">
               <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                Previous
+                {tPagination("previous")}
               </button>
               <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages - 1}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                Next
+                {tPagination("next")}
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithIntl as render } from "../../__test-support__/renderWithIntl";
 import userEvent from "@testing-library/user-event";
 import ProgramPlanForm from "@/components/programs/ProgramPlanForm";
 

@@ -3,6 +3,7 @@ package com.klasio.student.infrastructure.web;
 import com.klasio.shared.infrastructure.config.JwtProperties;
 import com.klasio.shared.infrastructure.exception.GlobalExceptionHandler;
 import com.klasio.student.application.port.input.CreateStudentUseCase;
+import com.klasio.student.application.port.input.GetStudentDetailUseCase;
 import com.klasio.student.application.port.input.GetStudentUseCase;
 import com.klasio.student.application.port.input.ListEnrollmentsUseCase;
 import com.klasio.student.application.port.input.ListStudentsUseCase;
@@ -10,6 +11,7 @@ import com.klasio.student.application.port.input.UpdateStudentUseCase;
 import com.klasio.shared.domain.model.IdentityDocumentType;
 import com.klasio.student.domain.model.Student;
 import com.klasio.student.domain.port.StudentRepository;
+import com.klasio.membership.domain.port.StudentIdPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -84,6 +86,9 @@ class StudentControllerRbacTest {
     private GetStudentUseCase getStudentUseCase;
 
     @MockitoBean
+    private GetStudentDetailUseCase getStudentDetailUseCase;
+
+    @MockitoBean
     private ListStudentsUseCase listStudentsUseCase;
 
     @MockitoBean
@@ -97,6 +102,9 @@ class StudentControllerRbacTest {
 
     @MockitoBean
     private ApplicationEventPublisher eventPublisher;
+
+    @MockitoBean
+    private StudentIdPort studentIdPort;
 
     private static final UUID USER_ID = UUID.randomUUID();
     private static final UUID TENANT_ID = UUID.randomUUID();
@@ -146,7 +154,8 @@ class StudentControllerRbacTest {
               "dateOfBirth": "2000-01-15",
               "eps": "Sura",
               "identityNumber": "123456",
-              "identityDocumentType": "CC"
+              "identityDocumentType": "CC",
+              "phone": "+573001234567"
             }
             """;
 
@@ -158,7 +167,8 @@ class StudentControllerRbacTest {
               "dateOfBirth": "2000-01-15",
               "eps": "Sura",
               "identityNumber": "123456",
-              "identityDocumentType": "CC"
+              "identityDocumentType": "CC",
+              "phone": "+573001234567"
             }
             """;
 

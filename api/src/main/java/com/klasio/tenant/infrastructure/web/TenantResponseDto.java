@@ -14,7 +14,7 @@ public final class TenantResponseDto {
             UUID id,
             String slug,
             String name,
-            String sportDiscipline,
+            String discipline,
             String status,
             Instant createdAt
     ) {
@@ -24,7 +24,7 @@ public final class TenantResponseDto {
                     tenant.getId().value(),
                     tenant.getSlug().value(),
                     tenant.getName(),
-                    tenant.getSportDiscipline(),
+                    tenant.getDiscipline(),
                     tenant.getStatus().name(),
                     tenant.getCreatedAt()
             );
@@ -35,16 +35,21 @@ public final class TenantResponseDto {
             UUID id,
             String slug,
             String name,
-            String sportDiscipline,
+            String discipline,
+            String language,
             String status,
             Instant createdAt,
             String logoUrl,
             String contactEmail,
             String contactPhone,
-            String contactAddress,
-            UUID createdBy,
+            String contactPhoneIndicator,
+            String contactStreet,
+            String contactCity,
+            String contactState,
+            String contactCountry,
+            String createdBy,
             Instant deactivatedAt,
-            UUID deactivatedBy
+            String deactivatedBy
     ) {
 
         public static TenantDetailResponse fromDomain(Tenant tenant) {
@@ -56,16 +61,21 @@ public final class TenantResponseDto {
                     tenant.getId().value(),
                     tenant.getSlug().value(),
                     tenant.getName(),
-                    tenant.getSportDiscipline(),
+                    tenant.getDiscipline(),
+                    tenant.getLanguage(),
                     tenant.getStatus().name(),
                     tenant.getCreatedAt(),
                     logoUrl,
                     tenant.getContactInfo().email(),
                     tenant.getContactInfo().phone(),
-                    tenant.getContactInfo().address(),
-                    tenant.getCreatedBy(),
+                    tenant.getContactInfo().phoneIndicator(),
+                    tenant.getContactInfo().street(),
+                    tenant.getContactInfo().city(),
+                    tenant.getContactInfo().state(),
+                    tenant.getContactInfo().country(),
+                    tenant.getCreatedBy().toString(),
                     tenant.getDeactivatedAt(),
-                    tenant.getDeactivatedBy()
+                    tenant.getDeactivatedBy() != null ? tenant.getDeactivatedBy().toString() : null
             );
         }
     }

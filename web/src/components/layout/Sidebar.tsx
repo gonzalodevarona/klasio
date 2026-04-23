@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebarIdentity } from "@/hooks/useSidebarIdentity";
 import { usePendingProofsCount } from "@/hooks/usePaymentProofs";
@@ -39,8 +40,8 @@ interface NavItem {
   icon: IconComponent;
 }
 
-function NotificationBadge({ count }: { count: number }) {
-  const label = count > 10 ? "10+" : String(count);
+function NotificationBadge({ count, badgeMax }: { count: number; badgeMax: string }) {
+  const label = count > 10 ? badgeMax : String(count);
   return (
     <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none shrink-0">
       {label}
@@ -48,51 +49,55 @@ function NotificationBadge({ count }: { count: number }) {
   );
 }
 
-const NAV_ITEMS_BY_ROLE: Record<Role, NavItem[]> = {
-  SUPERADMIN: [
-    { label: "Tenants",        href: "/tenants",        icon: Building2 },
-    { label: "Admins",         href: "/admins",         icon: ShieldCheck },
-    { label: "Managers",       href: "/managers",       icon: UserCog },
-    { label: "Professors",     href: "/professors",     icon: GraduationCap },
-    { label: "Students",       href: "/students",       icon: Users },
-    { label: "Programs",       href: "/programs",       icon: BookOpen },
-    { label: "Plans",          href: "/plans",          icon: ListChecks },
-    { label: "Classes",        href: "/classes",        icon: CalendarDays },
-    { label: "Payment Proofs", href: "/payment-proofs", icon: FileCheck },
-  ],
-  ADMIN: [
-    { label: "Managers",       href: "/managers",       icon: UserCog },
-    { label: "Professors",     href: "/professors",     icon: GraduationCap },
-    { label: "Students",       href: "/students",       icon: Users },
-    { label: "Programs",       href: "/programs",       icon: BookOpen },
-    { label: "Plans",          href: "/plans",          icon: ListChecks },
-    { label: "Classes",        href: "/classes",        icon: CalendarDays },
-    { label: "Payment Proofs", href: "/payment-proofs", icon: FileCheck },
-  ],
-  MANAGER: [
-    { label: "Professors", href: "/professors", icon: GraduationCap },
-    { label: "Students",   href: "/students",   icon: Users },
-    { label: "Programs",   href: "/programs",   icon: BookOpen },
-    { label: "Classes",    href: "/classes",    icon: CalendarDays },
-  ],
-  PROFESSOR: [
-    { label: "Classes", href: "/classes", icon: CalendarDays },
-  ],
-  STUDENT: [
-    { label: "Dashboard",        href: "/student/dashboard",     icon: LayoutDashboard },
-    { label: "My Memberships",   href: "/student/memberships",   icon: BadgeCheck },
-    { label: "My Enrollments",   href: "/student/enrollments",   icon: ClipboardList },
-    { label: "My Classes",       href: "/student/classes",       icon: Calendar },
-    { label: "My Registrations", href: "/student/registrations", icon: CalendarCheck },
-  ],
-};
+type LayoutT = ReturnType<typeof useTranslations<"layout">>;
+
+function makeNavItemsByRole(t: LayoutT): Record<Role, NavItem[]> {
+  return {
+    SUPERADMIN: [
+      { label: t("navTenants"),       href: "/tenants",        icon: Building2 },
+      { label: t("navAdmins"),        href: "/admins",         icon: ShieldCheck },
+      { label: t("navManagers"),      href: "/managers",       icon: UserCog },
+      { label: t("navProfessors"),    href: "/professors",     icon: GraduationCap },
+      { label: t("navStudents"),      href: "/students",       icon: Users },
+      { label: t("navPrograms"),      href: "/programs",       icon: BookOpen },
+      { label: t("navPlans"),         href: "/plans",          icon: ListChecks },
+      { label: t("navClasses"),       href: "/classes",        icon: CalendarDays },
+      { label: t("navPaymentProofs"), href: "/payment-proofs", icon: FileCheck },
+    ],
+    ADMIN: [
+      { label: t("navManagers"),      href: "/managers",       icon: UserCog },
+      { label: t("navProfessors"),    href: "/professors",     icon: GraduationCap },
+      { label: t("navStudents"),      href: "/students",       icon: Users },
+      { label: t("navPrograms"),      href: "/programs",       icon: BookOpen },
+      { label: t("navPlans"),         href: "/plans",          icon: ListChecks },
+      { label: t("navClasses"),       href: "/classes",        icon: CalendarDays },
+      { label: t("navPaymentProofs"), href: "/payment-proofs", icon: FileCheck },
+    ],
+    MANAGER: [
+      { label: t("navProfessors"), href: "/professors", icon: GraduationCap },
+      { label: t("navStudents"),   href: "/students",   icon: Users },
+      { label: t("navPrograms"),   href: "/programs",   icon: BookOpen },
+      { label: t("navClasses"),    href: "/classes",    icon: CalendarDays },
+    ],
+    PROFESSOR: [
+      { label: t("navClasses"), href: "/classes", icon: CalendarDays },
+    ],
+    STUDENT: [
+      { label: t("navDashboard"),       href: "/student/dashboard",     icon: LayoutDashboard },
+      { label: t("navMyMemberships"),   href: "/student/memberships",   icon: BadgeCheck },
+      { label: t("navMyEnrollments"),   href: "/student/enrollments",   icon: ClipboardList },
+      { label: t("navMyClasses"),       href: "/student/classes",       icon: Calendar },
+      { label: t("navMyRegistrations"), href: "/student/registrations", icon: CalendarCheck },
+    ],
+  };
+}
 
 /** Union of nav items across all granted roles, deduplicated by href, ordered by role privilege. */
-function computeNavItems(roles: Role[]): NavItem[] {
+function computeNavItems(roles: Role[], navItemsByRole: Record<Role, NavItem[]>): NavItem[] {
   const seen = new Set<string>();
   const result: NavItem[] = [];
   for (const r of roles) {
-    for (const item of (NAV_ITEMS_BY_ROLE[r] ?? [])) {
+    for (const item of (navItemsByRole[r] ?? [])) {
       if (!seen.has(item.href)) {
         seen.add(item.href);
         result.push(item);
@@ -109,12 +114,14 @@ function NavLinks({
   collapsed,
   onLinkClick,
   pendingProofsCount,
+  badgeMax,
 }: {
   items: NavItem[];
   pathname: string;
   collapsed: boolean;
   onLinkClick?: () => void;
   pendingProofsCount?: number | null;
+  badgeMax: string;
 }) {
   return (
     <ul className="space-y-1">
@@ -148,7 +155,7 @@ function NavLinks({
                 )}
               </div>
               {!collapsed && <span className="truncate">{label}</span>}
-              {showBadge && <NotificationBadge count={pendingProofsCount!} />}
+              {showBadge && <NotificationBadge count={pendingProofsCount!} badgeMax={badgeMax} />}
             </Link>
           </li>
         );
@@ -161,15 +168,19 @@ function NavLinks({
 function Brand({
   tenantName,
   collapsed,
+  brand,
+  brandSubtitle,
 }: {
   tenantName: string | null;
   collapsed: boolean;
+  brand: string;
+  brandSubtitle: string;
 }) {
   if (collapsed) return null;
   return (
     <div className="overflow-hidden">
-      <h1 className="text-xl font-bold text-white whitespace-nowrap">Klasio</h1>
-      <p className="text-xs text-gray-400 whitespace-nowrap">League Management</p>
+      <h1 className="text-xl font-bold text-white whitespace-nowrap">{brand}</h1>
+      <p className="text-xs text-gray-400 whitespace-nowrap">{brandSubtitle}</p>
       {tenantName && (
         <p className="text-xs font-medium text-indigo-400 whitespace-nowrap mt-0.5 truncate">
           {tenantName}
@@ -187,6 +198,7 @@ function UserFooter({
   identityNumber,
   collapsed,
   onLogout,
+  signOut,
 }: {
   role: Role;
   displayName: string | null;
@@ -194,6 +206,7 @@ function UserFooter({
   identityNumber: string | null;
   collapsed: boolean;
   onLogout: () => void;
+  signOut: string;
 }) {
   return (
     <div className="px-2 py-4 border-t border-gray-700 shrink-0">
@@ -214,7 +227,7 @@ function UserFooter({
       )}
       <button
         onClick={onLogout}
-        title={collapsed ? "Sign out" : undefined}
+        title={collapsed ? signOut : undefined}
         className={[
           "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-gray-300",
           "hover:text-white hover:bg-gray-800 transition-colors",
@@ -222,7 +235,7 @@ function UserFooter({
         ].join(" ")}
       >
         <LogOut className="h-5 w-5 shrink-0" />
-        {!collapsed && <span>Sign out</span>}
+        {!collapsed && <span>{signOut}</span>}
       </button>
     </div>
   );
@@ -235,12 +248,14 @@ function MobileUserFooter({
   identityDocumentType,
   identityNumber,
   onLogout,
+  signOut,
 }: {
   role: Role;
   displayName: string | null;
   identityDocumentType: string | null;
   identityNumber: string | null;
   onLogout: () => void;
+  signOut: string;
 }) {
   return (
     <div className="px-3 py-4 border-t border-gray-700 shrink-0">
@@ -262,7 +277,7 @@ function MobileUserFooter({
         className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
       >
         <LogOut className="h-5 w-5 shrink-0" />
-        <span>Sign out</span>
+        <span>{signOut}</span>
       </button>
     </div>
   );
@@ -273,6 +288,7 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+  const t = useTranslations("layout");
 
   const primaryUserRole = user ? primaryRole(user.roles) : undefined;
   const { tenantName, displayName, identityDocumentType, identityNumber } =
@@ -320,7 +336,8 @@ export default function Sidebar() {
     );
   }
 
-  const navItems = user ? computeNavItems(user.roles) : [];
+  const navItemsByRole = makeNavItemsByRole(t);
+  const navItems = user ? computeNavItems(user.roles, navItemsByRole) : [];
 
   return (
     <>
@@ -328,13 +345,13 @@ export default function Sidebar() {
       <header className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center h-14 px-4 gap-3 bg-gray-900 border-b border-gray-700">
         <button
           onClick={() => setMobileOpen(true)}
-          aria-label="Open navigation"
+          aria-label={t("openNav")}
           className="p-1 text-gray-300 hover:text-white rounded transition-colors"
         >
           <Menu className="h-6 w-6" />
         </button>
         <div className="min-w-0 flex-1">
-          <span className="text-lg font-bold text-white">Klasio</span>
+          <span className="text-lg font-bold text-white">{t("brand")}</span>
           {tenantName && (
             <span className="ml-2 text-xs text-indigo-400 truncate hidden sm:inline">
               {tenantName}
@@ -357,8 +374,8 @@ export default function Sidebar() {
             {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-gray-700">
               <div className="min-w-0">
-                <h1 className="text-lg font-bold text-white">Klasio</h1>
-                <p className="text-xs text-gray-400">League Management</p>
+                <h1 className="text-lg font-bold text-white">{t("brand")}</h1>
+                <p className="text-xs text-gray-400">{t("brandSubtitle")}</p>
                 {tenantName && (
                   <p className="text-xs font-medium text-indigo-400 truncate mt-0.5">
                     {tenantName}
@@ -367,7 +384,7 @@ export default function Sidebar() {
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
-                aria-label="Close navigation"
+                aria-label={t("closeNav")}
                 className="p-1 text-gray-400 hover:text-white rounded transition-colors shrink-0 ml-2"
               >
                 <X className="h-5 w-5" />
@@ -382,6 +399,7 @@ export default function Sidebar() {
                 collapsed={false}
                 onLinkClick={() => setMobileOpen(false)}
                 pendingProofsCount={pendingProofsCount}
+                badgeMax={t("notificationsBadgeMax")}
               />
             </nav>
 
@@ -393,6 +411,7 @@ export default function Sidebar() {
                 identityDocumentType={identityDocumentType}
                 identityNumber={identityNumber}
                 onLogout={logout}
+                signOut={t("signOut")}
               />
             )}
           </aside>
@@ -414,12 +433,12 @@ export default function Sidebar() {
             collapsed ? "justify-center" : "justify-between",
           ].join(" ")}
         >
-          <Brand tenantName={tenantName} collapsed={collapsed} />
+          <Brand tenantName={tenantName} collapsed={collapsed} brand={t("brand")} brandSubtitle={t("brandSubtitle")} />
           <div className="flex items-center gap-1 shrink-0">
             {!collapsed && <NotificationBell />}
             <button
               onClick={() => setCollapsed((c) => !c)}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
               className="p-1 text-gray-400 hover:text-white rounded transition-colors"
             >
               {collapsed ? (
@@ -438,6 +457,7 @@ export default function Sidebar() {
             pathname={pathname}
             collapsed={collapsed}
             pendingProofsCount={pendingProofsCount}
+            badgeMax={t("notificationsBadgeMax")}
           />
         </nav>
 
@@ -450,6 +470,7 @@ export default function Sidebar() {
             identityNumber={identityNumber}
             collapsed={collapsed}
             onLogout={logout}
+            signOut={t("signOut")}
           />
         )}
       </aside>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { ProofStatus } from "@/lib/types/paymentProof";
 
 const STATUS_STYLES: Record<ProofStatus, string> = {
@@ -7,21 +10,15 @@ const STATUS_STYLES: Record<ProofStatus, string> = {
   SUPERSEDED: "bg-gray-100 text-gray-500 border border-gray-300",
 };
 
-const STATUS_LABELS: Record<ProofStatus, string> = {
-  PENDING:    "Pending Review",
-  APPROVED:   "Approved",
-  REJECTED:   "Rejected",
-  SUPERSEDED: "Superseded",
-};
-
 interface Props {
   status: ProofStatus;
 }
 
 export function ProofStatusBadge({ status }: Props) {
+  const t = useTranslations("badges.proofStatus");
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[status]}`}>
-      {STATUS_LABELS[status]}
+      {t(status)}
     </span>
   );
 }

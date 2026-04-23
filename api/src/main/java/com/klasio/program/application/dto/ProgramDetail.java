@@ -11,21 +11,21 @@ public record ProgramDetail(
         String name,
         String status,
         Instant createdAt,
-        UUID createdBy,
+        String createdBy,
         Instant updatedAt,
-        UUID updatedBy
+        String updatedBy
 ) {
 
-    public static ProgramDetail fromDomain(Program program) {
+    public static ProgramDetail fromDomain(Program program, String createdByName, String updatedByName) {
         return new ProgramDetail(
                 program.getId().value(),
                 program.getTenantId(),
                 program.getName(),
                 program.getStatus().name(),
                 program.getCreatedAt(),
-                program.getCreatedBy(),
+                createdByName,
                 program.getUpdatedAt(),
-                program.getUpdatedBy()
+                updatedByName
         );
     }
 }

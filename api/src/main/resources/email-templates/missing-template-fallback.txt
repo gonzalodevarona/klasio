@@ -1,0 +1,5 @@
+You have a new notification from [(${tenantName})].
+
+(Email template not configured for: [(${emailTypeName})])
+
+Sent by [(${tenantName})] via Klasio.

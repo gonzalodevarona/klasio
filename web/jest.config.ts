@@ -11,7 +11,21 @@ const config: Config = {
         },
       },
     ],
+    // Transform ESM packages that ship without CommonJS builds
+    "^.+\\.js$": [
+      "ts-jest",
+      {
+        tsconfig: {
+          jsx: "react-jsx",
+          allowJs: true,
+        },
+      },
+    ],
   },
+  // Do NOT ignore next-intl and its ESM deps when transforming node_modules
+  transformIgnorePatterns: [
+    "/node_modules/(?!(next-intl|use-intl|@formatjs|intl-messageformat|@internationalized)/)",
+  ],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },

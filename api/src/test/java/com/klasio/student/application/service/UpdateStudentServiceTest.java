@@ -54,7 +54,7 @@ class UpdateStudentServiceTest {
 
     private Student createExistingStudent() {
         return Student.reconstitute(
-                StudentId.of(STUDENT_ID), TENANT_ID, "Carlos", "Garcia",
+                StudentId.of(STUDENT_ID), TENANT_ID, null, "Carlos", "Garcia",
                 "carlos@example.com",
                 ADULT_DATE_OF_BIRTH, "Sura", "1234567890", IdentityDocumentType.CC,
                 BloodType.O_POSITIVE, "3001234567",

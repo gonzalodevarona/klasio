@@ -17,11 +17,11 @@ public record ProfessorDetail(
         IdentityDocumentType identityDocumentType,
         String identityNumber,
         Instant createdAt,
-        UUID createdBy,
+        String createdBy,
         Instant updatedAt,
-        UUID updatedBy
+        String updatedBy
 ) {
-    public static ProfessorDetail fromDomain(Professor professor) {
+    public static ProfessorDetail fromDomain(Professor professor, String createdByName, String updatedByName) {
         return new ProfessorDetail(
                 professor.getId().value(),
                 professor.getTenantId(),
@@ -33,9 +33,9 @@ public record ProfessorDetail(
                 professor.getIdentityDocumentType(),
                 professor.getIdentityNumber(),
                 professor.getCreatedAt(),
-                professor.getCreatedBy(),
+                createdByName,
                 professor.getUpdatedAt(),
-                professor.getUpdatedBy()
+                updatedByName
         );
     }
 }

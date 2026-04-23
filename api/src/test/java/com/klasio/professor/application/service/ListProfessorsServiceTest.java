@@ -45,7 +45,7 @@ class ListProfessorsServiceTest {
     void execute_withNoStatusFilter_returnsAllProfessors() {
         Pageable pageable = PageRequest.of(0, 20);
         Professor professor = Professor.reconstitute(
-                ProfessorId.of(UUID.randomUUID()), TENANT_ID,
+                ProfessorId.of(UUID.randomUUID()), TENANT_ID, null,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,
@@ -81,14 +81,14 @@ class ListProfessorsServiceTest {
     void execute_returnsPageMetadata() {
         Pageable pageable = PageRequest.of(0, 10);
         Professor professor1 = Professor.reconstitute(
-                ProfessorId.of(UUID.randomUUID()), TENANT_ID,
+                ProfessorId.of(UUID.randomUUID()), TENANT_ID, null,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,
                         com.klasio.shared.domain.model.IdentityDocumentType.CC, "12345678"
         );
         Professor professor2 = Professor.reconstitute(
-                ProfessorId.of(UUID.randomUUID()), TENANT_ID,
+                ProfessorId.of(UUID.randomUUID()), TENANT_ID, null,
                 "Ana", "Lopez", "ana@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,

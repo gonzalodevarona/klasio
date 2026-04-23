@@ -40,14 +40,18 @@ public final class ProgramPlanResponseDto {
             Integer hours,
             List<ScheduleEntryResponse> scheduleEntries,
             UUID managerId,
+            String managerName,
             String status,
             Instant createdAt,
-            UUID createdBy,
+            String createdBy,
             Instant updatedAt,
-            UUID updatedBy
+            String updatedBy
     ) {
 
         public static ProgramPlanDetailResponse fromDomain(ProgramPlan plan) {
+            String createdBy = plan.getCreatedBy() != null ? plan.getCreatedBy().toString() : null;
+            String updatedBy = plan.getUpdatedBy() != null ? plan.getUpdatedBy().toString() : null;
+            String managerName = plan.getManagerId() != null ? plan.getManagerId().toString() : null;
             return new ProgramPlanDetailResponse(
                     plan.getId().value(),
                     plan.getProgramId(),
@@ -60,11 +64,12 @@ public final class ProgramPlanResponseDto {
                             .map(ScheduleEntryResponse::fromDomain)
                             .toList(),
                     plan.getManagerId(),
+                    managerName,
                     plan.getStatus().name(),
                     plan.getCreatedAt(),
-                    plan.getCreatedBy(),
+                    createdBy,
                     plan.getUpdatedAt(),
-                    plan.getUpdatedBy()
+                    updatedBy
             );
         }
 
@@ -81,6 +86,7 @@ public final class ProgramPlanResponseDto {
                             .map(ScheduleEntryResponse::fromDomain)
                             .toList(),
                     detail.managerId(),
+                    detail.managerName(),
                     detail.status(),
                     detail.createdAt(),
                     detail.createdBy(),
@@ -98,6 +104,7 @@ public final class ProgramPlanResponseDto {
             BigDecimal cost,
             Integer hours,
             UUID managerId,
+            String managerName,
             String status,
             String programName
     ) {
@@ -111,6 +118,7 @@ public final class ProgramPlanResponseDto {
                     summary.cost(),
                     summary.hours(),
                     summary.managerId(),
+                    summary.managerName(),
                     summary.status(),
                     summary.programName()
             );

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
@@ -16,6 +17,7 @@ function formatDate(iso: string | null): string {
 }
 
 export default function StudentDashboard() {
+  const t = useTranslations("studentDashboard");
   const today = todayInTenantZone();
 
   const { user } = useAuth();
@@ -38,19 +40,19 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Welcome back.
+          {t("subtitle")}
         </p>
       </div>
 
       {/* Active membership card */}
       <div className="rounded-lg border border-gray-200 bg-white p-5">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
-          Active Membership
+          {t("activeMembership")}
         </h2>
         {membershipsLoading ? (
-          <p className="text-sm text-gray-400">Loading…</p>
+          <p className="text-sm text-gray-400">{t("loading")}</p>
         ) : activeMembership ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -64,17 +66,17 @@ export default function StudentDashboard() {
               purchased={activeMembership.purchasedHours}
             />
             <p className="text-xs text-gray-400">
-              Expires: {formatDate(activeMembership.expirationDate)}
+              {t("membershipExpires", { date: formatDate(activeMembership.expirationDate) })}
             </p>
             <Link
               href={`/student/memberships/${activeMembership.id}`}
               className="inline-block text-sm text-indigo-600 hover:text-indigo-800 font-medium"
             >
-              View details →
+              {t("viewDetails")}
             </Link>
           </div>
         ) : (
-          <p className="text-sm text-gray-400">No active membership.</p>
+          <p className="text-sm text-gray-400">{t("noMembership")}</p>
         )}
       </div>
 
@@ -82,19 +84,19 @@ export default function StudentDashboard() {
       <div className="rounded-lg border border-gray-200 bg-white p-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-            Enrollments
+            {t("enrollmentsTitle")}
           </h2>
           <Link
             href="/student/enrollments"
             className="text-xs text-indigo-600 hover:text-indigo-800"
           >
-            View all
+            {t("viewAll")}
           </Link>
         </div>
         {enrollmentsLoading ? (
-          <p className="text-sm text-gray-400">Loading…</p>
+          <p className="text-sm text-gray-400">{t("loading")}</p>
         ) : enrollments.length === 0 ? (
-          <p className="text-sm text-gray-400">No enrollments yet.</p>
+          <p className="text-sm text-gray-400">{t("noEnrollments")}</p>
         ) : (
           <ul className="space-y-2">
             {enrollments.slice(0, 3).map((e) => (
@@ -122,19 +124,19 @@ export default function StudentDashboard() {
       <div className="rounded-lg border border-gray-200 bg-white p-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-            Upcoming Registrations
+            {t("upcomingRegistrations")}
           </h2>
           <Link
             href="/student/registrations"
             className="text-xs text-indigo-600 hover:text-indigo-800"
           >
-            View all
+            {t("viewAll")}
           </Link>
         </div>
         {registrationsLoading ? (
-          <p className="text-sm text-gray-400">Loading…</p>
+          <p className="text-sm text-gray-400">{t("loading")}</p>
         ) : upcomingRegistrations.length === 0 ? (
-          <p className="text-sm text-gray-400">No upcoming registrations.</p>
+          <p className="text-sm text-gray-400">{t("noRegistrations")}</p>
         ) : (
           <ul className="space-y-2">
             {upcomingRegistrations.map((r) => (
@@ -148,7 +150,7 @@ export default function StudentDashboard() {
                   </span>
                   {r.sessionStatus === "ALERTED" && (
                     <span
-                      title={r.sessionAlertReason ?? "Alert issued for this session"}
+                      title={r.sessionAlertReason ?? t("alertTooltip")}
                       className="inline-flex text-amber-600"
                     >
                       <AlertTriangle className="w-4 h-4" />
@@ -177,9 +179,9 @@ export default function StudentDashboard() {
       {/* Quick links */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Memberships", href: "/student/memberships" },
-          { label: "Enrollments", href: "/student/enrollments" },
-          { label: "Classes", href: "/student/classes" },
+          { label: t("quickLinksMemberships"), href: "/student/memberships" },
+          { label: t("quickLinksEnrollments"), href: "/student/enrollments" },
+          { label: t("quickLinksClasses"), href: "/student/classes" },
         ].map(({ label, href }) => (
           <Link
             key={href}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { MembershipDetail as MembershipDetailType } from "@/lib/types/membership";
 import MembershipStatusBadge from "./MembershipStatusBadge";
 import HourBalance from "./HourBalance";
@@ -41,6 +42,8 @@ export default function MembershipDetail({
   isManager = false,
 }: MembershipDetailProps) {
   const [showAdjust, setShowAdjust] = useState(false);
+  const t = useTranslations("memberships");
+  const tCommon = useTranslations("common");
   const { activateMembership, validatePayment, adjustHours, loading, error } =
     useMembershipActions();
 
@@ -66,7 +69,7 @@ export default function MembershipDetail({
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-gray-900">Membership</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t("detailTitle")}</h2>
             <MembershipStatusBadge status={membership.status} />
           </div>
           <p className="text-xs font-mono text-gray-400">{membership.id}</p>
@@ -80,14 +83,14 @@ export default function MembershipDetail({
                 disabled={loading}
                 className="rounded-md bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700 disabled:opacity-50"
               >
-                Validate & Activate
+                {t("btnValidateActivate")}
               </button>
               <button
                 onClick={() => handleValidatePayment(false)}
                 disabled={loading}
                 className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
-                Validate (delegate)
+                {t("btnValidateDelegate")}
               </button>
             </div>
           )}
@@ -97,7 +100,7 @@ export default function MembershipDetail({
               disabled={loading}
               className="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              Activate
+              {t("btnActivate")}
             </button>
           )}
           {membership.status === "ACTIVE" && isAdmin && (
@@ -105,7 +108,7 @@ export default function MembershipDetail({
               onClick={() => setShowAdjust(true)}
               className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
             >
-              Adjust Hours
+              {t("btnAdjustHours")}
             </button>
           )}
         </div>
@@ -124,23 +127,23 @@ export default function MembershipDetail({
 
       {/* Details */}
       <div className="rounded-md border border-gray-200 p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Details</h3>
-        <InfoRow label="Plan" value={membership.planName} />
-        <InfoRow label="Program" value={membership.programName} />
-        <InfoRow label="Student" value={membership.studentName} />
-        <InfoRow label="Purchased hours" value={membership.purchasedHours} />
-        <InfoRow label="Available hours" value={membership.availableHours} />
-        <InfoRow label="Start date" value={formatDate(membership.startDate)} />
-        <InfoRow label="Expiration date" value={formatDate(membership.expirationDate)} />
-        <InfoRow label="Payment validated" value={membership.paymentValidated ? "Yes" : "No"} />
-        <InfoRow label="Activated at" value={formatDateTime(membership.activatedAt)} />
-        <InfoRow label="Created at" value={formatDateTime(membership.createdAt)} />
-        <InfoRow label="Updated at" value={formatDateTime(membership.updatedAt)} />
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">{t("detailSectionDetails")}</h3>
+        <InfoRow label={t("detailLabelPlan")} value={membership.planName} />
+        <InfoRow label={t("detailLabelProgram")} value={membership.programName} />
+        <InfoRow label={t("detailLabelStudent")} value={membership.studentName} />
+        <InfoRow label={t("detailLabelPurchasedHours")} value={membership.purchasedHours} />
+        <InfoRow label={t("detailLabelAvailableHours")} value={membership.availableHours} />
+        <InfoRow label={t("detailLabelStartDate")} value={formatDate(membership.startDate)} />
+        <InfoRow label={t("detailLabelExpirationDate")} value={formatDate(membership.expirationDate)} />
+        <InfoRow label={t("detailLabelPaymentValidated")} value={membership.paymentValidated ? tCommon("yes") : tCommon("no")} />
+        <InfoRow label={t("detailLabelActivatedAt")} value={formatDateTime(membership.activatedAt)} />
+        <InfoRow label={t("detailLabelCreatedAt")} value={formatDateTime(membership.createdAt)} />
+        <InfoRow label={t("detailLabelUpdatedAt")} value={formatDateTime(membership.updatedAt)} />
       </div>
 
       {/* Transaction ledger */}
       <div className="rounded-md border border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4">Hour Transaction History</h3>
+        <h3 className="text-sm font-semibold text-gray-700 mb-4">{t("detailSectionTxHistory")}</h3>
         <HourTransactionList membershipId={membership.id} />
       </div>
 

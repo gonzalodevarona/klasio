@@ -15,6 +15,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.mockito.ArgumentCaptor;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import com.klasio.auth.domain.event.PasswordResetRequestedEvent;
@@ -25,7 +28,6 @@ class RequestPasswordResetServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private PasswordResetTokenRepository prtRepository;
     @Mock private TokenGenerator tokenGenerator;
-    @Mock private AuthEmailSender authEmailSender;
     @Mock private ApplicationEventPublisher eventPublisher;
 
     private RequestPasswordResetService service;
@@ -34,7 +36,7 @@ class RequestPasswordResetServiceTest {
     void setUp() {
         AuthProperties authProperties = new AuthProperties(24, 30, 5, 15, "noreply@klasio.com");
         service = new RequestPasswordResetService(
-                userRepository, prtRepository, tokenGenerator, authEmailSender,
+                userRepository, prtRepository, tokenGenerator,
                 authProperties, eventPublisher);
     }
 
@@ -52,8 +54,14 @@ class RequestPasswordResetServiceTest {
 
         verify(prtRepository).invalidateAllByUserId(user.getId());
         verify(prtRepository).save(any());
-        verify(authEmailSender).sendPasswordResetEmail(eq(email), eq("raw-reset-token"));
-        verify(eventPublisher).publishEvent(any(PasswordResetRequestedEvent.class));
+
+        ArgumentCaptor<PasswordResetRequestedEvent> eventCaptor = ArgumentCaptor.forClass(PasswordResetRequestedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        PasswordResetRequestedEvent event = eventCaptor.getValue();
+        assertEquals("raw-reset-token", event.rawToken());
+        assertNotNull(event.expiresAt());
+        // User in this test has null first/last name, so fallback is the email
+        assertEquals(email, event.recipientName());
     }
 
     @Test
@@ -64,7 +72,6 @@ class RequestPasswordResetServiceTest {
 
         verify(prtRepository, never()).invalidateAllByUserId(any());
         verify(prtRepository, never()).save(any());
-        verify(authEmailSender, never()).sendPasswordResetEmail(any(), any());
         verify(eventPublisher, never()).publishEvent(any());
     }
 }

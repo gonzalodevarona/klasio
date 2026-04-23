@@ -19,6 +19,13 @@ public interface UserRepository {
 
     Optional<User> findByEmail(String email);
 
+    /**
+     * Finds a user by email and status across all tenants.
+     * Used when tenant context is unavailable (e.g. email-only resend-setup flow).
+     * Returns the first match found — in practice a given email is used in one tenant only.
+     */
+    Optional<User> findFirstByEmailAndStatus(String email, UserStatus status);
+
     boolean existsByEmailAndTenantId(String email, UUID tenantId);
 
     boolean existsByIdentityNumberAndTenantId(UUID tenantId, String identityNumber);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ProgramClassDetail as ProgramClassDetailType } from "@/lib/types/programClass";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,6 +24,7 @@ export default function ClassDetail({
   programClass,
   onChanged,
 }: ClassDetailProps) {
+  const t = useTranslations("classes");
   const { user } = useAuth();
   const [showConfirm, setShowConfirm] = useState<
     "deactivate" | "reactivate" | "removeProfessor" | null
@@ -44,7 +46,7 @@ export default function ClassDetail({
       const label = action === "deactivate" ? "deactivated" : "reactivated";
       setFeedback({
         type: "success",
-        message: `Class has been ${label} successfully.`,
+        message: t("detailClassSuccessFeedback", { action: label }),
       });
       setShowConfirm(null);
       onChanged?.();
@@ -52,7 +54,7 @@ export default function ClassDetail({
       const message =
         err instanceof ApiError
           ? err.message
-          : `Failed to ${action} class. Please try again.`;
+          : t("detailClassErrorFeedback", { action });
       setFeedback({ type: "error", message });
     } finally {
       setActionLoading(false);
@@ -69,7 +71,7 @@ export default function ClassDetail({
       );
       setFeedback({
         type: "success",
-        message: "Professor has been removed from this class successfully.",
+        message: t("detailRemoveProfessorSuccess"),
       });
       setShowConfirm(null);
       onChanged?.();
@@ -77,7 +79,7 @@ export default function ClassDetail({
       const message =
         err instanceof ApiError
           ? err.message
-          : "Failed to remove professor. Please try again.";
+          : t("detailRemoveProfessorError");
       setFeedback({ type: "error", message });
     } finally {
       setActionLoading(false);
@@ -125,7 +127,7 @@ export default function ClassDetail({
                 href={`/programs/${programId}/classes/${programClass.id}/edit`}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                Edit
+                {t("detailEditButton")}
               </Link>
             )}
           </div>
@@ -135,21 +137,21 @@ export default function ClassDetail({
         <div className="px-6 py-5">
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <div>
-              <dt className="text-sm font-medium text-gray-500">Name</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailName")}</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {programClass.name}
               </dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Level</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailLevel")}</dt>
               <dd className="mt-1">
                 <ClassLevelBadge level={programClass.level} />
               </dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Type</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailType")}</dt>
               <dd className="mt-1">
                 <ClassTypeBadge type={programClass.type} />
               </dd>
@@ -157,7 +159,7 @@ export default function ClassDetail({
 
             <div>
               <dt className="text-sm font-medium text-gray-500">
-                Max Students
+                {t("detailMaxStudents")}
               </dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {programClass.maxStudents}
@@ -165,21 +167,21 @@ export default function ClassDetail({
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Professor</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailProfessor")}</dt>
               <dd className="mt-1 text-sm text-gray-900">
-                {programClass.professorName ?? (programClass.professorId ? programClass.professorId : "Unassigned")}
+                {programClass.professorName ?? (programClass.professorId ? programClass.professorId : t("detailProfessorUnassigned"))}
               </dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Status</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailStatus")}</dt>
               <dd className="mt-1">
                 <ClassStatusBadge status={programClass.status} />
               </dd>
             </div>
 
             <div className="sm:col-span-2">
-              <dt className="text-sm font-medium text-gray-500">Schedule</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailSchedule")}</dt>
               <dd className="mt-1">
                 <ScheduleDisplay
                   entries={programClass.scheduleEntries}
@@ -189,15 +191,15 @@ export default function ClassDetail({
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Created At</dt>
+              <dt className="text-sm font-medium text-gray-500">{t("detailCreatedAt")}</dt>
               <dd className="mt-1 text-sm text-gray-900">
                 {formatDate(programClass.createdAt)}
               </dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-gray-500">Created By</dt>
-              <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+              <dt className="text-sm font-medium text-gray-500">{t("detailCreatedBy")}</dt>
+              <dd className="mt-1 text-sm text-gray-900">
                 {programClass.createdBy}
               </dd>
             </div>
@@ -206,7 +208,7 @@ export default function ClassDetail({
               <>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
-                    Last Updated
+                    {t("detailLastUpdated")}
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {formatDate(programClass.updatedAt)}
@@ -215,9 +217,9 @@ export default function ClassDetail({
 
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
-                    Updated By
+                    {t("detailUpdatedBy")}
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                  <dd className="mt-1 text-sm text-gray-900">
                     {programClass.updatedBy}
                   </dd>
                 </div>
@@ -240,7 +242,7 @@ export default function ClassDetail({
         {/* Professor Assignment */}
         <div className="px-6 py-4 border-t border-gray-200">
           <h3 className="text-sm font-medium text-gray-900 mb-3">
-            Professor Assignment
+            {t("detailProfessorAssignmentTitle")}
           </h3>
           {programClass.professorId ? (
             <>
@@ -250,15 +252,14 @@ export default function ClassDetail({
                   onClick={() => setShowConfirm("removeProfessor")}
                   className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
-                  Remove Professor
+                  {t("detailRemoveProfessorButton")}
                 </button>
               )}
 
               {showConfirm === "removeProfessor" && (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-700">
-                    Are you sure you want to remove the professor from this
-                    class?
+                    {t("detailRemoveProfessorConfirm")}
                   </p>
                   <div className="flex gap-3">
                     <button
@@ -267,7 +268,7 @@ export default function ClassDetail({
                       disabled={actionLoading}
                       className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {actionLoading ? "Removing..." : "Confirm Removal"}
+                      {actionLoading ? t("detailRemovingButton") : t("detailConfirmRemovalButton")}
                     </button>
                     <button
                       type="button"
@@ -275,7 +276,7 @@ export default function ClassDetail({
                       disabled={actionLoading}
                       className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Cancel
+                      {t("detailCancelButton")}
                     </button>
                   </div>
                 </div>
@@ -283,7 +284,7 @@ export default function ClassDetail({
             </>
           ) : (
             <p className="text-sm text-gray-500">
-              No professor assigned to this class.
+              {t("detailNoProfessor")}
             </p>
           )}
         </div>
@@ -297,14 +298,14 @@ export default function ClassDetail({
                 onClick={() => setShowConfirm("deactivate")}
                 className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
-                Deactivate Class
+                {t("detailDeactivateButton")}
               </button>
             )}
 
           {showConfirm === "deactivate" && (
             <div className="space-y-3">
               <p className="text-sm text-gray-700">
-                Are you sure you want to deactivate this class?
+                {t("detailConfirmDeactivate")}
               </p>
               <div className="flex gap-3">
                 <button
@@ -313,7 +314,7 @@ export default function ClassDetail({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading ? "Deactivating..." : "Confirm Deactivation"}
+                  {actionLoading ? t("detailDeactivatingButton") : t("detailConfirmDeactivateButton")}
                 </button>
                 <button
                   type="button"
@@ -321,7 +322,7 @@ export default function ClassDetail({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {t("detailCancelButton")}
                 </button>
               </div>
             </div>
@@ -334,7 +335,7 @@ export default function ClassDetail({
               disabled={actionLoading}
               className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {actionLoading ? "Reactivating..." : "Reactivate Class"}
+              {actionLoading ? t("detailReactivatingButton") : t("detailReactivateButton")}
             </button>
           )}
         </div>

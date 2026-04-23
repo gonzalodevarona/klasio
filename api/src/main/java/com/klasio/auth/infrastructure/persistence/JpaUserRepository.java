@@ -52,6 +52,11 @@ public class JpaUserRepository implements UserRepository {
     }
 
     @Override
+    public Optional<User> findFirstByEmailAndStatus(String email, UserStatus status) {
+        return springDataRepo.findFirstByEmailAndStatus(email, status).map(UserJpaEntity::toDomain);
+    }
+
+    @Override
     public Page<User> findByRole(Role role, UUID tenantId, UserStatus status, Pageable pageable) {
         return springDataRepo.findByRoleAndOptionalTenantAndStatus(role, tenantId, status, pageable)
                 .map(UserJpaEntity::toDomain);

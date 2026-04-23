@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { useClassSessionRoster } from "@/hooks/useClassSessionRoster";
 import RegistrationStatusBadge from "./RegistrationStatusBadge";
 import AttendanceMarkingPanel from "./AttendanceMarkingPanel";
@@ -40,21 +41,21 @@ function toISO(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function formatDisplayDate(isoDate: string): string {
+function formatDisplayDate(isoDate: string, locale: string): string {
   const [y, m, d] = isoDate.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+  return new Date(y, m - 1, d).toLocaleDateString(locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
   });
 }
 
-function formatTime(timeStr: string): string {
-  // timeStr: "HH:mm:ss" or "HH:mm"
+function formatTime(timeStr: string, locale: string): string {
   const [h, m] = timeStr.split(":").map(Number);
-  const ampm = h >= 12 ? "PM" : "AM";
-  const hour12 = h % 12 || 12;
-  return `${hour12}:${String(m).padStart(2, "0")} ${ampm}`;
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(2000, 0, 1, h, m));
 }
 
 const LEVEL_STYLES: Record<string, string> = {
@@ -70,6 +71,10 @@ export default function ClassRosterPanel({
   managedProgramIds,
   professorClassIds,
 }: ClassRosterPanelProps) {
+  const t = useTranslations("classes");
+  const tBadges = useTranslations("badges.classLevel");
+  const locale = useLocale();
+
   const [monday, setMonday] = useState<Date>(() => weekStart(new Date()));
 
   const from = useMemo(() => toISO(monday), [monday]);
@@ -79,8 +84,8 @@ export default function ClassRosterPanel({
 
   const weekLabel = useMemo(() => {
     const sun = addDays(monday, 6);
-    return `${monday.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${sun.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
-  }, [monday]);
+    return `${monday.toLocaleDateString(locale, { month: "short", day: "numeric" })} – ${sun.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })}`;
+  }, [monday, locale]);
 
   const now = new Date();
 
@@ -90,14 +95,14 @@ export default function ClassRosterPanel({
       <div className="flex items-center gap-3 mb-4">
         <span className="text-sm font-medium text-blue-800 flex items-center gap-1.5">
           <Users className="w-4 h-4" />
-          Session Roster
+          {t("rosterTitle")}
         </span>
         <div className="flex items-center gap-1 ml-auto">
           <button
             type="button"
             onClick={() => setMonday((d) => addDays(d, -7))}
             className="rounded p-1 text-blue-600 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Previous week"
+            aria-label={t("rosterPrevWeekAriaLabel")}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -108,7 +113,7 @@ export default function ClassRosterPanel({
             type="button"
             onClick={() => setMonday((d) => addDays(d, 7))}
             className="rounded p-1 text-blue-600 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Next week"
+            aria-label={t("rosterNextWeekAriaLabel")}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -116,7 +121,7 @@ export default function ClassRosterPanel({
       </div>
 
       {loading && (
-        <p className="text-sm text-blue-600 py-2">Loading roster…</p>
+        <p className="text-sm text-blue-600 py-2">{t("rosterLoading")}</p>
       )}
 
       {error && (
@@ -124,7 +129,7 @@ export default function ClassRosterPanel({
       )}
 
       {!loading && !error && sessions.length === 0 && (
-        <p className="text-sm text-blue-600 py-2">No registrations this week.</p>
+        <p className="text-sm text-blue-600 py-2">{t("rosterNoSessions")}</p>
       )}
 
       {!loading && !error && sessions.length > 0 && (
@@ -149,10 +154,10 @@ export default function ClassRosterPanel({
               {/* Session header */}
               <div className="flex items-center flex-wrap px-4 py-2 bg-blue-100 border-b border-blue-200 gap-4">
                 <span className="text-sm font-semibold text-blue-900">
-                  {formatDisplayDate(session.sessionDate)}
+                  {formatDisplayDate(session.sessionDate, locale)}
                 </span>
                 <span className="text-sm text-blue-700">
-                  {formatTime(session.startTime)} – {formatTime(session.endTime)}
+                  {formatTime(session.startTime, locale)} – {formatTime(session.endTime, locale)}
                 </span>
                 <SessionStatusBadge status={sessionStatus} reason={sessionReason} />
                 <SessionActionsPanel
@@ -165,13 +170,13 @@ export default function ClassRosterPanel({
                   onActionCompleted={refetch}
                 />
                 <span className="text-xs font-medium text-blue-600 ml-auto">
-                  {session.registrantCount} registrant{session.registrantCount !== 1 ? "s" : ""}
+                  {t("rosterRegistrantCount", { count: session.registrantCount })}
                 </span>
               </div>
 
               {/* Registrants — interactive marking panel or read-only table */}
               {session.registrants.length === 0 ? (
-                <p className="text-sm text-gray-400 italic px-4 py-3">No registrants.</p>
+                <p className="text-sm text-gray-400 italic px-4 py-3">{t("rosterNoRegistrants")}</p>
               ) : userRole ? (
                 <div className="px-4 py-3">
                   <AttendanceMarkingPanel
@@ -185,10 +190,10 @@ export default function ClassRosterPanel({
                 <table className="min-w-full text-sm">
                   <thead>
                     <tr className="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-100">
-                      <th className="px-4 py-2 text-left font-medium">Student</th>
-                      <th className="px-4 py-2 text-left font-medium">Level</th>
-                      <th className="px-4 py-2 text-left font-medium">Hours</th>
-                      <th className="px-4 py-2 text-left font-medium">Status</th>
+                      <th className="px-4 py-2 text-left font-medium">{t("rosterColStudent")}</th>
+                      <th className="px-4 py-2 text-left font-medium">{t("rosterColLevel")}</th>
+                      <th className="px-4 py-2 text-left font-medium">{t("rosterColHours")}</th>
+                      <th className="px-4 py-2 text-left font-medium">{t("rosterColStatus")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
@@ -199,7 +204,7 @@ export default function ClassRosterPanel({
                           <span
                             className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL_STYLES[r.level] ?? "bg-gray-100 text-gray-600"}`}
                           >
-                            {r.level.charAt(0) + r.level.slice(1).toLowerCase()}
+                            {tBadges(r.level)}
                           </span>
                         </td>
                         <td className="px-4 py-2 text-gray-600">{r.intendedHours}h</td>

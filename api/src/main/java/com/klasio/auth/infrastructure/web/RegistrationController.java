@@ -32,7 +32,6 @@ public class RegistrationController {
             @NotBlank @Size(max = 30) String identityNumber,
             @NotBlank String eps,
             @NotBlank @Email String email,
-            @NotBlank String password,
             String tutorFullName,
             String tutorRelationship,
             String tutorContact
@@ -52,7 +51,6 @@ public class RegistrationController {
                 request.identityNumber(),
                 request.eps(),
                 request.email(),
-                request.password(),
                 request.tutorFullName(),
                 request.tutorRelationship(),
                 request.tutorContact()
@@ -61,6 +59,6 @@ public class RegistrationController {
         registerStudentService.register(command);
 
         return ResponseEntity.accepted().body(Map.of(
-                "message", "Registration successful. Please check your email to verify your account."));
+                "message", "Registration successful. Please check your email to set your password and activate your account."));
     }
 }

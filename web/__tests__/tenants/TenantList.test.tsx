@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithIntl as render } from "../../__test-support__/renderWithIntl";
 import TenantList from "@/components/tenants/TenantList";
 import { TenantSummary } from "@/lib/types/tenant";
 
@@ -30,7 +31,7 @@ function createTenant(overrides: Partial<TenantSummary> = {}): TenantSummary {
     id: "1",
     slug: "test-league",
     name: "Test League",
-    sportDiscipline: "Soccer",
+    discipline: "Soccer",
     status: "ACTIVE",
     createdAt: "2026-03-15T00:00:00Z",
     ...overrides,
@@ -45,7 +46,7 @@ describe("TenantList", () => {
         id: "2",
         name: "Tennis Club",
         slug: "tennis-club",
-        sportDiscipline: "Tennis",
+        discipline: "Tennis",
         status: "INACTIVE",
       }),
     ];

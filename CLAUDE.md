@@ -198,19 +198,20 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | File storage | AWS S3 (payment proofs, tenant logos) | AWS SDK v2 |
 | Auth | JWT + refresh tokens | — |
 
-## Implemented Features (as of 2026-04-19)
+## Implemented Features (as of 2026-04-23)
 
 | Feature branch | RFs | Status |
 |---|---|---|
 | `merged/001-tenant-management` | RF-05 | ✅ |
 | `merged/002-program-configuration` | RF-06 | ✅ |
-| `merged/003-professor-management` | RF-08 | 🔄 Partial (email invite pending RF-32) |
+| `merged/003-professor-management` | RF-08 | ✅ |
 | `merged/004-class-management` | RF-09 | ✅ |
 | `merged/005-student-level-assignment` | RF-07, RF-11, RF-12, RF-13 | RF-07 ✅, RF-11 ✅, RF-12 ✅, RF-13 ✅ |
 | `merged/007-auth-rbac` | RF-01, RF-02, RF-03, RF-04 | RF-01 ✅, RF-02 ✅, RF-03 ✅, RF-04 ✅ |
 | `006-membership-lifecycle` (active, not merged) | RF-14, RF-15, RF-16, RF-17, RF-18 | RF-14 ✅, RF-15 ✅, RF-16 ✅, RF-17 ✅, RF-18 ✅ |
 | `merged/008-payment-proof-validation` | RF-19, RF-20, RF-21 | RF-19 ✅, RF-20 ✅, RF-21 ✅ |
 | `merged/010-class-alert-cancellation` | RF-27, RF-28 | RF-27 ✅, RF-28 ✅ (in-app only) |
+| `merged/013-tenant-i18n` | RF-32 | RF-32 ✅ (+ i18n via next-intl, unified account setup flow, tenant form overhaul with structured address + language) |
 
 ### Remaining v1.0 work (P0 features not yet implemented)
 
@@ -225,7 +226,6 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | RF-29 | Student Dashboard | 🔄 Partial — attendance history not yet surfaced on dashboard |
 | RF-30 | Manager Dashboard | 🔄 Partial — only delegated memberships panel (blocked on RF-23/RF-25) |
 | RF-31 | Admin Dashboard | Not started — blocked on RF-22, RF-23/RF-25 |
-| RF-32 | Transactional Email (Postmark) | 🔄 Partial — all listeners stubbed; no Postmark adapter yet |
 
 ## Flyway Migration Ownership Rule
 
@@ -292,7 +292,7 @@ Added in `006-membership-lifecycle`. Key patterns:
 - **System actor sentinel**: `SYSTEM_ACTOR = UUID.fromString("00000000-0000-0000-0000-000000000000")` used in `AuditEventListener` for scheduler-triggered events (expiration, expiry warnings) since `actor_id` is NOT NULL.
 - **Partial unique indexes**: PostgreSQL enforces one active membership per student+program via two separate partial unique indexes (`WHERE status = 'ACTIVE'` and `WHERE status = 'PENDING_MANAGER_ACTIVATION'`). The JPA adapter catches `DataIntegrityViolationException` → `MembershipAlreadyActiveException`.
 - **Scheduler**: `@EnableScheduling` + `@EnableAsync` on `KlasioApplication`. `MembershipExpirationJob` runs at `0 1 * * * UTC` (expire ACTIVE/INACTIVE past expiration_date) and `5 1 * * * UTC` (publish 3-day expiry warning for memberships expiring within next 3 days). Both jobs are idempotent.
-- **Notification stubs**: `MembershipNotificationListener` has `@Async @EventListener` stubs (fire-and-forget) with TODO for Postmark (pending RF-32). Failures never block the triggering business operation.
+- **Notification listeners**: `MembershipNotificationListener` has `@Async @EventListener` handlers (fire-and-forget) wired to `EmailDispatcherService` via Brevo (RF-32 ✅). Failures never block the triggering business operation.
 - **Flyway migrations**: V024 (memberships table + partial unique indexes + RLS), V025 (hour_transactions table, append-only), V026 (adds 8 MEMBERSHIP_* action types to audit_log constraint), V027 (adds `plan_id` FK + `plan_name` snapshot column to memberships).
 - **Plan snapshot**: `plan_name` stored at membership creation so history remains accurate if the plan name changes later.
 - **API endpoints** (9 total, all tenant-scoped from JWT):
@@ -313,6 +313,7 @@ Added in `006-membership-lifecycle`. Key patterns:
 - **CSV export**: native `fetch` with `Accept: text/csv` header + `URL.createObjectURL` (no third-party library).
 
 ## Recent Changes
+- 013-tenant-i18n: Transactional email via Brevo (RF-32): new `com.klasio.email` hexagonal module — `EmailService` port, `EmailType` registry, `EmailDispatcherService` (Caffeine tenant cache), `ThymeleafTemplateRenderer` (HTML+TEXT dual engine), `BrevoEmailTransport` (RetryTemplate backoff, WireMock IT), `LoggingEmailTransport` (local dev), `InMemoryEmailTransport` (tests). 6 Thymeleaf templates (account-setup, password-recovery, payment-proof-uploaded, payment-rejected, professor-invitation, class-session-change). All listeners wired: `AuthEmailListener`, `AccountSetupEmailListener`, `PasswordResetEmailListener`, `MembershipNotificationListener`, `PaymentProofNotificationListener`, `ProfessorInvitationEmailListener`, `SessionEventsNotificationListener`. Unified account setup flow: `AccountSetupToken` domain + `SetupAccountService` + `ResendSetupEmailService`; all role creation flows (student, admin, manager, professor) generate an `AccountSetupToken` and send an account-setup email — no password set at creation time. `SetupAccountService` validates token, hashes password, activates user. V055 (`account_setup_tokens`), V056 (nullable `password_hash`), V057 (`user_id` FK on professors), V058 (`INVITED` status), V059 (unify `PENDING` → `INVITED`). Frontend: `/setup-account` page, password-fields removed from all creation forms. Tenant form overhaul: `ContactInfo` expanded with structured address (street, city, department, country) + `hasWhatsapp` flag + required phone; `discipline` rename from `sportDiscipline`; `language` field; `CountrySelect` component + `countries.ts` data; V060 (split address columns + language), V061 (backfill contact fields), V062 (strip +57 prefix from phones). i18n via next-intl: `messages/en.json` + `messages/es.json` covering all domains; locale resolved from `NEXT_LOCALE` cookie (set on login from tenant language, cleared on logout) with `Accept-Language` RFC 7231 fallback; all frontend components and pages migrated. MailHog removed.
 - 010-class-alert-cancellation: Class session alerts and cancellations (RF-27, RF-28): `ClassSession.raiseAlert()`, `updateAlertReason()`, `cancel()` transitions + 4 attendance domain events (`SessionAlertRaised`, `SessionAlertUpdated`, `SessionCancelled`, `RegistrationCancelledBySession`). `RaiseSessionAlertService`, `UpdateSessionAlertService`, `CancelSessionService` with RBAC guards (professor assigned / manager of program / admin in tenant). Cancel fans out `cancelBySession()` to all non-cancelled registrations inside the same transaction and calls `RefundHoursUseCase` for prior `PRESENT` rows only. New `com.klasio.notifications` module (generic, reusable): `Notification` aggregate (pure Java), `NotificationCreated` + `NotificationRead` domain events, 5 use cases, `MeNotificationsController` (5 endpoints), `SessionEventsNotificationListener` (`@TransactionalEventListener(AFTER_COMMIT)` — translates session events → in-app rows), V053 attendance extensions + V054 notifications table. Frontend: `NotificationBell` with `10+` badge cap, `/notifications` page, `SessionActionsPanel` + `SessionReasonModal`, student-side status-aware badges (`SESSION_CANCELLED` red badge, `ALERTED` amber icon). Email fan-out deferred to RF-32.
 - 008-payment-proof-validation: Payment proof upload/validation/delegation (RF-19–RF-21): `PaymentProof` aggregate (pure Java) with `upload()`/`approve()`/`reject()`/`supersede()` transitions and 3 domain events. `UploadPaymentProofService`, `ApproveProofService`, `RejectProofService`, `ListPendingProofsService`, `GetPaymentProofService`, `GetProofDownloadUrlService`, `ListDelegatedMembershipsService`. `S3PaymentProofStorage` (presigned URLs). `DelegationReminderJob` (hourly cron, 48 h cutoff, idempotent via `reminder_sent` flag). `PaymentProofController` (8 endpoints). V037 (payment_proofs + RLS), V038 (delegation_reminders), V039 (PAYMENT_PROOF audit types). Frontend: `ProofQueue`, `ProofReviewModal`, `ProofStatusBadge`, `PaymentProofPanel`, `DelegatedMembershipList`, `/payment-proofs` admin page, student memberships page with upload panel. Notification stubs in `PaymentProofNotificationListener` (Postmark pending RF-32).
 - 007-auth-rbac: Full auth & RBAC (RF-01–RF-04): `com.klasio.auth` hexagonal module with User aggregate, 9 domain events, 9 use case services (Login, Logout, RefreshToken, RegisterStudent, VerifyEmail, ResendVerification, RequestPasswordReset, ResetPassword, AssignRole). JWT access tokens (8h) + DB-backed refresh tokens (7d, rotated). HttpOnly cookies via Next.js API proxy routes. Cookie-first token extraction with Authorization header fallback. Account lockout (5 failed → 15 min). Email verification (24h) and password reset (30 min) one-time tokens. BCrypt factor 12. Edge Runtime middleware with `jose` for RBAC routing. V028–V034 Flyway migrations. AuthAuditEventListener (11 action types). Frontend: LoginForm, RegistrationForm (age-based tutor fields), PasswordPolicyChecker (real-time), ForgotPasswordForm, ResetPasswordForm, verify-email page. Cross-module ports: StudentProfilePort, TenantResolverPort. MailHog for local email testing.

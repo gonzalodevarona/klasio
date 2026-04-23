@@ -57,10 +57,15 @@ class CreateTenantServiceTest {
         CreateTenantCommand command = new CreateTenantCommand(
                 "Liga Bogota Futbol",
                 "Football",
+                "es",
                 null,
                 "contact@liga.com",
-                "+57 300 1234567",
-                "Bogota, Colombia",
+                "3001234567",
+                "57",
+                "Calle 50 #45-12",
+                "Bogotá",
+                "Cundinamarca",
+                "Colombia",
                 null,
                 null,
                 0,
@@ -71,7 +76,7 @@ class CreateTenantServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("Liga Bogota Futbol");
-        assertThat(result.getSportDiscipline()).isEqualTo("Football");
+        assertThat(result.getDiscipline()).isEqualTo("Football");
         assertThat(result.getContactInfo().email()).isEqualTo("contact@liga.com");
 
         ArgumentCaptor<Tenant> tenantCaptor = ArgumentCaptor.forClass(Tenant.class);
@@ -95,8 +100,13 @@ class CreateTenantServiceTest {
         CreateTenantCommand command = new CreateTenantCommand(
                 "Liga Bogota",
                 "Football",
+                "es",
                 "liga-bogota",
                 "contact@liga.com",
+                null,
+                null,
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -127,8 +137,13 @@ class CreateTenantServiceTest {
         CreateTenantCommand command = new CreateTenantCommand(
                 "Liga Bogota",
                 "Football",
+                "es",
                 null,
                 "contact@liga.com",
+                null,
+                null,
+                null,
+                null,
                 null,
                 null,
                 logoData,
@@ -157,10 +172,15 @@ class CreateTenantServiceTest {
         CreateTenantCommand command = new CreateTenantCommand(
                 "Liga Bogota",
                 "Football",
+                "es",
                 null,
                 "contact@liga.com",
-                null,
-                null,
+                "3001234567",
+                "57",
+                "Calle 50 #45-12",
+                "Bogotá",
+                "Cundinamarca",
+                "Colombia",
                 logoData,
                 "image/png",
                 3,

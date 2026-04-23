@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import StudentMembershipCreationForm from "@/components/memberships/StudentMembershipCreationForm";
 import { useMembershipActions, useMembershipDetail } from "@/hooks/useMemberships";
 
@@ -10,6 +11,8 @@ function NewMembershipContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const renewId = searchParams.get("renew");
+  const t = useTranslations("studentMembershipsPage");
+  const tCommon = useTranslations("common");
 
   const { createSelfMembership, renewMembership } = useMembershipActions();
 
@@ -36,21 +39,21 @@ function NewMembershipContent() {
   }
 
   if (isRenewing && sourceLoading) {
-    return <p className="py-8 text-center text-sm text-gray-500">Loading membership...</p>;
+    return <p className="py-8 text-center text-sm text-gray-500">{tCommon("loading")}</p>;
   }
 
   return (
     <div className="max-w-xl">
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/student/memberships" className="hover:text-gray-700 hover:underline">
-          My Memberships
+          {t("title")}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">{isRenewing ? "Renew" : "New Membership"}</span>
+        <span className="text-gray-900">{isRenewing ? t("renew") : t("newButton")}</span>
       </nav>
 
       <h1 className="text-2xl font-bold text-gray-900 mb-2">
-        {isRenewing ? "Renew Membership" : "Subscribe to a Plan"}
+        {isRenewing ? t("renew") : t("newButton")}
       </h1>
       <p className="text-sm text-gray-500 mb-6">
         {isRenewing
@@ -73,7 +76,7 @@ function NewMembershipContent() {
 
 export default function NewMembershipPage() {
   return (
-    <Suspense fallback={<p className="py-8 text-center text-sm text-gray-500">Loading...</p>}>
+    <Suspense fallback={<p className="py-8 text-center text-sm text-gray-500">{/* fallback */}</p>}>
       <NewMembershipContent />
     </Suspense>
   );

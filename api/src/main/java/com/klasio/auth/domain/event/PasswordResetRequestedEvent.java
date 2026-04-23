@@ -9,5 +9,8 @@ public record PasswordResetRequestedEvent(
         UUID userId,
         UUID tenantId,
         String email,
+        String recipientName,
+        String rawToken,
+        Instant expiresAt,
         Instant occurredAt
 ) implements DomainEvent {}

@@ -82,15 +82,27 @@ public class User {
                 phoneNumber == null || phoneNumber.isBlank() ? null : phoneNumber.trim());
     }
 
-    public static User createUnverified(UUID tenantId, String email, String passwordHash,
-                                        IdentityDocumentType identityDocumentType, String identityNumber) {
+    /**
+     * Creates a user with no password hash and INVITED status.
+     * Used for all roles (students, professors, managers, admins) when their account
+     * is first created and they must complete setup via a one-time email link.
+     */
+    public static User createPendingSetup(UUID tenantId, String email, Role role,
+                                          IdentityDocumentType identityDocumentType, String identityNumber,
+                                          String firstName, String lastName, String phoneNumber) {
+        Objects.requireNonNull(role, "Role must not be null");
+        Objects.requireNonNull(tenantId, "Tenant id must not be null");
         Objects.requireNonNull(identityDocumentType, "Identity document type must not be null");
         validateNotBlank(identityNumber, "Identity number");
-
         Instant now = Instant.now();
-        return new User(UUID.randomUUID(), tenantId, email, passwordHash,
-                Role.STUDENT.impliedRoles(), UserStatus.EMAIL_UNVERIFIED, 0, null, now, now,
-                identityDocumentType, identityNumber.trim(), null, null, null);
+        return new User(UUID.randomUUID(), tenantId, email,
+                null,   // passwordHash is null until account setup is completed
+                role.impliedRoles(), UserStatus.INVITED,
+                0, null, now, now,
+                identityDocumentType, identityNumber.trim(),
+                firstName == null ? null : firstName.trim(),
+                lastName == null ? null : lastName.trim(),
+                phoneNumber == null || phoneNumber.isBlank() ? null : phoneNumber.trim());
     }
 
     public boolean isLocked() {
@@ -101,7 +113,7 @@ public class User {
         if (isLocked()) {
             throw new AccountLockedException(lockedUntil);
         }
-        if (status == UserStatus.EMAIL_UNVERIFIED) {
+        if (status == UserStatus.INVITED) {
             throw new EmailNotVerifiedException();
         }
     }
@@ -122,9 +134,19 @@ public class User {
     }
 
     public void verifyEmail() {
-        if (this.status != UserStatus.EMAIL_UNVERIFIED) {
+        if (this.status != UserStatus.INVITED) {
             return;
         }
+        this.status = UserStatus.ACTIVE;
+        this.updatedAt = Instant.now();
+    }
+
+    /**
+     * Completes the unified account setup flow: sets the user's password and
+     * transitions status from INVITED to ACTIVE.
+     */
+    public void setupAccount(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
         this.status = UserStatus.ACTIVE;
         this.updatedAt = Instant.now();
     }

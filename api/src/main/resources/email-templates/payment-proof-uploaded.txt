@@ -1,0 +1,5 @@
+[(${studentName})] has submitted a payment proof for the [(${programName})] program.
+
+Review the proof: [(${reviewUrl})]
+
+Sent by [(${tenantName})] via Klasio.

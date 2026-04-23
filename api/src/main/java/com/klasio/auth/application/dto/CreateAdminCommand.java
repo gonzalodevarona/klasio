@@ -5,7 +5,6 @@ import java.util.UUID;
 public record CreateAdminCommand(
         UUID tenantId,
         String email,
-        String password,
         String identityDocumentType,
         String identityNumber,
         String firstName,

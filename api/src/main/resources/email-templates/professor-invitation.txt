@@ -1,0 +1,9 @@
+Hi [(${professorName})],
+
+You have been invited to join [(${tenantName})] as a professor on Klasio.
+
+Accept your invitation: [(${activationUrl})]
+
+This invitation expires at [(${expiresAt})].
+
+Sent by [(${tenantName})] via Klasio.

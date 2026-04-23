@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { LoginResponse, AuthError } from "@/lib/types/auth";
 
 export default function LoginForm() {
+  const t = useTranslations("auth.login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -29,19 +31,24 @@ export default function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        const err = (data as AuthError).error;
-        setError({
-          code: err.code,
-          message: err.message,
-          lockedUntil: err.lockedUntil,
-        });
+        const raw = (data as AuthError | { error: string }).error;
+        // Handle both flat `{ error: "CODE" }` and structured `{ error: { code, message } }`
+        if (typeof raw === "string") {
+          setError({ code: raw, message: raw });
+        } else {
+          setError({
+            code: raw.code,
+            message: raw.message,
+            lockedUntil: raw.lockedUntil,
+          });
+        }
         return;
       }
 
       const loginData = data as LoginResponse;
       window.location.href = loginData.dashboardUrl;
     } catch {
-      setError({ code: "NETWORK_ERROR", message: "Unable to connect to server" });
+      setError({ code: "NETWORK_ERROR", message: t("errorNetwork") });
     } finally {
       setLoading(false);
     }
@@ -50,20 +57,30 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div role="alert" className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-800">
             {error.code === "ACCOUNT_LOCKED" && error.lockedUntil
-              ? `Account locked until ${new Date(error.lockedUntil).toLocaleString()}`
+              ? t("errorAccountLocked", { date: new Date(error.lockedUntil).toLocaleString() })
               : error.code === "EMAIL_NOT_VERIFIED"
-                ? "Please verify your email address before logging in"
-                : error.message}
+                ? t("errorEmailNotVerified")
+                : error.code === "ACCOUNT_SETUP_PENDING"
+                  ? t("errorAccountSetupPending")
+                  : error.message}
           </p>
+          {error.code === "ACCOUNT_SETUP_PENDING" && (
+            <p className="mt-2 text-sm text-red-700">
+              {t("accountSetupPendingResend")}{" "}
+              <a href="/setup-account" className="underline text-indigo-700 hover:text-indigo-600">
+                {t("accountSetupPendingLink")}
+              </a>
+            </p>
+          )}
         </div>
       )}
 
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email
+          {t("emailLabel")}
         </label>
         <input
           id="email"
@@ -72,13 +89,13 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          placeholder="you@example.com"
+          placeholder={t("emailPlaceholder")}
         />
       </div>
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password
+          {t("passwordLabel")}
         </label>
         <div className="relative mt-1">
           <input
@@ -93,7 +110,7 @@ export default function LoginForm() {
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
           >
             {showPassword ? (
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -112,7 +129,7 @@ export default function LoginForm() {
 
       <div className="flex items-center justify-between">
         <a href="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
-          Forgot your password?
+          {t("forgotPassword")}
         </a>
       </div>
 
@@ -121,7 +138,7 @@ export default function LoginForm() {
         disabled={loading}
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
       >
-        {loading ? "Signing in..." : "Sign In"}
+        {loading ? t("submitting") : t("submit")}
       </button>
     </form>
   );

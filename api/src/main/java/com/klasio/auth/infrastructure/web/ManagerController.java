@@ -14,7 +14,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -59,14 +58,11 @@ public class ManagerController {
     public record CreateManagerRequest(
             @NotNull UUID tenantId,
             @NotBlank @Email String email,
-            String password, // optional — auto-generated when omitted
             @NotBlank String identityDocumentType,
             @NotBlank @Size(min = 3, max = 30) String identityNumber,
             @NotBlank @Size(max = 100) String firstName,
             @NotBlank @Size(max = 100) String lastName,
-            /** WhatsApp-compatible E.164 phone number, e.g. +573001234567. Required. */
             @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^\\+[1-9]\\d{6,19}$", message = "Phone number must be a valid WhatsApp number in E.164 format (e.g. +573001234567)")
             @Size(max = 20)
             String phoneNumber
     ) {}
@@ -77,9 +73,7 @@ public class ManagerController {
             @Email String email,
             String identityDocumentType,
             @Size(min = 3, max = 30) String identityNumber,
-            /** WhatsApp-compatible E.164 phone number, e.g. +573001234567. Required. */
             @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^\\+[1-9]\\d{6,19}$", message = "Phone number must be a valid WhatsApp number in E.164 format (e.g. +573001234567)")
             @Size(max = 20)
             String phoneNumber
     ) {}
@@ -165,7 +159,6 @@ public class ManagerController {
         CreateAdminCommand command = new CreateAdminCommand(
                 effectiveTenantId,
                 request.email(),
-                request.password(),
                 request.identityDocumentType(),
                 request.identityNumber(),
                 request.firstName(),

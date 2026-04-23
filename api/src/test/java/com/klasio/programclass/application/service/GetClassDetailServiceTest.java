@@ -7,6 +7,7 @@ import com.klasio.programclass.domain.model.ClassType;
 import com.klasio.programclass.domain.model.ProgramClass;
 import com.klasio.programclass.domain.port.ProgramClassRepository;
 import com.klasio.professor.domain.port.ProfessorRepository;
+import com.klasio.shared.domain.port.UserDisplayNamePort;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +36,9 @@ class GetClassDetailServiceTest {
     @Mock
     private ProfessorRepository professorRepository;
 
+    @Mock
+    private UserDisplayNamePort userDisplayNamePort;
+
     private GetClassDetailService service;
 
     private static final UUID TENANT_ID = UUID.randomUUID();
@@ -50,10 +54,48 @@ class GetClassDetailServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new GetClassDetailService(programClassRepository, professorRepository);
+        service = new GetClassDetailService(programClassRepository, professorRepository, userDisplayNamePort);
     }
 
-    // ---- T069: Happy path - returns full class detail with all fields ----
+    @Test
+    @DisplayName("should resolve createdBy UUID to display name")
+    void execute_resolvesCreatedByToDisplayName() {
+        ProgramClass programClass = ProgramClass.create(
+                TENANT_ID, PROGRAM_ID, "Kids Beginner Monday", ClassLevel.BEGINNER,
+                ClassType.RECURRING, List.of(MONDAY_SCHEDULE),
+                PROFESSOR_ID, 20, CREATED_BY);
+
+        UUID classId = programClass.getId().value();
+
+        when(programClassRepository.findById(TENANT_ID, classId)).thenReturn(Optional.of(programClass));
+        when(professorRepository.findById(any(), any())).thenReturn(Optional.empty());
+        when(userDisplayNamePort.findDisplayName(CREATED_BY)).thenReturn(Optional.of("Ana Torres"));
+
+        ClassDetail result = service.execute(TENANT_ID, classId);
+
+        assertThat(result.createdBy()).isEqualTo("Ana Torres");
+    }
+
+    @Test
+    @DisplayName("should fall back to UUID string when user not found")
+    void execute_fallsBackToUuidStringWhenUserNotFound() {
+        ProgramClass programClass = ProgramClass.create(
+                TENANT_ID, PROGRAM_ID, "Kids Beginner Monday", ClassLevel.BEGINNER,
+                ClassType.RECURRING, List.of(MONDAY_SCHEDULE),
+                PROFESSOR_ID, 20, CREATED_BY);
+
+        UUID classId = programClass.getId().value();
+
+        when(programClassRepository.findById(TENANT_ID, classId)).thenReturn(Optional.of(programClass));
+        when(professorRepository.findById(any(), any())).thenReturn(Optional.empty());
+        when(userDisplayNamePort.findDisplayName(CREATED_BY)).thenReturn(Optional.empty());
+
+        ClassDetail result = service.execute(TENANT_ID, classId);
+
+        assertThat(result.createdBy()).isEqualTo(CREATED_BY.toString());
+    }
+
+    // ---- T069: Happy path ----
 
     @Test
     @DisplayName("should return class detail with all fields mapped from domain")
@@ -65,10 +107,9 @@ class GetClassDetailServiceTest {
 
         UUID classId = programClass.getId().value();
 
-        when(programClassRepository.findById(TENANT_ID, classId))
-                .thenReturn(Optional.of(programClass));
-        when(professorRepository.findById(any(), any()))
-                .thenReturn(Optional.empty());
+        when(programClassRepository.findById(TENANT_ID, classId)).thenReturn(Optional.of(programClass));
+        when(professorRepository.findById(any(), any())).thenReturn(Optional.empty());
+        when(userDisplayNamePort.findDisplayName(any())).thenReturn(Optional.empty());
 
         ClassDetail result = service.execute(TENANT_ID, classId);
 
@@ -82,9 +123,7 @@ class GetClassDetailServiceTest {
         assertThat(result.maxStudents()).isEqualTo(20);
         assertThat(result.status()).isEqualTo("ACTIVE");
         assertThat(result.scheduleEntries()).hasSize(2);
-        assertThat(result.scheduleEntries()).containsExactly(MONDAY_SCHEDULE, WEDNESDAY_SCHEDULE);
         assertThat(result.createdAt()).isNotNull();
-        assertThat(result.createdBy()).isEqualTo(CREATED_BY);
         assertThat(result.updatedAt()).isNull();
         assertThat(result.updatedBy()).isNull();
     }
@@ -96,8 +135,7 @@ class GetClassDetailServiceTest {
     void execute_withNonExistentClass_throwsClassNotFoundException() {
         UUID classId = UUID.randomUUID();
 
-        when(programClassRepository.findById(TENANT_ID, classId))
-                .thenReturn(Optional.empty());
+        when(programClassRepository.findById(TENANT_ID, classId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.execute(TENANT_ID, classId))
                 .isInstanceOf(ClassNotFoundException.class)

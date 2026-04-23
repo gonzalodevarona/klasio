@@ -24,9 +24,9 @@ public final class ProfessorResponseDto {
             IdentityDocumentType identityDocumentType,
             String identityNumber,
             Instant createdAt,
-            UUID createdBy,
+            String createdBy,
             Instant updatedAt,
-            UUID updatedBy
+            String updatedBy
     ) {
 
         public static ProfessorDetailResponse fromDomain(Professor professor) {
@@ -41,9 +41,9 @@ public final class ProfessorResponseDto {
                     professor.getIdentityDocumentType(),
                     professor.getIdentityNumber(),
                     professor.getCreatedAt(),
-                    professor.getCreatedBy(),
+                    professor.getCreatedBy().toString(),
                     professor.getUpdatedAt(),
-                    professor.getUpdatedBy()
+                    professor.getUpdatedBy() != null ? professor.getUpdatedBy().toString() : null
             );
         }
 

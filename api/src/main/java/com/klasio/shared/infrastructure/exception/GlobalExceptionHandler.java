@@ -410,6 +410,38 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(com.klasio.auth.domain.exception.AccountSetupTokenInvalidException.class)
+    public ResponseEntity<ErrorResponse> handleAccountSetupTokenInvalid(
+            com.klasio.auth.domain.exception.AccountSetupTokenInvalidException ex) {
+        var error = new ErrorResponse.ErrorDetail("ACCOUNT_SETUP_TOKEN_INVALID", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.GONE).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(com.klasio.auth.domain.exception.AccountSetupTokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleAccountSetupTokenExpired(
+            com.klasio.auth.domain.exception.AccountSetupTokenExpiredException ex) {
+        var error = new ErrorResponse.ErrorDetail("ACCOUNT_SETUP_TOKEN_EXPIRED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.GONE).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(com.klasio.auth.domain.exception.AccountSetupTokenAlreadyUsedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountSetupTokenAlreadyUsed(
+            com.klasio.auth.domain.exception.AccountSetupTokenAlreadyUsedException ex) {
+        var error = new ErrorResponse.ErrorDetail("ACCOUNT_SETUP_TOKEN_ALREADY_USED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.GONE).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(com.klasio.auth.domain.exception.AccountSetupPendingException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountSetupPending(
+            com.klasio.auth.domain.exception.AccountSetupPendingException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "error", Map.of(
+                        "code", "ACCOUNT_SETUP_PENDING",
+                        "message", ex.getMessage()
+                )
+        ));
+    }
+
     @ExceptionHandler(RoleElevationForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleRoleElevation(RoleElevationForbiddenException ex) {
         var error = new ErrorResponse.ErrorDetail("ROLE_ELEVATION_FORBIDDEN", ex.getMessage());

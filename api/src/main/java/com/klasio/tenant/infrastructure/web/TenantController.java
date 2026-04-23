@@ -81,35 +81,42 @@ public class TenantController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<TenantResponseDto.TenantDetailResponse> createTenant(
             @RequestParam("name") String name,
-            @RequestParam("sportDiscipline") String sportDiscipline,
+            @RequestParam("discipline") String discipline,
+            @RequestParam("language") String language,
             @RequestParam("contactEmail") String contactEmail,
-            @RequestParam(value = "slug", required = false) String slug,
-            @RequestParam(value = "contactPhone", required = false) String contactPhone,
-            @RequestParam(value = "contactAddress", required = false) String contactAddress,
-            @RequestParam(value = "logo", required = false) MultipartFile logo) throws IOException {
+            @RequestParam("contactPhone") String contactPhone,
+            @RequestParam("contactPhoneIndicator") String contactPhoneIndicator,
+            @RequestParam("contactStreet") String contactStreet,
+            @RequestParam("contactCity") String contactCity,
+            @RequestParam("contactState") String contactState,
+            @RequestParam("contactCountry") String contactCountry,
+            @RequestParam("logo") MultipartFile logo,
+            @RequestParam(value = "slug", required = false) String slug) {
 
         UUID userId = extractUserId();
 
-        InputStream logoData = null;
-        String logoContentType = null;
-        long logoSize = 0;
-
-        if (logo != null && !logo.isEmpty()) {
-            logoData = logo.getInputStream();
-            logoContentType = logo.getContentType();
-            logoSize = logo.getSize();
+        InputStream logoStream;
+        try {
+            logoStream = logo.getInputStream();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read uploaded logo file");
         }
 
         CreateTenantCommand command = new CreateTenantCommand(
                 name,
-                sportDiscipline,
+                discipline,
+                language,
                 slug,
                 contactEmail,
                 contactPhone,
-                contactAddress,
-                logoData,
-                logoContentType,
-                logoSize,
+                contactPhoneIndicator,
+                contactStreet,
+                contactCity,
+                contactState,
+                contactCountry,
+                logoStream,
+                logo.getContentType(),
+                logo.getSize(),
                 userId
         );
 

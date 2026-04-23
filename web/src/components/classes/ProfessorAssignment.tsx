@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { api, ApiError } from "@/lib/api";
 
 interface ProfessorAssignmentProps {
@@ -16,6 +17,7 @@ export default function ProfessorAssignment({
   professorId,
   onChanged,
 }: ProfessorAssignmentProps) {
+  const t = useTranslations("classes");
   const [inputProfessorId, setInputProfessorId] = useState("");
   const [showAssignConfirm, setShowAssignConfirm] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
@@ -38,7 +40,7 @@ export default function ProfessorAssignment({
       );
       setFeedback({
         type: "success",
-        message: "Professor has been assigned successfully.",
+        message: t("professorAssignSuccess"),
       });
       setShowAssignConfirm(false);
       setInputProfessorId("");
@@ -47,7 +49,7 @@ export default function ProfessorAssignment({
       const message =
         err instanceof ApiError
           ? err.message
-          : "Failed to assign professor. Please try again.";
+          : t("professorAssignError");
       setFeedback({ type: "error", message });
     } finally {
       setActionLoading(false);
@@ -64,7 +66,7 @@ export default function ProfessorAssignment({
       );
       setFeedback({
         type: "success",
-        message: "Professor has been removed successfully.",
+        message: t("professorRemoveSuccess"),
       });
       setShowRemoveConfirm(false);
       onChanged?.();
@@ -72,7 +74,7 @@ export default function ProfessorAssignment({
       const message =
         err instanceof ApiError
           ? err.message
-          : "Failed to remove professor. Please try again.";
+          : t("professorRemoveError");
       setFeedback({ type: "error", message });
     } finally {
       setActionLoading(false);
@@ -83,7 +85,7 @@ export default function ProfessorAssignment({
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900">
-          Professor Assignment
+          {t("professorAssignmentTitle")}
         </h3>
       </div>
 
@@ -103,10 +105,10 @@ export default function ProfessorAssignment({
 
         <div>
           <dt className="text-sm font-medium text-gray-500">
-            Current Professor
+            {t("professorCurrentLabel")}
           </dt>
           <dd className="mt-1 text-sm text-gray-900 font-mono">
-            {professorId ?? "Unassigned"}
+            {professorId ?? t("colUnassigned")}
           </dd>
         </div>
 
@@ -118,7 +120,7 @@ export default function ProfessorAssignment({
                 htmlFor="professorIdInput"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Professor ID
+                {t("professorIdLabel")}
               </label>
               <input
                 id="professorIdInput"
@@ -126,7 +128,7 @@ export default function ProfessorAssignment({
                 value={inputProfessorId}
                 onChange={(e) => setInputProfessorId(e.target.value)}
                 className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="UUID of the professor"
+                placeholder={t("professorIdPlaceholder")}
               />
             </div>
             {!showAssignConfirm && (
@@ -136,7 +138,7 @@ export default function ProfessorAssignment({
                 disabled={!inputProfessorId.trim()}
                 className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Assign Professor
+                {t("professorAssignButton")}
               </button>
             )}
           </div>
@@ -144,7 +146,7 @@ export default function ProfessorAssignment({
           {showAssignConfirm && (
             <div className="space-y-3">
               <p className="text-sm text-gray-700">
-                Are you sure you want to assign this professor to the class?
+                {t("professorConfirmAssignQuestion")}
               </p>
               <div className="flex gap-3">
                 <button
@@ -153,7 +155,7 @@ export default function ProfessorAssignment({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading ? "Assigning..." : "Confirm Assignment"}
+                  {actionLoading ? t("professorAssigningButton") : t("professorConfirmAssignButton")}
                 </button>
                 <button
                   type="button"
@@ -161,7 +163,7 @@ export default function ProfessorAssignment({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {t("professorCancelButton")}
                 </button>
               </div>
             </div>
@@ -178,12 +180,12 @@ export default function ProfessorAssignment({
               onClick={() => setShowRemoveConfirm(true)}
               className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              Remove Professor
+              {t("professorRemoveButton")}
             </button>
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-gray-700">
-                Are you sure you want to remove the professor from this class?
+                {t("professorConfirmRemoveQuestion")}
               </p>
               <div className="flex gap-3">
                 <button
@@ -192,7 +194,7 @@ export default function ProfessorAssignment({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading ? "Removing..." : "Confirm Removal"}
+                  {actionLoading ? t("professorRemovingButton") : t("professorConfirmRemovalButton")}
                 </button>
                 <button
                   type="button"
@@ -200,7 +202,7 @@ export default function ProfessorAssignment({
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Cancel
+                  {t("professorCancelButton")}
                 </button>
               </div>
             </div>

@@ -1,0 +1,9 @@
+Hi [(${studentName})],
+
+Your payment proof for the [(${programName})] program was not accepted.
+
+Reason: [(${reason})]
+
+Please try again: [(${retryUrl})]
+
+Sent by [(${tenantName})] via Klasio.

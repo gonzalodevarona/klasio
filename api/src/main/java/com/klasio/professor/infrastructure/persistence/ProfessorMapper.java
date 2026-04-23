@@ -12,6 +12,7 @@ public class ProfessorMapper {
         return Professor.reconstitute(
                 ProfessorId.of(entity.getId()),
                 entity.getTenantId(),
+                entity.getUserId(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),
@@ -32,6 +33,7 @@ public class ProfessorMapper {
         ProfessorJpaEntity entity = new ProfessorJpaEntity();
         entity.setId(professor.getId().value());
         entity.setTenantId(professor.getTenantId());
+        entity.setUserId(professor.getUserId());
         entity.setFirstName(professor.getFirstName());
         entity.setLastName(professor.getLastName());
         entity.setEmail(professor.getEmail());

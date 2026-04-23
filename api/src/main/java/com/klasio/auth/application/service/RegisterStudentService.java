@@ -1,15 +1,17 @@
 package com.klasio.auth.application.service;
 
 import com.klasio.auth.application.dto.RegisterStudentCommand;
-import com.klasio.auth.application.port.*;
-import com.klasio.auth.domain.event.StudentRegisteredEvent;
+import com.klasio.auth.application.port.AccountSetupTokenRepository;
+import com.klasio.auth.application.port.StudentProfilePort;
+import com.klasio.auth.application.port.TenantResolverPort;
+import com.klasio.auth.application.port.TokenGenerator;
+import com.klasio.auth.application.port.UserRepository;
+import com.klasio.auth.domain.event.AccountSetupInitiated;
 import com.klasio.auth.domain.exception.EmailAlreadyRegisteredException;
 import com.klasio.auth.domain.exception.IdentityNumberAlreadyRegisteredException;
-import com.klasio.auth.domain.exception.PasswordPolicyViolationException;
-import com.klasio.auth.domain.model.EmailVerificationToken;
-import com.klasio.auth.domain.model.PasswordPolicy;
+import com.klasio.auth.domain.model.AccountSetupToken;
+import com.klasio.auth.domain.model.Role;
 import com.klasio.auth.domain.model.User;
-import com.klasio.auth.infrastructure.config.AuthProperties;
 import com.klasio.shared.domain.model.IdentityDocumentType;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,30 +27,21 @@ public class RegisterStudentService {
     private final UserRepository userRepository;
     private final StudentProfilePort studentProfilePort;
     private final TenantResolverPort tenantResolverPort;
-    private final PasswordEncoder passwordEncoder;
     private final TokenGenerator tokenGenerator;
-    private final EmailVerificationTokenRepository evtRepository;
-    private final AuthEmailSender authEmailSender;
-    private final AuthProperties authProperties;
+    private final AccountSetupTokenRepository accountSetupTokenRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public RegisterStudentService(UserRepository userRepository,
                                   StudentProfilePort studentProfilePort,
                                   TenantResolverPort tenantResolverPort,
-                                  PasswordEncoder passwordEncoder,
                                   TokenGenerator tokenGenerator,
-                                  EmailVerificationTokenRepository evtRepository,
-                                  AuthEmailSender authEmailSender,
-                                  AuthProperties authProperties,
+                                  AccountSetupTokenRepository accountSetupTokenRepository,
                                   ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.studentProfilePort = studentProfilePort;
         this.tenantResolverPort = tenantResolverPort;
-        this.passwordEncoder = passwordEncoder;
         this.tokenGenerator = tokenGenerator;
-        this.evtRepository = evtRepository;
-        this.authEmailSender = authEmailSender;
-        this.authProperties = authProperties;
+        this.accountSetupTokenRepository = accountSetupTokenRepository;
         this.eventPublisher = eventPublisher;
     }
 
@@ -74,31 +66,29 @@ public class RegisterStudentService {
             throw new IdentityNumberAlreadyRegisteredException();
         }
 
-        List<String> violations = PasswordPolicy.validate(command.password());
-        if (!violations.isEmpty()) {
-            throw new PasswordPolicyViolationException(violations);
-        }
-
-        String passwordHash = passwordEncoder.encode(command.password());
-        User user = User.createUnverified(tenantId, command.email(), passwordHash, docType, identityNumber);
+        // Create user with no password — they will set it by clicking the account setup link.
+        User user = User.createPendingSetup(tenantId, command.email(), Role.STUDENT,
+                docType, identityNumber,
+                command.firstName(), command.lastName(), null);
         userRepository.save(user);
 
-        UUID studentId = studentProfilePort.createStudentProfile(
+        studentProfilePort.createStudentProfile(
                 tenantId, command.firstName(), command.lastName(), command.email(),
                 command.dateOfBirth(), command.identityDocumentType(), command.identityNumber(),
                 command.eps(), command.tutorFullName(), command.tutorRelationship(),
                 command.tutorContact(), user.getId());
 
+        // Generate 15-minute account setup token and persist it.
         String rawToken = tokenGenerator.generateRawToken();
         String hashedToken = tokenGenerator.hashToken(rawToken);
-        Instant expiresAt = Instant.now().plus(authProperties.emailVerificationExpiryHours(), ChronoUnit.HOURS);
-        EmailVerificationToken token = EmailVerificationToken.create(user.getId(), hashedToken, expiresAt);
-        evtRepository.save(token);
+        Instant expiresAt = Instant.now().plus(15, ChronoUnit.MINUTES);
+        AccountSetupToken token = AccountSetupToken.create(user.getId(), hashedToken, expiresAt);
+        accountSetupTokenRepository.save(token);
 
-        authEmailSender.sendVerificationEmail(command.email(), rawToken, command.tenantSlug());
-
-        eventPublisher.publishEvent(new StudentRegisteredEvent(
-                user.getId(), tenantId, studentId, command.email(), Instant.now()));
+        eventPublisher.publishEvent(new AccountSetupInitiated(
+                user.getId(), tenantId, command.email(),
+                command.firstName() + " " + command.lastName(),
+                "student", rawToken, expiresAt, Instant.now()));
     }
 
     private IdentityDocumentType parseDocumentType(String value) {

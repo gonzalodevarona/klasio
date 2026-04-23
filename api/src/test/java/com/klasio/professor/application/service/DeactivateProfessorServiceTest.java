@@ -52,7 +52,7 @@ class DeactivateProfessorServiceTest {
     void execute_withActiveProfessor_deactivates() {
         UUID professorId = UUID.randomUUID();
         Professor professor = Professor.reconstitute(
-                ProfessorId.of(professorId), TENANT_ID,
+                ProfessorId.of(professorId), TENANT_ID, null,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.ACTIVE, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,
@@ -91,7 +91,7 @@ class DeactivateProfessorServiceTest {
     void execute_withAlreadyDeactivated_throwsException() {
         UUID professorId = UUID.randomUUID();
         Professor professor = Professor.reconstitute(
-                ProfessorId.of(professorId), TENANT_ID,
+                ProfessorId.of(professorId), TENANT_ID, null,
                 "Carlos", "Martinez", "carlos@example.com", null,
                 ProfessorStatus.DEACTIVATED, null, null,
                 Instant.now(), UUID.randomUUID(), null, null,

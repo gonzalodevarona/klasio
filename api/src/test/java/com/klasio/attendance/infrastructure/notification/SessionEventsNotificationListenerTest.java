@@ -6,7 +6,9 @@ import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ProfessorUserIdPort;
 import com.klasio.attendance.domain.port.ProgramManagerPort;
+import com.klasio.attendance.domain.port.StudentEmailPort;
 import com.klasio.attendance.domain.port.StudentUserIdPort;
+import com.klasio.email.application.EmailService;
 import com.klasio.notifications.application.dto.CreateNotificationCommand;
 import com.klasio.notifications.application.port.input.CreateNotificationUseCase;
 import com.klasio.attendance.domain.model.AttendanceRegistration;
@@ -37,11 +39,14 @@ class SessionEventsNotificationListenerTest {
     private final CreateNotificationUseCase createNotif = mock(CreateNotificationUseCase.class);
     private final StudentUserIdPort studentUserIdPort  = mock(StudentUserIdPort.class);
     private final ProfessorUserIdPort professorUserIdPort = mock(ProfessorUserIdPort.class);
+    private final EmailService emailService = mock(EmailService.class);
+    private final StudentEmailPort studentEmailPort = mock(StudentEmailPort.class);
 
     private final SessionEventsNotificationListener listener =
             new SessionEventsNotificationListener(
                     classDetails, regRepo, managerPort, createNotif,
-                    studentUserIdPort, professorUserIdPort);
+                    studentUserIdPort, professorUserIdPort,
+                    emailService, studentEmailPort);
 
     @Test
     void alertFromProfessorNotifiesStudentsAndManagerButNotTheProfessor() {

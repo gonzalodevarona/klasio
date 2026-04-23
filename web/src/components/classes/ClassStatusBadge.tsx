@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { ClassStatus } from "@/lib/types/programClass";
 
 interface ClassStatusBadgeProps {
@@ -10,11 +13,12 @@ const STATUS_STYLES: Record<ClassStatus, string> = {
 };
 
 export default function ClassStatusBadge({ status }: ClassStatusBadgeProps) {
+  const t = useTranslations("badges.classStatus");
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[status]}`}
     >
-      {status}
+      {t(status)}
     </span>
   );
 }

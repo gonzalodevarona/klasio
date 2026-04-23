@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useDelegatedMemberships } from "@/hooks/useDelegatedMemberships";
 import { useMembershipActions } from "@/hooks/useMemberships";
 
@@ -8,6 +9,7 @@ function formatDate(iso: string): string {
 }
 
 export function DelegatedMembershipList() {
+  const t = useTranslations("paymentProofs");
   const { memberships, loading, error, refetch } = useDelegatedMemberships();
   const { activateMembership, loading: activating } = useMembershipActions();
 
@@ -17,7 +19,7 @@ export function DelegatedMembershipList() {
   }
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading delegated memberships…</p>;
+    return <p className="text-sm text-gray-500">{t("delegatedLoading")}</p>;
   }
 
   if (error) {
@@ -29,7 +31,7 @@ export function DelegatedMembershipList() {
   }
 
   if (memberships.length === 0) {
-    return <p className="text-sm text-gray-400">No memberships awaiting your activation.</p>;
+    return <p className="text-sm text-gray-400">{t("delegatedEmpty")}</p>;
   }
 
   return (
@@ -38,13 +40,13 @@ export function DelegatedMembershipList() {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Student
+              {t("delegatedColStudent")}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Program
+              {t("delegatedColProgram")}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Delegated
+              {t("delegatedColDelegated")}
             </th>
             <th className="px-4 py-3" />
           </tr>
@@ -61,7 +63,7 @@ export function DelegatedMembershipList() {
                   disabled={activating}
                   className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                 >
-                  Activate
+                  {t("delegatedActivateBtn")}
                 </button>
               </td>
             </tr>

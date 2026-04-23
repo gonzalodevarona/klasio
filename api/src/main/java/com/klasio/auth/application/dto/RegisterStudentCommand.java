@@ -11,7 +11,6 @@ public record RegisterStudentCommand(
         String identityNumber,
         String eps,
         String email,
-        String password,
         String tutorFullName,
         String tutorRelationship,
         String tutorContact

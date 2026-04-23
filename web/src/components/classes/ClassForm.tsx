@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api, ApiError } from "@/lib/api";
 import {
   ClassLevel,
@@ -52,6 +53,8 @@ function emptyScheduleEntry(): ScheduleEntryFormData {
 }
 
 export default function ClassForm({ programId, programClass }: ClassFormProps) {
+  const t = useTranslations("classes");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const isEdit = !!programClass;
   const { professors, loading: professorsLoading } = useAllActiveProfessors();
@@ -86,51 +89,51 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
     const errors: FieldErrors = {};
 
     if (!name.trim()) {
-      errors.name = "Name is required.";
+      errors.name = t("formNameRequired");
     } else if (name.trim().length > 100) {
-      errors.name = "Name must be at most 100 characters.";
+      errors.name = t("formNameMaxLength");
     }
 
     if (!level) {
-      errors.level = "Level is required.";
+      errors.level = t("formLevelRequired");
     }
 
     if (!classType) {
-      errors.type = "Type is required.";
+      errors.type = t("formTypeRequired");
     }
 
     if (!professorId.trim()) {
-      errors.professorId = "Professor is required.";
+      errors.professorId = t("formProfessorRequired");
     }
 
     const maxStudentsNum = parseInt(maxStudents, 10);
     if (!maxStudents.trim()) {
-      errors.maxStudents = "Max students is required.";
+      errors.maxStudents = t("formMaxStudentsRequired");
     } else if (isNaN(maxStudentsNum) || maxStudentsNum < 1) {
-      errors.maxStudents = "Max students must be at least 1.";
+      errors.maxStudents = t("formMaxStudentsMin");
     }
 
     if (scheduleEntries.length === 0) {
-      errors.scheduleEntries = "At least one schedule entry is required.";
+      errors.scheduleEntries = t("formScheduleRequired");
     } else {
       for (const entry of scheduleEntries) {
         if (!entry.startTime || !entry.endTime) {
-          errors.scheduleEntries = "All schedule entries must have start and end times.";
+          errors.scheduleEntries = t("formScheduleTimesRequired");
           break;
         }
         if (classType === "RECURRING" && !entry.dayOfWeek) {
-          errors.scheduleEntries = "Recurring classes require a day of the week for each entry.";
+          errors.scheduleEntries = t("formScheduleDayRequired");
           break;
         }
         if (classType === "ONE_TIME" && !entry.specificDate) {
-          errors.scheduleEntries = "One-time classes require a specific date.";
+          errors.scheduleEntries = t("formScheduleDateRequired");
           break;
         }
       }
     }
 
     if (classType === "ONE_TIME" && scheduleEntries.length > 1) {
-      errors.scheduleEntries = "One-time classes can only have one schedule entry.";
+      errors.scheduleEntries = t("formScheduleOneTimeMax");
     }
 
     return errors;
@@ -229,7 +232,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
         }
         setApiError(err.message);
       } else {
-        setApiError("An unexpected error occurred. Please try again.");
+        setApiError(tCommon("unexpectedError"));
       }
     } finally {
       setSubmitting(false);
@@ -253,7 +256,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           htmlFor="name"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Class Name <span className="text-red-500">*</span>
+          {t("formClassNameLabel")} <span className="text-red-500">*</span>
         </label>
         <input
           id="name"
@@ -263,7 +266,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             fieldErrors.name ? "border-red-500" : "border-gray-300"
           }`}
-          placeholder="e.g. Kids Beginner Monday"
+          placeholder={t("formClassNamePlaceholder")}
         />
         {fieldErrors.name && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
@@ -276,7 +279,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           htmlFor="level"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Level <span className="text-red-500">*</span>
+          {t("formLevelLabel")} <span className="text-red-500">*</span>
         </label>
         <select
           id="level"
@@ -286,7 +289,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
             fieldErrors.level ? "border-red-500" : "border-gray-300"
           }`}
         >
-          <option value="">Select a level</option>
+          <option value="">{t("formLevelPlaceholder")}</option>
           {LEVELS.map((l) => (
             <option key={l} value={l}>
               {l.charAt(0) + l.slice(1).toLowerCase()}
@@ -302,7 +305,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
       {!isEdit && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Class Type <span className="text-red-500">*</span>
+            {t("formTypeLabel")} <span className="text-red-500">*</span>
           </label>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -317,7 +320,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                 }}
                 className="text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Recurring</span>
+              <span className="text-sm text-gray-700">{t("formTypeRecurring")}</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -331,7 +334,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                 }}
                 className="text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">One-Time</span>
+              <span className="text-sm text-gray-700">{t("formTypeOneTime")}</span>
             </label>
           </div>
           {fieldErrors.type && (
@@ -346,7 +349,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           htmlFor="maxStudents"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Max Students <span className="text-red-500">*</span>
+          {t("formMaxStudentsLabel")} <span className="text-red-500">*</span>
         </label>
         <input
           id="maxStudents"
@@ -357,7 +360,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             fieldErrors.maxStudents ? "border-red-500" : "border-gray-300"
           }`}
-          placeholder="e.g. 20"
+          placeholder={t("formMaxStudentsPlaceholder")}
         />
         {fieldErrors.maxStudents && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.maxStudents}</p>
@@ -370,7 +373,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           htmlFor="professorId"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Professor <span className="text-red-500">*</span>
+          {t("formProfessorLabel")} <span className="text-red-500">*</span>
         </label>
         <select
           id="professorId"
@@ -382,7 +385,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           }`}
         >
           <option value="">
-            {professorsLoading ? "Loading professors..." : "Select a professor"}
+            {professorsLoading ? t("formProfessorLoading") : t("formProfessorPlaceholder")}
           </option>
           {professors.map((p) => (
             <option key={p.id} value={p.id}>
@@ -398,7 +401,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
       {/* Schedule Entries */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Schedule <span className="text-red-500">*</span>
+          {t("formScheduleLabel")} <span className="text-red-500">*</span>
         </label>
         {fieldErrors.scheduleEntries && (
           <p className="mb-2 text-sm text-red-600">
@@ -414,7 +417,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
               {classType === "RECURRING" ? (
                 <div className="flex-1 min-w-[140px]">
                   <label className="block text-xs text-gray-500 mb-1">
-                    Day of Week
+                    {t("formScheduleDayLabel")}
                   </label>
                   <select
                     value={entry.dayOfWeek}
@@ -423,7 +426,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                     }
                     className="block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
                   >
-                    <option value="">Select day</option>
+                    <option value="">{t("formScheduleDayPlaceholder")}</option>
                     {DAYS_OF_WEEK.map((day) => (
                       <option key={day} value={day}>
                         {day.charAt(0) + day.slice(1).toLowerCase()}
@@ -434,7 +437,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
               ) : (
                 <div className="flex-1 min-w-[140px]">
                   <label className="block text-xs text-gray-500 mb-1">
-                    Date
+                    {t("formScheduleDateLabel")}
                   </label>
                   <input
                     type="date"
@@ -449,7 +452,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
 
               <div className="min-w-[100px]">
                 <label className="block text-xs text-gray-500 mb-1">
-                  Start Time
+                  {t("formScheduleStartLabel")}
                 </label>
                 <input
                   type="time"
@@ -463,7 +466,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
 
               <div className="min-w-[100px]">
                 <label className="block text-xs text-gray-500 mb-1">
-                  End Time
+                  {t("formScheduleEndLabel")}
                 </label>
                 <input
                   type="time"
@@ -481,7 +484,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                   onClick={() => removeScheduleEntry(index)}
                   className="text-red-500 hover:text-red-700 text-sm pb-1"
                 >
-                  Remove
+                  {t("formScheduleRemoveButton")}
                 </button>
               )}
             </div>
@@ -494,7 +497,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
             onClick={addScheduleEntry}
             className="mt-2 text-sm text-blue-600 hover:text-blue-800"
           >
-            + Add Schedule Entry
+            {t("formScheduleAddEntry")}
           </button>
         )}
       </div>
@@ -508,11 +511,11 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
         >
           {submitting
             ? isEdit
-              ? "Saving..."
-              : "Creating..."
+              ? t("formSavingButton")
+              : t("formCreatingButton")
             : isEdit
-              ? "Save Changes"
-              : "Create Class"}
+              ? t("formSaveButton")
+              : t("formCreateButton")}
         </button>
       </div>
     </form>

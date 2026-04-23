@@ -2,26 +2,19 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useProgramDetail } from "@/hooks/usePrograms";
 import { useProgramPlanDetail } from "@/hooks/useProgramPlans";
 import { api, ApiError } from "@/lib/api";
 import ProgramStatusBadge from "@/components/programs/ProgramStatusBadge";
 
-const DAY_LABELS: Record<string, string> = {
-  MONDAY: "Monday",
-  TUESDAY: "Tuesday",
-  WEDNESDAY: "Wednesday",
-  THURSDAY: "Thursday",
-  FRIDAY: "Friday",
-  SATURDAY: "Saturday",
-  SUNDAY: "Sunday",
-};
 
 interface PlanDetailPageProps {
   params: Promise<{ id: string; planId: string }>;
 }
 
 export default function PlanDetailPage({ params }: PlanDetailPageProps) {
+  const t = useTranslations("programs");
   const { id, planId } = use(params);
   const { program } = useProgramDetail(id);
   const { plan, loading, error, refetch } = useProgramPlanDetail(id, planId);
@@ -41,14 +34,14 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
       const label = action === "deactivate" ? "deactivated" : "reactivated";
       setFeedback({
         type: "success",
-        message: `Plan has been ${label} successfully.`,
+        message: t("planDetailSuccessFeedback", { action: label }),
       });
       refetch();
     } catch (err) {
       const message =
         err instanceof ApiError
           ? err.message
-          : `Failed to ${action} plan.`;
+          : t("planDetailErrorFeedback", { action });
       setFeedback({ type: "error", message });
     } finally {
       setActionLoading(false);
@@ -79,7 +72,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
     <div>
       <nav className="mb-6 text-sm text-gray-500">
         <Link href="/programs" className="hover:text-gray-700 hover:underline">
-          Programs
+          {t("detailBreadcrumb")}
         </Link>
         <span className="mx-2">/</span>
         <Link
@@ -89,12 +82,12 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
           {program?.name ?? id}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">{plan?.name ?? "Plan"}</span>
+        <span className="text-gray-900">{plan?.name ?? t("planDetailBreadcrumb")}</span>
       </nav>
 
       {loading && (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading plan details...
+          {t("planDetailLoadingText")}
         </div>
       )}
 
@@ -139,7 +132,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                     href={`/programs/${id}/plans/${planId}/edit`}
                     className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50"
                   >
-                    Edit
+                    {t("planDetailEditButton")}
                   </Link>
                 )}
               </div>
@@ -148,26 +141,26 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
             <div className="px-6 py-5">
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Modality</dt>
+                  <dt className="text-sm font-medium text-gray-500">{t("planDetailModality")}</dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {plan.modality === "HOURS_BASED"
-                      ? "Hours Based"
+                      ? t("modalityHoursBased")
                       : plan.modality === "CLASSES_PER_WEEK"
-                        ? "Classes per Week"
+                        ? t("modalityClassesPerWeek")
                         : plan.modality}
                   </dd>
                 </div>
 
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Manager ID</dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
-                    {plan.managerId}
+                  <dt className="text-sm font-medium text-gray-500">{t("planDetailManager")}</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {plan.managerName ?? plan.managerId}
                   </dd>
                 </div>
 
                 {plan.hours != null && (
                   <div>
-                    <dt className="text-sm font-medium text-gray-500">Hours</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t("planDetailHours")}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {plan.hours}
                     </dd>
@@ -176,7 +169,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
 
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
-                    Created At
+                    {t("planDetailCreatedAt")}
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {formatDate(plan.createdAt)}
@@ -185,9 +178,9 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
 
                 <div>
                   <dt className="text-sm font-medium text-gray-500">
-                    Created By
+                    {t("planDetailCreatedBy")}
                   </dt>
-                  <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                  <dd className="mt-1 text-sm text-gray-900">
                     {plan.createdBy}
                   </dd>
                 </div>
@@ -196,7 +189,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                   <>
                     <div>
                       <dt className="text-sm font-medium text-gray-500">
-                        Last Updated
+                        {t("planDetailLastUpdated")}
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
                         {formatDate(plan.updatedAt)}
@@ -204,9 +197,9 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500">
-                        Updated By
+                        {t("planDetailUpdatedBy")}
                       </dt>
-                      <dd className="mt-1 text-sm text-gray-900 font-mono text-xs">
+                      <dd className="mt-1 text-sm text-gray-900">
                         {plan.updatedBy}
                       </dd>
                     </div>
@@ -218,7 +211,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
             {plan.scheduleEntries.length > 0 && (
               <div className="px-6 py-5 border-t border-gray-200">
                 <h3 className="text-sm font-medium text-gray-500 mb-3">
-                  Schedule
+                  {t("planDetailScheduleTitle")}
                 </h3>
                 <div className="space-y-2">
                   {plan.scheduleEntries.map((entry, index) => (
@@ -227,7 +220,15 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                       className="flex items-center gap-3 text-sm text-gray-900 bg-gray-50 rounded-md px-3 py-2"
                     >
                       <span className="font-medium w-24">
-                        {DAY_LABELS[entry.dayOfWeek] ?? entry.dayOfWeek}
+                        {{
+                          MONDAY: t("dayMonday"),
+                          TUESDAY: t("dayTuesday"),
+                          WEDNESDAY: t("dayWednesday"),
+                          THURSDAY: t("dayThursday"),
+                          FRIDAY: t("dayFriday"),
+                          SATURDAY: t("daySaturday"),
+                          SUNDAY: t("daySunday"),
+                        }[entry.dayOfWeek] ?? entry.dayOfWeek}
                       </span>
                       <span>
                         {entry.startTime} - {entry.endTime}
@@ -246,7 +247,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading ? "Deactivating..." : "Deactivate Plan"}
+                  {actionLoading ? t("planDetailDeactivatingButton") : t("planDetailDeactivateButton")}
                 </button>
               )}
               {plan.status === "INACTIVE" && (
@@ -256,7 +257,7 @@ export default function PlanDetailPage({ params }: PlanDetailPageProps) {
                   disabled={actionLoading}
                   className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {actionLoading ? "Reactivating..." : "Reactivate Plan"}
+                  {actionLoading ? t("planDetailReactivatingButton") : t("planDetailReactivateButton")}
                 </button>
               )}
             </div>

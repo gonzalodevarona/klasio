@@ -9,6 +9,7 @@ import com.klasio.auth.application.port.UserRepository;
 import com.klasio.auth.domain.event.UserAccountLockedEvent;
 import com.klasio.auth.domain.event.UserLoggedInEvent;
 import com.klasio.auth.domain.event.UserLoginFailedEvent;
+import com.klasio.auth.domain.exception.AccountSetupPendingException;
 import com.klasio.auth.domain.exception.InvalidCredentialsException;
 import com.klasio.auth.domain.model.RefreshToken;
 import com.klasio.auth.domain.model.User;
@@ -56,6 +57,11 @@ public class LoginService {
     public LoginResult login(LoginCommand command) {
         User user = userRepository.findByEmail(command.email())
                 .orElseThrow(InvalidCredentialsException::new);
+
+        // Reject login attempts for users who have not completed account setup yet
+        if (user.getPasswordHash() == null) {
+            throw new AccountSetupPendingException();
+        }
 
         user.validateCanLogin();
 

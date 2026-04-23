@@ -30,7 +30,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              required: [name, sportDiscipline, contactEmail]
+              required: [name, discipline, contactEmail]
               properties:
                 name:
                   type: string
@@ -38,7 +38,7 @@ paths:
                   maxLength: 150
                   description: League display name
                   example: Fútbol Bogotá
-                sportDiscipline:
+                discipline:
                   type: string
                   minLength: 1
                   maxLength: 100
@@ -60,10 +60,31 @@ paths:
                   type: string
                   maxLength: 30
                   example: "+57 311 234 5678"
-                contactAddress:
+                contactStreet:
                   type: string
                   maxLength: 500
-                  example: Cra 7 #32-16, Bogotá
+                  example: Cra 7 #32-16
+                contactCity:
+                  type: string
+                  maxLength: 100
+                  example: Bogotá
+                contactState:
+                  type: string
+                  maxLength: 100
+                  example: Cundinamarca
+                contactCountry:
+                  type: string
+                  maxLength: 100
+                  example: Colombia
+                contactPhoneIndicator:
+                  type: string
+                  maxLength: 10
+                  example: "+57"
+                language:
+                  type: string
+                  maxLength: 10
+                  description: BCP 47 language tag (e.g. es, en)
+                  example: es
                 logo:
                   type: string
                   format: binary
@@ -240,7 +261,7 @@ components:
   schemas:
     TenantSummary:
       type: object
-      required: [id, slug, name, sportDiscipline, status, createdAt]
+      required: [id, slug, name, discipline, status, createdAt]
       properties:
         id:
           type: string
@@ -251,7 +272,7 @@ components:
         name:
           type: string
           example: Fútbol Bogotá
-        sportDiscipline:
+        discipline:
           type: string
           example: Fútbol
         status:
@@ -277,9 +298,25 @@ components:
             contactPhone:
               type: string
               nullable: true
-            contactAddress:
+            contactStreet:
               type: string
               nullable: true
+            contactCity:
+              type: string
+              nullable: true
+            contactState:
+              type: string
+              nullable: true
+            contactCountry:
+              type: string
+              nullable: true
+            contactPhoneIndicator:
+              type: string
+              nullable: true
+            language:
+              type: string
+              nullable: true
+              description: BCP 47 language tag (e.g. es, en)
             createdBy:
               type: string
               format: uuid

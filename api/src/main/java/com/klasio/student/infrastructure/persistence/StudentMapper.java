@@ -13,6 +13,7 @@ public class StudentMapper {
         return Student.reconstitute(
                 StudentId.of(entity.getId()),
                 entity.getTenantId(),
+                entity.getUserId(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getEmail(),
@@ -41,6 +42,7 @@ public class StudentMapper {
         StudentJpaEntity entity = new StudentJpaEntity();
         entity.setId(student.getId().value());
         entity.setTenantId(student.getTenantId());
+        entity.setUserId(student.getUserId());
         entity.setFirstName(student.getFirstName());
         entity.setLastName(student.getLastName());
         entity.setEmail(student.getEmail());

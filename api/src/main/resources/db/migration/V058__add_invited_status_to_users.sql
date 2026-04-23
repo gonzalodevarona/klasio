@@ -1,0 +1,3 @@
+ALTER TABLE users DROP CONSTRAINT chk_user_status;
+ALTER TABLE users ADD CONSTRAINT chk_user_status
+    CHECK (status IN ('ACTIVE', 'EMAIL_UNVERIFIED', 'INVITED', 'INACTIVE'));

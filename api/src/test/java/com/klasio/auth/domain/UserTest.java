@@ -23,8 +23,8 @@ class UserTest {
     }
 
     private User unverifiedUser() {
-        return User.createUnverified(UUID.randomUUID(), "test@example.com", "hash",
-                IdentityDocumentType.CC, "12345678");
+        return User.createPendingSetup(UUID.randomUUID(), "test@example.com", Role.STUDENT,
+                IdentityDocumentType.CC, "12345678", null, null, null);
     }
 
     // ── createActive ────────────────────────────────────────────────────────
@@ -63,12 +63,13 @@ class UserTest {
         assertFalse(user.hasRole(Role.MANAGER));
     }
 
-    // ── createUnverified ─────────────────────────────────────────────────────
+    // ── createPendingSetup ───────────────────────────────────────────────────
 
     @Test
-    void createUnverified_setsEmailUnverifiedStatus() {
+    void createPendingSetup_setsInvitedStatusAndNullPassword() {
         User user = unverifiedUser();
-        assertEquals(UserStatus.EMAIL_UNVERIFIED, user.getStatus());
+        assertEquals(UserStatus.INVITED, user.getStatus());
+        assertNull(user.getPasswordHash());
         assertEquals(Role.STUDENT, user.primaryRole());
         assertTrue(user.hasRole(Role.STUDENT));
     }

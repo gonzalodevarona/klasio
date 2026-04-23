@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
@@ -10,6 +11,8 @@ import { useNotificationCount } from "@/context/NotificationCountContext";
 import NotificationItem from "./NotificationItem";
 
 export default function NotificationList() {
+  const t = useTranslations("notifications");
+  const tPag = useTranslations("pagination");
   const [page, setPage] = useState(0);
   const [unreadOnly, setUnreadOnly] = useState(false);
 
@@ -52,7 +55,7 @@ export default function NotificationList() {
                 : "text-gray-500 hover:text-gray-700",
             ].join(" ")}
           >
-            All
+            {t("tabAll")}
           </button>
           <button
             type="button"
@@ -64,7 +67,7 @@ export default function NotificationList() {
                 : "text-gray-500 hover:text-gray-700",
             ].join(" ")}
           >
-            Unread only
+            {t("tabUnreadOnly")}
           </button>
         </div>
 
@@ -73,7 +76,7 @@ export default function NotificationList() {
           onClick={handleMarkAll}
           className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
         >
-          Mark all as read
+          {t("markAllAsRead")}
         </button>
       </div>
 
@@ -88,7 +91,7 @@ export default function NotificationList() {
 
       {!isLoading && !error && notifications.length === 0 && (
         <p className="text-sm text-gray-400 py-6 text-center">
-          No notifications found.
+          {t("listEmpty")}
         </p>
       )}
 
@@ -109,10 +112,10 @@ export default function NotificationList() {
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             className="px-3 py-1 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
           >
-            Previous
+            {tPag("previous")}
           </button>
           <span>
-            Page {page + 1} of {totalPages}
+            {tPag("summary", { current: page + 1, total: totalPages, count: totalPages })}
           </span>
           <button
             type="button"
@@ -120,7 +123,7 @@ export default function NotificationList() {
             onClick={() => setPage((p) => p + 1)}
             className="px-3 py-1 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
           >
-            Next
+            {tPag("next")}
           </button>
         </div>
       )}

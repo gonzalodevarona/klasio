@@ -13,10 +13,10 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.json({ message: "Logged out" });
 
-  // Clear cookies
   response.cookies.set("accessToken", "", { maxAge: 0, path: "/" });
   response.cookies.set("refreshToken", "", { maxAge: 0, path: "/" });
   response.cookies.set("userInfo", "", { maxAge: 0, path: "/" });
+  response.cookies.set("NEXT_LOCALE", "", { maxAge: 0, path: "/" });
 
   return response;
 }

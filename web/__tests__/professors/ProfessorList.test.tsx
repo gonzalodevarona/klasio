@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
+import { renderWithIntl as render } from "../../__test-support__/renderWithIntl";
 import ProfessorList from "@/components/professors/ProfessorList";
 import { api } from "@/lib/api";
 
@@ -63,8 +64,8 @@ describe("ProfessorList", () => {
     expect(screen.getByText("Ana Lopez")).toBeInTheDocument();
     expect(screen.getByText("carlos@example.com")).toBeInTheDocument();
     expect(screen.getByText("ana@example.com")).toBeInTheDocument();
-    expect(screen.getByText("ACTIVE")).toBeInTheDocument();
-    expect(screen.getByText("INVITED")).toBeInTheDocument();
+    expect(screen.getAllByText("Active").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Invited").length).toBeGreaterThanOrEqual(1);
   });
 
   it("links professor names to detail pages", async () => {

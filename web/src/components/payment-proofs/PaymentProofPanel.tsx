@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { usePaymentProofs } from "@/hooks/usePaymentProofs";
 import { ProofStatusBadge } from "./ProofStatusBadge";
 import type { PaymentProofDto } from "@/lib/types/paymentProof";
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
+  const t = useTranslations("paymentProofs");
   const { uploadProof, getProof, getDownloadUrl, loading, error } = usePaymentProofs();
   const [proof, setProof] = useState<PaymentProofDto | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -85,12 +87,12 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
     setUploadError(null);
 
     if (file.size > MAX_SIZE_BYTES) {
-      setUploadError("File exceeds the 5 MB size limit.");
+      setUploadError(t("fileSizeError"));
       return;
     }
 
     if (!["application/pdf", "image/jpeg", "image/png"].includes(file.type)) {
-      setUploadError("Unsupported file type. Please upload a PDF, JPG, or PNG.");
+      setUploadError(t("fileTypeError"));
       return;
     }
 
@@ -132,7 +134,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
       setPendingFile(null);
       setPreviewUrl(null);
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+      setUploadError(err instanceof Error ? err.message : t("submittingBtn"));
     } finally {
       setUploading(false);
       setProgress(null);
@@ -147,7 +149,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 space-y-4">
-      <h3 className="text-sm font-semibold text-gray-700">Payment Proof</h3>
+      <h3 className="text-sm font-semibold text-gray-700">{t("panelTitle")}</h3>
 
       {/* Current proof status */}
       {proof ? (
@@ -172,20 +174,20 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
                   d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
                      -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              {fetchingUrl ? "Getting link…" : "View approved proof"}
+              {fetchingUrl ? t("gettingLink") : t("viewApprovedProof")}
             </button>
           )}
 
           {proof.status === "REJECTED" && proof.rejectionReason && (
             <div className="rounded-md bg-red-50 border border-red-200 p-3">
-              <p className="text-xs font-medium text-red-700">Rejection reason:</p>
+              <p className="text-xs font-medium text-red-700">{t("rejectionReasonTitle")}</p>
               <p className="text-xs text-red-600 mt-1">{proof.rejectionReason}</p>
             </div>
           )}
         </div>
       ) : (
         !loading && (
-          <p className="text-xs text-gray-400">No proof uploaded yet.</p>
+          <p className="text-xs text-gray-400">{t("noProofYet")}</p>
         )
       )}
 
@@ -194,7 +196,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
         <div className="space-y-2">
           <label className="block">
             <span className="text-xs font-medium text-gray-600">
-              {proof?.status === "REJECTED" ? "Upload a new proof" : "Upload proof"}
+              {proof?.status === "REJECTED" ? t("uploadNewProof") : t("uploadProof")}
             </span>
             <input
               ref={fileInputRef}
@@ -211,7 +213,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
                 disabled:opacity-50"
             />
           </label>
-          <p className="text-xs text-gray-400">PDF, JPG, or PNG · Max 5 MB</p>
+          <p className="text-xs text-gray-400">{t("fileHint")}</p>
           {uploadError && (
             <p className="text-xs text-red-600">{uploadError}</p>
           )}
@@ -222,7 +224,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
       {pendingFile && previewUrl && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-gray-700">Review your file before submitting</p>
+            <p className="text-xs font-medium text-gray-700">{t("reviewYourFile")}</p>
           </div>
 
           {/* File meta */}
@@ -275,7 +277,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
               className="flex-1 text-xs font-medium px-3 py-2 rounded-md border border-gray-300
                 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              Cancel
+              {t("cancelBtn")}
             </button>
             <button
               onClick={handleConfirmUpload}
@@ -283,7 +285,7 @@ export function PaymentProofPanel({ membershipId, membershipStatus }: Props) {
               className="flex-1 text-xs font-medium px-3 py-2 rounded-md
                 bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50"
             >
-              {uploading ? "Uploading…" : "Submit proof"}
+              {uploading ? t("submittingBtn") : t("submitBtn")}
             </button>
           </div>
         </div>

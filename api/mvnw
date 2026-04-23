@@ -18,7 +18,7 @@ if [ ! -f "$WRAPPER_JAR" ]; then
 fi
 
 if [ -f "$WRAPPER_JAR" ]; then
-    exec java -jar "$WRAPPER_JAR" "$@"
+    exec java -Dmaven.multiModuleProjectDirectory="$(pwd)" -cp "$WRAPPER_JAR" org.apache.maven.wrapper.MavenWrapperMain "$@"
 fi
 
 if [ ! -d "$MAVEN_HOME" ]; then

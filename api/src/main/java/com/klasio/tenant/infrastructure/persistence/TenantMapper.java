@@ -15,9 +15,18 @@ public class TenantMapper {
                 TenantId.of(entity.getId()),
                 new TenantSlug(entity.getSlug()),
                 entity.getName(),
-                entity.getSportDiscipline(),
+                entity.getDiscipline(),
+                entity.getLanguage(),
                 entity.getLogoKey(),
-                new ContactInfo(entity.getContactEmail(), entity.getContactPhone(), entity.getContactAddress()),
+                new ContactInfo(
+                        entity.getContactEmail(),
+                        entity.getContactPhone(),
+                        entity.getContactPhoneIndicator(),
+                        entity.getContactStreet(),
+                        entity.getContactCity(),
+                        entity.getContactState(),
+                        entity.getContactCountry()
+                ),
                 TenantStatus.valueOf(entity.getStatus()),
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
@@ -31,11 +40,16 @@ public class TenantMapper {
         entity.setId(tenant.getId().value());
         entity.setSlug(tenant.getSlug().value());
         entity.setName(tenant.getName());
-        entity.setSportDiscipline(tenant.getSportDiscipline());
+        entity.setDiscipline(tenant.getDiscipline());
+        entity.setLanguage(tenant.getLanguage());
         entity.setLogoKey(tenant.getLogoKey());
         entity.setContactEmail(tenant.getContactInfo().email());
         entity.setContactPhone(tenant.getContactInfo().phone());
-        entity.setContactAddress(tenant.getContactInfo().address());
+        entity.setContactPhoneIndicator(tenant.getContactInfo().phoneIndicator());
+        entity.setContactStreet(tenant.getContactInfo().street());
+        entity.setContactCity(tenant.getContactInfo().city());
+        entity.setContactState(tenant.getContactInfo().state());
+        entity.setContactCountry(tenant.getContactInfo().country());
         entity.setStatus(tenant.getStatus().name());
         entity.setCreatedAt(tenant.getCreatedAt());
         entity.setCreatedBy(tenant.getCreatedBy());

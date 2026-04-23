@@ -9,9 +9,12 @@ public record TenantRequestDto(
         @Size(max = 150, message = "Name must be at most 150 characters")
         String name,
 
-        @NotBlank(message = "Sport discipline is required")
-        @Size(max = 100, message = "Sport discipline must be at most 100 characters")
-        String sportDiscipline,
+        @NotBlank(message = "Discipline is required")
+        @Size(max = 100, message = "Discipline must be at most 100 characters")
+        String discipline,
+
+        @Size(max = 10, message = "Language code must be at most 10 characters")
+        String language,
 
         @Size(max = 60, message = "Slug must be at most 60 characters")
         String slug,
@@ -24,7 +27,19 @@ public record TenantRequestDto(
         @Size(max = 30, message = "Contact phone must be at most 30 characters")
         String contactPhone,
 
-        @Size(max = 500, message = "Contact address must be at most 500 characters")
-        String contactAddress
+        @Size(max = 10, message = "Phone indicator must be at most 10 characters")
+        String contactPhoneIndicator,
+
+        @Size(max = 255, message = "Street must be at most 255 characters")
+        String contactStreet,
+
+        @Size(max = 100, message = "City must be at most 100 characters")
+        String contactCity,
+
+        @Size(max = 100, message = "State must be at most 100 characters")
+        String contactState,
+
+        @Size(max = 100, message = "Country must be at most 100 characters")
+        String contactCountry
 ) {
 }

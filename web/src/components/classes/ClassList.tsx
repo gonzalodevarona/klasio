@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ClassLevel, ClassStatus } from "@/lib/types/programClass";
 import { useProgramClasses } from "@/hooks/useProgramClasses";
 import ClassLevelBadge from "./ClassLevelBadge";
@@ -13,6 +14,8 @@ interface ClassListProps {
 }
 
 export default function ClassList({ programId }: ClassListProps) {
+  const t = useTranslations("classes");
+  const tPagination = useTranslations("pagination");
   const [page, setPage] = useState(0);
   const [levelFilter, setLevelFilter] = useState<ClassLevel | undefined>(
     undefined
@@ -64,7 +67,7 @@ export default function ClassList({ programId }: ClassListProps) {
       {/* Filters */}
       <div className="flex items-center gap-3">
         <label htmlFor="levelFilter" className="text-sm font-medium text-gray-700">
-          Level:
+          {t("filterLevelLabel")}
         </label>
         <select
           id="levelFilter"
@@ -72,14 +75,14 @@ export default function ClassList({ programId }: ClassListProps) {
           onChange={(e) => handleLevelChange(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">All</option>
-          <option value="BEGINNER">Beginner</option>
-          <option value="INTERMEDIATE">Intermediate</option>
-          <option value="ADVANCED">Advanced</option>
+          <option value="">{t("filterAll")}</option>
+          <option value="BEGINNER">{t("filterBeginnerOption")}</option>
+          <option value="INTERMEDIATE">{t("filterIntermediateOption")}</option>
+          <option value="ADVANCED">{t("filterAdvancedOption")}</option>
         </select>
 
         <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700">
-          Status:
+          {t("filterStatusLabel")}
         </label>
         <select
           id="statusFilter"
@@ -87,24 +90,24 @@ export default function ClassList({ programId }: ClassListProps) {
           onChange={(e) => handleStatusChange(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">All</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
+          <option value="">{t("filterAll")}</option>
+          <option value="ACTIVE">{t("filterActive")}</option>
+          <option value="INACTIVE">{t("filterInactive")}</option>
         </select>
       </div>
 
       {loading ? (
         <div className="text-center py-8 text-sm text-gray-500">
-          Loading classes...
+          {t("listLoading")}
         </div>
       ) : classes.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-sm text-gray-500">No classes found</p>
+          <p className="text-sm text-gray-500">{t("listEmpty")}</p>
           <Link
             href={`/programs/${programId}/classes/new`}
             className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-700"
           >
-            Create your first class
+            {t("listEmptyAction")}
           </Link>
         </div>
       ) : (
@@ -114,22 +117,22 @@ export default function ClassList({ programId }: ClassListProps) {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
+                    {t("colName")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Level
+                    {t("colLevel")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
+                    {t("colType")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Max Students
+                    {t("colMaxStudents")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {t("colStatus")}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
+                    {t("colCreated")}
                   </th>
                 </tr>
               </thead>
@@ -168,7 +171,7 @@ export default function ClassList({ programId }: ClassListProps) {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-gray-200 pt-4">
             <p className="text-sm text-gray-700">
-              Page {page + 1} of {totalPages} ({totalElements} total)
+              {tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}
             </p>
             <div className="flex gap-2">
               <button
@@ -177,7 +180,7 @@ export default function ClassList({ programId }: ClassListProps) {
                 disabled={page === 0}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Previous
+                {tPagination("previous")}
               </button>
               <button
                 type="button"
@@ -185,7 +188,7 @@ export default function ClassList({ programId }: ClassListProps) {
                 disabled={page >= totalPages - 1}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {tPagination("next")}
               </button>
             </div>
           </div>
