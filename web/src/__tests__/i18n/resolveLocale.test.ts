@@ -32,4 +32,8 @@ describe('resolveLocale', () => {
   it('prefers "es" over "en" when both appear in Accept-Language (es listed first)', () => {
     expect(resolveLocale(undefined, 'es-CO,es;q=0.9,en;q=0.8')).toBe('es');
   });
+
+  it('respects q-values: returns "es" when es has higher weight even if en appears first', () => {
+    expect(resolveLocale(undefined, 'en;q=0.9,es;q=1.0')).toBe('es');
+  });
 });
