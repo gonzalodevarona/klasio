@@ -41,6 +41,8 @@ export default function CountrySelect({ value, onChange, error }: CountrySelectP
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
         className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${
           error ? "border-red-500" : "border-gray-300"
         } ${value ? "text-gray-900" : "text-gray-400"}`}
@@ -61,7 +63,7 @@ export default function CountrySelect({ value, onChange, error }: CountrySelectP
               className="w-full text-sm outline-none"
             />
           </div>
-          <ul className="max-h-52 overflow-auto py-1">
+          <ul role="listbox" className="max-h-52 overflow-auto py-1">
             {filtered ? (
               filtered.length === 0 ? (
                 <li className="px-3 py-2 text-sm text-gray-400">No results</li>
@@ -69,7 +71,10 @@ export default function CountrySelect({ value, onChange, error }: CountrySelectP
                 filtered.map((c) => (
                   <li
                     key={c.name}
+                    role="option"
+                    tabIndex={0}
                     onClick={() => handleSelect(c)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelect(c); } }}
                     className="cursor-pointer px-3 py-1.5 text-sm hover:bg-blue-50"
                   >
                     {c.flag} {c.name}
@@ -81,7 +86,10 @@ export default function CountrySelect({ value, onChange, error }: CountrySelectP
                 {PINNED_COUNTRIES.map((c) => (
                   <li
                     key={`pinned-${c.name}`}
+                    role="option"
+                    tabIndex={0}
                     onClick={() => handleSelect(c)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelect(c); } }}
                     className="cursor-pointer px-3 py-1.5 text-sm font-medium text-blue-700 hover:bg-blue-50"
                   >
                     {c.flag} {c.name}
@@ -91,7 +99,10 @@ export default function CountrySelect({ value, onChange, error }: CountrySelectP
                 {COUNTRIES.map((c) => (
                   <li
                     key={c.name}
+                    role="option"
+                    tabIndex={0}
                     onClick={() => handleSelect(c)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSelect(c); } }}
                     className="cursor-pointer px-3 py-1.5 text-sm hover:bg-blue-50"
                   >
                     {c.flag} {c.name}
