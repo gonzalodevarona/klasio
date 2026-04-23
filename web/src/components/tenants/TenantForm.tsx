@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { api, ApiError } from "@/lib/api";
 import { TenantDetail } from "@/lib/types/tenant";
 import { Country } from "@/lib/countries";
@@ -40,6 +41,7 @@ function validateEmail(email: string): boolean {
 }
 
 export default function TenantForm() {
+  const t = useTranslations("tenants.form");
   const router = useRouter();
 
   const [name, setName] = useState("");
@@ -63,32 +65,32 @@ export default function TenantForm() {
   function validate(): FieldErrors {
     const errors: FieldErrors = {};
 
-    if (!name.trim()) errors.name = "Name is required.";
-    if (!discipline.trim()) errors.discipline = "Discipline is required.";
-    if (!language) errors.language = "Language is required.";
-    if (!slugPreview.trim()) errors.slug = "Slug is required.";
+    if (!name.trim()) errors.name = t("errorNameRequired");
+    if (!discipline.trim()) errors.discipline = t("errorDisciplineRequired");
+    if (!language) errors.language = t("errorLanguageRequired");
+    if (!slugPreview.trim()) errors.slug = t("errorSlugRequired");
 
     if (!contactEmail.trim()) {
-      errors.contactEmail = "Contact email is required.";
+      errors.contactEmail = t("errorContactEmailRequired");
     } else if (!validateEmail(contactEmail.trim())) {
-      errors.contactEmail = "Enter a valid email address.";
+      errors.contactEmail = t("errorContactEmailInvalid");
     }
 
     if (!selectedCountry) {
-      errors.contactCountry = "Country is required.";
+      errors.contactCountry = t("errorCountryRequired");
     }
 
     if (!contactPhone.trim()) {
-      errors.contactPhone = "Contact phone is required.";
+      errors.contactPhone = t("errorContactPhoneRequired");
     } else if (!/^\d+$/.test(contactPhone.trim())) {
-      errors.contactPhone = "Phone must contain digits only.";
+      errors.contactPhone = t("errorContactPhoneInvalid");
     }
 
-    if (!contactStreet.trim()) errors.contactStreet = "Street address is required.";
-    if (!contactCity.trim()) errors.contactCity = "City is required.";
-    if (!contactState.trim()) errors.contactState = "State is required.";
+    if (!contactStreet.trim()) errors.contactStreet = t("errorStreetRequired");
+    if (!contactCity.trim()) errors.contactCity = t("errorCityRequired");
+    if (!contactState.trim()) errors.contactState = t("errorStateRequired");
 
-    if (!logo) errors.logo = "Logo is required.";
+    if (!logo) errors.logo = t("errorLogoRequired");
 
     return errors;
   }
@@ -132,7 +134,7 @@ export default function TenantForm() {
         }
         setApiError(err.message);
       } else {
-        setApiError("An unexpected error occurred. Please try again.");
+        setApiError(t("errorUnexpected"));
       }
     } finally {
       setSubmitting(false);
@@ -152,10 +154,9 @@ export default function TenantForm() {
         </div>
       )}
 
-      {/* Name */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Name <span className="text-red-500">*</span>
+          {t("labelName")} <span className="text-red-500">*</span>
         </label>
         <input
           id="name"
@@ -168,10 +169,9 @@ export default function TenantForm() {
         {fieldErrors.name && <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>}
       </div>
 
-      {/* Discipline */}
       <div>
         <label htmlFor="discipline" className="block text-sm font-medium text-gray-700 mb-1">
-          Discipline <span className="text-red-500">*</span>
+          {t("labelDiscipline")} <span className="text-red-500">*</span>
         </label>
         <input
           id="discipline"
@@ -184,10 +184,9 @@ export default function TenantForm() {
         {fieldErrors.discipline && <p className="mt-1 text-sm text-red-600">{fieldErrors.discipline}</p>}
       </div>
 
-      {/* Language */}
       <div>
         <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
-          Language <span className="text-red-500">*</span>
+          {t("labelLanguage")} <span className="text-red-500">*</span>
         </label>
         <select
           id="language"
@@ -195,18 +194,17 @@ export default function TenantForm() {
           onChange={(e) => setLanguage(e.target.value)}
           className={inputClass(fieldErrors.language)}
         >
-          <option value="" disabled>Select language...</option>
-          <option value="es">Spanish</option>
-          <option value="en">English</option>
+          <option value="" disabled>{t("languagePlaceholder")}</option>
+          <option value="es">{t("languageSpanish")}</option>
+          <option value="en">{t("languageEnglish")}</option>
         </select>
         {fieldErrors.language && <p className="mt-1 text-sm text-red-600">{fieldErrors.language}</p>}
       </div>
 
-      {/* Slug */}
       <div>
         <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">
-          Slug <span className="text-red-500">*</span>{" "}
-          <span className="text-xs text-gray-400">(auto-filled from name)</span>
+          {t("labelSlug")} <span className="text-red-500">*</span>{" "}
+          <span className="text-xs text-gray-400">{t("slugAutoFill")}</span>
         </label>
         <input
           id="slug"
@@ -218,16 +216,15 @@ export default function TenantForm() {
         />
         {slugPreview && (
           <p className="mt-1 text-xs text-gray-500">
-            Preview: <span data-testid="slug-preview" className="font-mono">{slugPreview}</span>
+            {t("slugPreview")} <span data-testid="slug-preview" className="font-mono">{slugPreview}</span>
           </p>
         )}
         {fieldErrors.slug && <p className="mt-1 text-sm text-red-600">{fieldErrors.slug}</p>}
       </div>
 
-      {/* Contact Email */}
       <div>
         <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-1">
-          Contact Email <span className="text-red-500">*</span>
+          {t("labelContactEmail")} <span className="text-red-500">*</span>
         </label>
         <input
           id="contactEmail"
@@ -240,16 +237,14 @@ export default function TenantForm() {
         {fieldErrors.contactEmail && <p className="mt-1 text-sm text-red-600">{fieldErrors.contactEmail}</p>}
       </div>
 
-      {/* Contact Address block */}
       <fieldset className="rounded-lg border border-gray-200 p-4 space-y-4">
         <legend className="text-sm font-semibold text-gray-700 px-1">
-          Contact Address <span className="text-red-500">*</span>
+          {t("legendContactAddress")} <span className="text-red-500">*</span>
         </legend>
 
-        {/* Street */}
         <div>
           <label htmlFor="contactStreet" className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Street Address <span className="text-red-500">*</span>
+            {t("labelStreet")} <span className="text-red-500">*</span>
           </label>
           <input
             id="contactStreet"
@@ -262,11 +257,10 @@ export default function TenantForm() {
           {fieldErrors.contactStreet && <p className="mt-1 text-sm text-red-600">{fieldErrors.contactStreet}</p>}
         </div>
 
-        {/* City + State */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="contactCity" className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-              City <span className="text-red-500">*</span>
+              {t("labelCity")} <span className="text-red-500">*</span>
             </label>
             <input
               id="contactCity"
@@ -280,7 +274,7 @@ export default function TenantForm() {
           </div>
           <div>
             <label htmlFor="contactState" className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-              State / Dept. <span className="text-red-500">*</span>
+              {t("labelState")} <span className="text-red-500">*</span>
             </label>
             <input
               id="contactState"
@@ -294,10 +288,9 @@ export default function TenantForm() {
           </div>
         </div>
 
-        {/* Country */}
         <div>
           <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Country <span className="text-red-500">*</span>
+            {t("labelCountry")} <span className="text-red-500">*</span>
           </label>
           <CountrySelect
             value={selectedCountry}
@@ -307,10 +300,9 @@ export default function TenantForm() {
         </div>
       </fieldset>
 
-      {/* Contact Phone — disabled until country selected */}
       <div>
         <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-1">
-          Contact Phone <span className="text-red-500">*</span>
+          {t("labelContactPhone")} <span className="text-red-500">*</span>
         </label>
         <div className="flex rounded-md border border-gray-300 shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
           <span className="inline-flex items-center px-3 bg-gray-50 border-r border-gray-300 text-sm font-semibold text-gray-600 select-none">
@@ -323,26 +315,24 @@ export default function TenantForm() {
             onChange={(e) => setContactPhone(e.target.value.replace(/\D/g, ""))}
             disabled={!selectedCountry}
             className="flex-1 px-3 py-2 text-sm outline-none disabled:bg-gray-50 disabled:text-gray-400"
-            placeholder={selectedCountry ? "3001234567" : "Select a country first"}
+            placeholder={selectedCountry ? "3001234567" : t("phoneSelectCountryFirst")}
           />
         </div>
         {!selectedCountry && (
-          <p className="mt-1 text-xs text-gray-400">Select a country to enable this field.</p>
+          <p className="mt-1 text-xs text-gray-400">{t("phoneSelectCountryHint")}</p>
         )}
         {fieldErrors.contactPhone && <p className="mt-1 text-sm text-red-600">{fieldErrors.contactPhone}</p>}
       </div>
 
-      {/* Logo */}
       <LogoUpload onFileSelect={setLogo} error={fieldErrors.logo} required />
 
-      {/* Submit */}
       <div className="pt-2">
         <button
           type="submit"
           disabled={submitting}
           className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? "Creating..." : "Create Tenant"}
+          {submitting ? t("submitting") : t("submitButton")}
         </button>
       </div>
     </form>

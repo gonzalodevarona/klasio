@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import PasswordPolicyChecker, { validatePassword } from "./PasswordPolicyChecker";
 
 interface SetupAccountFormProps {
@@ -8,39 +9,34 @@ interface SetupAccountFormProps {
 }
 
 type Phase =
-  | "form"          // initial state — enter new password
-  | "success"       // account set up OK
-  | "expired"       // 410 from backend
-  | "resend"        // user clicked "Request a new link"
-  | "resend-done";  // resend confirmed
+  | "form"        // initial state — enter new password
+  | "success"     // account set up OK
+  | "expired"     // 410 from backend
+  | "resend"      // user clicked "Request a new link"
+  | "resend-done"; // resend confirmed
 
 export default function SetupAccountForm({ token }: SetupAccountFormProps) {
+  const t = useTranslations("auth.setupAccount");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  // When no token is present, skip straight to the resend form
   const [phase, setPhase] = useState<Phase>(token ? "form" : "resend");
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Resend sub-form
   const [resendEmail, setResendEmail] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
-
-  // ---------------------------------------------------------------------------
-  // Setup form submission
-  // ---------------------------------------------------------------------------
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
 
     if (password !== confirmPassword) {
-      setFormError("Passwords do not match.");
+      setFormError(t("errorPasswordMismatch"));
       return;
     }
 
     if (!validatePassword(password)) {
-      setFormError("Password does not meet the requirements.");
+      setFormError(t("errorPasswordInvalid"));
       return;
     }
 
@@ -67,17 +63,13 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
         return;
       }
 
-      setFormError("Something went wrong. Please try again.");
+      setFormError(t("errorGeneric"));
     } catch {
-      setFormError("Something went wrong. Please try again.");
+      setFormError(t("errorGeneric"));
     } finally {
       setLoading(false);
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Resend submission
-  // ---------------------------------------------------------------------------
 
   async function handleResendSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,67 +93,49 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Render: success
-  // ---------------------------------------------------------------------------
-
   if (phase === "success") {
     return (
       <div role="status" className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
-        <h2 className="text-lg font-semibold text-green-800 mb-2">Account Setup Complete</h2>
-        <p className="text-sm text-green-700 mb-4">
-          Your account is ready! You can now log in.
-        </p>
+        <h2 className="text-lg font-semibold text-green-800 mb-2">{t("successTitle")}</h2>
+        <p className="text-sm text-green-700 mb-4">{t("successMessage")}</p>
         <a
           href="/login"
           className="inline-block px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
         >
-          Log In
+          {t("successLogIn")}
         </a>
       </div>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Render: expired / invalid link
-  // ---------------------------------------------------------------------------
-
   if (phase === "expired") {
     return (
       <div className="space-y-6">
         <div role="alert" className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">Setup Link Expired</h2>
-          <p className="text-sm text-red-700 mb-4">
-            This setup link has expired or is no longer valid.
-          </p>
+          <h2 className="text-lg font-semibold text-red-800 mb-2">{t("expiredTitle")}</h2>
+          <p className="text-sm text-red-700 mb-4">{t("expiredMessage")}</p>
           <button
             type="button"
             onClick={() => setPhase("resend")}
             className="inline-block px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
           >
-            Request a New Link
+            {t("expiredRequestNew")}
           </button>
         </div>
       </div>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Render: resend form
-  // ---------------------------------------------------------------------------
-
   if (phase === "resend") {
     return (
       <form onSubmit={handleResendSubmit} className="space-y-6">
         <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
-          <p className="text-sm text-amber-800">
-            Enter your email address and we&apos;ll send you a new setup link.
-          </p>
+          <p className="text-sm text-amber-800">{t("resendHint")}</p>
         </div>
 
         <div>
           <label htmlFor="resend-email" className="block text-sm font-medium text-gray-700">
-            Email address
+            {t("resendEmailLabel")}
           </label>
           <input
             id="resend-email"
@@ -170,7 +144,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
             onChange={(e) => setResendEmail(e.target.value)}
             required
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="you@example.com"
+            placeholder={t("resendEmailPlaceholder")}
           />
         </div>
 
@@ -179,30 +153,20 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
           disabled={resendLoading}
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
         >
-          {resendLoading ? "Sending..." : "Send New Link"}
+          {resendLoading ? t("resendSubmitting") : t("resendSubmit")}
         </button>
       </form>
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Render: resend confirmation
-  // ---------------------------------------------------------------------------
-
   if (phase === "resend-done") {
     return (
       <div role="status" className="bg-green-50 border border-green-200 rounded-md p-6 text-center">
-        <h2 className="text-lg font-semibold text-green-800 mb-2">Email Sent</h2>
-        <p className="text-sm text-green-700">
-          A new setup link has been sent to your email.
-        </p>
+        <h2 className="text-lg font-semibold text-green-800 mb-2">{t("resendDoneTitle")}</h2>
+        <p className="text-sm text-green-700">{t("resendDoneMessage")}</p>
       </div>
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // Render: main password form
-  // ---------------------------------------------------------------------------
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -214,7 +178,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
 
       <div>
         <label htmlFor="setup-password" className="block text-sm font-medium text-gray-700">
-          New Password
+          {t("labelNewPassword")}
         </label>
         <input
           id="setup-password"
@@ -229,7 +193,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
 
       <div>
         <label htmlFor="setup-confirm-password" className="block text-sm font-medium text-gray-700">
-          Confirm New Password
+          {t("labelConfirmPassword")}
         </label>
         <input
           id="setup-confirm-password"
@@ -246,7 +210,7 @@ export default function SetupAccountForm({ token }: SetupAccountFormProps) {
         disabled={loading}
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
       >
-        {loading ? "Setting up..." : "Set Password"}
+        {loading ? t("submitting") : t("submit")}
       </button>
     </form>
   );
