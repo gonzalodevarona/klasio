@@ -16,11 +16,11 @@ public class TenantMapper {
         ContactInfo contactInfo = new ContactInfo(
                 entity.getContactEmail(),
                 entity.getContactPhone(),
-                null,           // phoneIndicator — column added in Task-5 migration
-                entity.getContactAddress(), // street — reuses legacy contact_address temporarily
-                null,           // city
-                null,           // state
-                null            // country
+                "0",            // phoneIndicator — sentinel until Task-5 migration adds the column
+                entity.getContactAddress() != null ? entity.getContactAddress() : "-", // street
+                "-",            // city — sentinel until Task-5 migration adds the column
+                "-",            // state — sentinel until Task-5 migration adds the column
+                "-"             // country — sentinel until Task-5 migration adds the column
         );
         return Tenant.reconstitute(
                 TenantId.of(entity.getId()),
