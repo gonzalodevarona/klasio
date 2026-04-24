@@ -53,6 +53,27 @@ describe("Select", () => {
     expect(screen.getByText("Country")).toBeInTheDocument();
   });
 
+  it("associates label with select via htmlFor/id", () => {
+    render(
+      <Select label="Country" aria-label="opt">
+        <option value="a">A</option>
+      </Select>
+    );
+    const label = screen.getByText("Country");
+    const select = screen.getByRole("combobox");
+    expect(label).toHaveAttribute("for", select.id);
+    expect(select.id).toBeTruthy();
+  });
+
+  it("does not render a label element when label prop is omitted", () => {
+    const { container } = render(
+      <Select aria-label="opt">
+        <option value="a">A</option>
+      </Select>
+    );
+    expect(container.querySelector("label")).toBeNull();
+  });
+
   it("renders hint when no error", () => {
     render(
       <Select aria-label="opt" hint="Pick one">
