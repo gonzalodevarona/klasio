@@ -30,6 +30,14 @@ describe("Input", () => {
     expect(screen.getByText("Email")).toBeInTheDocument();
   });
 
+  it("associates label with input via htmlFor/id", () => {
+    render(<Input label="Email" placeholder="X" />);
+    const label = screen.getByText("Email");
+    const input = screen.getByPlaceholderText("X");
+    expect(label).toHaveAttribute("for", input.id);
+    expect(input.id).toBeTruthy();
+  });
+
   it("does not render a label element when label prop is omitted", () => {
     const { container } = render(<Input placeholder="X" />);
     expect(container.querySelector("label")).toBeNull();
