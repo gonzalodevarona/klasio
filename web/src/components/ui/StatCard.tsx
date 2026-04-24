@@ -11,7 +11,7 @@ export interface StatCardProps {
 }
 
 export function StatCard({ label, value, sub, subColor, dark = false }: StatCardProps) {
-  const labelClass = dark ? "text-[#666]" : "text-k-muted";
+  const labelClass = "text-k-muted";
   const valueClass = dark ? "text-k-volt" : "text-k-dark";
   const defaultSubClass = dark ? "text-k-volt" : "text-k-muted";
 

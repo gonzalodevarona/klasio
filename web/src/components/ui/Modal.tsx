@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useId } from "react";
 import { Button } from "./Button";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,8 @@ export function Modal({
   className,
   children,
 }: ModalProps) {
+  const titleId = useId();
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -49,6 +51,9 @@ export function Modal({
     >
       <div
         data-testid="modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
         className={cn(
           "bg-k-surface rounded-k-xl shadow-k-modal max-h-[85vh] overflow-y-auto w-full",
@@ -57,7 +62,7 @@ export function Modal({
         )}
       >
         <div className="flex justify-between items-center px-7 py-6 border-b border-k-border">
-          <h2 className="text-base font-bold">{title}</h2>
+          <h2 id={titleId} className="text-base font-bold">{title}</h2>
           <Button
             variant="ghost"
             size="icon"

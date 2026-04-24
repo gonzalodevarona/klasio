@@ -25,9 +25,9 @@ describe("StatCard", () => {
     expect(screen.getByText("42")).toHaveClass("text-k-dark");
   });
 
-  it("dark theme: value uses text-k-volt and label uses text-[#666]", () => {
+  it("dark theme: value uses text-k-volt and label uses text-k-muted", () => {
     render(<StatCard label="ACTIVE" value={42} dark />);
-    expect(screen.getByText("ACTIVE")).toHaveClass("text-[#666]");
+    expect(screen.getByText("ACTIVE")).toHaveClass("text-k-muted");
     expect(screen.getByText("42")).toHaveClass("text-k-volt");
   });
 
