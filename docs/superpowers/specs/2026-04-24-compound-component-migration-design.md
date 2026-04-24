@@ -350,7 +350,7 @@ import { Table, Thead, Th, Tr, Td, Input, Select, Button } from "@/components/ui
 - Filter selects → `<Select value=... onChange=...><option>...</option></Select>`.
 - Row action buttons (Edit, Delete, View) → `<Button variant="ghost" size="sm" onClick={...}>`.
 - Primary CTAs ("New Student", "Add Class") at the top of a list page → `<Button variant="primary" size="sm">` if it appears inside the list component itself; if it lives in a page file (`app/**`), do not touch it (out of scope).
-- Status/level badges inside cells: replace inline class spans with the corresponding compound badge component (already migrated in Group A) — do not inline `<Badge>` directly. This preserves call-site stability.
+- Status/level badges inside cells already use the compound badge components (e.g. `<StudentStatusBadge>`); they update visually for free once Group A ships. If a cell contains a raw `<span className="bg-...">`, leave it — `<span>` is not in the user's substitution list and is out of scope here.
 
 ### Out of scope per file
 
@@ -510,7 +510,7 @@ import { Modal } from "@/components/ui";
 - Existing `"use client"` directives on modal files are preserved.
 - If the consumer uses a different prop name (`isOpen`, `visible`, etc.), keep that prop on the consumer component and map it at the call site: `<Modal open={isOpen} ... />`.
 - If a modal currently has no close button (rare — confirmation dialogs that close only on action) — Modal still renders one. This is a deliberate accessibility improvement, not a regression.
-- Inline submit/cancel button rows inside the modal body should also be migrated to `<Button>` if they were not already migrated as part of Group C (these forms live inside modals). If the modal body imports a separate `Form` component already migrated in Group C, no extra change is needed.
+- **Inner content stays as-is.** Even if the modal body contains inline form fields or button rows that were not migrated in Group C (because the file lives in `components/<domain>/<X>Modal.tsx`, not in the Group C form list), they are not migrated as part of Group D. Group D scope is strictly modal chrome. Inline-form migration inside modals is a follow-up effort.
 
 ### Verification
 
@@ -575,7 +575,7 @@ refactor(ui): migrate modals to Modal primitive
 - `npx tsc --noEmit` exits 0 after each commit.
 - `npm run build` exits 0 after Group D.
 - `npm test -- src/components/ui/__tests__/Badge.test.tsx` passes after Step 0 with the 3 new tests.
-- No file under `web/src/app/**` has changes (verifiable via `git diff --stat origin/feature/full-redesign... -- web/src/app/`).
+- No file under `web/src/app/**` has changes (verifiable via `git diff --name-only HEAD~5 HEAD -- web/src/app/` returning no output).
 - No public component name, default-export status, or props interface changed (verifiable via grep / type errors at consumer call sites).
 - Manual dev-server spot-check completed; findings noted.
 
