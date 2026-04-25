@@ -331,11 +331,11 @@ export default function Sidebar() {
   if (loading) {
     return (
       <>
-        <div className="lg:hidden fixed top-0 inset-x-0 z-40 h-14 bg-gray-900 border-b border-gray-700 animate-pulse" />
-        <aside className="hidden lg:flex w-64 bg-gray-900 h-screen sticky top-0 flex-col shrink-0">
+        <div className="lg:hidden fixed top-0 inset-x-0 z-40 h-14 bg-k-dark border-b border-k-sidebar-active animate-pulse" />
+        <aside className="hidden lg:flex w-[220px] bg-k-dark h-screen sticky top-0 flex-col shrink-0">
           <div className="p-6 space-y-2">
-            <div className="h-6 w-24 bg-gray-700 rounded animate-pulse" />
-            <div className="h-4 w-32 bg-gray-700 rounded animate-pulse" />
+            <div className="h-6 w-24 bg-k-sidebar-active rounded animate-pulse" />
+            <div className="h-4 w-32 bg-k-sidebar-active rounded animate-pulse" />
           </div>
         </aside>
       </>
@@ -426,15 +426,15 @@ export default function Sidebar() {
       {/* ── Desktop: collapsible sidebar ─────────────────────────── */}
       <aside
         className={[
-          "hidden lg:flex flex-col bg-gray-900 text-white h-screen sticky top-0 shrink-0",
+          "hidden lg:flex flex-col bg-k-dark text-white h-screen sticky top-0 shrink-0",
           "transition-[width] duration-300 ease-in-out overflow-hidden",
-          collapsed ? "w-16" : "w-64",
+          collapsed ? "w-16" : "w-[220px]",
         ].join(" ")}
       >
         {/* Sidebar header */}
         <div
           className={[
-            "flex items-center shrink-0 border-b border-gray-700 px-3 py-4",
+            "flex items-center shrink-0 border-b border-k-sidebar-active px-3 py-4",
             collapsed ? "justify-center" : "justify-between",
           ].join(" ")}
         >
@@ -444,7 +444,7 @@ export default function Sidebar() {
             <button
               onClick={() => setCollapsed((c) => !c)}
               aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-              className="p-1 text-gray-400 hover:text-white rounded transition-colors"
+              className="p-1 text-k-subtle hover:text-white rounded transition-colors"
             >
               {collapsed ? (
                 <Menu className="h-5 w-5" />
