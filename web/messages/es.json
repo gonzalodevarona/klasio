@@ -1048,5 +1048,38 @@
     "colLevel": "Nivel",
     "colStatus": "Estado",
     "colEnrolled": "Inscrito"
+  },
+  "adminDashboard": {
+    "title": "Panel de Administrador",
+    "subtitle": "Resumen de la liga",
+    "statStudents": "Estudiantes",
+    "statActiveMemberships": "Membresías activas",
+    "statPendingProofs": "Comprobantes pendientes",
+    "statPrograms": "Programas"
+  },
+  "managerDashboard": {
+    "title": "Panel de Coordinador",
+    "subtitle": "Resumen del programa",
+    "statClassesThisWeek": "Clases esta semana",
+    "statStudentsInProgram": "Estudiantes en el programa",
+    "statPendingActivations": "Activaciones pendientes",
+    "statHoursLogged": "Horas registradas",
+    "membershipsHeading": "Membresías pendientes de activación"
+  },
+  "professorDashboard": {
+    "title": "Panel del Profesor",
+    "subtitle": "Resumen de hoy",
+    "statClassesToday": "Clases hoy",
+    "statStudentsPresent": "Estudiantes presentes",
+    "statSessionsThisMonth": "Sesiones este mes",
+    "statHoursTaught": "Horas impartidas"
+  },
+  "superadminDashboard": {
+    "title": "Panel de Superadmin",
+    "subtitle": "Resumen de la plataforma",
+    "statTenants": "Tenants",
+    "statTotalStudents": "Total estudiantes",
+    "statActiveMemberships": "Membresías activas",
+    "statMonthlyRevenue": "Ingresos mensuales"
   }
 }

@@ -1048,5 +1048,38 @@
     "colLevel": "Level",
     "colStatus": "Status",
     "colEnrolled": "Enrolled"
+  },
+  "adminDashboard": {
+    "title": "Admin Dashboard",
+    "subtitle": "League overview",
+    "statStudents": "Students",
+    "statActiveMemberships": "Active memberships",
+    "statPendingProofs": "Pending proofs",
+    "statPrograms": "Programs"
+  },
+  "managerDashboard": {
+    "title": "Manager Dashboard",
+    "subtitle": "Program overview",
+    "statClassesThisWeek": "Classes this week",
+    "statStudentsInProgram": "Students in program",
+    "statPendingActivations": "Pending activations",
+    "statHoursLogged": "Hours logged",
+    "membershipsHeading": "Memberships awaiting activation"
+  },
+  "professorDashboard": {
+    "title": "Professor Dashboard",
+    "subtitle": "Today's overview",
+    "statClassesToday": "Classes today",
+    "statStudentsPresent": "Students present",
+    "statSessionsThisMonth": "Sessions this month",
+    "statHoursTaught": "Hours taught"
+  },
+  "superadminDashboard": {
+    "title": "Superadmin Dashboard",
+    "subtitle": "Platform overview",
+    "statTenants": "Tenants",
+    "statTotalStudents": "Total students",
+    "statActiveMemberships": "Active memberships",
+    "statMonthlyRevenue": "Monthly revenue"
   }
 }

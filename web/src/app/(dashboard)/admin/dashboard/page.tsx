@@ -1,28 +1,21 @@
-"use client";
+import { getTranslations } from "next-intl/server";
+import { StatCard } from "@/components/ui";
 
-import { useAuth } from "@/hooks/useAuth";
+export const metadata = { title: "Admin Dashboard - Klasio" };
 
-export default function AdminDashboard() {
-  const { user, logout } = useAuth();
-
+export default async function AdminDashboard() {
+  const t = await getTranslations("adminDashboard");
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">League Overview</p>
-        </div>
-        <button
-          onClick={logout}
-          className="px-4 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
-        >
-          Sign Out
-        </button>
+      <div className="mb-8">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
+        <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">{t("subtitle")}</p>
       </div>
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">
-          Welcome, Admin. Manage your league from the sidebar.
-        </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label={t("statStudents")} value="—" dark />
+        <StatCard label={t("statActiveMemberships")} value="—" />
+        <StatCard label={t("statPendingProofs")} value="—" />
+        <StatCard label={t("statPrograms")} value="—" />
       </div>
     </div>
   );
