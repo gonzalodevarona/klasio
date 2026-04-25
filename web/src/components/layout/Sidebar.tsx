@@ -197,12 +197,14 @@ function Brand({
 }
 
 // User identity block shown at the bottom of the sidebar.
+// `forceExpanded` lets the mobile drawer reuse this component without honoring `collapsed`.
 function UserFooter({
   role,
   displayName,
   identityDocumentType,
   identityNumber,
   collapsed,
+  forceExpanded,
   onLogout,
   signOut,
 }: {
@@ -211,21 +213,23 @@ function UserFooter({
   identityDocumentType: string | null;
   identityNumber: string | null;
   collapsed: boolean;
+  forceExpanded?: boolean;
   onLogout: () => void;
   signOut: string;
 }) {
+  const expanded = forceExpanded || !collapsed;
   return (
-    <div className="px-2 py-4 border-t border-gray-700 shrink-0">
-      {!collapsed && (
+    <div className="px-2 py-4 border-t border-k-sidebar-active shrink-0">
+      {expanded && (
         <div className="px-3 mb-2 space-y-0.5">
           {displayName && (
             <p className="text-xs font-medium text-white truncate">
               {displayName}
             </p>
           )}
-          <p className="text-xs text-gray-400 truncate">{role}</p>
+          <p className="text-xs text-k-subtle truncate">{role}</p>
           {identityDocumentType && identityNumber && (
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-k-subtle truncate">
               {identityDocumentType} {identityNumber}
             </p>
           )}
@@ -233,57 +237,15 @@ function UserFooter({
       )}
       <button
         onClick={onLogout}
-        title={collapsed ? signOut : undefined}
+        title={!expanded ? signOut : undefined}
         className={[
-          "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-gray-300",
-          "hover:text-white hover:bg-gray-800 transition-colors",
-          collapsed ? "justify-center" : "",
+          "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-k-subtle",
+          "hover:text-white hover:bg-k-sidebar-active transition-colors",
+          !expanded ? "justify-center" : "",
         ].join(" ")}
       >
         <LogOut className="h-5 w-5 shrink-0" />
-        {!collapsed && <span>{signOut}</span>}
-      </button>
-    </div>
-  );
-}
-
-// Mobile-drawer version of the user footer (never collapsed).
-function MobileUserFooter({
-  role,
-  displayName,
-  identityDocumentType,
-  identityNumber,
-  onLogout,
-  signOut,
-}: {
-  role: Role;
-  displayName: string | null;
-  identityDocumentType: string | null;
-  identityNumber: string | null;
-  onLogout: () => void;
-  signOut: string;
-}) {
-  return (
-    <div className="px-3 py-4 border-t border-gray-700 shrink-0">
-      <div className="px-3 mb-2 space-y-0.5">
-        {displayName && (
-          <p className="text-xs font-medium text-white truncate">
-            {displayName}
-          </p>
-        )}
-        <p className="text-xs text-gray-400 truncate">{role}</p>
-        {identityDocumentType && identityNumber && (
-          <p className="text-xs text-gray-500 truncate">
-            {identityDocumentType} {identityNumber}
-          </p>
-        )}
-      </div>
-      <button
-        onClick={onLogout}
-        className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-      >
-        <LogOut className="h-5 w-5 shrink-0" />
-        <span>{signOut}</span>
+        {expanded && <span>{signOut}</span>}
       </button>
     </div>
   );
@@ -410,11 +372,13 @@ export default function Sidebar() {
 
             {/* Drawer footer */}
             {user && (
-              <MobileUserFooter
+              <UserFooter
                 role={primaryUserRole!}
                 displayName={displayName}
                 identityDocumentType={identityDocumentType}
                 identityNumber={identityNumber}
+                collapsed={false}
+                forceExpanded
                 onLogout={logout}
                 signOut={t("signOut")}
               />
