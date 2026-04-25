@@ -15,6 +15,7 @@ describe("Badge", () => {
     expect(el).toHaveClass("font-semibold");
     expect(el).toHaveClass("inline-flex");
     expect(el).toHaveClass("items-center");
+    expect(el).toHaveClass("gap-1");
   });
 
   it("applies default size classes", () => {
@@ -46,6 +47,7 @@ describe("Badge", () => {
     { variant: "beginner",     expected: ["bg-k-info-bg", "text-k-info-text"] },
     { variant: "intermediate", expected: ["bg-k-warn-bg", "text-k-warn-text"] },
     { variant: "advanced",     expected: ["bg-k-volt", "text-k-volt-text"] },
+    { variant: "info",         expected: ["bg-k-info-bg", "text-k-info-text"] },
   ];
 
   cases.forEach(({ variant, expected }) => {
@@ -59,5 +61,21 @@ describe("Badge", () => {
   it("merges caller className", () => {
     render(<Badge variant="active" label="X" className="custom-class" />);
     expect(screen.getByText("X")).toHaveClass("custom-class");
+  });
+
+  it("renders an icon node passed via the icon prop", () => {
+    render(
+      <Badge
+        variant="active"
+        label="WithIcon"
+        icon={<svg data-testid="badge-icon" />}
+      />,
+    );
+    expect(screen.getByTestId("badge-icon")).toBeInTheDocument();
+  });
+
+  it("forwards the title prop to the underlying span", () => {
+    render(<Badge variant="active" label="X" title="tooltip text" />);
+    expect(screen.getByText("X")).toHaveAttribute("title", "tooltip text");
   });
 });
