@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useUpdateManager } from "@/hooks/useManagers";
 import { ManagerSummary } from "@/lib/types/manager";
+import { Modal } from "@/components/ui";
 
 const IDENTITY_DOCUMENT_TYPES = [
   { value: "CC",  label: "CC" },
@@ -36,12 +36,6 @@ export default function EditManagerModal({ manager, onClose, onUpdated }: Props)
     phoneNumber:          manager.phoneNumber ?? "",
   });
   const [phoneError, setPhoneError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   function set(field: keyof typeof form, value: string) {
     clearError();
@@ -76,20 +70,9 @@ export default function EditManagerModal({ manager, onClose, onUpdated }: Props)
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">{t("editTitle")}</h2>
-            <p className="text-xs text-gray-500 mt-0.5">{manager.tenantName}</p>
-          </div>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 rounded transition-colors" aria-label="Close">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+    <Modal open onClose={onClose} title={t("editTitle")} size="md">
+        <p className="text-xs text-gray-500 -mt-2 mb-3">{manager.tenantName}</p>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">{error}</div>
           )}
@@ -165,7 +148,6 @@ export default function EditManagerModal({ manager, onClose, onUpdated }: Props)
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }
