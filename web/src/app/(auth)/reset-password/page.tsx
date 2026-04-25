@@ -2,51 +2,64 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 function ResetPasswordContent() {
+  const t = useTranslations("resetPasswordPage");
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
+  const shell = (children: React.ReactNode) => (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-k-dark px-4 py-12">
+      <div className="mb-8 text-white font-extrabold text-2xl tracking-[-0.04em] text-center">
+        klasio
+      </div>
+      <div className="w-full max-w-md bg-k-surface rounded-k-xl shadow-k-modal p-10">
+        {children}
+      </div>
+    </div>
+  );
+
   if (!token) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-        <div className="max-w-md w-full">
-          <div className="bg-red-50 border border-red-200 rounded-md p-6 text-center">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Invalid Link</h2>
-            <p className="text-sm text-red-700 mb-4">
-              This password reset link is invalid. Please request a new one.
-            </p>
-            <a
-              href="/forgot-password"
-              className="inline-block px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
-            >
-              Request New Link
-            </a>
-          </div>
-        </div>
+    return shell(
+      <div className="text-center">
+        <h2 className="text-lg font-semibold text-k-danger-text mb-2">{t("invalidTitle")}</h2>
+        <p className="text-sm text-k-subtle mb-4">{t("invalidBody")}</p>
+        <Button variant="primary" asChild>
+          <Link href="/forgot-password">{t("requestNew")}</Link>
+        </Button>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Reset your password</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Enter your new password below.
-          </p>
-        </div>
-        <ResetPasswordForm token={token} />
+  return shell(
+    <>
+      <div className="text-center mb-6">
+        <h1 className="text-[22px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
+        <p className="mt-2 text-sm text-k-muted">{t("subtitle")}</p>
       </div>
-    </div>
+      <ResetPasswordForm token={token} />
+    </>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><p className="text-gray-600">Loading...</p></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex flex-col items-center justify-center bg-k-dark px-4 py-12">
+          <div className="mb-8 text-white font-extrabold text-2xl tracking-[-0.04em] text-center">
+            klasio
+          </div>
+          <div className="w-full max-w-md bg-k-surface rounded-k-xl shadow-k-modal p-10">
+            <p className="text-center text-k-muted text-sm">Loading…</p>
+          </div>
+        </div>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );

@@ -11,11 +11,14 @@ function SetupAccountContent() {
   const token = searchParams.get("token");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">{t("pageTitle")}</h1>
-          <p className="mt-2 text-sm text-gray-600">{t("pageSubtitle")}</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-k-dark px-4 py-12">
+      <div className="mb-8 text-white font-extrabold text-2xl tracking-[-0.04em] text-center">
+        klasio
+      </div>
+      <div className="w-full max-w-md bg-k-surface rounded-k-xl shadow-k-modal p-10">
+        <div className="text-center mb-6">
+          <h1 className="text-[22px] font-extrabold tracking-[-0.02em] text-k-dark">{t("pageTitle")}</h1>
+          <p className="mt-2 text-sm text-k-muted">{t("pageSubtitle")}</p>
         </div>
         <SetupAccountForm token={token} />
       </div>
@@ -24,13 +27,16 @@ function SetupAccountContent() {
 }
 
 export default function SetupAccountPage() {
-  const t = useTranslations("auth.setupAccount");
-
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <p className="text-gray-600">{t("pageLoading")}</p>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-k-dark px-4 py-12">
+          <div className="mb-8 text-white font-extrabold text-2xl tracking-[-0.04em] text-center">
+            klasio
+          </div>
+          <div className="w-full max-w-md bg-k-surface rounded-k-xl shadow-k-modal p-10">
+            <p className="text-center text-k-muted text-sm">Loading…</p>
+          </div>
         </div>
       }
     >

@@ -1002,6 +1002,19 @@
     "title": "Klasio",
     "subtitle": "Gestión de Liga Deportiva"
   },
+  "forgotPasswordPage": {
+    "title": "¿Olvidaste tu contraseña?",
+    "subtitle": "Ingresa tu correo y te enviaremos un enlace para restablecer.",
+    "loading": "Cargando…"
+  },
+  "resetPasswordPage": {
+    "title": "Restablece tu contraseña",
+    "subtitle": "Ingresa tu nueva contraseña a continuación.",
+    "invalidTitle": "Enlace inválido",
+    "invalidBody": "Este enlace para restablecer la contraseña no es válido. Por favor solicita uno nuevo.",
+    "requestNew": "Solicitar nuevo enlace",
+    "loading": "Cargando…"
+  },
   "registerPage": {
     "title": "Crea tu cuenta",
     "subtitle": "Regístrate como estudiante en {tenantSlug}"

@@ -1002,6 +1002,19 @@
     "title": "Klasio",
     "subtitle": "Sports League Management"
   },
+  "forgotPasswordPage": {
+    "title": "Forgot your password?",
+    "subtitle": "Enter your email and we'll send you a reset link.",
+    "loading": "Loading…"
+  },
+  "resetPasswordPage": {
+    "title": "Reset your password",
+    "subtitle": "Enter your new password below.",
+    "invalidTitle": "Invalid Link",
+    "invalidBody": "This password reset link is invalid. Please request a new one.",
+    "requestNew": "Request New Link",
+    "loading": "Loading…"
+  },
   "registerPage": {
     "title": "Create your account",
     "subtitle": "Register as a student for {tenantSlug}"
