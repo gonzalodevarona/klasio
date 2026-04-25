@@ -338,18 +338,18 @@ export default function Sidebar() {
   return (
     <>
       {/* ── Mobile: top bar ─────────────────────────────────────── */}
-      <header className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center h-14 px-4 gap-3 bg-gray-900 border-b border-gray-700">
+      <header className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center h-14 px-4 gap-3 bg-k-dark border-b border-k-sidebar-active">
         <button
           onClick={() => setMobileOpen(true)}
           aria-label={t("openNav")}
-          className="p-1 text-gray-300 hover:text-white rounded transition-colors"
+          className="p-1 text-k-subtle hover:text-white rounded transition-colors"
         >
           <Menu className="h-6 w-6" />
         </button>
         <div className="min-w-0 flex-1">
-          <span className="text-lg font-bold text-white">{t("brand")}</span>
+          <KLogo />
           {tenantName && (
-            <span className="ml-2 text-xs text-indigo-400 truncate hidden sm:inline">
+            <span className="ml-2 text-xs text-k-subtle truncate hidden sm:inline">
               {tenantName}
             </span>
           )}
@@ -366,14 +366,13 @@ export default function Sidebar() {
             aria-hidden="true"
           />
 
-          <aside className="relative flex flex-col w-64 h-full bg-gray-900 shadow-2xl">
+          <aside className="relative flex flex-col w-64 h-full bg-k-dark shadow-2xl">
             {/* Drawer header */}
-            <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-gray-700">
+            <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
               <div className="min-w-0">
-                <h1 className="text-lg font-bold text-white">{t("brand")}</h1>
-                <p className="text-xs text-gray-400">{t("brandSubtitle")}</p>
+                <KLogo />
                 {tenantName && (
-                  <p className="text-xs font-medium text-indigo-400 truncate mt-0.5">
+                  <p className="text-xs text-k-subtle truncate mt-0.5">
                     {tenantName}
                   </p>
                 )}
@@ -381,7 +380,7 @@ export default function Sidebar() {
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label={t("closeNav")}
-                className="p-1 text-gray-400 hover:text-white rounded transition-colors shrink-0 ml-2"
+                className="p-1 text-k-subtle hover:text-white rounded transition-colors shrink-0 ml-2"
               >
                 <X className="h-5 w-5" />
               </button>
