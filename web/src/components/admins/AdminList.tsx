@@ -5,6 +5,7 @@ import { Plus, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAdmins, useDeactivateAdmin, useActivateAdmin, useTenantOptions } from "@/hooks/useAdmins";
 import { AdminSummary } from "@/lib/types/admin";
+import { Table, Thead, Th, Tr, Td, Select, Button } from "@/components/ui";
 import CreateAdminModal from "./CreateAdminModal";
 import EditAdminModal from "./EditAdminModal";
 
@@ -94,7 +95,7 @@ function DeactivateModal({ admin, loading, error, onConfirm, onCancel }: Deactiv
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
         <h2 className="text-base font-semibold text-gray-900 mb-2">{t("modalDeactivateTitle")}</h2>
         <p className="text-sm text-gray-600 mb-1">
-          {t("modalDeactivateConfirm", { name: <span className="font-medium text-gray-900">{name}</span> })}
+          {t("modalDeactivateConfirm", { name })}
         </p>
         <p className="text-xs text-gray-500 mb-6">
           {t("modalDeactivateHint")}
@@ -223,21 +224,16 @@ export default function AdminList() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Tenant filter */}
-          <label htmlFor="tenantFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            {t("filterTenantLabel")}
-          </label>
-          <select
-            id="tenantFilter"
+          <Select
             value={tenantFilter}
             onChange={(e) => handleTenantChange(e.target.value)}
             disabled={loadingTenants}
-            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           >
             <option value="">{t("filterAllTenants")}</option>
             {Object.entries(tenantOptions).map(([id, name]) => (
               <option key={id} value={id}>{name}</option>
             ))}
-          </select>
+          </Select>
 
           {/* Status filter tabs */}
           <div className="flex rounded-md border border-gray-300 overflow-hidden shadow-sm">
@@ -260,13 +256,10 @@ export default function AdminList() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
+        <Button variant="primary" size="sm" onClick={() => setShowCreateModal(true)}>
           <Plus className="h-4 w-4" />
           {t("createButton")}
-        </button>
+        </Button>
       </div>
 
       {/* Errors */}
@@ -285,83 +278,78 @@ export default function AdminList() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {COLUMNS.map((col) => (
-                    <th key={col.key} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${col.right ? "text-right" : "text-left"}`}>
-                      {col.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {admins.map((admin: AdminSummary) => (
-                  <tr
-                    key={admin.id}
-                    className={`hover:bg-gray-50 ${admin.status === "INACTIVE" || admin.status === "INVITED" ? "opacity-60" : ""}`}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {admin.firstName || admin.lastName
-                        ? [admin.firstName, admin.lastName].filter(Boolean).join(" ")
-                        : <span className="text-gray-400 italic">—</span>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{admin.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{admin.tenantName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className="font-mono">{admin.identityDocumentType}</span>{" "}{admin.identityNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={admin.status} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(admin.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-3">
-                        <button
-                          onClick={() => { setActionError(null); setEditTarget(admin); }}
-                          title="Edit"
-                          className="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <Toggle
-                          checked={admin.status === "ACTIVE"}
-                          disabled={togglingId === admin.id || admin.status === "INVITED"}
-                          onChange={() => handleToggleClick(admin)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
+          <Table>
+            <Thead>
+              <tr>
+                {COLUMNS.map((col) => (
+                  col.right ? <Th key={col.key} right>{col.label}</Th> : <Th key={col.key}>{col.label}</Th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </Thead>
+            <tbody>
+              {admins.map((admin: AdminSummary) => (
+                <Tr
+                  key={admin.id}
+                  className={admin.status === "INACTIVE" || admin.status === "INVITED" ? "opacity-60" : ""}
+                >
+                  <Td bold>
+                    {admin.firstName || admin.lastName
+                      ? [admin.firstName, admin.lastName].filter(Boolean).join(" ")
+                      : <span className="text-gray-400 italic">—</span>}
+                  </Td>
+                  <Td>{admin.email}</Td>
+                  <Td muted>{admin.tenantName}</Td>
+                  <Td muted>
+                    <span className="font-mono">{admin.identityDocumentType}</span>{" "}{admin.identityNumber}
+                  </Td>
+                  <Td>
+                    <StatusBadge status={admin.status} />
+                  </Td>
+                  <Td muted>{formatDate(admin.createdAt)}</Td>
+                  <Td right>
+                    <div className="flex items-center justify-end gap-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setActionError(null); setEditTarget(admin); }}
+                        title="Edit"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Toggle
+                        checked={admin.status === "ACTIVE"}
+                        disabled={togglingId === admin.id || admin.status === "INVITED"}
+                        onChange={() => handleToggleClick(admin)}
+                      />
+                    </div>
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-700">
+          <div className="flex items-center justify-between border-t border-k-line pt-4">
+            <p className="text-sm text-k-subtle">
               {tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}
             </p>
             <div className="flex gap-2">
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {tPagination("previous")}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= totalPages - 1}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {tPagination("next")}
-              </button>
+              </Button>
             </div>
           </div>
         </>

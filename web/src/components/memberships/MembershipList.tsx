@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { MembershipSummary } from "@/lib/types/membership";
 import MembershipStatusBadge from "./MembershipStatusBadge";
 import HourBalance from "./HourBalance";
+import { Table, Thead, Th, Tr, Td, Button } from "@/components/ui";
 
 interface MembershipListProps {
   memberships: MembershipSummary[];
@@ -34,62 +35,60 @@ export default function MembershipList({
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-gray-200">
-      <table className="min-w-full text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-4 py-3 text-left font-medium text-gray-600">{t("colPlan")}</th>
-            <th className="px-4 py-3 text-left font-medium text-gray-600">{t("colStatus")}</th>
-            <th className="px-4 py-3 text-left font-medium text-gray-600">{t("colHours")}</th>
-            <th className="px-4 py-3 text-left font-medium text-gray-600">{t("colStart")}</th>
-            <th className="px-4 py-3 text-left font-medium text-gray-600">{t("colExpires")}</th>
-            <th className="px-4 py-3 text-left font-medium text-gray-600">{t("colActions")}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100 bg-white">
-          {memberships.map((m) => (
-            <tr key={m.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 text-sm text-gray-700 font-medium">
-                {m.planName}
-              </td>
-              <td className="px-4 py-3">
-                <MembershipStatusBadge status={m.status} />
-              </td>
-              <td className="px-4 py-3">
-                <HourBalance available={m.availableHours} purchased={m.purchasedHours} />
-              </td>
-              <td className="px-4 py-3 text-gray-600">{formatDate(m.startDate)}</td>
-              <td className="px-4 py-3 text-gray-600">{formatDate(m.expirationDate)}</td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/students/${studentId}/memberships/${m.id}`}
-                    className="text-blue-600 hover:underline text-xs"
+    <Table>
+      <Thead>
+        <tr>
+          <Th>{t("colPlan")}</Th>
+          <Th>{t("colStatus")}</Th>
+          <Th>{t("colHours")}</Th>
+          <Th>{t("colStart")}</Th>
+          <Th>{t("colExpires")}</Th>
+          <Th right>{t("colActions")}</Th>
+        </tr>
+      </Thead>
+      <tbody>
+        {memberships.map((m) => (
+          <Tr key={m.id}>
+            <Td bold>{m.planName}</Td>
+            <Td>
+              <MembershipStatusBadge status={m.status} />
+            </Td>
+            <Td>
+              <HourBalance available={m.availableHours} purchased={m.purchasedHours} />
+            </Td>
+            <Td muted>{formatDate(m.startDate)}</Td>
+            <Td muted>{formatDate(m.expirationDate)}</Td>
+            <Td right>
+              <div className="flex items-center justify-end gap-2">
+                <Link
+                  href={`/students/${studentId}/memberships/${m.id}`}
+                  className="text-blue-600 hover:underline text-xs"
+                >
+                  {t("actionView")}
+                </Link>
+                {m.status === "PENDING_PAYMENT_VALIDATION" && onValidatePayment && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onValidatePayment(m.id)}
                   >
-                    {t("actionView")}
-                  </Link>
-                  {m.status === "PENDING_PAYMENT_VALIDATION" && onValidatePayment && (
-                    <button
-                      onClick={() => onValidatePayment(m.id)}
-                      className="text-xs text-indigo-600 hover:underline"
-                    >
-                      {t("actionValidatePayment")}
-                    </button>
-                  )}
-                  {m.status === "PENDING_MANAGER_ACTIVATION" && onActivate && (
-                    <button
-                      onClick={() => onActivate(m.id)}
-                      className="text-xs text-green-600 hover:underline"
-                    >
-                      {t("actionActivate")}
-                    </button>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                    {t("actionValidatePayment")}
+                  </Button>
+                )}
+                {m.status === "PENDING_MANAGER_ACTIVATION" && onActivate && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onActivate(m.id)}
+                  >
+                    {t("actionActivate")}
+                  </Button>
+                )}
+              </div>
+            </Td>
+          </Tr>
+        ))}
+      </tbody>
+    </Table>
   );
 }

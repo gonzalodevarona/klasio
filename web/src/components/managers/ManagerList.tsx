@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useManagers, useDeactivateManager, useActivateManager, useManagerTenantOptions } from "@/hooks/useManagers";
 import { useAuth } from "@/hooks/useAuth";
 import { ManagerSummary } from "@/lib/types/manager";
+import { Table, Thead, Th, Tr, Td, Select, Button } from "@/components/ui";
 import CreateManagerModal from "./CreateManagerModal";
 import EditManagerModal from "./EditManagerModal";
 
@@ -64,7 +65,7 @@ function DeactivateModal({ manager, loading, error, onConfirm, onCancel }: {
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
         <h2 className="text-base font-semibold text-gray-900 mb-2">{t("modalDeactivateTitle")}</h2>
         <p className="text-sm text-gray-600 mb-1">
-          {t("modalDeactivateConfirm", { name: <span className="font-medium text-gray-900">{name}</span> })}
+          {t("modalDeactivateConfirm", { name })}
         </p>
         <p className="text-xs text-gray-500 mb-6">
           {t("modalDeactivateHint")}
@@ -185,19 +186,16 @@ export default function ManagerList() {
         <div className="flex items-center gap-3">
           {/* Tenant filter — hidden for ADMIN (they are scoped to their own tenant) */}
           {!isAdmin && (
-            <>
-              <label htmlFor="tenantFilter" className="text-sm font-medium text-gray-700 whitespace-nowrap">{t("filterTenantLabel")}</label>
-              <select
-                id="tenantFilter" value={tenantFilter} onChange={(e) => { setTenantFilter(e.target.value); setPage(0); }}
-                disabled={loadingTenants}
-                className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-              >
-                <option value="">{t("filterAllTenants")}</option>
-                {Object.entries(tenantOptions).map(([id, name]) => (
-                  <option key={id} value={id}>{name}</option>
-                ))}
-              </select>
-            </>
+            <Select
+              value={tenantFilter}
+              onChange={(e) => { setTenantFilter(e.target.value); setPage(0); }}
+              disabled={loadingTenants}
+            >
+              <option value="">{t("filterAllTenants")}</option>
+              {Object.entries(tenantOptions).map(([id, name]) => (
+                <option key={id} value={id}>{name}</option>
+              ))}
+            </Select>
           )}
 
           <div className="flex rounded-md border border-gray-300 overflow-hidden shadow-sm">
@@ -212,11 +210,10 @@ export default function ManagerList() {
           </div>
         </div>
 
-        <button onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <Button variant="primary" size="sm" onClick={() => setShowCreateModal(true)}>
           <Plus className="h-4 w-4" />
           {t("createButton")}
-        </button>
+        </Button>
       </div>
 
       {(error || actionError) && (
@@ -231,62 +228,70 @@ export default function ManagerList() {
         <div className="text-center py-10 text-sm text-gray-500">{t("listEmpty")}</div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {COLUMNS.map((col) => (
-                    <th key={col.key} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${col.right ? "text-right" : "text-left"}`}>
-                      {col.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {managers.map((m: ManagerSummary) => (
-                  <tr key={m.id} className={`hover:bg-gray-50 ${m.status === "INACTIVE" || m.status === "INVITED" ? "opacity-60" : ""}`}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {m.firstName || m.lastName
-                        ? [m.firstName, m.lastName].filter(Boolean).join(" ")
-                        : <span className="text-gray-400 italic">—</span>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{m.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{m.tenantName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className="font-mono">{m.identityDocumentType}</span>{" "}{m.identityNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap"><StatusBadge status={m.status} /></td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(m.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-3">
-                        <button onClick={() => { setActionError(null); setEditTarget(m); }} title="Edit"
-                          className="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors">
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <Toggle
-                          checked={m.status === "ACTIVE"}
-                          disabled={togglingId === m.id || m.status === "INVITED"}
-                          onChange={() => handleToggleClick(m)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
+          <Table>
+            <Thead>
+              <tr>
+                {COLUMNS.map((col) => (
+                  col.right ? <Th key={col.key} right>{col.label}</Th> : <Th key={col.key}>{col.label}</Th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </Thead>
+            <tbody>
+              {managers.map((m: ManagerSummary) => (
+                <Tr key={m.id} className={m.status === "INACTIVE" || m.status === "INVITED" ? "opacity-60" : ""}>
+                  <Td bold>
+                    {m.firstName || m.lastName
+                      ? [m.firstName, m.lastName].filter(Boolean).join(" ")
+                      : <span className="text-gray-400 italic">—</span>}
+                  </Td>
+                  <Td>{m.email}</Td>
+                  <Td muted>{m.tenantName}</Td>
+                  <Td muted>
+                    <span className="font-mono">{m.identityDocumentType}</span>{" "}{m.identityNumber}
+                  </Td>
+                  <Td><StatusBadge status={m.status} /></Td>
+                  <Td muted>{formatDate(m.createdAt)}</Td>
+                  <Td right>
+                    <div className="flex items-center justify-end gap-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setActionError(null); setEditTarget(m); }}
+                        title="Edit"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Toggle
+                        checked={m.status === "ACTIVE"}
+                        disabled={togglingId === m.id || m.status === "INVITED"}
+                        onChange={() => handleToggleClick(m)}
+                      />
+                    </div>
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
 
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-700">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
+          <div className="flex items-center justify-between border-t border-k-line pt-4">
+            <p className="text-sm text-k-subtle">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
             <div className="flex gap-2">
-              <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+              >
                 {tPagination("previous")}
-              </button>
-              <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages - 1}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= totalPages - 1}
+              >
                 {tPagination("next")}
-              </button>
+              </Button>
             </div>
           </div>
         </>

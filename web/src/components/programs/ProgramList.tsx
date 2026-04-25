@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { ProgramStatus } from "@/lib/types/program";
 import { usePrograms } from "@/hooks/usePrograms";
 import ProgramStatusBadge from "./ProgramStatusBadge";
+import { Table, Thead, Th, Tr, Td, Select, Button } from "@/components/ui";
 
 export default function ProgramList() {
   const t = useTranslations("programs");
@@ -50,19 +51,15 @@ export default function ProgramList() {
     <div className="space-y-4">
       {/* Filter */}
       <div className="flex items-center gap-3">
-        <label htmlFor="statusFilter" className="text-sm font-medium text-gray-700">
-          {t("filterStatusLabel")}
-        </label>
-        <select
-          id="statusFilter"
+        <Select
+          label={t("filterStatusLabel")}
           value={statusFilter ?? ""}
           onChange={(e) => handleStatusChange(e.target.value)}
-          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">{t("filterAll")}</option>
           <option value="ACTIVE">{t("filterActive")}</option>
           <option value="INACTIVE">{t("filterInactive")}</option>
-        </select>
+        </Select>
       </div>
 
       {loading ? (
@@ -75,66 +72,58 @@ export default function ProgramList() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t("colName")}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t("colStatus")}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t("colCreatedAt")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {programs.map((program) => (
-                  <tr key={program.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      <Link
-                        href={`/programs/${program.id}`}
-                        className="hover:text-blue-600 hover:underline"
-                      >
-                        {program.name}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <ProgramStatusBadge status={program.status} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(program.createdAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <Thead>
+              <tr>
+                <Th>{t("colName")}</Th>
+                <Th>{t("colStatus")}</Th>
+                <Th>{t("colCreatedAt")}</Th>
+              </tr>
+            </Thead>
+            <tbody>
+              {programs.map((program) => (
+                <Tr key={program.id}>
+                  <Td bold>
+                    <Link
+                      href={`/programs/${program.id}`}
+                      className="hover:text-blue-600 hover:underline"
+                    >
+                      {program.name}
+                    </Link>
+                  </Td>
+                  <Td>
+                    <ProgramStatusBadge status={program.status} />
+                  </Td>
+                  <Td muted>{formatDate(program.createdAt)}</Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
 
           {/* Pagination */}
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-700">
+          <div className="flex items-center justify-between border-t border-k-line pt-4">
+            <p className="text-sm text-k-subtle">
               {tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}
             </p>
             <div className="flex gap-2">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 type="button"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {tPagination("previous")}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 type="button"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= totalPages - 1}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {tPagination("next")}
-              </button>
+              </Button>
             </div>
           </div>
         </>
