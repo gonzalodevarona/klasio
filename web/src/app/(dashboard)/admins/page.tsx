@@ -10,8 +10,8 @@ export default async function AdminsPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">{t("pageTitle")}</h1>
+      <div className="mb-6">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("pageTitle")}</h1>
       </div>
 
       <AdminList />
