@@ -1,18 +1,20 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface KLogoProps {
+  size?: number;
   className?: string;
 }
 
-export default function KLogo({ className }: KLogoProps) {
+export default function KLogo({ size = 28, className }: KLogoProps) {
   return (
-    <span
-      className={cn(
-        "text-[18px] font-extrabold text-white tracking-[-0.03em] leading-none select-none",
-        className,
-      )}
-    >
-      klasio
-    </span>
+    <Image
+      src="/logo.svg"
+      alt="Klasio"
+      width={size}
+      height={size}
+      className={cn("select-none", className)}
+      priority
+    />
   );
 }
