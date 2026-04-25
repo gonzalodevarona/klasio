@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 const AuthShell = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-k-dark px-4 py-12">
-    <Image src="/logo.svg" alt="Klasio" width={48} height={48} className="mb-8" priority />
+    <img src="/logo.svg" alt="Klasio" width={48} height={48} className="mb-8" />
     <div className="w-full max-w-md bg-k-surface rounded-k-xl shadow-k-modal p-10">
       {children}
     </div>
@@ -52,7 +52,7 @@ export default function ResetPasswordPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex flex-col items-center justify-center bg-k-dark px-4 py-12">
-          <Image src="/logo.svg" alt="Klasio" width={48} height={48} className="mb-8" />
+          <img src="/logo.svg" alt="Klasio" width={48} height={48} className="mb-8" />
           <div className="w-full max-w-md bg-k-surface rounded-k-xl shadow-k-modal p-10">
             <p className="text-center text-k-muted text-sm">Loading…</p>
           </div>
