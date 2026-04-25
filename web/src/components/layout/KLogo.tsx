@@ -6,15 +6,13 @@ interface KLogoProps {
   className?: string;
 }
 
-export default function KLogo({ size = 28, className }: KLogoProps) {
+export default function KLogo({ size = 24, className }: KLogoProps) {
   return (
-    <Image
-      src="/logo.svg"
-      alt="Klasio"
-      width={size}
-      height={size}
-      className={cn("select-none", className)}
-      priority
-    />
+    <div className={cn("flex items-center gap-2 select-none", className)}>
+      <Image src="/logo.svg" alt="" width={size} height={size} priority />
+      <span className="text-[18px] font-extrabold text-white tracking-[-0.03em] leading-none">
+        klasio
+      </span>
+    </div>
   );
 }
