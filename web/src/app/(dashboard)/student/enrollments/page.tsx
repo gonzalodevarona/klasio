@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import LevelBadge from "@/components/enrollments/LevelBadge";
+import { Badge, Select } from "@/components/ui";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -27,86 +28,82 @@ export default function StudentEnrollmentsPage() {
     <div>
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
+          <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
             {t("subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2 pt-1">
-          <label htmlFor="statusFilter" className="text-sm text-gray-600 whitespace-nowrap">
+          <label htmlFor="statusFilter" className="text-sm text-k-muted whitespace-nowrap">
             {t("statusLabel")}
           </label>
-          <select
+          <Select
             id="statusFilter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-auto"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 
       {loading && (
-        <p className="py-8 text-center text-sm text-gray-500">{t("loading")}</p>
+        <p className="py-8 text-center text-sm text-k-muted">{t("loading")}</p>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <div className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
           {error}
         </div>
       )}
 
       {!loading && !error && enrollments.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-400">
+        <p className="py-8 text-center text-sm text-k-muted">
           {t("empty", { status: statusFilter ? statusFilter.toLowerCase() : "" })}
         </p>
       )}
 
       {enrollments.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-hidden rounded-k-lg border border-k-border bg-k-surface">
+          <table className="min-w-full divide-y divide-k-border">
+            <thead className="bg-k-bg">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   {t("colProgram")}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   {t("colLevel")}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   {t("colStatus")}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   {t("colEnrolled")}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-k-line">
               {enrollments.map((e) => (
-                <tr key={e.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                <tr key={e.id} className="hover:bg-k-bg">
+                  <td className="px-4 py-3 text-sm font-medium text-k-dark">
                     {e.programName}
                   </td>
                   <td className="px-4 py-3">
                     <LevelBadge level={e.level} />
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        e.status === "ACTIVE"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {e.status}
-                    </span>
+                  <td className="px-4 py-3">
+                    <Badge
+                      variant={e.status === "ACTIVE" ? "active" : "inactive"}
+                      label={e.status}
+                      small
+                    />
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-k-muted">
                     {formatDate(e.enrollmentDate)}
                   </td>
                 </tr>

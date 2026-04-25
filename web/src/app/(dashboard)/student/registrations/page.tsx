@@ -4,14 +4,9 @@ import { useState } from "react";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { useCancelRegistration } from "@/hooks/useCancelRegistration";
 import RegistrationStatusBadge from "@/components/attendance/RegistrationStatusBadge";
+import { Badge, Button } from "@/components/ui";
 import { Registration } from "@/lib/types/attendance";
 import { AttendanceTimeConstants, formatSessionDate } from "@/lib/attendanceConstants";
-
-const LEVEL_COLORS: Record<string, string> = {
-  BEGINNER:     "bg-blue-100 text-blue-700",
-  INTERMEDIATE: "bg-yellow-100 text-yellow-700",
-  ADVANCED:     "bg-red-100 text-red-700",
-};
 
 function isCancellable(reg: Registration): boolean {
   if (reg.status !== "REGISTERED") return false;
@@ -67,8 +62,8 @@ export default function StudentRegistrationsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">My Registrations</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">My Registrations</h1>
+        <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
           Your upcoming and past class session registrations.
         </p>
       </div>
@@ -80,8 +75,8 @@ export default function StudentRegistrationsPage() {
             onClick={() => setStatusFilter(opt.value)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
               statusFilter === opt.value
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-gray-600 border-gray-300 hover:border-indigo-400 hover:text-indigo-600"
+                ? "bg-k-dark text-white border-k-dark"
+                : "bg-k-surface text-k-subtle border-k-border hover:border-k-subtle hover:text-k-dark"
             }`}
           >
             {opt.label}
@@ -90,36 +85,36 @@ export default function StudentRegistrationsPage() {
       </div>
 
       {successMessage && (
-        <div className="mb-4 rounded-md bg-green-50 border border-green-200 p-4 text-sm text-green-700">
+        <div className="mb-4 rounded-k-sm bg-k-volt/10 border border-k-volt/30 p-4 text-sm text-k-volt-text">
           {successMessage}
         </div>
       )}
 
       {cancelError && (
-        <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <div className="mb-4 rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
           {cancelError}
         </div>
       )}
 
       {loading && (
-        <p className="py-8 text-center text-sm text-gray-500">Loading…</p>
+        <p className="py-8 text-center text-sm text-k-muted">Loading…</p>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <div className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
           {error}
         </div>
       )}
 
       {statusFilter === "CANCELLED_BY_SYSTEM" && (
-        <div className="mb-4 rounded-md bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+        <div className="mb-4 rounded-k-sm bg-k-warn-bg border border-k-warn-text/30 p-4 text-sm text-k-warn-text">
           These registrations were cancelled because the class schedule was changed.
           Go to <strong>My Classes</strong> to register for the new sessions.
         </div>
       )}
 
       {statusFilter === "SESSION_CANCELLED" && (
-        <div className="mb-4 rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-800">
+        <div className="mb-4 rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
           These registrations were cancelled by the league. Your spot was released and no hours
           were deducted. You can register for a different session in{" "}
           <strong>My Classes</strong>.
@@ -127,7 +122,7 @@ export default function StudentRegistrationsPage() {
       )}
 
       {!loading && !error && registrations.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-400">
+        <p className="py-8 text-center text-sm text-k-muted">
           {statusFilter === "REGISTERED"
             ? "You have no upcoming registrations."
             : statusFilter === "CANCELLED_BY_SYSTEM"
@@ -139,63 +134,69 @@ export default function StudentRegistrationsPage() {
       )}
 
       {registrations.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-hidden rounded-k-lg border border-k-border bg-k-surface">
+          <table className="min-w-full divide-y divide-k-border">
+            <thead className="bg-k-bg">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Time
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Class
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Level
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Hours
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-k-line">
               {registrations.map((r) => {
                 const cancellable = isCancellable(r);
                 const inPast = isWithinWarningZone(r);
                 return (
-                  <tr key={r.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">
+                  <tr key={r.id} className="hover:bg-k-bg">
+                    <td className="px-4 py-3 text-sm text-k-dark">
                       {formatSessionDate(r.sessionDate)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-k-muted whitespace-nowrap">
                       {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
+                    <td className="px-4 py-3 text-sm text-k-dark">
                       {r.className}
                       {r.status === "SESSION_CANCELLED" && r.sessionCancellationReason && (
-                        <div className="mt-0.5 text-xs italic text-red-600">
+                        <div className="mt-0.5 text-xs italic text-k-danger-text">
                           Reason: {r.sessionCancellationReason}
                         </div>
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                          LEVEL_COLORS[r.level] ?? "bg-gray-100 text-gray-600"
-                        }`}
-                      >
-                        {r.level}
-                      </span>
+                      <Badge
+                        variant={
+                          r.level === "BEGINNER"
+                            ? "beginner"
+                            : r.level === "INTERMEDIATE"
+                            ? "intermediate"
+                            : r.level === "ADVANCED"
+                            ? "advanced"
+                            : "info"
+                        }
+                        label={r.level}
+                        small
+                      />
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-4 py-3 text-sm text-k-muted">
                       {r.intendedHours}h
                     </td>
                     <td className="px-4 py-3">
@@ -206,7 +207,7 @@ export default function StudentRegistrationsPage() {
                         cancellable ? (
                           <button
                             onClick={() => handleCancelClick(r)}
-                            className="text-xs font-medium text-red-600 hover:text-red-800 transition-colors"
+                            className="text-xs font-medium text-k-danger-text hover:text-k-dark transition-colors"
                           >
                             Cancel
                           </button>
@@ -217,7 +218,7 @@ export default function StudentRegistrationsPage() {
                                 ? "Session has already started"
                                 : `Cancellation window closed (${AttendanceTimeConstants.CANCELLATION_CUTOFF_MINUTES} min before class)`
                             }
-                            className="text-xs text-gray-400 cursor-not-allowed"
+                            className="text-xs text-k-muted cursor-not-allowed"
                           >
                             Cancel
                           </span>
@@ -235,14 +236,14 @@ export default function StudentRegistrationsPage() {
       {/* Confirmation modal */}
       {confirmTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="bg-k-surface rounded-k-lg shadow-k-modal p-6 max-w-sm w-full mx-4">
+            <h2 className="text-lg font-semibold text-k-dark mb-2">
               Cancel registration?
             </h2>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-k-muted mb-4">
               Cancel your registration for{" "}
-              <span className="font-medium">{confirmTarget.className}</span> on{" "}
-              <span className="font-medium">
+              <span className="font-medium text-k-dark">{confirmTarget.className}</span> on{" "}
+              <span className="font-medium text-k-dark">
                 {formatSessionDate(confirmTarget.sessionDate)}
               </span>{" "}
               at {confirmTarget.sessionStartTime.slice(0, 5)}? Your spot will be
@@ -250,24 +251,26 @@ export default function StudentRegistrationsPage() {
             </p>
 
             {cancelError && (
-              <p className="mb-3 text-sm text-red-600">{cancelError}</p>
+              <p className="mb-3 text-sm text-k-danger-text">{cancelError}</p>
             )}
 
             <div className="flex justify-end gap-3">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => { setConfirmTarget(null); clearError(); }}
                 disabled={cancelling}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
               >
                 Keep
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={handleConfirmCancel}
                 disabled={cancelling}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 disabled:opacity-50"
               >
                 {cancelling ? "Cancelling…" : "Yes, cancel"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
 import HourBalance from "@/components/memberships/HourBalance";
+import { Button, Card } from "@/components/ui";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -27,97 +28,93 @@ export default function StudentMembershipsPage() {
     <div>
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
+          <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
             {t("subtitle")}
           </p>
         </div>
         {!hasActiveMembership && (
-          <Link
-            href="/student/memberships/new"
-            className="shrink-0 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            {t("newButton")}
-          </Link>
+          <Button variant="volt" asChild>
+            <Link href="/student/memberships/new">{t("newButton")}</Link>
+          </Button>
         )}
       </div>
 
       {loading && (
-        <p className="py-8 text-center text-sm text-gray-500">{t("loading")}</p>
+        <p className="py-8 text-center text-sm text-k-muted">{t("loading")}</p>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <div className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
           {error}
         </div>
       )}
 
       {!loading && !error && memberships.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-400">
+        <p className="py-8 text-center text-sm text-k-muted">
           {t("empty")}
         </p>
       )}
 
       <div className="space-y-6">
         {memberships.map((m) => (
-          <div
-            key={m.id}
-            className="rounded-lg border border-gray-200 bg-white p-5 space-y-4"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-gray-900">{m.planName}</p>
-                <p className="text-xs text-gray-400 mt-0.5 font-mono">{m.id}</p>
+          <Card key={m.id} padding="md">
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-k-dark">{m.planName}</p>
+                  <p className="text-xs text-k-muted mt-0.5 font-mono">{m.id}</p>
+                </div>
+                <MembershipStatusBadge status={m.status} />
               </div>
-              <MembershipStatusBadge status={m.status} />
-            </div>
 
-            {/* Hour balance bar */}
-            <HourBalance available={m.availableHours} purchased={m.purchasedHours} />
+              {/* Hour balance bar */}
+              <HourBalance available={m.availableHours} purchased={m.purchasedHours} />
 
-            {/* Key info */}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-              <div>
-                <span className="text-gray-500">{t("expires")} </span>
-                <span className="font-medium text-gray-900">
-                  {formatDate(m.expirationDate)}
-                </span>
+              {/* Key info */}
+              <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
+                <div>
+                  <span className="text-k-muted">{t("expires")} </span>
+                  <span className="font-medium text-k-dark">
+                    {formatDate(m.expirationDate)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-k-muted">{t("paymentLabel")} </span>
+                  <span className="font-medium text-k-dark">
+                    {m.paymentValidated ? t("paymentValidated") : t("paymentPending")}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-gray-500">{t("paymentLabel")} </span>
-                <span className="font-medium text-gray-900">
-                  {m.paymentValidated ? t("paymentValidated") : t("paymentPending")}
-                </span>
-              </div>
-            </div>
 
-            {/* Actions row */}
-            <div className="pt-1 flex items-center gap-4">
-              <Link
-                href={`/student/memberships/${m.id}`}
-                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
-              >
-                {t("viewDetails")}
-              </Link>
-              {m.status === "PENDING_PAYMENT" && (
+              {/* Actions row */}
+              <div className="pt-1 flex items-center gap-4">
                 <Link
                   href={`/student/memberships/${m.id}`}
-                  className="text-sm font-medium text-amber-600 hover:text-amber-800"
+                  className="text-sm text-k-subtle hover:text-k-dark font-medium"
                 >
-                  {t("uploadProof")}
+                  {t("viewDetails")}
                 </Link>
-              )}
-              {(m.status === "EXPIRED" || m.status === "INACTIVE") && (
-                <Link
-                  href={`/student/memberships/new?renew=${m.id}`}
-                  className="text-sm font-medium text-emerald-600 hover:text-emerald-800"
-                >
-                  {t("renew")}
-                </Link>
-              )}
+                {m.status === "PENDING_PAYMENT" && (
+                  <Link
+                    href={`/student/memberships/${m.id}`}
+                    className="text-sm font-medium text-k-warn-text hover:text-k-dark"
+                  >
+                    {t("uploadProof")}
+                  </Link>
+                )}
+                {(m.status === "EXPIRED" || m.status === "INACTIVE") && (
+                  <Link
+                    href={`/student/memberships/new?renew=${m.id}`}
+                    className="text-sm font-medium text-k-volt-text hover:text-k-dark"
+                  >
+                    {t("renew")}
+                  </Link>
+                )}
+              </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

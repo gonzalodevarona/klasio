@@ -6,17 +6,11 @@ import { useMyClasses } from "@/hooks/useMyClasses";
 import { useAvailableSessions } from "@/hooks/useAvailableSessions";
 import { useRegisterForSession } from "@/hooks/useRegisterForSession";
 import SessionCapacityBar from "@/components/attendance/SessionCapacityBar";
+import { Badge } from "@/components/ui";
 import { AvailableSession } from "@/lib/types/attendance";
 import { ProgramClassSummary } from "@/lib/types/programClass";
 import { AttendanceTimeConstants, todayInTenantZone, addDays, formatSessionDate } from "@/lib/attendanceConstants";
 
-const LEVEL_COLORS: Record<string, string> = {
-  BEGINNER:     "bg-blue-100 text-blue-700",
-  INTERMEDIATE: "bg-yellow-100 text-yellow-700",
-  ADVANCED:     "bg-red-100 text-red-700",
-};
-
-/** Parses "HH:mm:ss" strings and returns floor(durationMinutes / 60), minimum 1. */
 function computeIntendedHours(start: string, end: string): number {
   const [sh, sm] = start.split(":").map(Number);
   const [eh, em] = end.split(":").map(Number);
@@ -83,29 +77,29 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
   }
 
   return (
-    <div className="bg-gray-50 px-4 py-3 border-t border-gray-100">
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+    <div className="bg-k-bg px-4 py-3 border-t border-k-line">
+      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
         Upcoming Sessions — next 2 weeks
       </p>
 
       {loading && (
-        <p className="text-sm text-gray-400 py-2">Loading sessions…</p>
+        <p className="text-sm text-k-muted py-2">Loading sessions…</p>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 mb-2">
+        <div className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 px-3 py-2 text-xs text-k-danger-text mb-2">
           {error}
         </div>
       )}
 
       {registerError && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 mb-2">
+        <div className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 px-3 py-2 text-xs text-k-danger-text mb-2">
           {registerError}
         </div>
       )}
 
       {!loading && !error && classSessions.length === 0 && (
-        <p className="text-sm text-gray-400 py-1">
+        <p className="text-sm text-k-muted py-1">
           No upcoming sessions in the next 2 weeks.
         </p>
       )}
@@ -113,33 +107,33 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
       {classSessions.length > 0 && (
         <table className="min-w-full text-sm">
           <thead>
-            <tr className="text-xs text-gray-500">
+            <tr className="text-xs text-k-muted">
               <th className="py-1 pr-4 text-left font-medium">Date</th>
               <th className="py-1 pr-4 text-left font-medium">Time</th>
               <th className="py-1 pr-4 text-left font-medium">Capacity</th>
               <th className="py-1 text-left font-medium"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-k-line">
             {classSessions.map((s) => {
               const isFull = s.currentCapacity >= s.maxStudents;
               const registrationOpen = s.registrationOpen !== false; // treat missing field as open
               return (
                 <tr key={`${s.classId}-${s.sessionDate}`}>
-                  <td className="py-2 pr-4 text-gray-900">
+                  <td className="py-2 pr-4 text-k-dark">
                     <div className="flex items-center gap-1.5">
                       <span>{formatSessionDate(s.sessionDate)}</span>
                       {s.status === "ALERTED" && (
                         <span
                           title={s.alertReason ?? "Alert issued for this session"}
-                          className="inline-flex text-amber-600"
+                          className="inline-flex text-k-warn-text"
                         >
                           <AlertTriangle className="w-4 h-4" />
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="py-2 pr-4 text-gray-500 whitespace-nowrap">
+                  <td className="py-2 pr-4 text-k-muted whitespace-nowrap">
                     {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
                   </td>
                   <td className="py-2 pr-4">
@@ -162,8 +156,8 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                       className={[
                         "rounded px-3 py-1 text-xs font-medium transition-colors",
                         isFull || !registrationOpen
-                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          : "bg-indigo-600 text-white hover:bg-indigo-700",
+                          ? "bg-k-bg text-k-muted cursor-not-allowed"
+                          : "bg-k-volt text-k-dark hover:bg-k-volt-hover",
                       ].join(" ")}
                     >
                       {isFull ? "Full" : !registrationOpen ? "Closed" : "Register"}
@@ -192,76 +186,82 @@ export default function StudentClassesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">My Classes</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">My Classes</h1>
+        <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
           Classes available to you based on your enrollment level.
         </p>
       </div>
 
       {loading && (
-        <p className="py-8 text-center text-sm text-gray-500">Loading…</p>
+        <p className="py-8 text-center text-sm text-k-muted">Loading…</p>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <div className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
           {error}
         </div>
       )}
 
       {!loading && !error && classes.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-400">
+        <p className="py-8 text-center text-sm text-k-muted">
           No classes found. Make sure you have an active enrollment.
         </p>
       )}
 
       {classes.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-hidden rounded-k-lg border border-k-border bg-k-surface">
+          <table className="min-w-full divide-y divide-k-border">
+            <thead className="bg-k-bg">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Class
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Program
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Level
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
                   Capacity
                 </th>
                 <th className="w-8" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-k-line">
               {classes.map((c) => {
                 const isExpanded = expandedClassId === c.id;
                 return (
                   <React.Fragment key={c.id}>
                     <tr
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className="hover:bg-k-bg cursor-pointer"
                       onClick={() => toggleExpand(c)}
                     >
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                      <td className="px-4 py-3 text-sm font-medium text-k-dark">
                         {c.name}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
+                      <td className="px-4 py-3 text-sm text-k-muted">
                         {c.programName ?? "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                            LEVEL_COLORS[c.level] ?? "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {c.level}
-                        </span>
+                        <Badge
+                          variant={
+                            c.level === "BEGINNER"
+                              ? "beginner"
+                              : c.level === "INTERMEDIATE"
+                              ? "intermediate"
+                              : c.level === "ADVANCED"
+                              ? "advanced"
+                              : "info"
+                          }
+                          label={c.level}
+                          small
+                        />
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
+                      <td className="px-4 py-3 text-sm text-k-muted">
                         {c.maxStudents}
                       </td>
-                      <td className="px-2 py-3 text-gray-400">
+                      <td className="px-2 py-3 text-k-muted">
                         {isExpanded ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (

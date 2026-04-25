@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Card } from "@/components/ui";
 import StudentMembershipCreationForm from "@/components/memberships/StudentMembershipCreationForm";
 import { useMembershipActions, useMembershipDetail } from "@/hooks/useMemberships";
 
@@ -39,29 +40,29 @@ function NewMembershipContent() {
   }
 
   if (isRenewing && sourceLoading) {
-    return <p className="py-8 text-center text-sm text-gray-500">{tCommon("loading")}</p>;
+    return <p className="py-8 text-center text-sm text-k-muted">{tCommon("loading")}</p>;
   }
 
   return (
     <div className="max-w-xl">
-      <nav className="mb-6 text-sm text-gray-500">
-        <Link href="/student/memberships" className="hover:text-gray-700 hover:underline">
+      <nav className="mb-6 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted">
+        <Link href="/student/memberships" className="hover:text-k-subtle">
           {t("title")}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-900">{isRenewing ? t("renew") : t("newButton")}</span>
+        <span className="text-k-subtle">{isRenewing ? t("renew") : t("newButton")}</span>
       </nav>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark mb-2">
         {isRenewing ? t("renew") : t("newButton")}
       </h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="font-[var(--font-mono)] text-xs text-k-muted mb-6">
         {isRenewing
           ? "Your renewed membership will start pending payment validation."
           : "Select a plan from your enrolled program, attach your payment proof, and submit."}
       </p>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <Card padding="md">
         <StudentMembershipCreationForm
           initialProgramId={initialProgramId}
           initialPlanId={initialPlanId}
@@ -69,14 +70,14 @@ function NewMembershipContent() {
           onSubmit={handleSubmit}
           onCancel={() => router.push("/student/memberships")}
         />
-      </div>
+      </Card>
     </div>
   );
 }
 
 export default function NewMembershipPage() {
   return (
-    <Suspense fallback={<p className="py-8 text-center text-sm text-gray-500">{/* fallback */}</p>}>
+    <Suspense fallback={<p className="py-8 text-center text-sm text-k-muted">{/* fallback */}</p>}>
       <NewMembershipContent />
     </Suspense>
   );
