@@ -12,6 +12,7 @@ import {
 } from "@/lib/types/student";
 import type { IdentityDocumentType } from "@/lib/types/identity";
 import DocumentFields from "@/components/common/DocumentFields";
+import { Input, Select, Button } from "@/components/ui";
 
 interface FieldErrors {
   [key: string]: string | undefined;
@@ -160,11 +161,6 @@ export default function StudentForm({ student }: StudentFormProps) {
     }
   }
 
-  const inputClass = (field: string) =>
-    `block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-      fieldErrors[field] ? "border-red-500" : "border-gray-300"
-    }`;
-
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl space-y-8" noValidate>
       {apiError && (
@@ -177,64 +173,71 @@ export default function StudentForm({ student }: StudentFormProps) {
       <fieldset>
         <legend className="text-base font-semibold text-gray-900 mb-4">{t("formPersonalInfoLegend")}</legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-              {t("formFirstNameLabel")}
-            </label>
-            <input id="firstName" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
-              className={inputClass("firstName")} placeholder={t("formFirstNamePlaceholder")} />
-            {fieldErrors.firstName && <p className="mt-1 text-sm text-red-600">{fieldErrors.firstName}</p>}
-          </div>
+          <Input
+            label={t("formFirstNameLabel")}
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder={t("formFirstNamePlaceholder")}
+            error={fieldErrors.firstName}
+          />
+
+          <Input
+            label={t("formLastNameLabel")}
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder={t("formLastNamePlaceholder")}
+            error={fieldErrors.lastName}
+          />
+
+          <Input
+            label={t("formEmailLabel")}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t("formEmailPlaceholder")}
+            error={fieldErrors.email}
+          />
+
+          <Input
+            label={t("formPhoneLabel")}
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder={t("formPhonePlaceholder")}
+            error={fieldErrors.phone}
+          />
 
           <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-              {t("formLastNameLabel")}
-            </label>
-            <input id="lastName" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)}
-              className={inputClass("lastName")} placeholder={t("formLastNamePlaceholder")} />
-            {fieldErrors.lastName && <p className="mt-1 text-sm text-red-600">{fieldErrors.lastName}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              {t("formEmailLabel")}
-            </label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              className={inputClass("email")} placeholder={t("formEmailPlaceholder")} />
-            {fieldErrors.email && <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              {t("formPhoneLabel")}
-            </label>
-            <input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
-              className={inputClass("phone")} placeholder={t("formPhonePlaceholder")} />
-            {fieldErrors.phone && <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="dateOfBirth" className="block text-sm font-medium text-k-subtle mb-1">
               {t("formDateOfBirthLabel")}
             </label>
-            <input id="dateOfBirth" type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)}
-              className={inputClass("dateOfBirth")} max={new Date().toISOString().split("T")[0]} />
+            {/* TODO: no primitive for type="date" */}
+            <input
+              id="dateOfBirth"
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 text-sm focus:border-k-volt focus:outline-none"
+              max={new Date().toISOString().split("T")[0]}
+            />
             {dateOfBirth && (
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-k-muted">
                 {t("formAgeInfo", { age: calculateAge(dateOfBirth), minor: isMinor ? t("formAgeMinor") : "" })}
               </p>
             )}
             {fieldErrors.dateOfBirth && <p className="mt-1 text-sm text-red-600">{fieldErrors.dateOfBirth}</p>}
           </div>
 
-          <div>
-            <label htmlFor="eps" className="block text-sm font-medium text-gray-700 mb-1">
-              {t("formEpsLabel")}
-            </label>
-            <input id="eps" type="text" value={eps} onChange={(e) => setEps(e.target.value)}
-              className={inputClass("eps")} placeholder={t("formEpsPlaceholder")} />
-            {fieldErrors.eps && <p className="mt-1 text-sm text-red-600">{fieldErrors.eps}</p>}
-          </div>
+          <Input
+            label={t("formEpsLabel")}
+            type="text"
+            value={eps}
+            onChange={(e) => setEps(e.target.value)}
+            placeholder={t("formEpsPlaceholder")}
+            error={fieldErrors.eps}
+          />
         </div>
       </fieldset>
 
@@ -255,16 +258,16 @@ export default function StudentForm({ student }: StudentFormProps) {
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="bloodType" className="block text-sm font-medium text-gray-700 mb-1">{t("formBloodTypeLabel")}</label>
-            <select id="bloodType" value={bloodType} onChange={(e) => setBloodType(e.target.value)}
-              className={inputClass("bloodType")}>
+            <Select
+              label={t("formBloodTypeLabel")}
+              value={bloodType}
+              onChange={(e) => setBloodType(e.target.value)}
+            >
               <option value="">{t("formBloodTypePlaceholder")}</option>
               {BLOOD_TYPES.map((bt) => (
                 <option key={bt} value={bt}>{bt}</option>
               ))}
-            </select>
-          </div>
+            </Select>
           </div>
         </div>
       </fieldset>
@@ -275,52 +278,49 @@ export default function StudentForm({ student }: StudentFormProps) {
           <legend className="text-base font-semibold text-gray-900 mb-1">{t("formTutorInfoLegend")}</legend>
           <p className="text-sm text-amber-600 mb-4">{t("formTutorInfoNote")}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="tutorFirstName" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("formTutorFirstNameLabel")}
-              </label>
-              <input id="tutorFirstName" type="text" value={tutorFirstName}
-                onChange={(e) => setTutorFirstName(e.target.value)}
-                className={inputClass("tutorFirstName")} />
-              {fieldErrors.tutorFirstName && <p className="mt-1 text-sm text-red-600">{fieldErrors.tutorFirstName}</p>}
-            </div>
+            <Input
+              label={t("formTutorFirstNameLabel")}
+              type="text"
+              value={tutorFirstName}
+              onChange={(e) => setTutorFirstName(e.target.value)}
+              error={fieldErrors.tutorFirstName}
+            />
 
-            <div>
-              <label htmlFor="tutorLastName" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("formTutorLastNameLabel")}
-              </label>
-              <input id="tutorLastName" type="text" value={tutorLastName}
-                onChange={(e) => setTutorLastName(e.target.value)}
-                className={inputClass("tutorLastName")} />
-              {fieldErrors.tutorLastName && <p className="mt-1 text-sm text-red-600">{fieldErrors.tutorLastName}</p>}
-            </div>
+            <Input
+              label={t("formTutorLastNameLabel")}
+              type="text"
+              value={tutorLastName}
+              onChange={(e) => setTutorLastName(e.target.value)}
+              error={fieldErrors.tutorLastName}
+            />
 
-            <div>
-              <label htmlFor="tutorRelationship" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("formTutorRelationshipLabel")}
-              </label>
-              <input id="tutorRelationship" type="text" value={tutorRelationship}
-                onChange={(e) => setTutorRelationship(e.target.value)}
-                className={inputClass("tutorRelationship")} placeholder={t("formTutorRelationshipPlaceholder")} />
-              {fieldErrors.tutorRelationship && <p className="mt-1 text-sm text-red-600">{fieldErrors.tutorRelationship}</p>}
-            </div>
+            <Input
+              label={t("formTutorRelationshipLabel")}
+              type="text"
+              value={tutorRelationship}
+              onChange={(e) => setTutorRelationship(e.target.value)}
+              placeholder={t("formTutorRelationshipPlaceholder")}
+              error={fieldErrors.tutorRelationship}
+            />
 
-            <div>
-              <label htmlFor="tutorPhone" className="block text-sm font-medium text-gray-700 mb-1">
-                {t("formTutorPhoneLabel")}
-              </label>
-              <input id="tutorPhone" type="tel" value={tutorPhone}
-                onChange={(e) => setTutorPhone(e.target.value)}
-                className={inputClass("tutorPhone")} placeholder={t("formTutorPhonePlaceholder")} />
-              {fieldErrors.tutorPhone && <p className="mt-1 text-sm text-red-600">{fieldErrors.tutorPhone}</p>}
-            </div>
+            <Input
+              label={t("formTutorPhoneLabel")}
+              type="tel"
+              value={tutorPhone}
+              onChange={(e) => setTutorPhone(e.target.value)}
+              placeholder={t("formTutorPhonePlaceholder")}
+              error={fieldErrors.tutorPhone}
+            />
 
             <div className="sm:col-span-2">
-              <label htmlFor="tutorEmail" className="block text-sm font-medium text-gray-700 mb-1">{t("formTutorEmailLabel")}</label>
-              <input id="tutorEmail" type="email" value={tutorEmail}
+              <Input
+                label={t("formTutorEmailLabel")}
+                type="email"
+                value={tutorEmail}
                 onChange={(e) => setTutorEmail(e.target.value)}
-                className={inputClass("tutorEmail")} placeholder={t("formTutorEmailPlaceholder")} />
-              {fieldErrors.tutorEmail && <p className="mt-1 text-sm text-red-600">{fieldErrors.tutorEmail}</p>}
+                placeholder={t("formTutorEmailPlaceholder")}
+                error={fieldErrors.tutorEmail}
+              />
             </div>
           </div>
         </fieldset>
@@ -328,12 +328,11 @@ export default function StudentForm({ student }: StudentFormProps) {
 
       {/* Submit */}
       <div className="pt-2">
-        <button type="submit" disabled={submitting}
-          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+        <Button variant="volt" type="submit" disabled={submitting}>
           {submitting
             ? (isEdit ? tCommon("saving") : tCommon("creating"))
             : (isEdit ? t("formSaveButton") : t("formCreateButton"))}
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import PasswordPolicyChecker from "./PasswordPolicyChecker";
 import type { AuthError } from "@/lib/types/auth";
+import { Button } from "@/components/ui";
 
 interface ResetPasswordFormProps {
   token: string;
@@ -78,9 +79,10 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       )}
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="block text-sm font-medium text-k-subtle">
           {t("newPasswordLabel")}
         </label>
+        {/* TODO: migrate to <Input> when primitive supports a trailing-icon slot. */}
         <div className="relative mt-1">
           <input
             id="password"
@@ -88,12 +90,12 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 pr-10 text-sm focus:border-k-volt focus:outline-none w-full"
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-k-muted hover:text-k-subtle"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
@@ -113,9 +115,10 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       </div>
 
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-k-subtle">
           {t("confirmPasswordLabel")}
         </label>
+        {/* TODO: migrate to <Input> when primitive supports a trailing-icon slot. */}
         <div className="relative mt-1">
           <input
             id="confirmPassword"
@@ -123,12 +126,12 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 pr-10 text-sm focus:border-k-volt focus:outline-none w-full"
           />
           <button
             type="button"
             onClick={() => setShowConfirmPassword((v) => !v)}
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-k-muted hover:text-k-subtle"
             aria-label={showConfirmPassword ? "Hide password" : "Show password"}
           >
             {showConfirmPassword ? (
@@ -146,13 +149,9 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-      >
+      <Button variant="volt" type="submit" disabled={loading} className="w-full">
         {loading ? t("submitting") : t("submit")}
-      </button>
+      </Button>
     </form>
   );
 }
