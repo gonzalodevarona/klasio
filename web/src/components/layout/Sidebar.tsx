@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSidebarIdentity } from "@/hooks/useSidebarIdentity";
 import { usePendingProofsCount } from "@/hooks/usePaymentProofs";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import KLogo from "@/components/layout/KLogo";
 import type { Role } from "@/lib/types/auth";
 import { primaryRole } from "@/lib/types/auth";
 import {
@@ -164,25 +165,20 @@ function NavLinks({
   );
 }
 
-// Brand block shown in the sidebar header.
+// Brand block shown in the sidebar header (desktop expanded only).
 function Brand({
   tenantName,
   collapsed,
-  brand,
-  brandSubtitle,
 }: {
   tenantName: string | null;
   collapsed: boolean;
-  brand: string;
-  brandSubtitle: string;
 }) {
   if (collapsed) return null;
   return (
     <div className="overflow-hidden">
-      <h1 className="text-xl font-bold text-white whitespace-nowrap">{brand}</h1>
-      <p className="text-xs text-gray-400 whitespace-nowrap">{brandSubtitle}</p>
+      <KLogo />
       {tenantName && (
-        <p className="text-xs font-medium text-indigo-400 whitespace-nowrap mt-0.5 truncate">
+        <p className="text-xs text-k-subtle whitespace-nowrap mt-0.5 truncate">
           {tenantName}
         </p>
       )}
@@ -433,7 +429,7 @@ export default function Sidebar() {
             collapsed ? "justify-center" : "justify-between",
           ].join(" ")}
         >
-          <Brand tenantName={tenantName} collapsed={collapsed} brand={t("brand")} brandSubtitle={t("brandSubtitle")} />
+          <Brand tenantName={tenantName} collapsed={collapsed} />
           <div className="flex items-center gap-1 shrink-0">
             {!collapsed && <NotificationBell />}
             <button
