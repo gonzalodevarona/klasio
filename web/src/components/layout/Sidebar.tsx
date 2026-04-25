@@ -44,7 +44,7 @@ interface NavItem {
 function NotificationBadge({ count, badgeMax }: { count: number; badgeMax: string }) {
   const label = count > 10 ? badgeMax : String(count);
   return (
-    <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none shrink-0">
+    <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-k-danger-text text-white text-[10px] font-bold leading-none shrink-0">
       {label}
     </span>
   );
@@ -108,6 +108,16 @@ function computeNavItems(roles: Role[], navItemsByRole: Record<Role, NavItem[]>)
   return result;
 }
 
+function navItemClasses(active: boolean, collapsed: boolean) {
+  return [
+    "relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+    active
+      ? "bg-k-sidebar-active text-white"
+      : "text-k-muted hover:bg-k-sidebar-active hover:text-white",
+    collapsed ? "justify-center" : "",
+  ].join(" ");
+}
+
 // Module-level component so its identity is stable across renders.
 function NavLinks({
   items,
@@ -135,24 +145,24 @@ function NavLinks({
           pendingProofsCount != null &&
           pendingProofsCount > 0;
         return (
-          <li key={href}>
+          <li key={href} className="relative">
             <Link
               href={href}
               onClick={onLinkClick}
               title={collapsed ? label : undefined}
-              className={[
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white",
-                collapsed ? "justify-center" : "",
-              ].join(" ")}
+              className={navItemClasses(isActive, collapsed)}
             >
+              {isActive && (
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-[20%] bottom-[20%] w-[3px] bg-k-volt rounded-r-full"
+                />
+              )}
               <div className="relative shrink-0">
-                <Icon className="h-5 w-5" />
+                <Icon className={`h-5 w-5 ${isActive ? "text-k-volt" : "text-k-subtle"}`} />
                 {/* Collapsed mode: dot indicator on the icon itself */}
                 {collapsed && pendingProofsCount != null && pendingProofsCount > 0 && href === "/payment-proofs" && (
-                  <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-red-500" />
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-k-danger-text" />
                 )}
               </div>
               {!collapsed && <span className="truncate">{label}</span>}
