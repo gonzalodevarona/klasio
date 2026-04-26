@@ -67,6 +67,7 @@ describe("NotificationList", () => {
           title: "t",
           body: "b",
           read: false,
+          readAt: null,
           createdAt: new Date().toISOString(),
           metadata: {},
         },

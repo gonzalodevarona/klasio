@@ -11,6 +11,7 @@ const baseNotification = {
   title: "Class alert",
   body: "Your class has an alert",
   read: false,
+  readAt: null,
   createdAt: new Date().toISOString(),
   metadata: { classId: "c-1" },
 } as const;
