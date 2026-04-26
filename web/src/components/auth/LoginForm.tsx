@@ -137,6 +137,7 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
             style={{ ...inputStyle, paddingRight: 40 }}
             onFocus={(e) => { e.currentTarget.style.borderColor = "#CAFF4D"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "#DDDDD8"; }}
