@@ -34,6 +34,9 @@ public class AdminDashboardController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Map<String, Object> details = (Map<String, Object>) auth.getDetails();
         String tenantId = (String) details.get("tenantId");
-        return tenantId != null ? UUID.fromString(tenantId) : null;
+        if (tenantId == null) {
+            throw new IllegalStateException("tenantId claim missing from JWT");
+        }
+        return UUID.fromString(tenantId);
     }
 }
