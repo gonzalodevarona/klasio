@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -90,13 +89,9 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
                         s -> s
                 ));
 
-        // 6. Fetch session IDs where student already has a REGISTERED registration
-        List<UUID> materializedSessionIds = materializedSessions.stream()
-                .map(s -> s.getId().value())
-                .collect(Collectors.toList());
-        Set<UUID> alreadyRegisteredIds = materializedSessionIds.isEmpty()
-                ? Set.of()
-                : registrationRepository.findRegisteredSessionIds(tenantId, studentId, materializedSessionIds);
+        // 6. Fetch active registrations for student in this window (for inline status display)
+        Map<UUID, AttendanceRegistrationRepository.RegistrationInfo> registrationBySessionId =
+                registrationRepository.findActiveRegistrationsBySessionId(tenantId, studentId, from, to);
 
         // 7. Time thresholds
         ZonedDateTime now    = ZonedDateTime.now(AttendanceTimeConstants.TENANT_ZONE);
@@ -137,14 +132,19 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
             ClassRegistrationView classView = classMap.get(tuple.classId());
             int maxStudents = classView.maxStudents();
 
-            // Filter: already registered
-            if (sessionId != null && alreadyRegisteredIds.contains(sessionId)) {
-                continue;
-            }
-
             // Filter: full unless includeFull=true
             if (!includeFull && currentCapacity >= maxStudents) {
                 continue;
+            }
+
+            UUID registrationId = null;
+            String registrationStatus = null;
+            if (sessionId != null) {
+                AttendanceRegistrationRepository.RegistrationInfo regInfo = registrationBySessionId.get(sessionId);
+                if (regInfo != null) {
+                    registrationId = regInfo.registrationId();
+                    registrationStatus = regInfo.registrationStatus();
+                }
             }
 
             result.add(new AvailableSessionView(
@@ -161,8 +161,8 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
                     status,
                     registrationOpen,
                     alertReason,
-                    null,   // registrationId — wired in Task 4
-                    null    // registrationStatus — wired in Task 4
+                    registrationId,
+                    registrationStatus
             ));
         }
 

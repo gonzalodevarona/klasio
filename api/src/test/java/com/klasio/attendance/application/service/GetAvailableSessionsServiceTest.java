@@ -28,8 +28,8 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -171,8 +171,8 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(oneTimeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -203,8 +203,8 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(cancelled));
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -212,12 +212,45 @@ class GetAvailableSessionsServiceTest {
     }
 
     // ------------------------------------------------------------------
-    // Already-registered sessions excluded
+    // Already-registered sessions shown with inline registration state
     // ------------------------------------------------------------------
 
     @Test
-    @DisplayName("session where student is already registered is excluded")
-    void alreadyRegistered_excluded() {
+    @DisplayName("already-registered session appears in results with registrationId and registrationStatus REGISTERED")
+    void alreadyRegistered_shownWithRegistrationState() {
+        LocalDate from = FUTURE_MONDAY;
+        LocalDate to   = from.plusDays(6);
+
+        UUID sessionId      = UUID.randomUUID();
+        UUID registrationId = UUID.randomUUID();
+
+        ClassSession scheduled = ClassSession.reconstitute(
+                ClassSessionId.of(sessionId), TENANT_ID, CLASS_ID,
+                FUTURE_MONDAY, START, END,
+                1, ClassSessionStatus.SCHEDULED,
+                null, null, null, null, null, null,
+                Instant.now(), UUID.randomUUID(), null, null
+        );
+
+        when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                .thenReturn(Optional.of(enrollment));
+        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+                .thenReturn(List.of(activeClass));
+        when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
+                .thenReturn(List.of(scheduled));
+        when(registrationRepository.findActiveRegistrationsBySessionId(eq(TENANT_ID), eq(STUDENT_ID), eq(from), eq(to)))
+                .thenReturn(Map.of(sessionId, new AttendanceRegistrationRepository.RegistrationInfo(registrationId, "REGISTERED")));
+
+        List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).registrationId()).isEqualTo(registrationId);
+        assertThat(result.get(0).registrationStatus()).isEqualTo("REGISTERED");
+    }
+
+    @Test
+    @DisplayName("unregistered session has null registrationId and registrationStatus")
+    void unregistered_hasNullRegistrationFields() {
         LocalDate from = FUTURE_MONDAY;
         LocalDate to   = from.plusDays(6);
 
@@ -236,12 +269,14 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(scheduled));
-        when(registrationRepository.findRegisteredSessionIds(eq(TENANT_ID), eq(STUDENT_ID), any()))
-                .thenReturn(Set.of(sessionId));
+        when(registrationRepository.findActiveRegistrationsBySessionId(eq(TENANT_ID), eq(STUDENT_ID), eq(from), eq(to)))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
-        assertThat(result).isEmpty();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).registrationId()).isNull();
+        assertThat(result.get(0).registrationStatus()).isNull();
     }
 
     // ------------------------------------------------------------------
@@ -260,8 +295,8 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -307,8 +342,8 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(soonClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -340,8 +375,8 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(pastClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -369,8 +404,8 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(full));
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> excluded = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
         assertThat(excluded).isEmpty();
@@ -382,8 +417,8 @@ class GetAvailableSessionsServiceTest {
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(full));
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> included = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, true);
         assertThat(included).hasSize(1);
