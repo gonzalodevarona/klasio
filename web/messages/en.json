@@ -864,7 +864,11 @@
     "newLoadingStudent": "Loading student…",
     "newNoEnrollments": "This student has no active program enrollments. Enroll them in a program first.",
     "newLoadingPlans": "Loading plans…",
-    "newNoPlans": "No active HOURS_BASED plans found for this program."
+    "newNoPlans": "No active HOURS_BASED plans found for this program.",
+    "hourBalanceTotalSuffix": "/ {purchased}h",
+    "hourBalanceRemaining": "hours remaining",
+    "hourBalanceConsumed": "Consumed: {hours}h",
+    "hourBalancePercentUsed": "{pct}% used"
   },
   "paymentProofs": {
     "pageTitle": "Payment Proof Queue",
@@ -1038,7 +1042,10 @@
     "alertTooltip": "Alert issued for this session",
     "quickLinksMemberships": "Memberships",
     "quickLinksEnrollments": "Enrollments",
-    "quickLinksClasses": "Classes"
+    "quickLinksClasses": "Classes",
+    "quickLinksMembershipsSub": "memberships",
+    "quickLinksEnrollmentsSub": "active classes",
+    "quickLinksClassesSub": "upcoming sessions"
   },
   "studentMembershipsPage": {
     "title": "My Memberships",
@@ -1067,12 +1074,39 @@
     "colEnrolled": "Enrolled"
   },
   "adminDashboard": {
-    "title": "Admin Dashboard",
-    "subtitle": "League overview",
-    "statStudents": "Students",
-    "statActiveMemberships": "Active memberships",
-    "statPendingProofs": "Pending proofs",
-    "statPrograms": "Programs"
+    "title": "Dashboard",
+    "subtitle": "Current period",
+    "actionValidatePayment": "Validate payment",
+    "actionRegisterClass": "Register class",
+    "actionViewStudents": "View students",
+    "actionPrograms": "Programs",
+    "kpiStudents": "Students",
+    "kpiNewThisMonth": "↑ {count} new this month",
+    "kpiHoursConsumed": "Hours consumed",
+    "kpiHoursConsumedSub": "This period",
+    "kpiPendingPayments": "Pending payments",
+    "kpiPendingAction": "Action required",
+    "kpiUpToDate": "Up to date",
+    "kpiActivePrograms": "Active programs",
+    "attendanceTitle": "Attendance control",
+    "attendanceStartClass": "Start class",
+    "attendanceEmpty": "No students with this status.",
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterExpiring": "Expiring soon",
+    "filterInactive": "Inactive",
+    "filterExpired": "Expired",
+    "filterNew": "New",
+    "tableStudent": "Student",
+    "tableProgram": "Program",
+    "tableHours": "Hours",
+    "tableStatus": "Status",
+    "statusActive": "Active",
+    "statusExpiring": "Expiring soon",
+    "statusInactive": "Inactive",
+    "statusExpired": "Expired",
+    "statusNew": "New",
+    "error": "Failed to load dashboard data."
   },
   "managerDashboard": {
     "title": "Manager Dashboard",

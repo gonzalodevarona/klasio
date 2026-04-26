@@ -864,7 +864,11 @@
     "newLoadingStudent": "Cargando estudiante…",
     "newNoEnrollments": "Este estudiante no tiene inscripciones activas. Inscríbelo en un programa primero.",
     "newLoadingPlans": "Cargando planes…",
-    "newNoPlans": "No se encontraron planes HOURS_BASED activos para este programa."
+    "newNoPlans": "No se encontraron planes HOURS_BASED activos para este programa.",
+    "hourBalanceTotalSuffix": "/ {purchased}h",
+    "hourBalanceRemaining": "horas restantes",
+    "hourBalanceConsumed": "Consumido: {hours}h",
+    "hourBalancePercentUsed": "{pct}% usado"
   },
   "paymentProofs": {
     "pageTitle": "Cola de comprobantes",
@@ -1038,7 +1042,10 @@
     "alertTooltip": "Se emitió una alerta para esta sesión",
     "quickLinksMemberships": "Membresías",
     "quickLinksEnrollments": "Inscripciones",
-    "quickLinksClasses": "Clases"
+    "quickLinksClasses": "Clases",
+    "quickLinksMembershipsSub": "membresías",
+    "quickLinksEnrollmentsSub": "clases activas",
+    "quickLinksClassesSub": "próximas sesiones"
   },
   "studentMembershipsPage": {
     "title": "Mis membresías",
@@ -1067,12 +1074,39 @@
     "colEnrolled": "Inscrito"
   },
   "adminDashboard": {
-    "title": "Panel de Administrador",
-    "subtitle": "Resumen de la liga",
-    "statStudents": "Estudiantes",
-    "statActiveMemberships": "Membresías activas",
-    "statPendingProofs": "Comprobantes pendientes",
-    "statPrograms": "Programas"
+    "title": "Dashboard",
+    "subtitle": "Período actual",
+    "actionValidatePayment": "Validar pago",
+    "actionRegisterClass": "Registrar clase",
+    "actionViewStudents": "Ver estudiantes",
+    "actionPrograms": "Programas",
+    "kpiStudents": "Estudiantes",
+    "kpiNewThisMonth": "↑ {count} nuevos este mes",
+    "kpiHoursConsumed": "Horas consumidas",
+    "kpiHoursConsumedSub": "Este período",
+    "kpiPendingPayments": "Pagos pendientes",
+    "kpiPendingAction": "Requieren acción",
+    "kpiUpToDate": "Al día",
+    "kpiActivePrograms": "Programas activos",
+    "attendanceTitle": "Control de asistencia",
+    "attendanceStartClass": "Iniciar clase",
+    "attendanceEmpty": "No hay estudiantes con este estado.",
+    "filterAll": "Todos",
+    "filterActive": "Activo",
+    "filterExpiring": "Por vencer",
+    "filterInactive": "Inactivo",
+    "filterExpired": "Vencida",
+    "filterNew": "Nuevo",
+    "tableStudent": "Estudiante",
+    "tableProgram": "Programa",
+    "tableHours": "Horas",
+    "tableStatus": "Estado",
+    "statusActive": "Activo",
+    "statusExpiring": "Por vencer",
+    "statusInactive": "Inactivo",
+    "statusExpired": "Vencida",
+    "statusNew": "Nuevo",
+    "error": "Error al cargar el dashboard."
   },
   "managerDashboard": {
     "title": "Panel de Coordinador",
