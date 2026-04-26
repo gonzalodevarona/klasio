@@ -57,7 +57,7 @@ class GetAvailableSessionsServiceTest {
 
     // A Monday far enough in the future (> 2h cutoff)
     private static final LocalDate FUTURE_MONDAY =
-            LocalDate.now(BOGOTA).plusDays(7)
+            LocalDate.now(BOGOTA).plusDays(3)
                      .with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
 
     private static final LocalTime START = LocalTime.of(9, 0);
@@ -81,30 +81,29 @@ class GetAvailableSessionsServiceTest {
     // ------------------------------------------------------------------
 
     @Test
-    @DisplayName("window > 30 days throws IllegalArgumentException")
+    @DisplayName("window > 7 days throws IllegalArgumentException")
     void windowExceedsMax_throwsIllegalArgument() {
         LocalDate from = LocalDate.now(BOGOTA);
-        LocalDate to   = from.plusDays(31);
+        LocalDate to   = from.plusDays(8);
 
         assertThatThrownBy(() -> service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("30");
+                .hasMessageContaining("7");
 
         verifyNoInteractions(enrollmentLookupPort, classDetailsPort, classSessionRepository, registrationRepository);
     }
 
     @Test
-    @DisplayName("window exactly 30 days does not throw on the window check")
-    void windowExactly30Days_doesNotThrowWindowError() {
+    @DisplayName("window exactly 7 days does not throw on the window check")
+    void windowExactly7Days_doesNotThrowWindowError() {
         LocalDate from = LocalDate.now(BOGOTA);
-        LocalDate to   = from.plusDays(30);
+        LocalDate to   = from.plusDays(7);
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
         when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
                 .thenReturn(List.of());
 
-        // No exception from the window guard — service returns empty list
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
         assertThat(result).isEmpty();
     }

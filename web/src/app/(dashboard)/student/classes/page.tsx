@@ -27,11 +27,11 @@ interface ClassSessionsPanelProps {
 
 function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
   const today = todayInTenantZone();
-  const twoWeeksOut = addDays(today, 14);
+  const oneWeekOut = addDays(today, 7);
 
   const { sessions, loading, error, refetch } = useAvailableSessions(programId, {
     from: today,
-    to: twoWeeksOut,
+    to: oneWeekOut,
   });
   const { register } = useRegisterForSession();
 
@@ -79,7 +79,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
   return (
     <div className="bg-k-bg px-4 py-3 border-t border-k-line">
       <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
-        Upcoming Sessions — next 2 weeks
+        Upcoming Sessions — next 7 days
       </p>
 
       {loading && (
@@ -100,7 +100,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
 
       {!loading && !error && classSessions.length === 0 && (
         <p className="text-sm text-k-muted py-1">
-          No upcoming sessions in the next 2 weeks.
+          No upcoming sessions in the next 7 days.
         </p>
       )}
 
