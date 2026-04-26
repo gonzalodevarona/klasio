@@ -132,4 +132,23 @@ public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
                 )
         ));
     }
+
+    @Override
+    public StatsProjection computeStatsForStudent(UUID tenantId, UUID studentId) {
+        applyTenantContext();
+        List<Object[]> rows = springDataRepository.computeStatsForStudent(tenantId, studentId);
+        if (rows.isEmpty()) {
+            return new StatsProjection(0L, 0L, 0L, 0L, 0L);
+        }
+        Object[] row = rows.get(0);
+        return new StatsProjection(
+                toLong(row[0]), toLong(row[1]), toLong(row[2]), toLong(row[3]), toLong(row[4])
+        );
+    }
+
+    private long toLong(Object val) {
+        if (val == null) return 0L;
+        if (val instanceof Number n) return n.longValue();
+        return Long.parseLong(val.toString());
+    }
 }

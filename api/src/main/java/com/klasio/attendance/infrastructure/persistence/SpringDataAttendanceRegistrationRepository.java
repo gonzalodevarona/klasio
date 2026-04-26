@@ -105,4 +105,21 @@ public interface SpringDataAttendanceRegistrationRepository
             @Param("studentId") UUID studentId,
             @Param("from")      LocalDate from,
             @Param("to")        LocalDate to);
+
+    @Query(value = """
+            SELECT
+              COUNT(*) FILTER (WHERE status IN ('PRESENT', 'PRESENT_NO_HOURS'))   AS attended,
+              COUNT(*) FILTER (WHERE status = 'CANCELLED_BY_STUDENT')              AS cancelled_by_student,
+              COUNT(*) FILTER (WHERE status IN ('SESSION_CANCELLED',
+                                                'CANCELLED_BY_SYSTEM'))            AS cancelled_by_system,
+              COUNT(*) FILTER (WHERE status = 'ABSENT')                            AS absent,
+              COALESCE(SUM(intended_hours)
+                       FILTER (WHERE status IN ('PRESENT', 'PRESENT_NO_HOURS')), 0) AS total_hours_consumed
+            FROM attendance_registrations
+            WHERE tenant_id  = :tenantId
+              AND student_id = :studentId
+            """, nativeQuery = true)
+    List<Object[]> computeStatsForStudent(
+            @Param("tenantId")  UUID tenantId,
+            @Param("studentId") UUID studentId);
 }

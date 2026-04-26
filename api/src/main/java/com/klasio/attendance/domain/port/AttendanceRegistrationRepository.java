@@ -64,4 +64,21 @@ public interface AttendanceRegistrationRepository {
      */
     Map<UUID, RegistrationInfo> findActiveRegistrationsBySessionId(
             UUID tenantId, UUID studentId, LocalDate from, LocalDate to);
+
+    /**
+     * Aggregate counts used to compute the attendance stats summary.
+     */
+    record StatsProjection(
+            long attended,
+            long cancelledByStudent,
+            long cancelledBySystem,
+            long absent,
+            long totalHoursConsumed
+    ) {}
+
+    /**
+     * Computes full-history attendance stats for a student within a tenant.
+     * No date window — spans all records.
+     */
+    StatsProjection computeStatsForStudent(UUID tenantId, UUID studentId);
 }
