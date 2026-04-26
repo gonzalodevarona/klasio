@@ -44,15 +44,15 @@ export default function NotificationList() {
       {/* Controls */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         {/* Tab toggle */}
-        <div className="flex gap-1 bg-gray-100 rounded-md p-1">
+        <div className="flex gap-1 bg-k-bg rounded-k-sm p-1">
           <button
             type="button"
             onClick={() => handleTabChange(false)}
             className={[
-              "px-3 py-1 text-sm rounded transition-colors",
+              "px-3 py-1 text-sm rounded-[6px] transition-colors",
               !unreadOnly
-                ? "bg-white font-medium text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700",
+                ? "bg-k-surface font-semibold text-k-dark shadow-k-card"
+                : "text-k-muted hover:text-k-dark",
             ].join(" ")}
           >
             {t("tabAll")}
@@ -61,10 +61,10 @@ export default function NotificationList() {
             type="button"
             onClick={() => handleTabChange(true)}
             className={[
-              "px-3 py-1 text-sm rounded transition-colors",
+              "px-3 py-1 text-sm rounded-[6px] transition-colors",
               unreadOnly
-                ? "bg-white font-medium text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700",
+                ? "bg-k-surface font-semibold text-k-dark shadow-k-card"
+                : "text-k-muted hover:text-k-dark",
             ].join(" ")}
           >
             {t("tabUnreadOnly")}
@@ -74,7 +74,7 @@ export default function NotificationList() {
         <button
           type="button"
           onClick={handleMarkAll}
-          className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
+          className="text-k-muted hover:text-k-dark text-sm font-medium transition-colors"
         >
           {t("markAllAsRead")}
         </button>
@@ -82,21 +82,21 @@ export default function NotificationList() {
 
       {/* Content */}
       {isLoading && (
-        <p className="text-sm text-gray-400 py-6 text-center">Loading…</p>
+        <p className="text-sm text-k-muted py-6 text-center">Loading…</p>
       )}
 
       {error && (
-        <p className="text-sm text-red-500 py-6 text-center">{error}</p>
+        <p className="text-sm text-k-danger-text py-6 text-center">{error}</p>
       )}
 
       {!isLoading && !error && notifications.length === 0 && (
-        <p className="text-sm text-gray-400 py-6 text-center">
+        <p className="text-sm text-k-muted py-6 text-center">
           {t("listEmpty")}
         </p>
       )}
 
       {!isLoading && !error && notifications.length > 0 && (
-        <div className="rounded-lg border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+        <div className="rounded-k-md border border-k-border divide-y divide-k-line overflow-hidden">
           {notifications.map((n) => (
             <NotificationItem key={n.id} notification={n} onRead={handleRead} />
           ))}
@@ -105,23 +105,23 @@ export default function NotificationList() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="flex items-center justify-between text-sm text-k-muted">
           <button
             type="button"
             disabled={page === 0}
             onClick={() => setPage((p) => Math.max(0, p - 1))}
-            className="px-3 py-1 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+            className="px-3 py-1 rounded border border-k-border disabled:opacity-40 hover:bg-k-bg transition-colors"
           >
             {tPag("previous")}
           </button>
-          <span>
+          <span className="font-[var(--font-mono)] text-xs">
             {tPag("summary", { current: page + 1, total: totalPages, count: totalPages })}
           </span>
           <button
             type="button"
             disabled={page >= totalPages - 1}
             onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1 rounded border border-gray-200 disabled:opacity-40 hover:bg-gray-50 transition-colors"
+            className="px-3 py-1 rounded border border-k-border disabled:opacity-40 hover:bg-k-bg transition-colors"
           >
             {tPag("next")}
           </button>
