@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
 import { useMyClasses } from "@/hooks/useMyClasses";
 import { useAvailableSessions } from "@/hooks/useAvailableSessions";
 import { useRegisterForSession } from "@/hooks/useRegisterForSession";
+import { useCancelRegistration } from "@/hooks/useCancelRegistration";
 import SessionCapacityBar from "@/components/attendance/SessionCapacityBar";
 import { Badge } from "@/components/ui";
 import { AvailableSession } from "@/lib/types/attendance";
@@ -16,6 +17,16 @@ function computeIntendedHours(start: string, end: string): number {
   const [eh, em] = end.split(":").map(Number);
   const durationMinutes = (eh * 60 + em) - (sh * 60 + sm);
   return Math.max(1, Math.floor(durationMinutes / 60));
+}
+
+/**
+ * Returns true if the cancellation window is still open for the given session.
+ * The window closes CANCELLATION_CUTOFF_MINUTES before the session starts.
+ */
+function isCancellableSession(sessionDate: string, startTime: string): boolean {
+  const sessionStart = new Date(`${sessionDate}T${startTime}`);
+  const cutoffMs = sessionStart.getTime() - AttendanceTimeConstants.CANCELLATION_CUTOFF_MINUTES * 60 * 1000;
+  return Date.now() < cutoffMs;
 }
 
 // ── ClassSessionsPanel ──────────────────────────────────────────────────────
@@ -34,45 +45,44 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
     to: oneWeekOut,
   });
   const { register } = useRegisterForSession();
+  const { cancel } = useCancelRegistration();
 
-  // Local copy of sessions — enables optimistic removal without touching the hook state.
-  const [localSessions, setLocalSessions] = useState<AvailableSession[]>([]);
   const [registerError, setRegisterError] = useState<string | null>(null);
+  // Keyed by `classId-sessionDate` — stores per-row cancel errors.
+  const [cancelErrors, setCancelErrors] = useState<Record<string, string>>({});
 
-  // Keep local copy in sync whenever the hook fetches fresh data.
-  useEffect(() => {
-    setLocalSessions(sessions);
-  }, [sessions]);
-
-  const classSessions = localSessions.filter(
+  const classSessions = sessions.filter(
     (s) => s.classId === classId && s.status !== "CANCELLED"
   );
 
   async function handleRegister(s: AvailableSession) {
     setRegisterError(null);
-
-    // Optimistic remove — row disappears before the backend responds.
-    setLocalSessions((prev) =>
-      prev.filter((x) => !(x.classId === s.classId && x.sessionDate === s.sessionDate))
-    );
-
     try {
       const hours = computeIntendedHours(s.startTime, s.endTime);
       await register(classId, s.sessionDate, hours);
-      // Silent background revalidation to stay in sync with the server.
       refetch();
     } catch (err) {
-      // Rollback — put the session back in date order.
-      setLocalSessions((prev) => {
-        const exists = prev.some(
-          (x) => x.classId === s.classId && x.sessionDate === s.sessionDate
-        );
-        if (exists) return prev;
-        return [...prev, s].sort((a, b) => a.sessionDate.localeCompare(b.sessionDate));
-      });
       setRegisterError(
         err instanceof Error ? err.message : "Failed to register. Please try again."
       );
+    }
+  }
+
+  async function handleCancel(s: AvailableSession) {
+    const rowKey = `${s.classId}-${s.sessionDate}`;
+    setCancelErrors((prev) => {
+      const next = { ...prev };
+      delete next[rowKey];
+      return next;
+    });
+    try {
+      await cancel(s.registrationId!);
+      refetch();
+    } catch (err) {
+      setCancelErrors((prev) => ({
+        ...prev,
+        [rowKey]: err instanceof Error ? err.message : "Failed to cancel. Please try again.",
+      }));
     }
   }
 
@@ -116,54 +126,93 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
           </thead>
           <tbody className="divide-y divide-k-line">
             {classSessions.map((s) => {
+              const rowKey = `${s.classId}-${s.sessionDate}`;
               const isFull = s.currentCapacity >= s.maxStudents;
-              const registrationOpen = s.registrationOpen !== false; // treat missing field as open
+              const registrationOpen = s.registrationOpen !== false;
+              const isRegistered = s.registrationStatus === "REGISTERED";
+              const canCancel = isRegistered && isCancellableSession(s.sessionDate, s.startTime);
+              const rowCancelErr = cancelErrors[rowKey] ?? null;
+
               return (
-                <tr key={`${s.classId}-${s.sessionDate}`}>
-                  <td className="py-2 pr-4 text-k-dark">
-                    <div className="flex items-center gap-1.5">
-                      <span>{formatSessionDate(s.sessionDate)}</span>
-                      {s.status === "ALERTED" && (
-                        <span
-                          title={s.alertReason ?? "Alert issued for this session"}
-                          className="inline-flex text-k-warn-text"
+                <React.Fragment key={rowKey}>
+                  <tr>
+                    <td className="py-2 pr-4 text-k-dark">
+                      <div className="flex items-center gap-1.5">
+                        <span>{formatSessionDate(s.sessionDate)}</span>
+                        {s.status === "ALERTED" && (
+                          <span
+                            title={s.alertReason ?? "Alert issued for this session"}
+                            className="inline-flex text-k-warn-text"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-2 pr-4 text-k-muted whitespace-nowrap">
+                      {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
+                    </td>
+                    <td className="py-2 pr-4">
+                      <SessionCapacityBar
+                        current={s.currentCapacity}
+                        max={s.maxStudents}
+                      />
+                    </td>
+                    <td className="py-2">
+                      {isRegistered ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-k-volt-text bg-k-volt/20 px-2 py-0.5 rounded">
+                            Registered
+                          </span>
+                          {canCancel ? (
+                            <button
+                              onClick={() => handleCancel(s)}
+                              className="text-xs text-k-danger-text hover:text-k-dark transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          ) : (
+                            <span
+                              title="Cancellation window closed"
+                              className="text-xs text-k-muted cursor-not-allowed"
+                            >
+                              Cancel
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleRegister(s)}
+                          disabled={isFull || !registrationOpen}
+                          title={
+                            !registrationOpen
+                              ? `Registration closes ${AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES} min before class`
+                              : isFull
+                              ? "This session is full"
+                              : undefined
+                          }
+                          className={[
+                            "rounded px-3 py-1 text-xs font-medium transition-colors",
+                            isFull || !registrationOpen
+                              ? "bg-k-bg text-k-muted cursor-not-allowed"
+                              : "bg-k-volt text-k-dark hover:bg-k-volt-hover",
+                          ].join(" ")}
                         >
-                          <AlertTriangle className="w-4 h-4" />
-                        </span>
+                          {isFull ? "Full" : !registrationOpen ? "Closed" : "Register"}
+                        </button>
                       )}
-                    </div>
-                  </td>
-                  <td className="py-2 pr-4 text-k-muted whitespace-nowrap">
-                    {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
-                  </td>
-                  <td className="py-2 pr-4">
-                    <SessionCapacityBar
-                      current={s.currentCapacity}
-                      max={s.maxStudents}
-                    />
-                  </td>
-                  <td className="py-2">
-                    <button
-                      onClick={() => handleRegister(s)}
-                      disabled={isFull || !registrationOpen}
-                      title={
-                        !registrationOpen
-                          ? `Registration closes ${AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES} min before class`
-                          : isFull
-                          ? "This session is full"
-                          : undefined
-                      }
-                      className={[
-                        "rounded px-3 py-1 text-xs font-medium transition-colors",
-                        isFull || !registrationOpen
-                          ? "bg-k-bg text-k-muted cursor-not-allowed"
-                          : "bg-k-volt text-k-dark hover:bg-k-volt-hover",
-                      ].join(" ")}
-                    >
-                      {isFull ? "Full" : !registrationOpen ? "Closed" : "Register"}
-                    </button>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  {rowCancelErr && (
+                    <tr>
+                      <td colSpan={4} className="pb-2 pt-0">
+                        <div className="rounded bg-k-danger-bg border border-k-danger-text/30 px-3 py-1.5 text-xs text-k-danger-text">
+                          {rowCancelErr}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               );
             })}
           </tbody>
