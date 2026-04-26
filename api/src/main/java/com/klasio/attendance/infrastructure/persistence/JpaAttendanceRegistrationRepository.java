@@ -12,9 +12,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
@@ -114,5 +116,20 @@ public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
                 .map(mapper::toEntity)
                 .toList();
         springDataRepository.saveAll(entities);
+    }
+
+    @Override
+    public Map<UUID, RegistrationInfo> findActiveRegistrationsBySessionId(
+            UUID tenantId, UUID studentId, LocalDate from, LocalDate to) {
+        applyTenantContext();
+        List<Object[]> rows = springDataRepository
+                .findActiveRegistrationsInDateRange(tenantId, studentId, from, to);
+        return rows.stream().collect(Collectors.toMap(
+                row -> UUID.fromString(row[0].toString()),
+                row -> new RegistrationInfo(
+                        UUID.fromString(row[1].toString()),
+                        row[2].toString()
+                )
+        ));
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -51,4 +52,16 @@ public interface AttendanceRegistrationRepository {
     List<AttendanceRegistration> findAllNonCancelledBySessionId(UUID tenantId, UUID sessionId);
 
     void saveAll(List<AttendanceRegistration> registrations);
+
+    /**
+     * Lightweight view of a student's active (REGISTERED) registration for a session.
+     */
+    record RegistrationInfo(UUID registrationId, String registrationStatus) {}
+
+    /**
+     * Returns a map of sessionId → RegistrationInfo for all REGISTERED registrations
+     * the student has within the given date window.
+     */
+    Map<UUID, RegistrationInfo> findActiveRegistrationsBySessionId(
+            UUID tenantId, UUID studentId, LocalDate from, LocalDate to);
 }

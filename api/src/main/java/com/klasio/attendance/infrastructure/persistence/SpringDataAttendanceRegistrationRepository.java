@@ -91,4 +91,18 @@ public interface SpringDataAttendanceRegistrationRepository
             @Param("tenantId") UUID tenantId,
             @Param("classId")  UUID classId,
             @Param("fromDate") LocalDate fromDate);
+
+    @Query(value = """
+            SELECT session_id, id, status
+              FROM attendance_registrations
+             WHERE tenant_id   = :tenantId
+               AND student_id  = :studentId
+               AND session_date BETWEEN :from AND :to
+               AND status      = 'REGISTERED'
+            """, nativeQuery = true)
+    List<Object[]> findActiveRegistrationsInDateRange(
+            @Param("tenantId")  UUID tenantId,
+            @Param("studentId") UUID studentId,
+            @Param("from")      LocalDate from,
+            @Param("to")        LocalDate to);
 }
