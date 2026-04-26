@@ -11,7 +11,8 @@ import {
 import { ProfessorSummary } from "@/lib/types/professor";
 import CreateProfessorModal from "./CreateProfessorModal";
 import EditProfessorModal from "./EditProfessorModal";
-import { Table, Thead, Th, Tr, Td, Button } from "@/components/ui";
+import ProfessorStatusBadge from "./ProfessorStatusBadge";
+import { Table, Thead, Th, Tr, Td, Button, Select } from "@/components/ui";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -26,8 +27,8 @@ function Toggle({ checked, disabled, onChange }: {
     <button
       type="button" role="switch" aria-checked={checked} disabled={disabled} onClick={onChange}
       className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent
-        transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
-        disabled:opacity-40 disabled:cursor-not-allowed ${checked ? "bg-green-500" : "bg-gray-300"}`}
+        transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-k-volt focus:ring-offset-1
+        disabled:opacity-40 disabled:cursor-not-allowed ${checked ? "bg-k-volt" : "bg-k-border"}`}
     >
       <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0
         transition duration-200 ease-in-out ${checked ? "translate-x-4" : "translate-x-0"}`} />
@@ -35,22 +36,6 @@ function Toggle({ checked, disabled, onChange }: {
   );
 }
 
-// ── Status badge ──────────────────────────────────────────────────────────────
-
-const STATUS_COLORS: Record<string, string> = {
-  ACTIVE:      "bg-green-100 text-green-700",
-  INVITED:     "bg-yellow-100 text-yellow-700",
-  DEACTIVATED: "bg-gray-100 text-gray-500",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const t = useTranslations("badges.professorStatus");
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"}`}>
-      {t(status)}
-    </span>
-  );
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -158,31 +143,28 @@ export default function ProfessorList() {
     }
   }
 
-  const STATUS_TABS: { label: string; value: StatusFilter }[] = [
-    { label: t("filterActive"),      value: "ACTIVE" },
-    { label: t("filterDeactivated"), value: "DEACTIVATED" },
-    { label: t("filterAll"),         value: "" },
-  ];
-
   return (
     <div className="space-y-4">
-      {/* Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-md border border-gray-300 overflow-hidden shadow-sm">
-          {STATUS_TABS.map((tab, i) => (
-            <button key={tab.value} type="button" onClick={() => handleStatusFilter(tab.value)}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors
-                ${i < STATUS_TABS.length - 1 ? "border-r border-gray-300" : ""}
-                ${statusFilter === tab.value ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <Button variant="primary" size="sm" onClick={() => setShowCreateModal(true)}>
-          <Plus className="h-4 w-4" />
+      {/* Page header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("pageTitle")}</h1>
+        <Button variant="volt" onClick={() => setShowCreateModal(true)}>
+          <Plus className="h-4 w-4 mr-1" />
           {t("addButton")}
         </Button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Select
+          label={t("filterStatusLabel")}
+          value={statusFilter}
+          onChange={(e) => handleStatusFilter(e.target.value as StatusFilter)}
+        >
+          <option value="">{t("filterAll")}</option>
+          <option value="ACTIVE">{t("filterActive")}</option>
+          <option value="DEACTIVATED">{t("filterDeactivated")}</option>
+        </Select>
       </div>
 
       {(error || actionError) && (
@@ -221,7 +203,7 @@ export default function ProfessorList() {
                     <span className="font-[var(--font-mono)]">{p.identityDocumentType}</span>{" "}{p.identityNumber}
                   </Td>
                   <Td>
-                    <StatusBadge status={p.status} />
+                    <ProfessorStatusBadge status={p.status} />
                   </Td>
                   <Td muted>{formatDate(p.createdAt)}</Td>
                   <Td right>
@@ -246,8 +228,8 @@ export default function ProfessorList() {
             </tbody>
           </Table>
 
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-700">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
+          <div className="flex items-center justify-between border-t border-k-line pt-4">
+            <p className="text-sm text-k-subtle">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
             <div className="flex gap-2">
               <Button
                 variant="outline"

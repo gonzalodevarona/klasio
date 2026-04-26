@@ -75,9 +75,9 @@ export default function StudentMembershipsPage() {
               {/* Key info */}
               <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
                 <div>
-                  <span className="text-k-muted">{t("expires")} </span>
-                  <span className="font-medium text-k-dark">
-                    {formatDate(m.expirationDate)}
+                  <span className="text-k-muted">{t("period")} </span>
+                  <span className="font-medium text-k-dark font-mono text-xs">
+                    {formatDate(m.startDate)} → {formatDate(m.expirationDate)}
                   </span>
                 </div>
                 <div>
