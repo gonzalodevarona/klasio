@@ -23,6 +23,17 @@ export interface AvailableSession {
   status: SessionStatus;
   registrationOpen: boolean;
   alertReason?: string | null;
+  registrationId?: string | null;
+  registrationStatus?: string | null;
+}
+
+export interface AttendanceStats {
+  attended: number;
+  cancelledByStudent: number;
+  cancelledBySystem: number;
+  absent: number;
+  totalHoursConsumed: number;
+  attendanceRatePercent: number;
 }
 
 export interface Registration {

@@ -160,7 +160,9 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
                     maxStudents,
                     status,
                     registrationOpen,
-                    alertReason
+                    alertReason,
+                    null,   // registrationId — wired in Task 4
+                    null    // registrationStatus — wired in Task 4
             ));
         }
 

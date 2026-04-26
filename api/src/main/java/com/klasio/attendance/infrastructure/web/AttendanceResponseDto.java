@@ -59,7 +59,9 @@ public class AttendanceResponseDto {
             int maxStudents,
             String status,
             boolean registrationOpen,
-            String alertReason
+            String alertReason,
+            UUID registrationId,
+            String registrationStatus
     ) {
         public static AvailableSessionResponse from(AvailableSessionView view) {
             return new AvailableSessionResponse(
@@ -75,7 +77,9 @@ public class AttendanceResponseDto {
                     view.maxStudents(),
                     view.status(),
                     view.registrationOpen(),
-                    view.alertReason()
+                    view.alertReason(),
+                    view.registrationId(),
+                    view.registrationStatus()
             );
         }
     }
