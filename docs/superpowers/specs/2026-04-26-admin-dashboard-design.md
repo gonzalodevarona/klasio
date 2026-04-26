@@ -268,7 +268,44 @@ Color keyed to consumption percentage (`consumed = purchased - available`):
 
 ### 5.7 Labels
 
-Hardcoded Spanish strings (matching existing page intent and design mockup). i18n migration is a separate task.
+All user-facing strings use next-intl (`useTranslations("adminDashboard")`). English is the default locale; Spanish loads when the tenant's language is `es`. New keys are added to both `messages/en.json` and `messages/es.json` under the `adminDashboard` namespace.
+
+Key inventory (English default → Spanish):
+
+| Key | EN | ES |
+|---|---|---|
+| `title` | Dashboard | Dashboard |
+| `subtitle` | Current period | Período actual |
+| `action.validatePayment` | Validate payment | Validar pago |
+| `action.registerClass` | Register class | Registrar clase |
+| `action.viewStudents` | View students | Ver estudiantes |
+| `action.programs` | Programs | Programas |
+| `kpi.students` | Students | Estudiantes |
+| `kpi.hoursConsumed` | Hours consumed | Horas consumidas |
+| `kpi.hoursConsumedSub` | This period | Este período |
+| `kpi.pendingPayments` | Pending payments | Pagos pendientes |
+| `kpi.pendingAction` | Action required | Requieren acción |
+| `kpi.upToDate` | Up to date | Al día |
+| `kpi.activePrograms` | Active programs | Programas activos |
+| `kpi.newThisMonth` | ↑ {count} this month | ↑ {count} este mes |
+| `attendance.title` | Attendance control | Control de asistencia |
+| `attendance.startClass` | Start class | Iniciar clase |
+| `attendance.empty` | No students with this status. | No hay estudiantes con este estado. |
+| `filter.all` | All | Todos |
+| `filter.active` | Active | Activo |
+| `filter.expiring` | Expiring | Por vencer |
+| `filter.inactive` | Inactive | Inactivo |
+| `filter.expired` | Expired | Vencida |
+| `filter.new` | New | Nuevo |
+| `table.student` | Student | Estudiante |
+| `table.program` | Program | Programa |
+| `table.hours` | Hours | Horas |
+| `table.status` | Status | Estado |
+| `status.active` | Active | Activo |
+| `status.expiring` | Expiring | Por vencer |
+| `status.inactive` | Inactive | Inactivo |
+| `status.expired` | Expired | Vencida |
+| `status.new` | New | Nuevo |
 
 ---
 
