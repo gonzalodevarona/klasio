@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
 import { useMyClasses } from "@/hooks/useMyClasses";
 import { useAvailableSessions } from "@/hooks/useAvailableSessions";
@@ -37,6 +38,7 @@ interface ClassSessionsPanelProps {
 }
 
 function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
+  const t = useTranslations("studentClasses");
   const today = todayInTenantZone();
   const oneWeekOut = addDays(today, 7);
 
@@ -48,7 +50,6 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
   const { cancel } = useCancelRegistration();
 
   const [registerError, setRegisterError] = useState<string | null>(null);
-  // Keyed by `classId-sessionDate` — stores per-row cancel errors.
   const [cancelErrors, setCancelErrors] = useState<Record<string, string>>({});
 
   const classSessions = sessions.filter(
@@ -63,7 +64,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
       refetch();
     } catch (err) {
       setRegisterError(
-        err instanceof Error ? err.message : "Failed to register. Please try again."
+        err instanceof Error ? err.message : t("registerError")
       );
     }
   }
@@ -81,7 +82,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
     } catch (err) {
       setCancelErrors((prev) => ({
         ...prev,
-        [rowKey]: err instanceof Error ? err.message : "Failed to cancel. Please try again.",
+        [rowKey]: err instanceof Error ? err.message : t("cancelError"),
       }));
     }
   }
@@ -89,11 +90,11 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
   return (
     <div className="bg-k-bg px-4 py-3 border-t border-k-line">
       <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
-        Upcoming Sessions — next 7 days
+        {t("sessionsLabel")}
       </p>
 
       {loading && (
-        <p className="text-sm text-k-muted py-2">Loading sessions…</p>
+        <p className="text-sm text-k-muted py-2">{t("sessionsLoading")}</p>
       )}
 
       {error && (
@@ -110,7 +111,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
 
       {!loading && !error && classSessions.length === 0 && (
         <p className="text-sm text-k-muted py-1">
-          No upcoming sessions in the next 7 days.
+          {t("sessionsEmpty")}
         </p>
       )}
 
@@ -118,9 +119,9 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
         <table className="min-w-full text-sm">
           <thead>
             <tr className="text-xs text-k-muted">
-              <th className="py-1 pr-4 text-left font-medium">Date</th>
-              <th className="py-1 pr-4 text-left font-medium">Time</th>
-              <th className="py-1 pr-4 text-left font-medium">Capacity</th>
+              <th className="py-1 pr-4 text-left font-medium">{t("colDate")}</th>
+              <th className="py-1 pr-4 text-left font-medium">{t("colTime")}</th>
+              <th className="py-1 pr-4 text-left font-medium">{t("colCapacity")}</th>
               <th className="py-1 text-left font-medium"></th>
             </tr>
           </thead>
@@ -141,7 +142,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                         <span>{formatSessionDate(s.sessionDate)}</span>
                         {s.status === "ALERTED" && (
                           <span
-                            title={s.alertReason ?? "Alert issued for this session"}
+                            title={s.alertReason ?? t("alertDefault")}
                             className="inline-flex text-k-warn-text"
                           >
                             <AlertTriangle className="w-4 h-4" />
@@ -162,21 +163,21 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                       {isRegistered ? (
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-k-volt-text bg-k-volt/20 px-2 py-0.5 rounded">
-                            Registered
+                            {t("registeredBadge")}
                           </span>
                           {canCancel ? (
                             <button
                               onClick={() => handleCancel(s)}
                               className="text-xs text-k-danger-text hover:text-k-dark transition-colors"
                             >
-                              Cancel
+                              {t("cancelButton")}
                             </button>
                           ) : (
                             <span
-                              title="Cancellation window closed"
+                              title={t("cancelWindowClosed")}
                               className="text-xs text-k-muted cursor-not-allowed"
                             >
-                              Cancel
+                              {t("cancelButton")}
                             </span>
                           )}
                         </div>
@@ -186,9 +187,9 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                           disabled={isFull || !registrationOpen}
                           title={
                             !registrationOpen
-                              ? `Registration closes ${AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES} min before class`
+                              ? t("registerClosesTooltip", { minutes: AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES })
                               : isFull
-                              ? "This session is full"
+                              ? t("registerFullTooltip")
                               : undefined
                           }
                           className={[
@@ -198,7 +199,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                               : "bg-k-volt text-k-dark hover:bg-k-volt-hover",
                           ].join(" ")}
                         >
-                          {isFull ? "Full" : !registrationOpen ? "Closed" : "Register"}
+                          {isFull ? t("registerFull") : !registrationOpen ? t("registerClosed") : t("registerButton")}
                         </button>
                       )}
                     </td>
@@ -225,6 +226,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
 // ── Page ────────────────────────────────────────────────────────────────────
 
 export default function StudentClassesPage() {
+  const t = useTranslations("studentClasses");
   const { classes, loading, error } = useMyClasses();
   const [expandedClassId, setExpandedClassId] = useState<string | null>(null);
 
@@ -235,14 +237,14 @@ export default function StudentClassesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">My Classes</h1>
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
         <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
-          Classes available to you based on your enrollment level.
+          {t("subtitle")}
         </p>
       </div>
 
       {loading && (
-        <p className="py-8 text-center text-sm text-k-muted">Loading…</p>
+        <p className="py-8 text-center text-sm text-k-muted">{t("loading")}</p>
       )}
 
       {error && (
@@ -253,7 +255,7 @@ export default function StudentClassesPage() {
 
       {!loading && !error && classes.length === 0 && (
         <p className="py-8 text-center text-sm text-k-muted">
-          No classes found. Make sure you have an active enrollment.
+          {t("empty")}
         </p>
       )}
 
@@ -263,16 +265,16 @@ export default function StudentClassesPage() {
             <thead className="bg-k-bg">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Class
+                  {t("colClass")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Program
+                  {t("colProgram")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Level
+                  {t("colLevel")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Capacity
+                  {t("colCapacity")}
                 </th>
                 <th className="w-8" />
               </tr>

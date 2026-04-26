@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { AttendanceStats } from "@/lib/types/attendance";
 
 interface Props {
@@ -17,6 +18,8 @@ function SkeletonCard() {
 }
 
 export default function AttendanceStatsBar({ stats, loading }: Props) {
+  const t = useTranslations("studentAttendance");
+
   if (loading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -31,10 +34,9 @@ export default function AttendanceStatsBar({ stats, loading }: Props) {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      {/* Attended + rate */}
       <div className="rounded-k-lg border-[1.5px] border-k-border bg-k-surface p-4">
         <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
-          Attended
+          {t("statsAttended")}
         </p>
         <div className="flex items-baseline gap-2">
           <span className="text-[32px] font-extrabold text-k-dark leading-none">
@@ -46,30 +48,27 @@ export default function AttendanceStatsBar({ stats, loading }: Props) {
         </div>
       </div>
 
-      {/* Cancelled */}
       <div className="rounded-k-lg border-[1.5px] border-k-border bg-k-surface p-4">
         <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
-          Cancelled
+          {t("statsCancelled")}
         </p>
         <span className="text-[32px] font-extrabold text-k-dark leading-none">
           {totalCancelled}
         </span>
       </div>
 
-      {/* Absent */}
       <div className="rounded-k-lg border-[1.5px] border-k-border bg-k-surface p-4">
         <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
-          Absent
+          {t("statsAbsent")}
         </p>
         <span className="text-[32px] font-extrabold text-k-dark leading-none">
           {stats.absent}
         </span>
       </div>
 
-      {/* Hours consumed */}
       <div className="rounded-k-lg border-[1.5px] border-k-border bg-k-surface p-4">
         <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
-          Hours consumed
+          {t("statsHours")}
         </p>
         <span className="text-[32px] font-extrabold text-k-dark leading-none">
           {stats.totalHoursConsumed}h

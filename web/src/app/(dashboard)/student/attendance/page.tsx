@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { useCancelRegistration } from "@/hooks/useCancelRegistration";
 import { useAttendanceStats } from "@/hooks/useAttendanceStats";
@@ -27,20 +28,21 @@ type FilterKey = "ALL" | "REGISTERED" | "PRESENT" | "CANCELLED_BY_STUDENT" | "AB
 
 interface FilterOption {
   key: FilterKey;
-  label: string;
+  labelKey: string;
   status: string | undefined;
 }
 
-const FILTER_OPTIONS: FilterOption[] = [
-  { key: "ALL",                label: "All",       status: undefined },
-  { key: "REGISTERED",         label: "Registered", status: "REGISTERED" },
-  { key: "PRESENT",            label: "Attended",   status: "PRESENT" },
-  { key: "CANCELLED_BY_STUDENT", label: "Cancelled", status: "CANCELLED_BY_STUDENT" },
-  { key: "ABSENT",             label: "Absent",     status: "ABSENT" },
+const FILTER_DEFS: FilterOption[] = [
+  { key: "ALL",                  labelKey: "filterAll",        status: undefined },
+  { key: "REGISTERED",           labelKey: "filterRegistered", status: "REGISTERED" },
+  { key: "PRESENT",              labelKey: "filterAttended",   status: "PRESENT" },
+  { key: "CANCELLED_BY_STUDENT", labelKey: "filterCancelled",  status: "CANCELLED_BY_STUDENT" },
+  { key: "ABSENT",               labelKey: "filterAbsent",     status: "ABSENT" },
 ];
 
 export default function StudentAttendancePage() {
-  const [activeFilter, setActiveFilter] = useState<FilterOption>(FILTER_OPTIONS[0]);
+  const t = useTranslations("studentAttendance");
+  const [activeFilter, setActiveFilter] = useState<FilterOption>(FILTER_DEFS[0]);
 
   const { registrations, loading, error, refetch } = useMyRegistrations(
     activeFilter.status ? { status: activeFilter.status } : {}
@@ -62,7 +64,10 @@ export default function StudentAttendancePage() {
     try {
       await cancel(confirmTarget.id);
       setSuccessMessage(
-        `Registration for "${confirmTarget.className}" on ${formatSessionDate(confirmTarget.sessionDate)} cancelled.`
+        t("successMessage", {
+          className: confirmTarget.className,
+          date: formatSessionDate(confirmTarget.sessionDate),
+        })
       );
       setConfirmTarget(null);
       refetch();
@@ -74,16 +79,16 @@ export default function StudentAttendancePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">Attendance</h1>
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
         <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
-          Your complete class session history.
+          {t("subtitle")}
         </p>
       </div>
 
       <AttendanceStatsBar stats={stats} loading={statsLoading} />
 
       <div className="mb-4 flex flex-wrap gap-2">
-        {FILTER_OPTIONS.map((opt) => (
+        {FILTER_DEFS.map((opt) => (
           <button
             key={opt.key}
             onClick={() => setActiveFilter(opt)}
@@ -93,7 +98,7 @@ export default function StudentAttendancePage() {
                 : "bg-k-surface text-k-subtle border-k-border hover:border-k-subtle hover:text-k-dark"
             }`}
           >
-            {opt.label}
+            {t(opt.labelKey as Parameters<typeof t>[0])}
           </button>
         ))}
       </div>
@@ -111,7 +116,7 @@ export default function StudentAttendancePage() {
       )}
 
       {loading && (
-        <p className="py-8 text-center text-sm text-k-muted">Loading…</p>
+        <p className="py-8 text-center text-sm text-k-muted">{t("loading")}</p>
       )}
 
       {error && (
@@ -122,7 +127,7 @@ export default function StudentAttendancePage() {
 
       {!loading && !error && registrations.length === 0 && (
         <p className="py-8 text-center text-sm text-k-muted">
-          No records found for the selected filter.
+          {t("emptyFilter")}
         </p>
       )}
 
@@ -132,25 +137,25 @@ export default function StudentAttendancePage() {
             <thead className="bg-k-bg">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Date
+                  {t("colDate")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Time
+                  {t("colTime")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Class
+                  {t("colClass")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Level
+                  {t("colLevel")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Hours
+                  {t("colHours")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Status
+                  {t("colStatus")}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  Actions
+                  {t("colActions")}
                 </th>
               </tr>
             </thead>
@@ -170,7 +175,7 @@ export default function StudentAttendancePage() {
                       {r.className}
                       {r.status === "SESSION_CANCELLED" && r.sessionCancellationReason && (
                         <div className="mt-0.5 text-xs italic text-k-danger-text">
-                          Reason: {r.sessionCancellationReason}
+                          {t("reason")} {r.sessionCancellationReason}
                         </div>
                       )}
                     </td>
@@ -202,18 +207,18 @@ export default function StudentAttendancePage() {
                             onClick={() => handleCancelClick(r)}
                             className="text-xs font-medium text-k-danger-text hover:text-k-dark transition-colors"
                           >
-                            Cancel
+                            {t("cancelButton")}
                           </button>
                         ) : (
                           <span
                             title={
                               inPast
-                                ? "Session has already started"
-                                : `Cancellation window closed (${AttendanceTimeConstants.CANCELLATION_CUTOFF_MINUTES} min before class)`
+                                ? t("sessionStarted")
+                                : t("cancelCutoffClosed", { minutes: AttendanceTimeConstants.CANCELLATION_CUTOFF_MINUTES })
                             }
                             className="text-xs text-k-muted cursor-not-allowed"
                           >
-                            Cancel
+                            {t("cancelButton")}
                           </span>
                         )
                       )}
@@ -226,20 +231,19 @@ export default function StudentAttendancePage() {
         </div>
       )}
 
-      {/* Confirmation modal */}
       {confirmTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-k-surface rounded-k-lg shadow-k-modal p-6 max-w-sm w-full mx-4">
             <h2 className="text-lg font-semibold text-k-dark mb-2">
-              Cancel registration?
+              {t("modalTitle")}
             </h2>
             <p className="text-sm text-k-muted mb-4">
-              Cancel your registration for{" "}
-              <span className="font-medium text-k-dark">{confirmTarget.className}</span> on{" "}
-              <span className="font-medium text-k-dark">
-                {formatSessionDate(confirmTarget.sessionDate)}
-              </span>{" "}
-              at {confirmTarget.sessionStartTime.slice(0, 5)}? Your spot will be released.
+              {t.rich("modalBody", {
+                className: confirmTarget.className,
+                date: formatSessionDate(confirmTarget.sessionDate),
+                time: confirmTarget.sessionStartTime.slice(0, 5),
+                b: (chunks) => <span className="font-medium text-k-dark">{chunks}</span>,
+              })}
             </p>
 
             {cancelError && (
@@ -253,7 +257,7 @@ export default function StudentAttendancePage() {
                 onClick={() => { setConfirmTarget(null); clearError(); }}
                 disabled={cancelling}
               >
-                Keep
+                {t("modalKeep")}
               </Button>
               <Button
                 variant="danger"
@@ -261,7 +265,7 @@ export default function StudentAttendancePage() {
                 onClick={handleConfirmCancel}
                 disabled={cancelling}
               >
-                {cancelling ? "Cancelling…" : "Yes, cancel"}
+                {cancelling ? t("modalConfirming") : t("modalConfirm")}
               </Button>
             </div>
           </div>
