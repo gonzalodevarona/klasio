@@ -191,7 +191,7 @@ export default function AdminDashboard() {
             value={data?.studentCount ?? 0}
             sub={
               (data?.newStudentsThisMonth ?? 0) > 0
-                ? t("kpiNewThisMonth", { count: data!.newStudentsThisMonth })
+                ? t("kpiNewThisMonth", { count: data?.newStudentsThisMonth ?? 0 })
                 : undefined
             }
             subColor="#2A8A00"
