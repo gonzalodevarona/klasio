@@ -51,7 +51,7 @@ export default async function LoginPage() {
             marginBottom: 20,
           }}>
             {t("heroLine1")}<br />
-            <span style={{ color: "#CAFF4D" }}>{t("heroAccent")}</span>{t("heroLine2")}<br />
+            <span style={{ color: "#CAFF4D" }}>{t("heroAccent")}</span>{" "}{t("heroLine2")}<br />
             {t("heroLine3")}
           </h2>
           <p style={{ fontSize: 14, color: "#4A4A48", lineHeight: 1.7, maxWidth: 280 }}>
@@ -61,9 +61,9 @@ export default async function LoginPage() {
 
         {/* BOTTOM: tag pills */}
         <div style={{ display: "flex", gap: 16 }}>
-          {[t("tag1"), t("tag2"), t("tag3")].map((tag) => (
+          {(["tag1", "tag2", "tag3"] as const).map((k) => (
             <span
-              key={tag}
+              key={k}
               style={{
                 fontFamily: "var(--font-mono)",
                 fontSize: 10,
@@ -74,7 +74,7 @@ export default async function LoginPage() {
                 padding: "4px 10px",
               }}
             >
-              {tag}
+              {t(k)}
             </span>
           ))}
         </div>
