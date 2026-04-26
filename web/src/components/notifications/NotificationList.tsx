@@ -16,16 +16,16 @@ export default function NotificationList() {
   const [page, setPage] = useState(0);
   const [unreadOnly, setUnreadOnly] = useState(false);
 
-  const { notifications, totalPages, isLoading, error, refresh } =
+  const { notifications, totalPages, isLoading, error, refresh, markReadOptimistic } =
     useNotifications(page, unreadOnly);
   const { markRead } = useMarkNotificationRead();
   const { markAllRead } = useMarkAllNotificationsRead();
   const { refreshCount } = useNotificationCount();
 
   async function handleRead(id: string) {
-    await markRead(id);
-    refresh();
+    markReadOptimistic(id);
     refreshCount();
+    await markRead(id);
   }
 
   async function handleMarkAll() {

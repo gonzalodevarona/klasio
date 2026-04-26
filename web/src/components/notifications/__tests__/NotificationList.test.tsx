@@ -32,6 +32,7 @@ function setNotifications(state: {
     isLoading: state.isLoading ?? false,
     error: state.error ?? null,
     refresh: jest.fn(),
+    markReadOptimistic: jest.fn(),
   });
 }
 
