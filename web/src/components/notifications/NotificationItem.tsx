@@ -47,22 +47,25 @@ export default function NotificationItem({
       type="button"
       onClick={handleClick}
       className={[
-        "w-full text-left flex items-start gap-3 px-4 py-3 transition-colors",
-        "hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500",
-        notification.read ? "bg-white" : "bg-blue-50",
+        "relative w-full text-left flex items-start gap-3 px-4 py-3 transition-colors",
+        "hover:bg-k-bg focus:outline-none focus-visible:ring-2 focus-visible:ring-k-volt",
+        notification.read ? "bg-k-surface" : "bg-[#F9FFEA]",
       ].join(" ")}
     >
-      <div className="mt-0.5 shrink-0">
+      {!notification.read && (
+        <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-k-volt rounded-r-full" />
+      )}
+      <div className="mt-0.5 shrink-0 w-8 h-8 rounded-[8px] bg-k-bg flex items-center justify-center">
         <NotificationTypeIcon type={notification.type} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-gray-900 truncate">
+        <p className="text-sm font-medium text-k-dark truncate">
           {notification.title}
         </p>
-        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+        <p className="text-xs text-k-muted mt-0.5 line-clamp-2">
           {notification.body}
         </p>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-[#9A9A98] font-[var(--font-mono)] text-[10px] mt-1">
           {formatRelativeTime(notification.createdAt)}
         </p>
       </div>
