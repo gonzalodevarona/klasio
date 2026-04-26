@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { Notification } from "@/hooks/useNotifications";
 import NotificationTypeIcon from "./NotificationTypeIcon";
 
@@ -25,19 +24,8 @@ export default function NotificationItem({
   notification,
   onRead,
 }: NotificationItemProps) {
-  const router = useRouter();
-
   function handleClick() {
     onRead(notification.id);
-
-    const isSessionType =
-      notification.type === "CLASS_SESSION_ALERTED" ||
-      notification.type === "CLASS_SESSION_CANCELLED";
-    const classId = notification.metadata?.classId;
-
-    if (isSessionType && classId) {
-      router.push(`/classes/${classId}`);
-    }
   }
 
   return (
