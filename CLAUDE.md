@@ -212,6 +212,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | `merged/008-payment-proof-validation` | RF-19, RF-20, RF-21 | RF-19 ✅, RF-20 ✅, RF-21 ✅ |
 | `merged/010-class-alert-cancellation` | RF-27, RF-28 | RF-27 ✅, RF-28 ✅ (in-app only) |
 | `merged/013-tenant-i18n` | RF-32 | RF-32 ✅ (+ i18n via next-intl, unified account setup flow, tenant form overhaul with structured address + language) |
+| `feature/full-redesign` (active) | RF-23, RF-24, RF-25, RF-26, RF-29, RF-33 | RF-23 ✅, RF-24 ✅, RF-25 ✅, RF-26 ✅, RF-29 ✅, RF-33 ✅ |
 
 ### Remaining v1.0 work (P0 features not yet implemented)
 
@@ -219,13 +220,8 @@ When a feature branch is finished and ready to ship, always follow these steps i
 |---|---|---|
 | RF-10 | Program – Cost Modification History | No `cost_history` table; cost edit works but history missing |
 | RF-22 | Payment – Payment History | Not started |
-| RF-23 | Attendance – Student Registration | Not started |
-| RF-24 | Attendance – Student Cancellation | Blocked on RF-23 |
-| RF-25 | Attendance – Marking by Professor | Blocked on RF-23 |
-| RF-26 | Attendance – Marking by Manager | Blocked on RF-25 |
-| RF-29 | Student Dashboard | 🔄 Partial — attendance history not yet surfaced on dashboard |
-| RF-30 | Manager Dashboard | 🔄 Partial — only delegated memberships panel (blocked on RF-23/RF-25) |
-| RF-31 | Admin Dashboard | Not started — blocked on RF-22, RF-23/RF-25 |
+| RF-30 | Manager Dashboard | 🔄 Partial — only delegated memberships panel |
+| RF-31 | Admin Dashboard | Not started — blocked on RF-22 |
 
 ## Flyway Migration Ownership Rule
 
