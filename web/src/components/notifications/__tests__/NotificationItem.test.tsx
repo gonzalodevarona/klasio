@@ -44,13 +44,13 @@ describe("NotificationItem", () => {
     expect(button.querySelector("span.bg-k-volt")).toBeNull();
   });
 
-  it("renders the icon inside an 8x8 k-bg wrapper", () => {
+  it("renders the emoji inside an 8x8 k-bg wrapper", () => {
     const { container } = render(
       <NotificationItem notification={baseNotification} onRead={jest.fn()} />,
     );
     const wrapper = container.querySelector("div.bg-k-bg.w-8.h-8");
     expect(wrapper).not.toBeNull();
-    expect(wrapper?.querySelector("svg")).not.toBeNull();
+    expect(wrapper?.querySelector("[role='img']")).not.toBeNull();
   });
 
   it("uses the k-volt focus ring token on the outer button", () => {

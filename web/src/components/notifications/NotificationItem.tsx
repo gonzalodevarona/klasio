@@ -37,8 +37,6 @@ export default function NotificationItem({
 
     if (isSessionType && classId) {
       router.push(`/classes/${classId}`);
-    } else {
-      router.push("/notifications");
     }
   }
 

@@ -1,21 +1,25 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import NotificationTypeIcon from "../NotificationTypeIcon";
 
 describe("NotificationTypeIcon", () => {
-  it("renders ALERTED with k-warn-text token", () => {
-    const { container } = render(<NotificationTypeIcon type="CLASS_SESSION_ALERTED" />);
-    const svg = container.querySelector("svg");
-    expect(svg).not.toBeNull();
-    expect(svg).toHaveClass("text-k-warn-text");
+  it("renders ALERTED with warning emoji", () => {
+    render(<NotificationTypeIcon type="CLASS_SESSION_ALERTED" />);
+    const icon = screen.getByRole("img", { name: "CLASS_SESSION_ALERTED" });
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveTextContent("⚠️");
   });
 
-  it("renders CANCELLED with k-danger-text token", () => {
-    const { container } = render(<NotificationTypeIcon type="CLASS_SESSION_CANCELLED" />);
-    expect(container.querySelector("svg")).toHaveClass("text-k-danger-text");
+  it("renders CANCELLED with prohibited emoji", () => {
+    render(<NotificationTypeIcon type="CLASS_SESSION_CANCELLED" />);
+    const icon = screen.getByRole("img", { name: "CLASS_SESSION_CANCELLED" });
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveTextContent("🚫");
   });
 
-  it("renders default (unknown type) with k-muted token", () => {
-    const { container } = render(<NotificationTypeIcon type="SOME_OTHER_TYPE" />);
-    expect(container.querySelector("svg")).toHaveClass("text-k-muted");
+  it("renders default (unknown type) with bell emoji", () => {
+    render(<NotificationTypeIcon type="SOME_OTHER_TYPE" />);
+    const icon = screen.getByRole("img", { name: "SOME_OTHER_TYPE" });
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveTextContent("🔔");
   });
 });
