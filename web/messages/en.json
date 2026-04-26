@@ -1005,8 +1005,17 @@
     }
   },
   "loginPage": {
-    "title": "Klasio",
-    "subtitle": "Sports League Management"
+    "title": "Sign in",
+    "subtitle": "Enter your credentials to continue",
+    "tagline": "Sports management",
+    "heroLine1": "Manage your",
+    "heroAccent": "league",
+    "heroLine2": " with",
+    "heroLine3": "precision.",
+    "heroBody": "Attendance, memberships, payments and programs — all in one platform.",
+    "tag1": "Memberships",
+    "tag2": "Attendance",
+    "tag3": "Payments"
   },
   "forgotPasswordPage": {
     "title": "Forgot your password?",

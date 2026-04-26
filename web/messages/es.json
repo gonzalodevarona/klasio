@@ -1005,8 +1005,17 @@
     }
   },
   "loginPage": {
-    "title": "Klasio",
-    "subtitle": "Gestión de Liga Deportiva"
+    "title": "Iniciar sesión",
+    "subtitle": "Ingresa tus credenciales para continuar",
+    "tagline": "Gestión deportiva",
+    "heroLine1": "Administra tu",
+    "heroAccent": "liga",
+    "heroLine2": " con",
+    "heroLine3": "precisión.",
+    "heroBody": "Control de asistencia, membresías, pagos y programas en una sola plataforma.",
+    "tag1": "Membresías",
+    "tag2": "Asistencia",
+    "tag3": "Pagos"
   },
   "forgotPasswordPage": {
     "title": "¿Olvidaste tu contraseña?",
