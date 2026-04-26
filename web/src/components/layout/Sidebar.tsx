@@ -88,7 +88,7 @@ function makeNavItemsByRole(t: LayoutT): Record<Role, NavItem[]> {
       { label: t("navMyMemberships"),   href: "/student/memberships",   icon: BadgeCheck },
       { label: t("navMyEnrollments"),   href: "/student/enrollments",   icon: ClipboardList },
       { label: t("navMyClasses"),       href: "/student/classes",       icon: Calendar },
-      { label: t("navMyRegistrations"), href: "/student/registrations", icon: CalendarCheck },
+      { label: t("navAttendance"), href: "/student/attendance", icon: CalendarCheck },
     ],
   };
 }
@@ -178,19 +178,23 @@ function NavLinks({
 // Brand block shown in the sidebar header (desktop expanded only).
 function Brand({
   tenantName,
+  role,
   collapsed,
 }: {
   tenantName: string | null;
+  role: Role | undefined;
   collapsed: boolean;
 }) {
   if (collapsed) return null;
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden min-w-0">
       <KLogo />
+      <hr className="border-k-sidebar-active my-2" />
       {tenantName && (
-        <p className="text-xs text-k-subtle whitespace-nowrap mt-0.5 truncate">
-          {tenantName}
-        </p>
+        <p className="text-xs font-medium text-white truncate">{tenantName}</p>
+      )}
+      {role && (
+        <p className="text-[11px] text-k-subtle truncate">{role}</p>
       )}
     </div>
   );
@@ -341,12 +345,14 @@ export default function Sidebar() {
           <aside className="relative flex flex-col w-64 h-full bg-k-dark shadow-2xl">
             {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <KLogo />
+                <hr className="border-k-sidebar-active my-2" />
                 {tenantName && (
-                  <p className="text-xs text-k-subtle truncate mt-0.5">
-                    {tenantName}
-                  </p>
+                  <p className="text-xs font-medium text-white truncate">{tenantName}</p>
+                )}
+                {primaryUserRole && (
+                  <p className="text-[11px] text-k-subtle truncate">{primaryUserRole}</p>
                 )}
               </div>
               <button
@@ -402,7 +408,7 @@ export default function Sidebar() {
             collapsed ? "justify-center" : "justify-between",
           ].join(" ")}
         >
-          <Brand tenantName={tenantName} collapsed={collapsed} />
+          <Brand tenantName={tenantName} role={primaryUserRole} collapsed={collapsed} />
           <div className="flex items-center gap-1 shrink-0">
             {!collapsed && <NotificationBell />}
             <button

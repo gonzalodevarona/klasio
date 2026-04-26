@@ -63,8 +63,8 @@ export default function StudentDashboard() {
               available={activeMembership.availableHours}
               purchased={activeMembership.purchasedHours}
             />
-            <p className="text-xs text-k-muted">
-              {t("membershipExpires", { date: formatDate(activeMembership.expirationDate) })}
+            <p className="text-xs text-k-muted font-mono">
+              {t("membershipPeriod")} {formatDate(activeMembership.startDate)} → {formatDate(activeMembership.expirationDate)}
             </p>
             <Link
               href={`/student/memberships/${activeMembership.id}`}
@@ -119,7 +119,7 @@ export default function StudentDashboard() {
             {t("upcomingRegistrations")}
           </h2>
           <Link
-            href="/student/registrations"
+            href="/student/classes"
             className="text-xs text-k-subtle hover:text-k-dark font-medium"
           >
             {t("viewAll")}

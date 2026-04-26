@@ -198,11 +198,11 @@
     "navPrograms": "Programas",
     "navPlans": "Planes",
     "navClasses": "Clases",
-    "navPaymentProofs": "Comprobantes de Pago",
+    "navPaymentProofs": "Pruebas de Pago",
     "navMyMemberships": "Mis Membresías",
     "navMyEnrollments": "Mis Inscripciones",
     "navMyClasses": "Mis Clases",
-    "navMyRegistrations": "Mis Registros"
+    "navAttendance": "Asistencia"
   },
   "badges": {
     "membershipStatus": {
@@ -277,7 +277,7 @@
   },
   "students": {
     "pageTitle": "Estudiantes",
-    "addButton": "Agregar estudiante",
+    "addButton": "Nuevo estudiante",
     "filterStatusLabel": "Estado:",
     "filterSearchPlaceholder": "Buscar por nombre, correo o documento...",
     "listLoading": "Cargando estudiantes...",
@@ -363,12 +363,13 @@
   },
   "professors": {
     "pageTitle": "Profesores",
+    "filterStatusLabel": "Estado:",
     "filterAll": "Todos",
     "filterActive": "Activos",
     "filterDeactivated": "Desactivados",
     "listLoading": "Cargando profesores...",
     "listEmpty": "No hay profesores que coincidan con el filtro.",
-    "addButton": "Agregar profesor",
+    "addButton": "Nuevo profesor",
     "colName": "Nombre",
     "colEmail": "Correo",
     "colPhone": "Teléfono",
@@ -427,6 +428,7 @@
   },
   "managers": {
     "pageTitle": "Coordinadores",
+    "filterStatusLabel": "Estado:",
     "filterAll": "Todos",
     "filterActive": "Activos",
     "filterInactive": "Inactivos",
@@ -434,7 +436,7 @@
     "filterAllTenants": "Todas las ligas",
     "listLoading": "Cargando coordinadores...",
     "listEmpty": "No hay coordinadores que coincidan con el filtro.",
-    "createButton": "Crear coordinador",
+    "createButton": "Nuevo coordinador",
     "colName": "Nombre",
     "colEmail": "Correo",
     "colTenant": "Liga",
@@ -448,7 +450,7 @@
     "modalCancelButton": "Cancelar",
     "modalDeactivateButton": "Desactivar",
     "modalDeactivatingButton": "Desactivando...",
-    "formTitle": "Crear coordinador",
+    "formTitle": "Agregar coordinador",
     "editTitle": "Editar coordinador",
     "formTenantLabel": "Liga *",
     "formTenantPlaceholder": "Selecciona una liga...",
@@ -467,7 +469,7 @@
     "formIdNumberPlaceholder": "Número de documento",
     "formTempPasswordNote": "Se enviará un correo de configuración de cuenta a esta dirección. El coordinador deberá seguir el enlace para crear su contraseña antes de poder iniciar sesión.",
     "formCancelButton": "Cancelar",
-    "formCreateButton": "Crear coordinador",
+    "formCreateButton": "Agregar coordinador",
     "formCreatingButton": "Creando...",
     "formSaveButton": "Guardar cambios",
     "formSavingButton": "Guardando..."
@@ -1025,6 +1027,7 @@
     "activeMembership": "Membresía activa",
     "loading": "Cargando…",
     "membershipExpires": "Vence: {date}",
+    "membershipPeriod": "Período:",
     "viewDetails": "Ver detalles →",
     "noMembership": "Sin membresía activa.",
     "enrollmentsTitle": "Inscripciones",
@@ -1043,6 +1046,7 @@
     "newButton": "+ Nueva membresía",
     "loading": "Cargando…",
     "empty": "No tienes membresías aún.",
+    "period": "Período:",
     "expires": "Vence:",
     "paymentLabel": "Pago:",
     "paymentValidated": "Validado",
@@ -1094,5 +1098,23 @@
     "statTotalStudents": "Total estudiantes",
     "statActiveMemberships": "Membresías activas",
     "statMonthlyRevenue": "Ingresos mensuales"
+  },
+  "studentAttendance": {
+    "title": "Asistencia",
+    "subtitle": "Tu historial completo de sesiones.",
+    "filterAll": "Todos",
+    "filterAttended": "Asistidas",
+    "filterRegistered": "Registradas",
+    "filterCancelled": "Canceladas",
+    "filterAbsent": "Ausentes",
+    "emptyAll": "No hay registros de asistencia.",
+    "emptyAttended": "Aún no has asistido a ninguna sesión.",
+    "emptyRegistered": "No tienes próximas inscripciones.",
+    "emptyCancelled": "No tienes inscripciones canceladas.",
+    "emptyAbsent": "No tienes sesiones ausentes.",
+    "statsAttended": "Asistidas",
+    "statsCancelled": "Canceladas",
+    "statsAbsent": "Ausentes",
+    "statsHours": "Horas consumidas"
   }
 }

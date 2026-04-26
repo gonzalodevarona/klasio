@@ -202,7 +202,7 @@
     "navMyMemberships": "My Memberships",
     "navMyEnrollments": "My Enrollments",
     "navMyClasses": "My Classes",
-    "navMyRegistrations": "My Registrations"
+    "navAttendance": "Attendance"
   },
   "badges": {
     "membershipStatus": {
@@ -363,6 +363,7 @@
   },
   "professors": {
     "pageTitle": "Professors",
+    "filterStatusLabel": "Status:",
     "filterAll": "All",
     "filterActive": "Active",
     "filterDeactivated": "Deactivated",
@@ -427,6 +428,7 @@
   },
   "managers": {
     "pageTitle": "Managers",
+    "filterStatusLabel": "Status:",
     "filterAll": "All",
     "filterActive": "Active",
     "filterInactive": "Inactive",
@@ -1025,6 +1027,7 @@
     "activeMembership": "Active Membership",
     "loading": "Loading…",
     "membershipExpires": "Expires: {date}",
+    "membershipPeriod": "Period:",
     "viewDetails": "View details →",
     "noMembership": "No active membership.",
     "enrollmentsTitle": "Enrollments",
@@ -1043,6 +1046,7 @@
     "newButton": "+ New Membership",
     "loading": "Loading…",
     "empty": "You have no memberships yet.",
+    "period": "Period:",
     "expires": "Expires:",
     "paymentLabel": "Payment:",
     "paymentValidated": "Validated",
@@ -1094,5 +1098,23 @@
     "statTotalStudents": "Total students",
     "statActiveMemberships": "Active memberships",
     "statMonthlyRevenue": "Monthly revenue"
+  },
+  "studentAttendance": {
+    "title": "Attendance",
+    "subtitle": "Your complete class session history.",
+    "filterAll": "All",
+    "filterAttended": "Attended",
+    "filterRegistered": "Registered",
+    "filterCancelled": "Cancelled",
+    "filterAbsent": "Absent",
+    "emptyAll": "No attendance records found.",
+    "emptyAttended": "No attended sessions yet.",
+    "emptyRegistered": "No upcoming registrations.",
+    "emptyCancelled": "No cancelled registrations.",
+    "emptyAbsent": "No absent sessions.",
+    "statsAttended": "Attended",
+    "statsCancelled": "Cancelled",
+    "statsAbsent": "Absent",
+    "statsHours": "Hours consumed"
   }
 }
