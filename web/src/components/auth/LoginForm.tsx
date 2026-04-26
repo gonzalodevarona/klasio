@@ -4,6 +4,30 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { LoginResponse, AuthError } from "@/lib/types/auth";
 
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "#FAFAF8",
+  border: "1.5px solid #DDDDD8",
+  borderRadius: 8,
+  padding: "8px 12px",
+  fontSize: 13,
+  color: "#0A0A0A",
+  outline: "none",
+  fontFamily: "var(--font-main)",
+  boxSizing: "border-box",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontFamily: "var(--font-mono)",
+  fontSize: 11,
+  fontWeight: 600,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: "#4A4A48",
+  display: "block",
+  marginBottom: 6,
+};
+
 export default function LoginForm() {
   const t = useTranslations("auth.login");
   const [email, setEmail] = useState("");
@@ -52,30 +76,6 @@ export default function LoginForm() {
       setLoading(false);
     }
   }
-
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    background: "#FAFAF8",
-    border: "1.5px solid #DDDDD8",
-    borderRadius: 8,
-    padding: "8px 12px",
-    fontSize: 13,
-    color: "#0A0A0A",
-    outline: "none",
-    fontFamily: "var(--font-main)",
-    boxSizing: "border-box",
-  };
-
-  const labelStyle: React.CSSProperties = {
-    fontFamily: "var(--font-mono)",
-    fontSize: 11,
-    fontWeight: 600,
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "#4A4A48",
-    display: "block",
-    marginBottom: 6,
-  };
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
