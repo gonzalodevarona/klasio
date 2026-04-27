@@ -214,4 +214,20 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("Expires on");
         assertThat(result.htmlBody()).contains("Daniela Ríos");
     }
+
+    @Test
+    void membershipDepleted_rendersCorrectly() {
+        RenderedTemplate result = renderer.render("membership-depleted", Locale.ENGLISH, Map.of(
+                "studentName", "Pedro Sánchez",
+                "programName", "Karate Kids",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("Pedro Sánchez");
+        assertThat(result.htmlBody()).contains("Karate Kids");
+        assertThat(result.htmlBody()).contains("http://localhost:3000");
+    }
 }
