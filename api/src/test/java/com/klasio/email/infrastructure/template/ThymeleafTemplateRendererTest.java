@@ -136,4 +136,23 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("#CAFF4D");
         assertThat(result.htmlBody()).contains("https://test.klasio.com/reset?token=xyz");
     }
+
+    @Test
+    void paymentProofUploaded_rendersInfoPanel() {
+        RenderedTemplate result = renderer.render("payment-proof-uploaded", Locale.ENGLISH, Map.of(
+                "studentName", "Laura Torres",
+                "programName", "Boxing Beginners",
+                "reviewUrl", "https://test.klasio.com/payment-proofs/42",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("Laura Torres");
+        assertThat(result.htmlBody()).contains("Boxing Beginners");
+        assertThat(result.htmlBody()).contains("Student");
+        assertThat(result.htmlBody()).contains("Program");
+        assertThat(result.htmlBody()).contains("https://test.klasio.com/payment-proofs/42");
+    }
 }
