@@ -155,4 +155,23 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("Program");
         assertThat(result.htmlBody()).contains("https://test.klasio.com/payment-proofs/42");
     }
+
+    @Test
+    void paymentRejected_rendersReasonCallout() {
+        RenderedTemplate result = renderer.render("payment-rejected", Locale.ENGLISH, Map.of(
+                "studentName", "Laura Torres",
+                "programName", "Boxing Beginners",
+                "reason", "Image is blurry and amount is not visible.",
+                "retryUrl", "https://test.klasio.com/memberships/99/upload",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("Laura Torres");
+        assertThat(result.htmlBody()).contains("Image is blurry and amount is not visible.");
+        assertThat(result.htmlBody()).contains("https://test.klasio.com/memberships/99/upload");
+        assertThat(result.htmlBody()).contains("#FFF5F5");
+    }
 }
