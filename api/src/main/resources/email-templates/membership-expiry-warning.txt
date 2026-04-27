@@ -1,0 +1,12 @@
+[(#{membershipExpiryWarning.subject})]
+
+[(#{membershipExpiryWarning.hi})] [(${studentName})],
+
+[(#{membershipExpiryWarning.body(${programName})})]
+
+[(#{membershipExpiryWarning.hours(${remainingHours})})]
+[(#{membershipExpiryWarning.expires(${expiresAt})})]
+
+[(${loginUrl})]
+
+Klasio

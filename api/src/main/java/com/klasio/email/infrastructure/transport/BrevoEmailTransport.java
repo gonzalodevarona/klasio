@@ -93,18 +93,10 @@ public class BrevoEmailTransport implements EmailTransport {
         Map<String, Object> body = new HashMap<>();
         body.put("sender", Map.of("name", email.from().displayName(), "email", email.from().email()));
         body.put("to", List.of(Map.of("email", email.to().email(), "name", email.to().displayName())));
-
-        if (email.brevoTemplateId() != null) {
-            // Brevo-hosted template path: send templateId + params, no HTML
-            body.put("templateId", email.brevoTemplateId());
-            body.put("params", email.brevoParams() != null ? email.brevoParams() : Map.of());
-        } else {
-            // In-repo template path: send rendered HTML + subject
-            body.put("subject", email.subject());
-            body.put("htmlContent", email.htmlBody());
-            if (email.textBody() != null) {
-                body.put("textContent", email.textBody());
-            }
+        body.put("subject", email.subject());
+        body.put("htmlContent", email.htmlBody());
+        if (email.textBody() != null) {
+            body.put("textContent", email.textBody());
         }
         return body;
     }

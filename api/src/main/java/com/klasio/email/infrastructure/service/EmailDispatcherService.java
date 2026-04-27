@@ -9,15 +9,14 @@ import com.klasio.email.domain.model.*;
 import com.klasio.email.domain.port.EmailTransport;
 import com.klasio.email.domain.port.TemplateRenderer;
 import com.klasio.email.domain.port.TenantContextPort;
-import com.klasio.email.infrastructure.config.BrevoProperties;
 import com.klasio.email.infrastructure.config.EmailProperties;
+import com.klasio.email.infrastructure.config.FrontendProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -27,19 +26,18 @@ public class EmailDispatcherService implements EmailService {
     private final EmailTransport transport;
     private final TemplateRenderer renderer;
     private final EmailProperties props;
-    private final BrevoProperties brevoProps;
+    private final FrontendProperties frontendProps;
     private final LoadingCache<UUID, TenantContext> tenantCache;
-    private final Set<EmailType> warnedMissingTemplate = ConcurrentHashMap.newKeySet();
 
     public EmailDispatcherService(EmailTransport transport,
                                   TemplateRenderer renderer,
                                   TenantContextPort tenantContextPort,
                                   EmailProperties props,
-                                  BrevoProperties brevoProps) {
+                                  FrontendProperties frontendProps) {
         this.transport = transport;
         this.renderer = renderer;
         this.props = props;
-        this.brevoProps = brevoProps;
+        this.frontendProps = frontendProps;
         this.tenantCache = Caffeine.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(5, TimeUnit.MINUTES)
@@ -66,11 +64,20 @@ public class EmailDispatcherService implements EmailService {
                     tenant.name() + props.from().nameSuffix());
             String idempotencyKey = UUID.randomUUID().toString();
 
-            OutboundEmail outbound = buildOutbound(type, to, from, tenant, params, idempotencyKey);
+            Locale locale = Locale.forLanguageTag(tenant.language() != null ? tenant.language() : "en");
+            Map<String, Object> model = new HashMap<>(params);
+            model.put("tenantName", tenant.name());
+            model.put("tenantSlug", tenant.slug());
+            model.put("loginUrl", frontendProps.urlTemplate());
+
+            RenderedTemplate rendered = renderer.render(type.templateRef(), locale, model);
+            OutboundEmail outbound = new OutboundEmail(type, to, from,
+                    rendered.subject(), rendered.htmlBody(), rendered.textBody(),
+                    idempotencyKey);
             transport.send(outbound);
 
         } catch (IllegalArgumentException e) {
-            throw e; // propagate missing-param errors (fail fast)
+            throw e;
         } catch (Exception e) {
             log.error("[EMAIL] Failed to dispatch type={} tenantId={}: {}",
                     type, tenantId, e.getMessage(), e);
@@ -79,39 +86,6 @@ public class EmailDispatcherService implements EmailService {
             MDC.remove("tenantId");
             MDC.remove("recipientEmailHash");
         }
-    }
-
-    private OutboundEmail buildOutbound(EmailType type, EmailRecipient to, EmailSender from,
-                                        TenantContext tenant, Map<String, Object> params,
-                                        String idempotencyKey) {
-        if (type.source() == EmailType.Source.IN_REPO) {
-            Map<String, Object> model = new HashMap<>(params);
-            model.put("tenantName", tenant.name());
-            model.put("tenantSlug", tenant.slug());
-            RenderedTemplate rendered = renderer.render(type.templateRef(), model);
-            return new OutboundEmail(type, to, from,
-                    rendered.subject(), rendered.htmlBody(), rendered.textBody(),
-                    null, null, idempotencyKey);
-        }
-
-        Long templateId = brevoProps.templateIds().get(type.templateRef());
-        if (templateId == null || templateId == 0L) {
-            if (warnedMissingTemplate.add(type)) {
-                log.warn("[EMAIL] No Brevo template ID configured for {}, falling back to missing-template-fallback", type);
-            }
-            Map<String, Object> model = new HashMap<>(params);
-            model.put("tenantName", tenant.name());
-            model.put("emailTypeName", type.name());
-            RenderedTemplate fallback = renderer.render("missing-template-fallback", model);
-            return new OutboundEmail(type, to, from,
-                    fallback.subject(), fallback.htmlBody(), fallback.textBody(),
-                    null, null, idempotencyKey);
-        }
-
-        Map<String, Object> brevoParams = new HashMap<>(params);
-        brevoParams.put("tenantName", tenant.name());
-        return new OutboundEmail(type, to, from,
-                null, null, null, templateId, brevoParams, idempotencyKey);
     }
 
     private static String sha256First8(String input) {

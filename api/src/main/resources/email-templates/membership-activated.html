@@ -2,18 +2,22 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <th:block th:fragment="subject" th:text="#{paymentRejected.subject(${programName})}"></th:block>
+  <th:block th:fragment="subject" th:text="#{membershipActivated.subject}"></th:block>
 </head>
 <body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:20px">
   <div style="max-width:600px;margin:0 auto;background:white;padding:30px;border-radius:8px">
     <h2 th:text="${tenantName}" style="color:#2563eb">League</h2>
-    <p><span th:text="#{paymentRejected.hi}">Hi</span> <strong th:text="${studentName}">Student</strong>,</p>
-    <p th:text="#{paymentRejected.body(${programName})}"></p>
-    <p><strong th:text="#{paymentRejected.reason}">Reason:</strong> <span th:text="${reason}">reason</span></p>
+    <p><span th:text="#{membershipActivated.hi}">Hi</span> <strong th:text="${studentName}">Student</strong>,</p>
+    <p th:text="#{membershipActivated.body(${programName})}"></p>
+    <ul style="color:#374151;line-height:1.8">
+      <li th:text="#{membershipActivated.plan(${planName})}"></li>
+      <li th:text="#{membershipActivated.hours(${totalHours})}"></li>
+      <li th:text="#{membershipActivated.expires(${expiresAt})}"></li>
+    </ul>
     <p style="margin:24px 0">
-      <a th:href="${retryUrl}"
+      <a th:href="${loginUrl}"
          style="background:#2563eb;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block"
-         th:text="#{paymentRejected.cta}">Submit Again</a>
+         th:text="#{membershipActivated.cta}">Go to My Account</a>
     </p>
     <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb">
     <p th:text="#{layout.footer(${tenantName})}" style="color:#9ca3af;font-size:12px"></p>

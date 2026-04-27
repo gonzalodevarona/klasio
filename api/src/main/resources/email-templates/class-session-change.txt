@@ -1,0 +1,12 @@
+[(#{classSessionChange.subject(${className})})]
+
+[(#{classSessionChange.hi})] [(${studentName})],
+
+[(#{classSessionChange.body(${className}, ${startsAt})})]
+
+[(#{classSessionChange.changeKind(${changeKind})})]
+[# th:if="${reason != null and !reason.isEmpty()}"][(#{classSessionChange.reason(${reason})})]
+[/]
+[(${loginUrl})]
+
+Klasio

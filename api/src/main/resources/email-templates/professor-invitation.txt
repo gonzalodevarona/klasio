@@ -1,9 +1,11 @@
-Hi [(${professorName})],
+[(#{professorInvitation.subject(${tenantName})})]
 
-You have been invited to join [(${tenantName})] as a professor on Klasio.
+[(#{professorInvitation.hi})] [(${professorName})],
 
-Accept your invitation: [(${activationUrl})]
+[(#{professorInvitation.body(${tenantName})})]
 
-This invitation expires at [(${expiresAt})].
+[(${activationUrl})]
 
-Sent by [(${tenantName})] via Klasio.
+[(#{professorInvitation.expiry(${expiresAt})})]
+
+Klasio

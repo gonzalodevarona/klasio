@@ -1,0 +1,13 @@
+[(#{membershipActivated.subject})]
+
+[(#{membershipActivated.hi})] [(${studentName})],
+
+[(#{membershipActivated.body(${programName})})]
+
+[(#{membershipActivated.plan(${planName})})]
+[(#{membershipActivated.hours(${totalHours})})]
+[(#{membershipActivated.expires(${expiresAt})})]
+
+[(${loginUrl})]
+
+Klasio

@@ -1,5 +1,7 @@
-[(${studentName})] has submitted a payment proof for the [(${programName})] program.
+[(#{paymentProofUploaded.subject(${studentName})})]
 
-Review the proof: [(${reviewUrl})]
+[(#{paymentProofUploaded.body(${studentName}, ${programName})})]
 
-Sent by [(${tenantName})] via Klasio.
+[(${reviewUrl})]
+
+Klasio

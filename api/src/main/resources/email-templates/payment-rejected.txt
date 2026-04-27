@@ -1,9 +1,11 @@
-Hi [(${studentName})],
+[(#{paymentRejected.subject(${programName})})]
 
-Your payment proof for the [(${programName})] program was not accepted.
+[(#{paymentRejected.hi})] [(${studentName})],
 
-Reason: [(${reason})]
+[(#{paymentRejected.body(${programName})})]
 
-Please try again: [(${retryUrl})]
+[(#{paymentRejected.reason})] [(${reason})]
 
-Sent by [(${tenantName})] via Klasio.
+[(${retryUrl})]
+
+Klasio

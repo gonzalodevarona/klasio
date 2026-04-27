@@ -37,7 +37,7 @@ class GetAdminDashboardServiceTest {
     void mapsAllKpiFields() {
         when(repository.countStudents(TENANT_ID)).thenReturn(248L);
         when(repository.countNewStudentsThisMonth(TENANT_ID)).thenReturn(12L);
-        when(repository.sumConsumedHours(TENANT_ID)).thenReturn(1840L);
+        when(repository.countActiveMemberships(TENANT_ID)).thenReturn(1840L);
         when(repository.countPendingProofs(TENANT_ID)).thenReturn(14L);
         when(repository.countActivePrograms(TENANT_ID)).thenReturn(7L);
         when(repository.findStudentSummaries(TENANT_ID)).thenReturn(List.of());
@@ -46,7 +46,7 @@ class GetAdminDashboardServiceTest {
 
         assertThat(result.studentCount()).isEqualTo(248);
         assertThat(result.newStudentsThisMonth()).isEqualTo(12);
-        assertThat(result.totalHoursConsumed()).isEqualTo(1840);
+        assertThat(result.activeMembershipCount()).isEqualTo(1840);
         assertThat(result.pendingPaymentProofs()).isEqualTo(14);
         assertThat(result.activeProgramCount()).isEqualTo(7);
         assertThat(result.students()).isEmpty();
@@ -57,7 +57,7 @@ class GetAdminDashboardServiceTest {
     void passesTenantIdToEveryCall() {
         when(repository.countStudents(TENANT_ID)).thenReturn(0L);
         when(repository.countNewStudentsThisMonth(TENANT_ID)).thenReturn(0L);
-        when(repository.sumConsumedHours(TENANT_ID)).thenReturn(0L);
+        when(repository.countActiveMemberships(TENANT_ID)).thenReturn(0L);
         when(repository.countPendingProofs(TENANT_ID)).thenReturn(0L);
         when(repository.countActivePrograms(TENANT_ID)).thenReturn(0L);
         when(repository.findStudentSummaries(TENANT_ID)).thenReturn(List.of());
@@ -66,7 +66,7 @@ class GetAdminDashboardServiceTest {
 
         verify(repository).countStudents(TENANT_ID);
         verify(repository).countNewStudentsThisMonth(TENANT_ID);
-        verify(repository).sumConsumedHours(TENANT_ID);
+        verify(repository).countActiveMemberships(TENANT_ID);
         verify(repository).countPendingProofs(TENANT_ID);
         verify(repository).countActivePrograms(TENANT_ID);
         verify(repository).findStudentSummaries(TENANT_ID);
@@ -85,7 +85,7 @@ class GetAdminDashboardServiceTest {
         );
         when(repository.countStudents(TENANT_ID)).thenReturn(1L);
         when(repository.countNewStudentsThisMonth(TENANT_ID)).thenReturn(0L);
-        when(repository.sumConsumedHours(TENANT_ID)).thenReturn(20L);
+        when(repository.countActiveMemberships(TENANT_ID)).thenReturn(20L);
         when(repository.countPendingProofs(TENANT_ID)).thenReturn(0L);
         when(repository.countActivePrograms(TENANT_ID)).thenReturn(1L);
         when(repository.findStudentSummaries(TENANT_ID)).thenReturn(List.of(student));
