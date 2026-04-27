@@ -66,7 +66,7 @@ export default function StudentList() {
       {/* Filters */}
       <div className="flex items-center gap-3 flex-wrap">
         <Select
-          label={t("filterStatusLabel")}
+          aria-label={t("filterStatusLabel")}
           value={statusFilter ?? ""}
           onChange={(e) => handleStatusChange(e.target.value)}
         >
