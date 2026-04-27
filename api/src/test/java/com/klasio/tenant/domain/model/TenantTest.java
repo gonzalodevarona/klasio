@@ -59,6 +59,7 @@ class TenantTest {
             assertEquals(NAME, tenant.getName());
             assertEquals(DISCIPLINE, tenant.getDiscipline());
             assertEquals(LANGUAGE, tenant.getLanguage());
+            assertEquals(TIMEZONE, tenant.getTimezone());
             assertEquals(SLUG, tenant.getSlug());
             assertEquals(CONTACT, tenant.getContactInfo());
             assertEquals(CREATED_BY, tenant.getCreatedBy());
@@ -127,6 +128,22 @@ class TenantTest {
         void shouldRejectNullContactInfo() {
             assertThrows(NullPointerException.class,
                     () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, null, CREATED_BY, LOGO_KEY));
+        }
+
+        @Test
+        @DisplayName("should reject invalid timezone identifier")
+        void create_withInvalidTimezone_throwsIllegalArgument() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, "Not/AReal/Zone",
+                            SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+        }
+
+        @Test
+        @DisplayName("should reject blank timezone")
+        void create_withBlankTimezone_throwsIllegalArgument() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, "  ",
+                            SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
     }
 

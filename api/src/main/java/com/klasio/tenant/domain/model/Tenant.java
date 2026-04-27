@@ -5,6 +5,7 @@ import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +55,12 @@ public class Tenant {
         Objects.requireNonNull(contactInfo, "Contact info must not be null");
         validateNotBlank(name, "Name");
         validateNotBlank(discipline, "Discipline");
+        validateNotBlank(timezone, "Timezone");
+        try {
+            ZoneId.of(timezone);
+        } catch (java.time.zone.ZoneRulesException e) {
+            throw new IllegalArgumentException("Invalid timezone identifier: " + timezone, e);
+        }
 
         Instant now = Instant.now();
         TenantId id = TenantId.generate();

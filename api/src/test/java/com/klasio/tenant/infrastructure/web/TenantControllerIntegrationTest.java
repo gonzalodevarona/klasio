@@ -163,7 +163,8 @@ class TenantControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Liga Bogota"))
                 .andExpect(jsonPath("$.discipline").value("Football"))
                 .andExpect(jsonPath("$.slug").value("liga-bogota"))
-                .andExpect(jsonPath("$.status").value("ACTIVE"));
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.timezone").value("America/Bogota"));
     }
 
     @Test
@@ -392,7 +393,8 @@ class TenantControllerIntegrationTest {
                 .andExpect(jsonPath("$.slug").value("liga-bogota"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.logoUrl").value("https://s3.example.com/logo.png"))
-                .andExpect(jsonPath("$.contactEmail").value("contact@liga.com"));
+                .andExpect(jsonPath("$.contactEmail").value("contact@liga.com"))
+                .andExpect(jsonPath("$.timezone").value("America/Bogota"));
     }
 
     @Test

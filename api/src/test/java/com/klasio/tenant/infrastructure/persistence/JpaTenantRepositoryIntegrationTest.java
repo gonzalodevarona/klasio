@@ -73,6 +73,7 @@ class JpaTenantRepositoryIntegrationTest {
         assertThat(found.get().getName()).isEqualTo("Liga Bogota");
         assertThat(found.get().getDiscipline()).isEqualTo("Football");
         assertThat(found.get().getContactInfo().email()).isEqualTo("contact@liga.com");
+        assertThat(found.get().getTimezone()).isEqualTo("America/Bogota");
     }
 
     @Test
