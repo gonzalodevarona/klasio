@@ -986,6 +986,8 @@
       "languagePlaceholder": "Select language...",
       "languageSpanish": "Spanish",
       "languageEnglish": "English",
+      "labelTimezone": "Timezone",
+      "errorTimezoneRequired": "Timezone is required.",
       "submitButton": "Create Tenant",
       "submitting": "Creating...",
       "errorNameRequired": "Name is required.",

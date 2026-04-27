@@ -11,6 +11,7 @@ export interface TenantSummary {
 
 export interface TenantDetail extends TenantSummary {
   language: string;
+  timezone: string;
   logoUrl: string | null;
   contactEmail: string;
   contactPhone: string;
@@ -36,6 +37,7 @@ export interface CreateTenantRequest {
   name: string;
   discipline: string;
   language: string;
+  timezone: string;
   slug?: string;
   contactEmail: string;
   contactPhone: string;

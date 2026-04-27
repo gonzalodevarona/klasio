@@ -986,6 +986,8 @@
       "languagePlaceholder": "Seleccionar idioma...",
       "languageSpanish": "Español",
       "languageEnglish": "Inglés",
+      "labelTimezone": "Zona horaria",
+      "errorTimezoneRequired": "La zona horaria es obligatoria.",
       "submitButton": "Crear liga",
       "submitting": "Creando...",
       "errorNameRequired": "El nombre es obligatorio.",
