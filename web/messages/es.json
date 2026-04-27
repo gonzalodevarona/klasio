@@ -1091,8 +1091,8 @@
     "actionPrograms": "Programas",
     "kpiStudents": "Estudiantes",
     "kpiNewThisMonth": "↑ {count} nuevos este mes",
-    "kpiHoursConsumed": "Horas consumidas",
-    "kpiHoursConsumedSub": "Este período",
+    "kpiActiveMemberships": "Membresías activas",
+    "kpiActiveMembershipsSub": "En este momento",
     "kpiPendingPayments": "Pagos pendientes",
     "kpiPendingAction": "Requieren acción",
     "kpiUpToDate": "Al día",
@@ -1178,6 +1178,37 @@
     "modalConfirm": "Sí, cancelar",
     "modalConfirming": "Cancelando…",
     "successMessage": "Inscripción a \"{className}\" del {date} cancelada."
+  },
+  "attendance": {
+    "walkIn": {
+      "buttonLabel": "Registrar walk-in",
+      "modalTitle": "Registrar walk-in",
+      "sessionLabel": "Sesión",
+      "studentLabel": "Estudiante",
+      "searchPlaceholder": "Buscar por nombre o documento",
+      "noResults": "No hay estudiantes elegibles.",
+      "hoursLabel": "Horas a cobrar",
+      "submitButton": "Registrar y marcar presente",
+      "cancelButton": "Cancelar",
+      "successToast": "Walk-in registrado.",
+      "registeredBy": "Registrado por {name} ({role})",
+      "outsideWindowTooltip": "La ventana de marcación está cerrada.",
+      "errors": {
+        "classNotFound": "La clase ya no existe.",
+        "classInactive": "La clase no está activa.",
+        "forbidden": "No tienes permiso para registrar walk-ins en esta clase.",
+        "invalidDate": "La fecha no corresponde a una sesión válida.",
+        "outsideWindow": "El walk-in solo se permite dentro de la ventana de marcación.",
+        "sessionCancelled": "La sesión fue cancelada.",
+        "notEnrolled": "El estudiante no está matriculado en este programa.",
+        "levelMismatch": "El nivel del estudiante no coincide con esta clase.",
+        "noActiveMembership": "El estudiante no tiene una mensualidad activa para este programa.",
+        "insufficientHours": "El estudiante no tiene suficientes horas disponibles.",
+        "invalidHours": "El número de horas no es válido para esta clase.",
+        "sessionFull": "La sesión está llena.",
+        "alreadyMarked": "El estudiante ya está marcado. Usa el flujo de corrección."
+      }
+    }
   },
   "studentClasses": {
     "title": "Mis Clases",

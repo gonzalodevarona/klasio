@@ -1091,8 +1091,8 @@
     "actionPrograms": "Programs",
     "kpiStudents": "Students",
     "kpiNewThisMonth": "↑ {count} new this month",
-    "kpiHoursConsumed": "Hours consumed",
-    "kpiHoursConsumedSub": "This period",
+    "kpiActiveMemberships": "Active memberships",
+    "kpiActiveMembershipsSub": "Right now",
     "kpiPendingPayments": "Pending payments",
     "kpiPendingAction": "Action required",
     "kpiUpToDate": "Up to date",
@@ -1178,6 +1178,37 @@
     "modalConfirm": "Yes, cancel",
     "modalConfirming": "Cancelling…",
     "successMessage": "Registration for \"{className}\" on {date} cancelled."
+  },
+  "attendance": {
+    "walkIn": {
+      "buttonLabel": "Register walk-in",
+      "modalTitle": "Register walk-in",
+      "sessionLabel": "Session",
+      "studentLabel": "Student",
+      "searchPlaceholder": "Search by name or ID document",
+      "noResults": "No eligible students found.",
+      "hoursLabel": "Hours to charge",
+      "submitButton": "Register and mark present",
+      "cancelButton": "Cancel",
+      "successToast": "Walk-in registered.",
+      "registeredBy": "Registered by {name} ({role})",
+      "outsideWindowTooltip": "The marking window is closed.",
+      "errors": {
+        "classNotFound": "This class no longer exists.",
+        "classInactive": "This class is not active.",
+        "forbidden": "You are not allowed to register walk-ins for this class.",
+        "invalidDate": "The selected date is not a valid session for this class.",
+        "outsideWindow": "Walk-in is only allowed inside the marking window.",
+        "sessionCancelled": "This session has been cancelled.",
+        "notEnrolled": "Student is not enrolled in this program.",
+        "levelMismatch": "Student's level does not match this class.",
+        "noActiveMembership": "Student does not have an active membership for this program.",
+        "insufficientHours": "Student does not have enough available hours.",
+        "invalidHours": "Hours to charge is invalid for this class duration.",
+        "sessionFull": "The session is full.",
+        "alreadyMarked": "Student is already marked. Use the correction flow."
+      }
+    }
   },
   "studentClasses": {
     "title": "My Classes",
