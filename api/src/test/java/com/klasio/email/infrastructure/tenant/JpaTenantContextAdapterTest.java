@@ -23,7 +23,7 @@ class JpaTenantContextAdapterTest {
         Query query = mock(Query.class);
         when(em.createQuery(anyString())).thenReturn(query);
         when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of(new Object[]{id, "test-slug", "Test League", "en"}));
+        when(query.getResultList()).thenReturn(List.of(new Object[]{id, "test-slug", "Test League", "en", "America/Bogota"}));
 
         TenantContext ctx = adapter.findById(id);
 
@@ -31,6 +31,7 @@ class JpaTenantContextAdapterTest {
         assertThat(ctx.slug()).isEqualTo("test-slug");
         assertThat(ctx.name()).isEqualTo("Test League");
         assertThat(ctx.language()).isEqualTo("en");
+        assertThat(ctx.timezone()).isEqualTo("America/Bogota");
     }
 
     @Test
