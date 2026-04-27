@@ -83,6 +83,7 @@ public class TenantController {
             @RequestParam("name") String name,
             @RequestParam("discipline") String discipline,
             @RequestParam("language") String language,
+            @RequestParam("timezone") String timezone,
             @RequestParam("contactEmail") String contactEmail,
             @RequestParam("contactPhone") String contactPhone,
             @RequestParam("contactPhoneIndicator") String contactPhoneIndicator,
@@ -90,22 +91,29 @@ public class TenantController {
             @RequestParam("contactCity") String contactCity,
             @RequestParam("contactState") String contactState,
             @RequestParam("contactCountry") String contactCountry,
-            @RequestParam("logo") MultipartFile logo,
+            @RequestParam(value = "logo", required = false) MultipartFile logo,
             @RequestParam(value = "slug", required = false) String slug) {
 
         UUID userId = extractUserId();
 
-        InputStream logoStream;
-        try {
-            logoStream = logo.getInputStream();
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Could not read uploaded logo file");
+        InputStream logoStream = null;
+        String logoContentType = null;
+        long logoSize = 0L;
+        if (logo != null && !logo.isEmpty()) {
+            try {
+                logoStream = logo.getInputStream();
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Could not read uploaded logo file");
+            }
+            logoContentType = logo.getContentType();
+            logoSize = logo.getSize();
         }
 
         CreateTenantCommand command = new CreateTenantCommand(
                 name,
                 discipline,
                 language,
+                timezone,
                 slug,
                 contactEmail,
                 contactPhone,
@@ -115,8 +123,8 @@ public class TenantController {
                 contactState,
                 contactCountry,
                 logoStream,
-                logo.getContentType(),
-                logo.getSize(),
+                logoContentType,
+                logoSize,
                 userId
         );
 

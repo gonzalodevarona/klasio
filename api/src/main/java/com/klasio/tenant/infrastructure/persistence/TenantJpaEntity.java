@@ -52,6 +52,9 @@ public class TenantJpaEntity implements Persistable<UUID> {
     @Column(name = "language", nullable = false, length = 5)
     private String language;
 
+    @Column(name = "timezone", nullable = false, length = 50)
+    private String timezone;
+
     @Column(name = "status", nullable = false, length = 10)
     private String status;
 
@@ -95,6 +98,8 @@ public class TenantJpaEntity implements Persistable<UUID> {
     public void setContactCountry(String contactCountry) { this.contactCountry = contactCountry; }
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }
+    public String getTimezone() { return timezone; }
+    public void setTimezone(String timezone) { this.timezone = timezone; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }

@@ -17,6 +17,7 @@ public class TenantMapper {
                 entity.getName(),
                 entity.getDiscipline(),
                 entity.getLanguage(),
+                entity.getTimezone(),
                 entity.getLogoKey(),
                 new ContactInfo(
                         entity.getContactEmail(),
@@ -42,6 +43,7 @@ public class TenantMapper {
         entity.setName(tenant.getName());
         entity.setDiscipline(tenant.getDiscipline());
         entity.setLanguage(tenant.getLanguage());
+        entity.setTimezone(tenant.getTimezone());
         entity.setLogoKey(tenant.getLogoKey());
         entity.setContactEmail(tenant.getContactInfo().email());
         entity.setContactPhone(tenant.getContactInfo().phone());
