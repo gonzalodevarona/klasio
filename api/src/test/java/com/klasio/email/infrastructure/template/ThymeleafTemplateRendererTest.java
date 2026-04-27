@@ -267,4 +267,18 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("ALERTED");
         assertThat(result.htmlBody()).doesNotContain("Reason");
     }
+
+    @Test
+    void missingTemplateFallback_showsTypeNameForDebugging() {
+        RenderedTemplate result = renderer.render("missing-template-fallback", Locale.ENGLISH, Map.of(
+                "tenantName", "Test League",
+                "emailTypeName", "SOME_UNREGISTERED_TYPE",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("Test League");
+        assertThat(result.htmlBody()).contains("SOME_UNREGISTERED_TYPE");
+    }
 }
