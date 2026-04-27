@@ -261,11 +261,64 @@ class ListClassSessionRosterServiceTest {
         assertThat(result.get(0).cancellationReason()).isNull();
     }
 
+    // ── Task 12: createdBy exposure gated by viewer role ─────────────────────
+
+    @Test
+    void execute_includesCreatedBy_whenViewerIsAdminOrManager() {
+        UUID regId  = UUID.randomUUID();
+        UUID creator = UUID.randomUUID();
+        LocalDate day   = FROM.plusDays(1);
+        LocalTime start = LocalTime.of(18, 0);
+        LocalTime end   = LocalTime.of(19, 0);
+
+        AttendanceRegistration reg = buildRegistrationWithCreatedBy(regId, STUDENT_ID, day, start, end, "REGISTERED", creator);
+
+        when(registrationRepository.findByClassAndDateRange(TENANT_ID, CLASS_ID, FROM, TO))
+                .thenReturn(List.of(reg));
+        when(studentNamePort.findFullName(STUDENT_ID, TENANT_ID)).thenReturn(Optional.of("Test User"));
+
+        // ADMIN viewer — createdBy must be exposed
+        List<ClassSessionRosterView> result =
+                service.execute(TENANT_ID, CLASS_ID, FROM, TO, "ADMIN", USER_ID, null);
+
+        assertThat(result.get(0).registrants().get(0).createdBy()).isEqualTo(creator);
+    }
+
+    @Test
+    void execute_omitsCreatedBy_whenViewerIsProfessor() {
+        UUID regId  = UUID.randomUUID();
+        UUID creator = UUID.randomUUID();
+        LocalDate day   = FROM.plusDays(1);
+        LocalTime start = LocalTime.of(18, 0);
+        LocalTime end   = LocalTime.of(19, 0);
+
+        AttendanceRegistration reg = buildRegistrationWithCreatedBy(regId, STUDENT_ID, day, start, end, "REGISTERED", creator);
+
+        when(professorIdLookupPort.findProfessorIdByUserId(TENANT_ID, USER_ID))
+                .thenReturn(Optional.of(PROFESSOR_ID));
+        when(registrationRepository.findByClassAndDateRange(TENANT_ID, CLASS_ID, FROM, TO))
+                .thenReturn(List.of(reg));
+        when(studentNamePort.findFullName(STUDENT_ID, TENANT_ID)).thenReturn(Optional.of("Test User"));
+
+        // PROFESSOR viewer — createdBy must be hidden (null)
+        List<ClassSessionRosterView> result =
+                service.execute(TENANT_ID, CLASS_ID, FROM, TO, "PROFESSOR", USER_ID, null);
+
+        assertThat(result.get(0).registrants().get(0).createdBy()).isNull();
+    }
+
     // ── Helper ───────────────────────────────────────────────────────────────
 
     private AttendanceRegistration buildRegistration(UUID regId, UUID studentId,
                                                       LocalDate sessionDate, LocalTime start,
                                                       LocalTime end, String status) {
+        return buildRegistrationWithCreatedBy(regId, studentId, sessionDate, start, end, status, USER_ID);
+    }
+
+    private AttendanceRegistration buildRegistrationWithCreatedBy(UUID regId, UUID studentId,
+                                                                   LocalDate sessionDate, LocalTime start,
+                                                                   LocalTime end, String status,
+                                                                   UUID createdBy) {
         return AttendanceRegistration.reconstitute(
                 AttendanceRegistrationId.of(regId),
                 TENANT_ID,
@@ -283,7 +336,7 @@ class ListClassSessionRosterServiceTest {
                 null, null, null,   // cancelledAt, cancelledBy, cancellationReason
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
-                Instant.now(), USER_ID,
+                Instant.now(), createdBy,
                 null, null
         );
     }

@@ -90,6 +90,7 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
         }
 
         // 6. Group by (sessionDate, startTime, endTime) preserving date+time order
+        boolean exposeCreatedBy = "ADMIN".equals(role) || "SUPERADMIN".equals(role) || "MANAGER".equals(role);
         LinkedHashMap<SessionKey, List<RegistrantView>> grouped = new LinkedHashMap<>();
         for (AttendanceRegistration r : registrations) {
             SessionKey key = new SessionKey(r.getSessionDate(), r.getSessionStartTime(), r.getSessionEndTime());
@@ -100,7 +101,8 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
                             nameCache.getOrDefault(r.getStudentId(), "Unknown"),
                             r.getLevelAtRegistration(),
                             r.getIntendedHours(),
-                            r.getStatus().name()
+                            r.getStatus().name(),
+                            exposeCreatedBy ? r.getCreatedBy() : null
                     ));
         }
 

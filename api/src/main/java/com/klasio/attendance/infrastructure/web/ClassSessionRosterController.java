@@ -65,7 +65,8 @@ public class ClassSessionRosterController {
                 String studentName,
                 String level,
                 int intendedHours,
-                String status
+                String status,
+                String createdBy    // null for PROFESSOR viewers; UUID string for ADMIN/SUPERADMIN/MANAGER
         ) {}
 
         static ClassSessionRosterResponse from(ClassSessionRosterView view) {
@@ -76,7 +77,8 @@ public class ClassSessionRosterController {
                             r.studentName(),
                             r.level(),
                             r.intendedHours(),
-                            r.status()
+                            r.status(),
+                            r.createdBy() != null ? r.createdBy().toString() : null
                     ))
                     .toList();
             return new ClassSessionRosterResponse(
