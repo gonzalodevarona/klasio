@@ -121,4 +121,19 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("Carlos Ruiz");
         assertThat(result.htmlBody()).contains("https://test.klasio.com/setup?token=inv123");
     }
+
+    @Test
+    void passwordRecovery_usesNewDesign() {
+        RenderedTemplate result = renderer.render("password-recovery", Locale.ENGLISH, Map.of(
+                "resetUrl", "https://test.klasio.com/reset?token=xyz",
+                "expiresAt", "30 minutes",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("#CAFF4D");
+        assertThat(result.htmlBody()).contains("https://test.klasio.com/reset?token=xyz");
+    }
 }
