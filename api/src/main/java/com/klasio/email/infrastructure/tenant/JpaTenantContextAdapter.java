@@ -23,7 +23,7 @@ public class JpaTenantContextAdapter implements TenantContextPort {
     public TenantContext findById(UUID tenantId) {
         @SuppressWarnings("unchecked")
         List<Object> rows = em.createQuery(
-                        "SELECT t.id, t.slug, t.name, t.language FROM TenantJpaEntity t WHERE t.id = :id")
+                        "SELECT t.id, t.slug, t.name, t.language, t.timezone FROM TenantJpaEntity t WHERE t.id = :id")
                 .setParameter("id", tenantId)
                 .getResultList();
         if (rows.isEmpty()) {
@@ -31,6 +31,6 @@ public class JpaTenantContextAdapter implements TenantContextPort {
         }
         Object first = rows.get(0);
         Object[] r = (first instanceof Object[]) ? (Object[]) first : rows.toArray();
-        return new TenantContext((UUID) r[0], (String) r[1], (String) r[2], (String) r[3]);
+        return new TenantContext((UUID) r[0], (String) r[1], (String) r[2], (String) r[3], (String) r[4]);
     }
 }

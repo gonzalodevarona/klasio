@@ -37,7 +37,7 @@ class EmailDispatcherServiceTest {
     private EmailDispatcherService service;
 
     private final UUID tenantId = UUID.randomUUID();
-    private final TenantContext tenant = new TenantContext(tenantId, "test-league", "Test League", "en");
+    private final TenantContext tenant = new TenantContext(tenantId, "test-league", "Test League", "en", "America/Bogota");
 
     @BeforeEach
     void setUp() {
@@ -68,7 +68,7 @@ class EmailDispatcherServiceTest {
 
     @Test
     void localeResolvesFromTenantLanguage() {
-        TenantContext spanishTenant = new TenantContext(tenantId, "liga", "Liga Bogotá", "es");
+        TenantContext spanishTenant = new TenantContext(tenantId, "liga", "Liga Bogotá", "es", "America/Bogota");
         when(tenantContextPort.findById(tenantId)).thenReturn(spanishTenant);
         service = new EmailDispatcherService(transport, renderer, tenantContextPort, props, frontendProps);
 
