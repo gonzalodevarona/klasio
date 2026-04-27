@@ -11,6 +11,7 @@ import com.klasio.email.infrastructure.config.FrontendProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -147,5 +148,53 @@ class EmailDispatcherServiceTest {
         verify(transport, times(2)).send(captor.capture());
         List<OutboundEmail> sent = captor.getAllValues();
         assertThat(sent.get(0).idempotencyKey()).isNotEqualTo(sent.get(1).idempotencyKey());
+    }
+
+    @Test
+    void instantParamIsFormattedUsingTenantTimezone() {
+        TenantContext tzTenant = new TenantContext(tenantId, "test-league", "Test League", "en", "America/Bogota");
+        when(tenantContextPort.findById(tenantId)).thenReturn(tzTenant);
+        service = new EmailDispatcherService(transport, renderer, tenantContextPort, props, frontendProps);
+
+        when(renderer.render(anyString(), any(Locale.class), anyMap()))
+                .thenReturn(new RenderedTemplate("s", "<h/>", "t"));
+
+        Instant expiresAt = java.time.Instant.parse("2026-04-27T23:43:04Z"); // 18:43 Bogota (UTC-5)
+
+        service.send(EmailType.ACCOUNT_SETUP,
+                new EmailRecipient("u@x.com", "U"),
+                tenantId,
+                new java.util.HashMap<>(Map.of(
+                        "recipientName", "U", "role", "student",
+                        "setupUrl", "u", "expiresAt", expiresAt)));
+
+        @SuppressWarnings("unchecked")
+        org.mockito.ArgumentCaptor<Map<String, Object>> captor =
+                (org.mockito.ArgumentCaptor<Map<String, Object>>) (org.mockito.ArgumentCaptor<?>)
+                org.mockito.ArgumentCaptor.forClass(Map.class);
+        verify(renderer).render(anyString(), any(Locale.class), captor.capture());
+        assertThat(captor.getValue().get("expiresAt")).isEqualTo("27/04/2026 6:43 PM");
+    }
+
+    @Test
+    void localDateParamIsFormattedAsDdMmYyyy() {
+        when(renderer.render(anyString(), any(Locale.class), anyMap()))
+                .thenReturn(new RenderedTemplate("s", "<h/>", "t"));
+
+        java.time.LocalDate expiresAt = java.time.LocalDate.of(2026, 5, 31);
+
+        service.send(EmailType.ACCOUNT_SETUP,
+                new EmailRecipient("u@x.com", "U"),
+                tenantId,
+                new java.util.HashMap<>(Map.of(
+                        "recipientName", "U", "role", "student",
+                        "setupUrl", "u", "expiresAt", expiresAt)));
+
+        @SuppressWarnings("unchecked")
+        org.mockito.ArgumentCaptor<Map<String, Object>> captor =
+                (org.mockito.ArgumentCaptor<Map<String, Object>>) (org.mockito.ArgumentCaptor<?>)
+                org.mockito.ArgumentCaptor.forClass(Map.class);
+        verify(renderer).render(anyString(), any(Locale.class), captor.capture());
+        assertThat(captor.getValue().get("expiresAt")).isEqualTo("31/05/2026");
     }
 }

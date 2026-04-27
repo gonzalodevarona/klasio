@@ -16,6 +16,8 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -65,7 +67,8 @@ public class EmailDispatcherService implements EmailService {
             String idempotencyKey = UUID.randomUUID().toString();
 
             Locale locale = Locale.forLanguageTag(tenant.language() != null ? tenant.language() : "en");
-            Map<String, Object> model = new HashMap<>(params);
+            ZoneId zone = ZoneId.of(tenant.timezone() != null ? tenant.timezone() : "UTC");
+            Map<String, Object> model = formatTemporalParams(params, zone, locale);
             model.put("tenantName", tenant.name());
             model.put("tenantSlug", tenant.slug());
             model.put("loginUrl", frontendProps.urlTemplate());
@@ -86,6 +89,21 @@ public class EmailDispatcherService implements EmailService {
             MDC.remove("tenantId");
             MDC.remove("recipientEmailHash");
         }
+    }
+
+    private static Map<String, Object> formatTemporalParams(Map<String, Object> model,
+                                                             ZoneId zone, Locale locale) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy h:mm a", Locale.ENGLISH)
+                .withZone(zone);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH);
+        Map<String, Object> result = new HashMap<>(model);
+        result.replaceAll((key, value) -> {
+            if (value instanceof Instant i) return dtf.format(i);
+            if (value instanceof LocalDateTime ldt) return dtf.format(ldt.atZone(zone));
+            if (value instanceof LocalDate ld) return df.format(ld);
+            return value;
+        });
+        return result;
     }
 
     private static String sha256First8(String input) {
