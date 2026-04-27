@@ -32,6 +32,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -61,6 +62,9 @@ class AttendanceMarkingControllerTest {
                     .csrf(AbstractHttpConfigurer::disable)
                     .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                    .exceptionHandling(e -> e.authenticationEntryPoint(
+                            (request, response, authException) ->
+                                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED)))
                     .build();
         }
 
