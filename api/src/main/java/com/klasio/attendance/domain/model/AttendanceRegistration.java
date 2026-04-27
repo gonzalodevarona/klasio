@@ -33,7 +33,7 @@ public class AttendanceRegistration {
     private final UUID enrollmentId;
     private final UUID membershipId;
     private final String levelAtRegistration;
-    private final int intendedHours;
+    private int intendedHours;
     private AttendanceRegistrationStatus status;
 
     // Snapshot fields for session context (denormalized for queries)
@@ -187,6 +187,40 @@ public class AttendanceRegistration {
         if (this.status != AttendanceRegistrationStatus.REGISTERED) {
             throw new IllegalStateException("Cannot mark present from status: " + this.status);
         }
+        this.status = AttendanceRegistrationStatus.PRESENT;
+        this.markedAt = now;
+        this.markedBy = actorId;
+        this.updatedAt = now;
+        this.updatedBy = actorId;
+        this.domainEvents.add(new AttendanceMarkedPresent(
+                this.id.value(), this.sessionId, this.tenantId, this.classId,
+                this.studentId, this.membershipId, this.intendedHours,
+                this.sessionDate, actorId, now));
+    }
+
+    /**
+     * Transitions REGISTERED → PRESENT with a staff-overridden hours charge.
+     * Used for walk-in registrations where the staff selects the hours to deduct
+     * rather than relying on the student's pre-registered intendedHours.
+     *
+     * @param actorId              staff member performing the action
+     * @param now                  timestamp of the action
+     * @param hoursToCharge        hours to deduct from the membership; must be 1..floor(classDurationMinutes/60)
+     * @param classDurationMinutes class duration in minutes; used to validate hoursToCharge upper bound
+     */
+    public void markPresentByStaff(UUID actorId, Instant now,
+                                   int hoursToCharge, int classDurationMinutes) {
+        Objects.requireNonNull(actorId, "actorId must not be null");
+        Objects.requireNonNull(now, "now must not be null");
+        if (this.status != AttendanceRegistrationStatus.REGISTERED) {
+            throw new IllegalStateException("Cannot mark present from status: " + this.status);
+        }
+        int max = classDurationMinutes / 60;
+        if (hoursToCharge < 1 || hoursToCharge > max) {
+            throw new IllegalArgumentException(
+                    "hoursToCharge must be between 1 and " + max + ", got: " + hoursToCharge);
+        }
+        this.intendedHours = hoursToCharge;
         this.status = AttendanceRegistrationStatus.PRESENT;
         this.markedAt = now;
         this.markedBy = actorId;

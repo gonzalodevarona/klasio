@@ -387,6 +387,66 @@ class AttendanceRegistrationTest {
     }
 
     // ---------------------------------------------------------------
+    // markPresentByStaff()
+    // ---------------------------------------------------------------
+
+    @Test
+    void markPresentByStaff_overridesIntendedHours_andTransitionsToPresent() {
+        AttendanceRegistration reg = sampleRegistered(/*intendedHours=*/2, /*durationMinutes=*/120);
+        Instant now = Instant.parse("2026-04-27T17:00:00Z");
+        UUID actor = UUID.randomUUID();
+
+        reg.markPresentByStaff(actor, now, /*hoursToCharge=*/1, /*classDurationMinutes=*/120);
+
+        assertThat(reg.getStatus()).isEqualTo(AttendanceRegistrationStatus.PRESENT);
+        assertThat(reg.getIntendedHours()).isEqualTo(1);
+        assertThat(reg.getMarkedAt()).isEqualTo(now);
+        assertThat(reg.getMarkedBy()).isEqualTo(actor);
+    }
+
+    @Test
+    void markPresentByStaff_emitsMarkedPresentEvent_withOverriddenHours() {
+        AttendanceRegistration reg = sampleRegistered(2, 120);
+        UUID actor = UUID.randomUUID();
+        Instant now = Instant.now();
+
+        reg.markPresentByStaff(actor, now, 1, 120);
+
+        AttendanceMarkedPresent ev = (AttendanceMarkedPresent) reg.getDomainEvents().stream()
+                .filter(e -> e instanceof AttendanceMarkedPresent)
+                .findFirst().orElseThrow();
+        assertThat(ev.intendedHours()).isEqualTo(1);
+        assertThat(ev.actorId()).isEqualTo(actor);
+    }
+
+    @Test
+    void markPresentByStaff_rejectsWhenNotRegistered() {
+        AttendanceRegistration reg = sampleRegistered(1, 60);
+        // transition to PRESENT first via normal path
+        reg.markPresent(UUID.randomUUID(), Instant.now());
+
+        assertThatThrownBy(() -> reg.markPresentByStaff(UUID.randomUUID(), Instant.now(), 1, 60))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot mark present");
+    }
+
+    @Test
+    void markPresentByStaff_rejectsHoursOutOfRange_zero() {
+        AttendanceRegistration reg = sampleRegistered(1, 60);
+        assertThatThrownBy(() -> reg.markPresentByStaff(UUID.randomUUID(), Instant.now(), 0, 60))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void markPresentByStaff_rejectsHoursOutOfRange_aboveDurationFloor() {
+        AttendanceRegistration reg = sampleRegistered(1, 90);
+        // floor(90/60) = 1, so 2 must be rejected
+        assertThatThrownBy(() -> reg.markPresentByStaff(UUID.randomUUID(), Instant.now(), 2, 90))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("hoursToCharge");
+    }
+
+    // ---------------------------------------------------------------
     // Helper
     // ---------------------------------------------------------------
 
@@ -394,6 +454,14 @@ class AttendanceRegistrationTest {
         return AttendanceRegistration.register(
                 SESSION_ID, TENANT_ID, CLASS_ID, STUDENT_ID, ENROLLMENT_ID, MEMBERSHIP_ID,
                 LEVEL, 1, 60, DATE, START, END, ACTOR_ID
+        );
+    }
+
+    private static AttendanceRegistration sampleRegistered(int intendedHours, int durationMinutes) {
+        LocalTime end = START.plusMinutes(durationMinutes);
+        return AttendanceRegistration.register(
+                SESSION_ID, TENANT_ID, CLASS_ID, STUDENT_ID, ENROLLMENT_ID, MEMBERSHIP_ID,
+                LEVEL, intendedHours, durationMinutes, DATE, START, end, ACTOR_ID
         );
     }
 }
