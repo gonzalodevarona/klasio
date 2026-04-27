@@ -472,6 +472,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(AlreadyMarkedException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyMarked(AlreadyMarkedException ex) {
+        var error = new ErrorResponse.ErrorDetail("ALREADY_MARKED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(InvalidAlertReasonException.class)
     public ResponseEntity<ErrorResponse> handleInvalidReason(InvalidAlertReasonException ex) {
         var error = new ErrorResponse.ErrorDetail("INVALID_ALERT_REASON", ex.getMessage());
