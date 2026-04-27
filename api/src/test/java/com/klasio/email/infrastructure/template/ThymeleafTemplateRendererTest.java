@@ -174,4 +174,25 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("https://test.klasio.com/memberships/99/upload");
         assertThat(result.htmlBody()).contains("#FFF5F5");
     }
+
+    @Test
+    void membershipActivated_rendersGreenPanelWithNewDesign() {
+        RenderedTemplate result = renderer.render("membership-activated", Locale.ENGLISH, Map.of(
+                "studentName", "Ana",
+                "programName", "Tennis",
+                "planName", "Monthly 20h",
+                "totalHours", 20,
+                "expiresAt", "2026-05-31",
+                "tenantName", "Tennis Club",
+                "tenantSlug", "tennis-club",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("#F4FAF6");
+        assertThat(result.htmlBody()).contains("Monthly 20h");
+        assertThat(result.htmlBody()).contains("Available hours");
+        assertThat(result.htmlBody()).contains("Expires on");
+        assertThat(result.htmlBody()).contains("http://localhost:3000");
+    }
 }
