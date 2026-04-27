@@ -221,7 +221,7 @@ export default function TenantForm() {
           <option value="America/Mexico_City">America/Mexico_City (CST/CDT)</option>
           <option value="America/Lima">America/Lima (PET, UTC-5)</option>
           <option value="America/Santiago">America/Santiago (CLT/CLST)</option>
-          <option value="America/Buenos_Aires">America/Buenos_Aires (ART, UTC-3)</option>
+          <option value="America/Argentina/Buenos_Aires">America/Argentina/Buenos_Aires (ART, UTC-3)</option>
           <option value="America/Sao_Paulo">America/Sao_Paulo (BRT/BRST)</option>
           <option value="America/Caracas">America/Caracas (VET, UTC-4)</option>
           <option value="America/Guayaquil">America/Guayaquil (ECT, UTC-5)</option>
