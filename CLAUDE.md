@@ -212,7 +212,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | `merged/008-payment-proof-validation` | RF-19, RF-20, RF-21 | RF-19 ✅, RF-20 ✅, RF-21 ✅ |
 | `merged/010-class-alert-cancellation` | RF-27, RF-28 | RF-27 ✅, RF-28 ✅ (in-app only) |
 | `merged/013-tenant-i18n` | RF-32 | RF-32 ✅ (+ i18n via next-intl, unified account setup flow, tenant form overhaul with structured address + language) |
-| `feature/full-redesign` (active) | RF-23, RF-24, RF-25, RF-26, RF-29, RF-33 | RF-23 ✅, RF-24 ✅, RF-25 ✅, RF-26 ✅, RF-29 ✅, RF-33 ✅ |
+| `feature/full-redesign` (active) | RF-23, RF-24, RF-25, RF-26, RF-29, RF-33, RF-34 | RF-23 ✅, RF-24 ✅, RF-25 ✅, RF-26 ✅, RF-29 ✅, RF-33 ✅, RF-34 ✅ |
 
 ### Remaining v1.0 work (P0 features not yet implemented)
 
