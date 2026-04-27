@@ -84,4 +84,23 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("Tennis");
         assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
     }
+
+    @Test
+    void accountSetup_usesNewDesignAndResolvesAllKeys() {
+        RenderedTemplate result = renderer.render("account-setup", Locale.ENGLISH, Map.of(
+                "recipientName", "María García",
+                "role", "student",
+                "setupUrl", "https://test.klasio.com/setup?token=abc",
+                "expiresAt", "2026-05-01 09:00",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("#CAFF4D");
+        assertThat(result.htmlBody()).contains("María García");
+        assertThat(result.htmlBody()).contains("https://test.klasio.com/setup?token=abc");
+        assertThat(result.htmlBody()).contains("Temporary link");
+    }
 }
