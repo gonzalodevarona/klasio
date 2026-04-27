@@ -105,10 +105,10 @@ public class ListEligibleStudentsService implements ListEligibleStudentsUseCase 
         int limit = (nameFilter == null) ? 50 : 20;
 
         // 6. Load class level — needed to filter eligible students by level
-        //    Use findForRegistration which carries the level field
+        //    Use findForRegistration which carries the level field; missing class is a hard failure
         String level = classDetailsPort.findForRegistration(tenantId, classId)
                 .map(ClassDetailsPort.ClassRegistrationView::level)
-                .orElse(null); // if somehow missing, let port handle null gracefully
+                .orElseThrow(() -> new ClassNotFoundException("Class registration view not found: " + classId));
 
         // 7. Delegate to the lookup port
         return eligibleStudentLookupPort.findEligible(

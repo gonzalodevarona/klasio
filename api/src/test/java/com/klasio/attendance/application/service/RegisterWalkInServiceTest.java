@@ -103,7 +103,7 @@ class RegisterWalkInServiceTest {
 
         classSummary = new ClassSummaryView(CLASS_ID, PROGRAM_ID, PROFESSOR_ID);
         classRegView = new ClassDetailsPort.ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
                         TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
@@ -135,12 +135,17 @@ class RegisterWalkInServiceTest {
                 ACTOR_USER_ID, "MANAGER", programId);
     }
 
+    private RegisterWalkInCommand superadminCommand() {
+        return new RegisterWalkInCommand(
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START, STUDENT_ID, 1,
+                ACTOR_USER_ID, "SUPERADMIN", PROGRAM_ID);
+    }
+
     // ---------------------------------------------------------------
     // Shared stub helper — sets up all happy-path mocks
     // ---------------------------------------------------------------
 
     private void stubHappyPath() {
-        when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(enrollmentLookupPort.findActiveEnrollmentInProgramAtLevel(TENANT_ID, STUDENT_ID, PROGRAM_ID, "BEGINNER"))
                 .thenReturn(Optional.of(enrollment));
@@ -217,7 +222,7 @@ class RegisterWalkInServiceTest {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(summary));
 
         ClassDetailsPort.ClassRegistrationView inactiveView = new ClassDetailsPort.ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "INACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "INACTIVE", "RECURRING",
                 5, "Old Class",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
                         TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END)));
@@ -259,7 +264,7 @@ class RegisterWalkInServiceTest {
     @Test
     void execute_rbac_professor_rejectsWhenNotAssigned() {
         UUID otherProfessorId = UUID.randomUUID();
-        when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(professorIdLookupPort.findProfessorIdByUserId(TENANT_ID, ACTOR_USER_ID))
                 .thenReturn(Optional.of(otherProfessorId));
 
@@ -295,7 +300,7 @@ class RegisterWalkInServiceTest {
 
     @Test
     void execute_rbac_manager_rejectsCrossProgram() {
-        when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
 
         UUID otherProgramId = UUID.randomUUID();
         assertThatThrownBy(() -> service.execute(managerCommand(otherProgramId)))
@@ -317,6 +322,20 @@ class RegisterWalkInServiceTest {
     }
 
     // ---------------------------------------------------------------
+    // Test 9b: RBAC – superadmin always allowed
+    // ---------------------------------------------------------------
+
+    @Test
+    void execute_rbac_superadmin_alwaysAllowed() {
+        stubHappyPath();
+
+        AttendanceRegistration result = service.execute(superadminCommand());
+
+        assertThat(result).isNotNull();
+        verify(professorIdLookupPort, never()).findProfessorIdByUserId(any(), any());
+    }
+
+    // ---------------------------------------------------------------
     // Test 10: Outside marking window – before
     // ---------------------------------------------------------------
 
@@ -332,7 +351,7 @@ class RegisterWalkInServiceTest {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(summary));
 
         ClassDetailsPort.ClassRegistrationView futureClassView = new ClassDetailsPort.ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "RECURRING", 5, "Class",
+                CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING", 5, "Class",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
                         sessionDate.getDayOfWeek(), sessionDate, futureStart, futureEnd)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(futureClassView));
@@ -361,7 +380,7 @@ class RegisterWalkInServiceTest {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(summary));
 
         ClassDetailsPort.ClassRegistrationView pastClassView = new ClassDetailsPort.ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "RECURRING", 5, "Class",
+                CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING", 5, "Class",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
                         sessionDate.getDayOfWeek(), sessionDate, pastStart, pastEnd)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(pastClassView));

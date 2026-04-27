@@ -77,7 +77,7 @@ class RegisterForClassServiceTest {
     @BeforeEach
     void setUp() {
         activeClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
                 List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME))
         );
@@ -122,7 +122,7 @@ class RegisterForClassServiceTest {
     @Test
     void classInactive_throws400() {
         ClassRegistrationView inactive = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "INACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "INACTIVE", "RECURRING",
                 5, "Old Class", List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(inactive));
 

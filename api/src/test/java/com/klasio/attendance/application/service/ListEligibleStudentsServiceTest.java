@@ -69,6 +69,7 @@ class ListEligibleStudentsServiceTest {
     private LocalTime SESSION_END;
 
     private ClassSummaryView classSummary;
+    private ClassDetailsPort.ClassRegistrationView classRegView;
     private ClassSession existingSession;
 
     @BeforeEach
@@ -79,6 +80,12 @@ class ListEligibleStudentsServiceTest {
         SESSION_END = SESSION_START.plusHours(1);
 
         classSummary = new ClassSummaryView(CLASS_ID, PROGRAM_ID, PROFESSOR_ID);
+        classRegView = new ClassDetailsPort.ClassRegistrationView(
+                CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING",
+                5, "Yoga Beginners",
+                List.of(new ClassDetailsPort.ScheduleEntryView(
+                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
+        );
 
         existingSession = ClassSession.reconstitute(
                 ClassSessionId.of(SESSION_ID), TENANT_ID, CLASS_ID, TODAY,
@@ -104,6 +111,7 @@ class ListEligibleStudentsServiceTest {
     @Test
     void execute_returnsEligibleStudents_whenAdminViewer() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
                 .thenReturn(Optional.of(existingSession));
         when(registrationRepository.findActiveStudentIdsBySession(TENANT_ID, SESSION_ID))
@@ -125,6 +133,7 @@ class ListEligibleStudentsServiceTest {
     @Test
     void execute_returnsEligibleStudents_whenManagerInProgram() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
                 .thenReturn(Optional.empty());
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), any(), any(), anyInt()))
@@ -143,6 +152,7 @@ class ListEligibleStudentsServiceTest {
     @Test
     void execute_returnsEligibleStudents_whenProfessorAssignedToClass() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(professorIdLookupPort.findProfessorIdByUserId(TENANT_ID, ACTOR_USER_ID))
                 .thenReturn(Optional.of(PROFESSOR_ID));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
@@ -211,6 +221,7 @@ class ListEligibleStudentsServiceTest {
     @Test
     void execute_capsResultAt50_whenNoNameFilter() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
                 .thenReturn(Optional.empty());
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), isNull(), any(), anyInt()))
@@ -230,6 +241,7 @@ class ListEligibleStudentsServiceTest {
     @Test
     void execute_capsResultAt20_withNameFilter() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
                 .thenReturn(Optional.empty());
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), eq("Alice"), any(), anyInt()))
@@ -250,6 +262,7 @@ class ListEligibleStudentsServiceTest {
     void execute_passesExcludeStudentIdsFromActiveRegistrations_toAdapter() {
         UUID alreadyRegistered = UUID.randomUUID();
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
                 .thenReturn(Optional.of(existingSession));
         when(registrationRepository.findActiveStudentIdsBySession(TENANT_ID, SESSION_ID))
@@ -272,6 +285,7 @@ class ListEligibleStudentsServiceTest {
     @Test
     void execute_passesEmptyExclude_whenSessionNotMaterializedYet() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
                 .thenReturn(Optional.empty());
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), any(), any(), anyInt()))
@@ -292,6 +306,7 @@ class ListEligibleStudentsServiceTest {
     @Test
     void execute_returnsEmptyList_whenAdapterReturnsNothing() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
                 .thenReturn(Optional.empty());
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), any(), any(), anyInt()))

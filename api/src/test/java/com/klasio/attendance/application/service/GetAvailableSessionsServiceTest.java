@@ -70,7 +70,7 @@ class GetAvailableSessionsServiceTest {
     void setUp() {
         enrollment  = new EnrollmentView(UUID.randomUUID(), "BEGINNER");
         activeClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
                 List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START, END))
         );
@@ -160,7 +160,7 @@ class GetAvailableSessionsServiceTest {
         LocalDate to   = yesterday;
 
         ClassRegistrationView oneTimeClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "ONE_TIME",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Past Class",
                 List.of(new ScheduleEntryView(null, yesterday, LocalTime.of(9, 0), LocalTime.of(10, 0)))
         );
@@ -328,7 +328,7 @@ class GetAvailableSessionsServiceTest {
         LocalTime soonEnd   = soonStart.plusHours(1);
 
         ClassRegistrationView soonClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "ONE_TIME",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Soon Class",
                 List.of(new ScheduleEntryView(null, today, soonStart, soonEnd))
         );
@@ -361,7 +361,7 @@ class GetAvailableSessionsServiceTest {
         LocalTime pastEnd   = pastStart.plusHours(1);
 
         ClassRegistrationView pastClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "ONE_TIME",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Past Class",
                 List.of(new ScheduleEntryView(null, today, pastStart, pastEnd))
         );

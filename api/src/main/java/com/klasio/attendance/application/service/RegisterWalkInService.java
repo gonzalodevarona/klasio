@@ -10,7 +10,6 @@ import com.klasio.attendance.domain.model.ClassSessionStatus;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassRegistrationView;
-import com.klasio.attendance.domain.port.ClassDetailsPort.ClassSummaryView;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ScheduleEntryView;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.attendance.domain.port.EnrollmentLookupPort;
@@ -75,8 +74,9 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
 
     @Override
     public AttendanceRegistration execute(RegisterWalkInCommand cmd) {
-        // 1. Load class summary — existence + RBAC scope check
-        ClassSummaryView classSummary = classDetailsPort.findClassSummary(cmd.tenantId(), cmd.classId())
+        // 1. Load full class view — single DB call covers existence check, RBAC fields, and schedule
+        ClassRegistrationView classView = classDetailsPort
+                .findForRegistration(cmd.tenantId(), cmd.classId())
                 .orElseThrow(() -> new ClassNotFoundException("Class not found: " + cmd.classId()));
 
         // 2. RBAC scope check
@@ -86,20 +86,15 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
                     .findProfessorIdByUserId(cmd.tenantId(), cmd.actorUserId())
                     .orElseThrow(() -> new AccessDeniedException(
                             "Professor not found for user: " + cmd.actorUserId()));
-            if (!resolvedProfessorId.equals(classSummary.professorId())) {
+            if (!resolvedProfessorId.equals(classView.professorId())) {
                 throw new AccessDeniedException("Professor is not assigned to this class");
             }
         } else if ("MANAGER".equals(actorRole)) {
-            if (!cmd.programIdFromJwt().equals(classSummary.programId())) {
+            if (!cmd.programIdFromJwt().equals(classView.programId())) {
                 throw new AccessDeniedException("Manager does not belong to this class's program");
             }
         }
         // ADMIN / SUPERADMIN: no additional RBAC restriction
-
-        // 3. Load full class view to resolve schedule entry and check ACTIVE status
-        ClassRegistrationView classView = classDetailsPort
-                .findForRegistration(cmd.tenantId(), cmd.classId())
-                .orElseThrow(() -> new ClassNotFoundException("Class not found: " + cmd.classId()));
 
         if (!"ACTIVE".equals(classView.status())) {
             throw new IllegalArgumentException("This class is not currently active.");
@@ -160,7 +155,7 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
                             + cmd.hoursToCharge());
         }
 
-        int maxHours = durationMinutes / 60;
+        int maxHours = Math.max(1, durationMinutes / 60);
         if (cmd.hoursToCharge() < 1 || cmd.hoursToCharge() > maxHours) {
             throw new IllegalArgumentException(
                     "hoursToCharge must be between 1 and " + maxHours

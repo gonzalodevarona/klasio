@@ -28,6 +28,7 @@ public interface ClassDetailsPort {
     record ClassRegistrationView(
             UUID id,
             UUID programId,
+            UUID professorId,
             String level,
             String status,
             String type,

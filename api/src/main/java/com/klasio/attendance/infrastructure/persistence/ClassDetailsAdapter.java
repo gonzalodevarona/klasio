@@ -63,6 +63,7 @@ public class ClassDetailsAdapter implements ClassDetailsPort {
         return new ClassRegistrationView(
                 entity.getId(),
                 entity.getProgramId(),
+                entity.getProfessorId(),
                 entity.getLevel(),
                 entity.getStatus(),
                 entity.getType(),
