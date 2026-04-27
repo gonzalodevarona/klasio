@@ -4,7 +4,12 @@ import com.klasio.attendance.application.dto.MarkAttendanceResult;
 import com.klasio.attendance.application.dto.MarkAttendanceResult.MarkedRegistration;
 import com.klasio.attendance.application.port.input.CorrectMarkUseCase;
 import com.klasio.attendance.application.port.input.MarkAttendanceUseCase;
+import com.klasio.attendance.application.port.input.RegisterWalkInUseCase;
+import com.klasio.attendance.domain.model.AttendanceRegistration;
+import com.klasio.attendance.domain.model.AttendanceRegistrationId;
+import com.klasio.attendance.domain.model.AttendanceRegistrationStatus;
 import com.klasio.shared.infrastructure.config.JwtProperties;
+import com.klasio.shared.infrastructure.exception.AlreadyMarkedException;
 import com.klasio.shared.infrastructure.exception.GlobalExceptionHandler;
 import com.klasio.shared.infrastructure.exception.MarkingWindowException;
 import org.junit.jupiter.api.DisplayName;
@@ -86,6 +91,7 @@ class AttendanceMarkingControllerTest {
 
     @MockitoBean MarkAttendanceUseCase markAttendanceUseCase;
     @MockitoBean CorrectMarkUseCase correctMarkUseCase;
+    @MockitoBean RegisterWalkInUseCase registerWalkInUseCase;
 
     private static final UUID TENANT_ID  = UUID.randomUUID();
     private static final UUID CLASS_ID   = UUID.randomUUID();
@@ -94,8 +100,9 @@ class AttendanceMarkingControllerTest {
     private static final UUID REG_ID     = UUID.randomUUID();
     private static final LocalDate SESSION_DATE = LocalDate.now().plusDays(1);
 
-    private static final String MARKS_URL = "/api/v1/classes/{classId}/sessions/{sessionDate}/marks";
-    private static final String CORRECT_URL = "/api/v1/classes/{classId}/sessions/{sessionDate}/marks/{regId}/correct";
+    private static final String MARKS_URL    = "/api/v1/classes/{classId}/sessions/{sessionDate}/marks";
+    private static final String CORRECT_URL  = "/api/v1/classes/{classId}/sessions/{sessionDate}/marks/{regId}/correct";
+    private static final String WALK_IN_URL  = "/api/v1/classes/{classId}/sessions/{sessionDate}/walk-in";
 
     private UsernamePasswordAuthenticationToken authWithRole(String role) {
         var auth = new UsernamePasswordAuthenticationToken(
@@ -235,5 +242,101 @@ class AttendanceMarkingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(MARKS_BODY))
                 .andExpect(status().isUnauthorized());
+    }
+
+    // ------------------------------------------------------------------
+    // Walk-in tests
+    // ------------------------------------------------------------------
+
+    private static final String WALK_IN_BODY = """
+            {
+              "startTime": "18:00:00",
+              "studentId": "%s",
+              "hoursToCharge": 1
+            }
+            """.formatted(UUID.randomUUID());
+
+    private AttendanceRegistration buildWalkInRegistration(UUID regId) {
+        return AttendanceRegistration.reconstitute(
+                AttendanceRegistrationId.of(regId),
+                TENANT_ID,
+                UUID.randomUUID(),
+                CLASS_ID,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "BEGINNER",
+                1,
+                AttendanceRegistrationStatus.PRESENT,
+                SESSION_DATE,
+                java.time.LocalTime.of(18, 0),
+                java.time.LocalTime.of(19, 0),
+                null, null, null,
+                java.time.Instant.now(), USER_ID,
+                null, null, null,
+                java.time.Instant.now(), USER_ID,
+                null, null
+        );
+    }
+
+    @Test
+    @DisplayName("POST /walk-in as PROFESSOR returns 201")
+    void walkIn_returns201_onSuccess() throws Exception {
+        UUID regId = UUID.randomUUID();
+        when(registerWalkInUseCase.execute(any())).thenReturn(buildWalkInRegistration(regId));
+
+        mockMvc.perform(withAuth(
+                        post(WALK_IN_URL, CLASS_ID, SESSION_DATE)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(WALK_IN_BODY),
+                        "PROFESSOR"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.registrationId").value(regId.toString()))
+                .andExpect(jsonPath("$.status").value("PRESENT"))
+                .andExpect(jsonPath("$.intendedHours").value(1));
+    }
+
+    @Test
+    @DisplayName("POST /walk-in as STUDENT returns 403")
+    void walkIn_returns403_forStudentRole() throws Exception {
+        mockMvc.perform(withAuth(
+                        post(WALK_IN_URL, CLASS_ID, SESSION_DATE)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(WALK_IN_BODY),
+                        "STUDENT"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("POST /walk-in with hoursToCharge=-1 returns 400")
+    void walkIn_returns400_onValidationFailure_negativeHours() throws Exception {
+        String badBody = """
+                {
+                  "startTime": "18:00:00",
+                  "studentId": "%s",
+                  "hoursToCharge": -1
+                }
+                """.formatted(UUID.randomUUID());
+
+        mockMvc.perform(withAuth(
+                        post(WALK_IN_URL, CLASS_ID, SESSION_DATE)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(badBody),
+                        "PROFESSOR"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /walk-in with AlreadyMarkedException returns 409")
+    void walkIn_returns409_onAlreadyMarked() throws Exception {
+        when(registerWalkInUseCase.execute(any()))
+                .thenThrow(new AlreadyMarkedException("Already marked"));
+
+        mockMvc.perform(withAuth(
+                        post(WALK_IN_URL, CLASS_ID, SESSION_DATE)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(WALK_IN_BODY),
+                        "PROFESSOR"))
+                .andExpect(status().isConflict());
     }
 }
