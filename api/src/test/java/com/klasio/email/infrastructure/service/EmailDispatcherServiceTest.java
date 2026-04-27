@@ -197,4 +197,26 @@ class EmailDispatcherServiceTest {
         verify(renderer).render(anyString(), any(Locale.class), captor.capture());
         assertThat(captor.getValue().get("expiresAt")).isEqualTo("31/05/2026");
     }
+
+    @Test
+    void localDateTimeParamIsFormattedUsingTenantTimezone() {
+        when(renderer.render(anyString(), any(Locale.class), anyMap()))
+                .thenReturn(new RenderedTemplate("s", "<h/>", "t"));
+
+        java.time.LocalDateTime startsAt = java.time.LocalDateTime.of(2026, 4, 27, 18, 43);
+
+        service.send(EmailType.ACCOUNT_SETUP,
+                new EmailRecipient("u@x.com", "U"),
+                tenantId,
+                new java.util.HashMap<>(Map.of(
+                        "recipientName", "U", "role", "student",
+                        "setupUrl", "u", "expiresAt", startsAt)));
+
+        @SuppressWarnings("unchecked")
+        org.mockito.ArgumentCaptor<Map<String, Object>> captor =
+                (org.mockito.ArgumentCaptor<Map<String, Object>>) (org.mockito.ArgumentCaptor<?>)
+                org.mockito.ArgumentCaptor.forClass(Map.class);
+        verify(renderer).render(anyString(), any(Locale.class), captor.capture());
+        assertThat(captor.getValue().get("expiresAt")).isEqualTo("27/04/2026 6:43 PM");
+    }
 }
