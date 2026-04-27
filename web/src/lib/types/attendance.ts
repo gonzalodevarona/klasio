@@ -68,6 +68,8 @@ export interface RosterRegistrantView {
   level: string;
   intendedHours: number;
   status: RegistrationStatus;
+  /** userId of the actor who created this registration (null when self-registered). */
+  createdBy?: string | null;
 }
 
 export interface ClassSessionRoster {
