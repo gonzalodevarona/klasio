@@ -230,4 +230,41 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("Karate Kids");
         assertThat(result.htmlBody()).contains("http://localhost:3000");
     }
+
+    @Test
+    void classSessionChange_withReason_rendersBothPanelRows() {
+        RenderedTemplate result = renderer.render("class-session-change", Locale.ENGLISH, Map.of(
+                "studentName", "Sebastián Vargas",
+                "className", "Jiu-Jitsu Advanced",
+                "startsAt", "Monday April 28 at 7:00 PM",
+                "changeKind", "CANCELLED",
+                "reason", "Professor is ill.",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("CANCELLED");
+        assertThat(result.htmlBody()).contains("Professor is ill.");
+        assertThat(result.htmlBody()).contains("Change type");
+        assertThat(result.htmlBody()).contains("Reason");
+    }
+
+    @Test
+    void classSessionChange_withoutReason_omitsReasonRow() {
+        RenderedTemplate result = renderer.render("class-session-change", Locale.ENGLISH, Map.of(
+                "studentName", "Sebastián Vargas",
+                "className", "Jiu-Jitsu Advanced",
+                "startsAt", "Monday April 28 at 7:00 PM",
+                "changeKind", "ALERTED",
+                "reason", "",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("ALERTED");
+        assertThat(result.htmlBody()).doesNotContain("Reason");
+    }
 }
