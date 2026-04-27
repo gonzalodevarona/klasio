@@ -195,4 +195,23 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("Expires on");
         assertThat(result.htmlBody()).contains("http://localhost:3000");
     }
+
+    @Test
+    void membershipExpiryWarning_rendersAmberPanel() {
+        RenderedTemplate result = renderer.render("membership-expiry-warning", Locale.ENGLISH, Map.of(
+                "studentName", "Daniela Ríos",
+                "programName", "Yoga Adults",
+                "remainingHours", 2,
+                "expiresAt", "2026-04-30",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("#FFFAF0");
+        assertThat(result.htmlBody()).contains("Remaining hours");
+        assertThat(result.htmlBody()).contains("Expires on");
+        assertThat(result.htmlBody()).contains("Daniela Ríos");
+    }
 }
