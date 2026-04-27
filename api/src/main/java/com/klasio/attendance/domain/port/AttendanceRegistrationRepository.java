@@ -81,4 +81,19 @@ public interface AttendanceRegistrationRepository {
      * No date window — spans all records.
      */
     StatsProjection computeStatsForStudent(UUID tenantId, UUID studentId);
+
+    /**
+     * Returns the non-cancelled registration for the given (sessionId, studentId),
+     * i.e. status NOT IN (CANCELLED_BY_STUDENT, CANCELLED_BY_SYSTEM, SESSION_CANCELLED).
+     * Used by the walk-in flow to detect existing registrations.
+     */
+    Optional<AttendanceRegistration> findActiveBySessionAndStudent(UUID tenantId,
+                                                                   UUID sessionId,
+                                                                   UUID studentId);
+
+    /**
+     * Returns the set of studentIds with a non-cancelled registration for the session.
+     * Used by the walk-in picker to exclude already-registered students.
+     */
+    Set<UUID> findActiveStudentIdsBySession(UUID tenantId, UUID sessionId);
 }

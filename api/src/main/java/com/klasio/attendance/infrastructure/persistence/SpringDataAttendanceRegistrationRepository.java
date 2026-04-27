@@ -122,4 +122,26 @@ public interface SpringDataAttendanceRegistrationRepository
     List<Object[]> computeStatsForStudent(
             @Param("tenantId")  UUID tenantId,
             @Param("studentId") UUID studentId);
+
+    @Query("""
+           select r from AttendanceRegistrationJpaEntity r
+           where r.tenantId = :tenantId
+             and r.sessionId = :sessionId
+             and r.studentId = :studentId
+             and r.status not in ('CANCELLED_BY_STUDENT', 'CANCELLED_BY_SYSTEM', 'SESSION_CANCELLED')
+           """)
+    Optional<AttendanceRegistrationJpaEntity> findActiveBySessionAndStudent(
+            @Param("tenantId")  UUID tenantId,
+            @Param("sessionId") UUID sessionId,
+            @Param("studentId") UUID studentId);
+
+    @Query("""
+           select r.studentId from AttendanceRegistrationJpaEntity r
+           where r.tenantId = :tenantId
+             and r.sessionId = :sessionId
+             and r.status not in ('CANCELLED_BY_STUDENT', 'CANCELLED_BY_SYSTEM', 'SESSION_CANCELLED')
+           """)
+    List<UUID> findActiveStudentIdsBySession(
+            @Param("tenantId")  UUID tenantId,
+            @Param("sessionId") UUID sessionId);
 }

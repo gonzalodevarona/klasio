@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -144,6 +145,21 @@ public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
         return new StatsProjection(
                 toLong(row[0]), toLong(row[1]), toLong(row[2]), toLong(row[3]), toLong(row[4])
         );
+    }
+
+    @Override
+    public Optional<AttendanceRegistration> findActiveBySessionAndStudent(UUID tenantId,
+                                                                           UUID sessionId,
+                                                                           UUID studentId) {
+        applyTenantContext();
+        return springDataRepository.findActiveBySessionAndStudent(tenantId, sessionId, studentId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Set<UUID> findActiveStudentIdsBySession(UUID tenantId, UUID sessionId) {
+        applyTenantContext();
+        return new HashSet<>(springDataRepository.findActiveStudentIdsBySession(tenantId, sessionId));
     }
 
     private long toLong(Object val) {
