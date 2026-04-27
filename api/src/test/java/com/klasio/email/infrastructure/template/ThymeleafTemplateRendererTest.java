@@ -103,4 +103,22 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("https://test.klasio.com/setup?token=abc");
         assertThat(result.htmlBody()).contains("Temporary link");
     }
+
+    @Test
+    void professorInvitation_rendersCorrectly() {
+        RenderedTemplate result = renderer.render("professor-invitation", Locale.ENGLISH, Map.of(
+                "professorName", "Carlos Ruiz",
+                "activationUrl", "https://test.klasio.com/setup?token=inv123",
+                "expiresAt", "2026-05-05 18:00",
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.subject()).isEqualTo("You have been invited to join Test League as a professor");
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("#CAFF4D");
+        assertThat(result.htmlBody()).contains("Carlos Ruiz");
+        assertThat(result.htmlBody()).contains("https://test.klasio.com/setup?token=inv123");
+    }
 }
