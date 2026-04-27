@@ -62,9 +62,13 @@ export function WalkInModal({
     e.preventDefault();
     if (!selectedStudentId) return;
 
-    await mutate({ startTime, studentId: selectedStudentId, hoursToCharge });
-    onSuccess();
-    onClose();
+    try {
+      await mutate({ startTime, studentId: selectedStudentId, hoursToCharge });
+      onSuccess();
+      onClose();
+    } catch {
+      // error state already captured inside the hook
+    }
   };
 
   return (
