@@ -23,6 +23,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -135,7 +136,7 @@ public class SessionEventsNotificationListener {
         // Email fan-out for CLASS_SESSION_CHANGE
         // Uses a separate set keyed on students.id — distinct namespace from notifiedStudents (users.id).
         String changeKind = "CANCELLED";
-        String startsAt = e.sessionDate().toString() + " " + e.startTime().toString();
+        LocalDateTime startsAt = LocalDateTime.of(e.sessionDate(), e.startTime());
         Set<UUID> emailedStudents = new HashSet<>();
         for (UUID studentId : e.affectedStudentIds()) {
             if (!emailedStudents.add(studentId)) continue;
@@ -184,7 +185,7 @@ public class SessionEventsNotificationListener {
                 sessionId, actorId, actorRole, type);
 
         // Email fan-out for alert events
-        String startsAt = sessionDate.toString() + " " + startTime.toString();
+        LocalDateTime startsAt = LocalDateTime.of(sessionDate, startTime);
         for (AttendanceRegistration reg : regs) {
             studentEmailPort.findEmail(reg.getStudentId(), tenantId).ifPresent(email -> {
                 Map<String, Object> params = new HashMap<>();

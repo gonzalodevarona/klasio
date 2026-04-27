@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -54,11 +55,11 @@ public class MembershipNotificationListener {
                 EmailType.MEMBERSHIP_ACTIVATED,
                 new EmailRecipient(email, name),
                 event.tenantId(),
-                Map.of("studentName", name,
+                new HashMap<>(Map.of("studentName", name,
                        "programName", program,
                        "planName", event.planName(),
                        "totalHours", event.totalHours(),
-                       "expiresAt", event.expirationDate().toString()));
+                       "expiresAt", event.expirationDate())));
     }
 
     @Async("emailListenerExecutor")
@@ -76,10 +77,10 @@ public class MembershipNotificationListener {
                 EmailType.MEMBERSHIP_EXPIRY_WARNING,
                 new EmailRecipient(email, name),
                 event.tenantId(),
-                Map.of("studentName", name,
+                new HashMap<>(Map.of("studentName", name,
                        "programName", program,
-                       "expiresAt", event.expirationDate().toString(),
-                       "remainingHours", event.remainingHours()));
+                       "expiresAt", event.expirationDate(),
+                       "remainingHours", event.remainingHours())));
     }
 
     @Async("emailListenerExecutor")
