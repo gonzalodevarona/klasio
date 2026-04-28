@@ -276,6 +276,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(UnlimitedMembershipNotAdjustableException.class)
+    public ResponseEntity<ErrorResponse> handleUnlimitedMembershipNotAdjustable(
+            UnlimitedMembershipNotAdjustableException ex) {
+        var error = new ErrorResponse.ErrorDetail("UNLIMITED_MEMBERSHIP_NOT_ADJUSTABLE",
+                ex.getMessage() != null ? ex.getMessage() : "UNLIMITED memberships do not have adjustable hours");
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(ClassLevelMismatchException.class)
     public ResponseEntity<ErrorResponse> handleClassLevelMismatch(ClassLevelMismatchException ex) {
         var error = new ErrorResponse.ErrorDetail("CLASS_LEVEL_MISMATCH", ex.getMessage());

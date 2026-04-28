@@ -12,6 +12,7 @@ import com.klasio.shared.infrastructure.exception.EnrollmentNotFoundException;
 import com.klasio.shared.infrastructure.exception.MembershipAlreadyActiveException;
 import com.klasio.student.domain.model.StudentEnrollment;
 import com.klasio.student.domain.port.StudentEnrollmentRepository;
+import com.klasio.student.domain.model.StudentEnrollmentId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -163,6 +164,31 @@ class CreateMembershipServiceTest {
                 .isInstanceOf(EnrollmentNotFoundException.class);
 
         verify(membershipRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("creates membership with null hours when plan modality is UNLIMITED")
+    void execute_unlimitedPlan_createsMembershipWithNullHours() {
+        ProgramPlanPort.PlanView unlimitedPlan = new ProgramPlanPort.PlanView(
+                PLAN_ID, PROGRAM_ID, TENANT_ID, "Kids Unlimited", "UNLIMITED", 0, MANAGER_ID);
+        when(programPlanPort.findActivePlan(PLAN_ID, TENANT_ID)).thenReturn(Optional.of(unlimitedPlan));
+        StudentEnrollment enrollment = mock(StudentEnrollment.class);
+        when(enrollment.getId()).thenReturn(StudentEnrollmentId.of(ENROLLMENT_ID));
+        when(enrollmentRepository.findActiveByStudentIdAndProgramId(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                .thenReturn(Optional.of(enrollment));
+        when(membershipRepository.existsActiveByStudentIdAndProgramId(STUDENT_ID, PROGRAM_ID))
+                .thenReturn(false);
+
+        CreateMembershipCommand cmd = new CreateMembershipCommand(
+                TENANT_ID, STUDENT_ID, PLAN_ID, START, false, false, ACTOR_ID);
+
+        Membership result = service.execute(cmd);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isUnlimited()).isTrue();
+        assertThat(result.getPurchasedHours()).isNull();
+        assertThat(result.getAvailableHours()).isNull();
+        assertThat(result.getStatus()).isEqualTo(MembershipStatus.PENDING_PAYMENT);
     }
 
     @Test
