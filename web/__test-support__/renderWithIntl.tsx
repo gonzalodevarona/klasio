@@ -680,6 +680,7 @@ const testMessages = {
       BEGINNER: "Beginner",
       INTERMEDIATE: "Intermediate",
       ADVANCED: "Advanced",
+      OPEN: "Open",
     },
     classType: {
       RECURRING: "Recurring",

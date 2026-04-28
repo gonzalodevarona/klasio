@@ -236,7 +236,8 @@
     "classLevel": {
       "BEGINNER": "Beginner",
       "INTERMEDIATE": "Intermediate",
-      "ADVANCED": "Advanced"
+      "ADVANCED": "Advanced",
+      "OPEN": "Open"
     },
     "classType": {
       "RECURRING": "Recurring",
