@@ -125,22 +125,32 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
                             + " minutes after it ends");
         }
 
-        // 6. Validate enrollment
-        EnrollmentView enrollment = enrollmentLookupPort
-                .findActiveEnrollmentInProgramAtLevel(cmd.tenantId(), cmd.studentId(),
-                        classView.programId(), classView.level())
-                .orElseGet(() -> {
-                    boolean enrolledInProgram = enrollmentLookupPort
-                            .findActiveEnrollmentInProgram(cmd.tenantId(), cmd.studentId(), classView.programId())
-                            .isPresent();
-                    if (enrolledInProgram) {
-                        throw new ClassLevelMismatchException(
-                                "Student's enrollment level does not match this class level ("
-                                        + classView.level() + ").");
-                    }
-                    throw new EnrollmentNotFoundException(
-                            "Student is not enrolled in the program for this class.");
-                });
+        // 6. Validate enrollment.
+        //    OPEN classes: any active enrollment in the program is sufficient (RF-36).
+        //    Level-tagged classes: enrollment must match the class level exactly.
+        EnrollmentView enrollment;
+        if ("OPEN".equals(classView.level())) {
+            enrollment = enrollmentLookupPort
+                    .findActiveEnrollmentInProgram(cmd.tenantId(), cmd.studentId(), classView.programId())
+                    .orElseThrow(() -> new EnrollmentNotFoundException(
+                            "Student is not enrolled in the program for this class."));
+        } else {
+            enrollment = enrollmentLookupPort
+                    .findActiveEnrollmentInProgramAtLevel(cmd.tenantId(), cmd.studentId(),
+                            classView.programId(), classView.level())
+                    .orElseGet(() -> {
+                        boolean enrolledInProgram = enrollmentLookupPort
+                                .findActiveEnrollmentInProgram(cmd.tenantId(), cmd.studentId(), classView.programId())
+                                .isPresent();
+                        if (enrolledInProgram) {
+                            throw new ClassLevelMismatchException(
+                                    "Student's enrollment level does not match this class level ("
+                                            + classView.level() + ").");
+                        }
+                        throw new EnrollmentNotFoundException(
+                                "Student is not enrolled in the program for this class.");
+                    });
+        }
 
         // 7. Validate active membership
         ActiveMembershipView membership = membershipHoursPort
