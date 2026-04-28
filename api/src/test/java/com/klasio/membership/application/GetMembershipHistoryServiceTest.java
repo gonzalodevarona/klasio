@@ -104,6 +104,20 @@ class GetMembershipHistoryServiceTest {
             String[] lines = csv.split("\n");
             assertThat(lines).hasSize(1);
         }
+
+        @Test
+        @DisplayName("renders UNLIMITED rows with dashes instead of null for hour columns")
+        void testMembershipHistoryCsvRendersUnlimitedRowsWithDashes() {
+            Membership m = buildUnlimitedMembership(LocalDate.of(2026, 4, 1), MembershipStatus.ACTIVE);
+            when(membershipRepository.findAllByStudentIdAndProgramId(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                    .thenReturn(List.of(m));
+
+            String csv = service.exportCsv(TENANT_ID, STUDENT_ID, PROGRAM_ID);
+
+            assertThat(csv).contains("UNLIMITED");
+            assertThat(csv).contains("—");
+            assertThat(csv).doesNotContain("null");
+        }
     }
 
     private Membership buildMembership(LocalDate start, int purchased, int available, MembershipStatus status) {
@@ -114,6 +128,23 @@ class GetMembershipHistoryServiceTest {
                 UUID.randomUUID(), "Test Plan",
                 ProgramModality.HOURS_BASED,
                 purchased, available,
+                start, start.withDayOfMonth(start.lengthOfMonth()),
+                status,
+                true, UUID.randomUUID(), Instant.now(),
+                UUID.randomUUID(), Instant.now(),
+                Instant.now(), UUID.randomUUID(),
+                null, null
+        );
+    }
+
+    private Membership buildUnlimitedMembership(LocalDate start, MembershipStatus status) {
+        return Membership.reconstitute(
+                MembershipId.generate(),
+                TENANT_ID, STUDENT_ID,
+                UUID.randomUUID(), PROGRAM_ID,
+                UUID.randomUUID(), "Unlimited Plan",
+                ProgramModality.UNLIMITED,
+                null, null,
                 start, start.withDayOfMonth(start.lengthOfMonth()),
                 status,
                 true, UUID.randomUUID(), Instant.now(),
