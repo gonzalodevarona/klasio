@@ -6,7 +6,6 @@ import com.klasio.notifications.application.dto.CreateNotificationCommand;
 import com.klasio.notifications.application.port.input.CreateNotificationUseCase;
 import com.klasio.notifications.domain.model.NotificationType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
@@ -36,7 +35,6 @@ public class LevelChangeNotificationListener {
         this.studentUserIdPort = studentUserIdPort;
     }
 
-    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onRegistrationCancelledByLevelChange(RegistrationCancelledByLevelChange e) {
         log.info("[NOTIFY] Registration cancelled by level change — registrationId={}, studentId={}, {} -> {}",
