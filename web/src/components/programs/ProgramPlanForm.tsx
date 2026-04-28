@@ -186,7 +186,9 @@ export default function ProgramPlanForm({
           placeholder={
             modality === "HOURS_BASED"
               ? t("formNamePlaceholderHours")
-              : t("formNamePlaceholderSchedule")
+              : modality === "CLASSES_PER_WEEK"
+                ? t("formNamePlaceholderSchedule")
+                : t("formNamePlaceholderUnlimited")
           }
         />
       </div>
@@ -204,7 +206,13 @@ export default function ProgramPlanForm({
             <input
               type="text"
               id="modality"
-              value={modality === "HOURS_BASED" ? t("modalityHoursBased") : t("modalityClassesPerWeek")}
+              value={
+                modality === "HOURS_BASED"
+                  ? t("modalityHoursBased")
+                  : modality === "CLASSES_PER_WEEK"
+                    ? t("modalityClassesPerWeek")
+                    : t("modalityUnlimited")
+              }
               disabled
               className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm sm:text-sm cursor-not-allowed"
             />
@@ -221,6 +229,7 @@ export default function ProgramPlanForm({
           >
             <option value="HOURS_BASED">{t("modalityHoursBased")}</option>
             <option value="CLASSES_PER_WEEK">{t("modalityClassesPerWeek")}</option>
+            <option value="UNLIMITED">{t("modalityUnlimited")}</option>
           </select>
         )}
       </div>

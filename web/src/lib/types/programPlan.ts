@@ -1,4 +1,4 @@
-export type ProgramModality = "HOURS_BASED" | "CLASSES_PER_WEEK";
+export type ProgramModality = "HOURS_BASED" | "CLASSES_PER_WEEK" | "UNLIMITED";
 
 export type PlanStatus = "ACTIVE" | "INACTIVE";
 
