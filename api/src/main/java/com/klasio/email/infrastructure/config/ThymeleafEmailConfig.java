@@ -3,6 +3,7 @@ package com.klasio.email.infrastructure.config;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -17,7 +18,7 @@ public class ThymeleafEmailConfig {
     }
 
     @Bean("emailHtmlEngine")
-    SpringTemplateEngine emailHtmlEngine() {
+    TemplateEngine emailHtmlEngine() {
         ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
         resolver.setPrefix("email-templates/");
         resolver.setSuffix(".html");
@@ -31,7 +32,7 @@ public class ThymeleafEmailConfig {
     }
 
     @Bean("emailTextEngine")
-    SpringTemplateEngine emailTextEngine() {
+    TemplateEngine emailTextEngine() {
         ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
         resolver.setPrefix("email-templates/");
         resolver.setSuffix(".txt");
