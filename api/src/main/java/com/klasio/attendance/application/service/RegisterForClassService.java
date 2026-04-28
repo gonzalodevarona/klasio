@@ -115,8 +115,8 @@ public class RegisterForClassService implements RegisterForClassUseCase {
                 .orElseThrow(() -> new MembershipNotActiveException(
                         "You don't have an active membership for this program. Please contact your administrator."));
 
-        // 6. Validate sufficient hours
-        if (membership.availableHours() < command.intendedHours()) {
+        // 6. Validate sufficient hours (UNLIMITED memberships skip this check)
+        if (!membership.unlimited() && membership.availableHours() < command.intendedHours()) {
             throw new InsufficientHoursException(
                     "Student has " + membership.availableHours() + " available hours but requested "
                             + command.intendedHours());

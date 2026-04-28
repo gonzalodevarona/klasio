@@ -148,8 +148,8 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
                 .orElseThrow(() -> new MembershipNotActiveException(
                         "Student does not have an active membership for this program."));
 
-        // 8. Hours validation
-        if (membership.availableHours() < cmd.hoursToCharge()) {
+        // 8. Hours validation (UNLIMITED memberships skip the balance check)
+        if (!membership.unlimited() && membership.availableHours() < cmd.hoursToCharge()) {
             throw new InsufficientHoursException(
                     "Student has " + membership.availableHours() + " available hours but walk-in requires "
                             + cmd.hoursToCharge());

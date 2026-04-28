@@ -109,7 +109,7 @@ class RegisterWalkInServiceTest {
                         TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
         );
         enrollment = new EnrollmentView(ENROLLMENT_ID, "BEGINNER");
-        membership = new ActiveMembershipView(MEMBERSHIP_ID, 10, TODAY.plusMonths(1));
+        membership = new ActiveMembershipView(MEMBERSHIP_ID, 10, TODAY.plusMonths(1), false);
         scheduledSession = ClassSession.materialize(TENANT_ID, CLASS_ID, TODAY, SESSION_START, SESSION_END, ACTOR_USER_ID);
     }
 
@@ -482,7 +482,7 @@ class RegisterWalkInServiceTest {
         when(enrollmentLookupPort.findActiveEnrollmentInProgramAtLevel(any(), any(), any(), any()))
                 .thenReturn(Optional.of(enrollment));
         when(membershipHoursPort.findActiveForStudentInProgram(any(), any(), any()))
-                .thenReturn(Optional.of(new ActiveMembershipView(MEMBERSHIP_ID, 0, TODAY.plusMonths(1))));
+                .thenReturn(Optional.of(new ActiveMembershipView(MEMBERSHIP_ID, 0, TODAY.plusMonths(1), false)));
 
         assertThatThrownBy(() -> service.execute(adminCommand()))
                 .isInstanceOf(InsufficientHoursException.class);

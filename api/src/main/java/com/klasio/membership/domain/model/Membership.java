@@ -333,6 +333,9 @@ public class Membership {
 
     public void refundHours(int hours, UUID actorId, String actorRole) {
         Objects.requireNonNull(actorId, "actorId must not be null");
+        if (isUnlimited()) {
+            return;  // UNLIMITED: no balance to restore, silently no-op
+        }
         if (hours < 1) {
             throw new IllegalArgumentException("refund hours must be >= 1");
         }
@@ -398,6 +401,36 @@ public class Membership {
 
         domainEvents.add(new MembershipRenewed(
                 id.value(), tenantId, studentId, programId, newPurchasedHours, renewedBy, now));
+    }
+
+    /**
+     * Renews an UNLIMITED membership. No hour counters to reset — only resets payment
+     * state so the student can upload a new proof for the next period.
+     */
+    public void renewUnlimited(UUID renewedBy) {
+        Objects.requireNonNull(renewedBy, "renewedBy must not be null");
+        if (!isUnlimited()) {
+            throw new IllegalStateException("renewUnlimited() must only be called on UNLIMITED memberships");
+        }
+        if (this.status != MembershipStatus.EXPIRED && this.status != MembershipStatus.INACTIVE) {
+            throw new IllegalStateException(
+                    "Only EXPIRED or INACTIVE memberships can be renewed. Current: " + this.status);
+        }
+
+        Instant now = Instant.now();
+        this.startDate = null;
+        this.expirationDate = null;
+        this.status = MembershipStatus.PENDING_PAYMENT;
+        this.paymentValidated = false;
+        this.paymentValidatedBy = null;
+        this.paymentValidatedAt = null;
+        this.activatedBy = null;
+        this.activatedAt = null;
+        this.updatedAt = now;
+        this.updatedBy = renewedBy;
+
+        domainEvents.add(new MembershipRenewed(
+                id.value(), tenantId, studentId, programId, null, renewedBy, now));
     }
 
     // ---- Domain events ----

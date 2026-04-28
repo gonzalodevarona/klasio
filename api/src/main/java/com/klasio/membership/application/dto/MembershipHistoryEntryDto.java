@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public record MembershipHistoryEntryDto(
         UUID id,
-        int purchasedHours,
-        int consumedHours,
-        int availableHours,
+        Integer purchasedHours,
+        Integer consumedHours,
+        Integer availableHours,
         LocalDate startDate,
         LocalDate expirationDate,
         MembershipStatus status,

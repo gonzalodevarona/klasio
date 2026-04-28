@@ -9,7 +9,7 @@ public record MembershipRenewed(
         UUID tenantId,
         UUID studentId,
         UUID programId,
-        int purchasedHours,
+        Integer purchasedHours,
         UUID renewedBy,
         Instant occurredAt
 ) implements DomainEvent {}

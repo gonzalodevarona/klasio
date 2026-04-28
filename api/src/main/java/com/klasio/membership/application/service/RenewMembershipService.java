@@ -36,7 +36,11 @@ public class RenewMembershipService implements RenewMembershipUseCase {
                 .orElseThrow(() -> new IllegalStateException(
                         "Plan " + membership.getPlanId() + " is no longer active"));
 
-        membership.renew(plan.hours(), command.actorId());
+        if (membership.isUnlimited()) {
+            membership.renewUnlimited(command.actorId());
+        } else {
+            membership.renew(plan.hours(), command.actorId());
+        }
         membershipRepository.save(membership);
 
         membership.getDomainEvents().forEach(eventPublisher::publishEvent);

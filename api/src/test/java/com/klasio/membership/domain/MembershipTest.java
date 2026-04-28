@@ -569,6 +569,20 @@ class MembershipTest {
                     .anyMatch(e -> e instanceof MembershipDepleted);
             assertFalse(hasDepletion);
         }
+
+        @Test
+        @DisplayName("refundHours on UNLIMITED membership is a silent no-op")
+        void testUnlimitedMembershipRefundHoursIsNoOp() {
+            Membership unlimited = Membership.create(
+                    TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
+                    PLAN_ID, "Unlimited Plan", null,
+                    ProgramModality.UNLIMITED, START_DATE, ACTOR_ID);
+
+            // Should not throw regardless of membership status
+            assertDoesNotThrow(() -> unlimited.refundHours(5, ACTOR_ID, "PROFESSOR"));
+            // Hours remain null — no balance was modified
+            assertNull(unlimited.getAvailableHours());
+        }
     }
 
     // ---- validatePayment() — renewal date logic ----

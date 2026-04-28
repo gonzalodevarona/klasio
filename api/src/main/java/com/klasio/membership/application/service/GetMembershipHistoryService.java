@@ -31,7 +31,7 @@ public class GetMembershipHistoryService implements GetMembershipHistoryUseCase 
                 .map(m -> new MembershipHistoryEntryDto(
                         m.getId().value(),
                         m.getPurchasedHours(),
-                        m.getPurchasedHours() - m.getAvailableHours(),
+                        m.isUnlimited() ? null : m.getPurchasedHours() - m.getAvailableHours(),
                         m.getAvailableHours(),
                         m.getStartDate(),
                         m.getExpirationDate(),

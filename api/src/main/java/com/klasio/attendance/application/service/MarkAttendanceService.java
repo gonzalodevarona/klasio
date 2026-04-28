@@ -139,10 +139,15 @@ public class MarkAttendanceService implements MarkAttendanceUseCase {
                 Optional<MembershipHoursPort.ActiveMembershipView> membershipOpt =
                         membershipHoursPort.findActiveForStudentInProgram(tenantId, reg.getStudentId(), classView.programId());
 
-                boolean canDeduct = membershipOpt.isPresent() &&
+                boolean hasActiveMembership = membershipOpt.isPresent();
+                boolean isUnlimited = hasActiveMembership && membershipOpt.get().unlimited();
+                boolean canDeduct = hasActiveMembership && !isUnlimited &&
                         membershipOpt.get().availableHours() >= reg.getIntendedHours();
 
-                if (canDeduct) {
+                if (isUnlimited) {
+                    // UNLIMITED: attendance is free — no hour deduction, no warning
+                    reg.markPresent(actorId, nowInstant);
+                } else if (canDeduct) {
                     deductHoursUseCase.execute(new DeductHoursCommand(
                             tenantId,
                             membershipOpt.get().membershipId(),

@@ -83,7 +83,7 @@ class RegisterForClassServiceTest {
         );
         enrollment = new EnrollmentView(ENROLLMENT_ID, "BEGINNER");
         membership = new ActiveMembershipView(MEMBERSHIP_ID, 10,
-                LocalDate.now(ZoneId.of("America/Bogota")).plusMonths(1));
+                LocalDate.now(ZoneId.of("America/Bogota")).plusMonths(1), false);
         scheduledSession = ClassSession.materialize(
                 TENANT_ID, CLASS_ID, FUTURE_MONDAY, START_TIME, END_TIME, USER_ID);
     }
@@ -196,7 +196,7 @@ class RegisterForClassServiceTest {
                 .thenReturn(Optional.of(enrollment));
         when(membershipHoursPort.findActiveForStudentInProgram(any(), any(), any()))
                 .thenReturn(Optional.of(new ActiveMembershipView(MEMBERSHIP_ID, 0,
-                        LocalDate.now().plusMonths(1))));
+                        LocalDate.now().plusMonths(1), false)));
 
         assertThatThrownBy(() -> service.execute(command(FUTURE_MONDAY, 1)))
                 .isInstanceOf(InsufficientHoursException.class);
