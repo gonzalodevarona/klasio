@@ -66,11 +66,17 @@ export default function MembershipForm({
           required
         >
           <option value="">{t("formPlanSelectPlaceholder")}</option>
-          {plans.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} — {p.hours} hours
-            </option>
-          ))}
+          {plans.map((p) => {
+            const hoursLabel =
+              p.modality === "UNLIMITED"
+                ? tMembership("modality.unlimited")
+                : `${p.hours} hours`;
+            return (
+              <option key={p.id} value={p.id}>
+                {p.name} — {hoursLabel}
+              </option>
+            );
+          })}
         </Select>
         {selectedPlan && (
           <div className="mt-2 rounded-lg border border-k-border bg-k-surface px-4 py-3 space-y-1.5">
