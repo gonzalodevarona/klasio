@@ -85,7 +85,7 @@ class GetMembershipHistoryServiceTest {
 
             String csv = service.exportCsv(TENANT_ID, STUDENT_ID, PROGRAM_ID);
 
-            assertThat(csv).contains("id,purchasedHours,consumedHours,availableHours,startDate,expirationDate,status");
+            assertThat(csv).contains("id,modality,purchasedHours,consumedHours,availableHours,startDate,expirationDate,status");
             assertThat(csv).contains("ACTIVE");
             assertThat(csv).contains("2026-03-01");
             String[] lines = csv.split("\n");
@@ -100,7 +100,7 @@ class GetMembershipHistoryServiceTest {
 
             String csv = service.exportCsv(TENANT_ID, STUDENT_ID, PROGRAM_ID);
 
-            assertThat(csv).contains("id,purchasedHours");
+            assertThat(csv).contains("id,modality,purchasedHours");
             String[] lines = csv.split("\n");
             assertThat(lines).hasSize(1);
         }

@@ -11,6 +11,7 @@ public record MembershipSummaryDto(
         UUID programId,
         UUID planId,
         String planName,
+        String modality,
         MembershipStatus status,
         Integer purchasedHours,
         Integer availableHours,

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record MembershipHistoryEntryDto(
         UUID id,
+        String modality,
         Integer purchasedHours,
         Integer consumedHours,
         Integer availableHours,

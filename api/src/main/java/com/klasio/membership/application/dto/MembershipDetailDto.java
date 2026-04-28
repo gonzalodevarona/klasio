@@ -15,6 +15,7 @@ public record MembershipDetailDto(
         UUID planId,
         String planName,
         UUID enrollmentId,
+        String modality,
         MembershipStatus status,
         Integer purchasedHours,
         Integer availableHours,
