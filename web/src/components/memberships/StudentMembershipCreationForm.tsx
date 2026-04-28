@@ -33,14 +33,15 @@ export default function StudentMembershipCreationForm({
   onCancel,
 }: Props) {
   const t = useTranslations("memberships");
+  const tMembership = useTranslations("membership");
   const tCommon = useTranslations("common");
   const tPaymentProofs = useTranslations("paymentProofs");
   const { enrollments, loading: enrollmentsLoading } = useMyEnrollments();
 
   const [selectedProgramId, setSelectedProgramId] = useState<string>(initialProgramId ?? "");
+  // No modality filter — show HOURS_BASED and UNLIMITED plans; CLASSES_PER_WEEK excluded by backend
   const { plans, loading: plansLoading } = useProgramPlansByProgram(
-    selectedProgramId || null,
-    "HOURS_BASED"
+    selectedProgramId || null
   );
 
   const [selectedPlanId, setSelectedPlanId] = useState<string>(initialPlanId ?? "");
@@ -195,13 +196,22 @@ export default function StudentMembershipCreationForm({
             <div>
               <span className="text-indigo-600 font-medium">{t("formModalityLabel")}</span>
               <span className="text-indigo-800">
-                {selectedPlan.modality === "HOURS_BASED" ? t("formModalityHoursBased") : t("formModalityClassesPerWeek")}
+                {selectedPlan.modality === "HOURS_BASED"
+                  ? t("formModalityHoursBased")
+                  : selectedPlan.modality === "UNLIMITED"
+                  ? t("formModalityUnlimited")
+                  : t("formModalityClassesPerWeek")}
               </span>
             </div>
             {selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null && (
               <div>
                 <span className="text-indigo-600 font-medium">{t("formHoursLabel")}</span>
                 <span className="text-indigo-800">{selectedPlan.hours}h</span>
+              </div>
+            )}
+            {selectedPlan.modality === "UNLIMITED" && (
+              <div>
+                <span className="text-indigo-800 font-medium">{tMembership("unlimited.label")}</span>
               </div>
             )}
             <div>
