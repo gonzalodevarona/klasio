@@ -5,6 +5,7 @@ import com.klasio.attendance.domain.model.AttendanceRegistrationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -96,4 +97,12 @@ public interface AttendanceRegistrationRepository {
      * Used by the walk-in picker to exclude already-registered students.
      */
     Set<UUID> findActiveStudentIdsBySession(UUID tenantId, UUID sessionId);
+
+    /**
+     * Returns all REGISTERED registrations for a specific class whose session has
+     * not yet started as of {@code now}. Used by the cascade cancellation service
+     * (RF-36) to find and cancel all future open-level registrations when the class
+     * level changes from OPEN to a specific level.
+     */
+    List<AttendanceRegistration> findFutureRegisteredForClass(UUID tenantId, UUID classId, Instant now);
 }

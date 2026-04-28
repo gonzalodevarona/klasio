@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -160,6 +161,15 @@ public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
     public Set<UUID> findActiveStudentIdsBySession(UUID tenantId, UUID sessionId) {
         applyTenantContext();
         return new HashSet<>(springDataRepository.findActiveStudentIdsBySession(tenantId, sessionId));
+    }
+
+    @Override
+    public List<AttendanceRegistration> findFutureRegisteredForClass(UUID tenantId, UUID classId, Instant now) {
+        applyTenantContext();
+        return springDataRepository.findFutureRegisteredForClass(tenantId, classId, now)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     private long toLong(Object val) {
