@@ -6,6 +6,8 @@ export type MembershipStatus =
   | "INACTIVE"
   | "EXPIRED";
 
+export type MembershipModality = "HOURS_BASED" | "UNLIMITED";
+
 export type HourTransactionType =
   | "ATTENDANCE_DEDUCTION"
   | "MANUAL_ADDITION"
@@ -17,8 +19,9 @@ export interface MembershipSummary {
   programId: string;
   planId: string;
   planName: string;
-  purchasedHours: number;
-  availableHours: number;
+  modality: MembershipModality;
+  purchasedHours: number | null;
+  availableHours: number | null;
   startDate: string;
   expirationDate: string;
   status: MembershipStatus;
