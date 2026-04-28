@@ -47,6 +47,7 @@ const hoursBasedPlan: ProgramPlanSummary = {
   hours: 10,
   status: "ACTIVE",
   programId: "prog-1",
+  managerId: "manager-1",
 };
 
 const unlimitedPlan: ProgramPlanSummary = {
@@ -57,6 +58,7 @@ const unlimitedPlan: ProgramPlanSummary = {
   hours: null,
   status: "ACTIVE",
   programId: "prog-1",
+  managerId: "manager-1",
 };
 
 // --- Helpers ---

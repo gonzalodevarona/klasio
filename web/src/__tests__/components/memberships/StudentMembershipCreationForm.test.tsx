@@ -14,6 +14,7 @@ jest.mock("@/hooks/usePrograms", () => ({
 
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useProgramPlansByProgram } from "@/hooks/usePrograms";
+import { ProgramPlanSummary } from "@/lib/types/program";
 
 const mockUseMyEnrollments = useMyEnrollments as jest.MockedFunction<typeof useMyEnrollments>;
 const mockUseProgramPlansByProgram = useProgramPlansByProgram as jest.MockedFunction<
@@ -63,34 +64,36 @@ const messages = {
 
 // --- Helpers ---
 
-const activeEnrollment = {
+const activeEnrollment: import("@/lib/types/enrollment").EnrollmentSummary = {
+  id: "enroll-1",
+  studentId: "stu-1",
+  studentName: "Test Student",
   programId: "prog-1",
   programName: "Soccer",
   level: "BEGINNER",
-  status: "ACTIVE" as const,
-  enrollmentId: "enroll-1",
-  studentId: "stu-1",
+  enrollmentDate: "2026-04-01",
+  status: "ACTIVE",
 };
 
-const hoursBasedPlan = {
+const hoursBasedPlan: ProgramPlanSummary = {
   id: "plan-hours-1",
   name: "Basic 10h",
-  modality: "HOURS_BASED" as const,
+  modality: "HOURS_BASED",
   cost: 100000,
   hours: 10,
   managerId: "mgr-1",
-  status: "ACTIVE" as const,
+  status: "ACTIVE",
   programId: "prog-1",
 };
 
-const unlimitedPlan = {
+const unlimitedPlan: ProgramPlanSummary = {
   id: "plan-unlimited-1",
   name: "Unlimited Monthly",
-  modality: "UNLIMITED" as const,
+  modality: "UNLIMITED",
   cost: 200000,
   hours: null,
   managerId: "mgr-1",
-  status: "ACTIVE" as const,
+  status: "ACTIVE",
   programId: "prog-1",
 };
 
@@ -104,7 +107,7 @@ function wrap(ui: React.ReactElement) {
 
 function setupDefaultMocks({
   plans = [hoursBasedPlan, unlimitedPlan],
-}: { plans?: typeof hoursBasedPlan[] } = {}) {
+}: { plans?: ProgramPlanSummary[] } = {}) {
   mockUseMyEnrollments.mockReturnValue({
     enrollments: [activeEnrollment],
     loading: false,
