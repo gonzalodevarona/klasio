@@ -7,6 +7,7 @@ interface NotificationTypeIconProps {
 function getEmoji(type: string): string {
   if (type === "CLASS_SESSION_ALERTED") return "⚠️";
   if (type === "CLASS_SESSION_CANCELLED") return "🚫";
+  if (type === "CLASS_LEVEL_CHANGED") return "↕️";
   return "🔔";
 }
 

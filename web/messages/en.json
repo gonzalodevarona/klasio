@@ -939,7 +939,10 @@
     "tabUnreadOnly": "Unread only",
     "markAllAsRead": "Mark all as read",
     "listEmpty": "No notifications found.",
-    "pageTitle": "Notifications"
+    "pageTitle": "Notifications",
+    "session": {
+      "registrationCancelledLevelChange": "Your registration for {className} on {date} was cancelled because the class level changed to {newLevel}."
+    }
   },
   "tenants": {
     "pageTitle": "Tenants",

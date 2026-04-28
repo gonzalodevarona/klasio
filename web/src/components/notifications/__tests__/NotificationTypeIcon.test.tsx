@@ -16,6 +16,13 @@ describe("NotificationTypeIcon", () => {
     expect(icon).toHaveTextContent("🚫");
   });
 
+  it("renders CLASS_LEVEL_CHANGED with up-down arrow emoji", () => {
+    render(<NotificationTypeIcon type="CLASS_LEVEL_CHANGED" />);
+    const icon = screen.getByRole("img", { name: "CLASS_LEVEL_CHANGED" });
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveTextContent("↕️");
+  });
+
   it("renders default (unknown type) with bell emoji", () => {
     render(<NotificationTypeIcon type="SOME_OTHER_TYPE" />);
     const icon = screen.getByRole("img", { name: "SOME_OTHER_TYPE" });

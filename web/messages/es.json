@@ -939,7 +939,10 @@
     "tabUnreadOnly": "Solo no leídas",
     "markAllAsRead": "Marcar todo como leído",
     "listEmpty": "No se encontraron notificaciones.",
-    "pageTitle": "Notificaciones"
+    "pageTitle": "Notificaciones",
+    "session": {
+      "registrationCancelledLevelChange": "Tu inscripción a {className} el {date} fue cancelada porque el nivel de la clase cambió a {newLevel}."
+    }
   },
   "tenants": {
     "pageTitle": "Ligas",
