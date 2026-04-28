@@ -236,7 +236,8 @@
     "classLevel": {
       "BEGINNER": "Beginner",
       "INTERMEDIATE": "Intermediate",
-      "ADVANCED": "Advanced"
+      "ADVANCED": "Advanced",
+      "OPEN": "Open"
     },
     "classType": {
       "RECURRING": "Recurring",
@@ -678,6 +679,7 @@
     "filterBeginnerOption": "Beginner",
     "filterIntermediateOption": "Intermediate",
     "filterAdvancedOption": "Advanced",
+    "filterOpenOption": "Open",
     "detailName": "Name",
     "detailLevel": "Level",
     "detailType": "Type",
@@ -744,6 +746,8 @@
     "formScheduleDayRequired": "Recurring classes require a day of the week for each entry.",
     "formScheduleDateRequired": "One-time classes require a specific date.",
     "formScheduleOneTimeMax": "One-time classes can only have one schedule entry.",
+    "formLevelOpen": "Open (any level)",
+    "editLevelCascadeConfirm": "Changing this class to {newLevel} will cancel future registrations of students whose enrollment level doesn't match. Proceed?",
     "professorAssignmentTitle": "Professor Assignment",
     "professorCurrentLabel": "Current Professor",
     "professorIdLabel": "Professor ID",
@@ -935,7 +939,10 @@
     "tabUnreadOnly": "Unread only",
     "markAllAsRead": "Mark all as read",
     "listEmpty": "No notifications found.",
-    "pageTitle": "Notifications"
+    "pageTitle": "Notifications",
+    "session": {
+      "registrationCancelledLevelChange": "Your registration for {className} on {date} was cancelled because the class level changed to {newLevel}."
+    }
   },
   "tenants": {
     "pageTitle": "Tenants",

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -144,4 +145,23 @@ public interface SpringDataAttendanceRegistrationRepository
     List<UUID> findActiveStudentIdsBySession(
             @Param("tenantId")  UUID tenantId,
             @Param("sessionId") UUID sessionId);
+
+    /**
+     * Returns REGISTERED registrations for a class whose session has not yet started
+     * relative to {@code now} (UTC instant). "Future" is determined by combining the
+     * denormalized session_date + session_start_time columns into a UTC timestamp and
+     * comparing it against the provided instant.
+     */
+    @Query(value = """
+            SELECT * FROM attendance_registrations
+             WHERE tenant_id = :tenantId
+               AND class_id  = :classId
+               AND status    = 'REGISTERED'
+               AND (session_date + session_start_time)::TIMESTAMP AT TIME ZONE 'UTC' > :now
+             ORDER BY session_date ASC, session_start_time ASC
+            """, nativeQuery = true)
+    List<AttendanceRegistrationJpaEntity> findFutureRegisteredForClass(
+            @Param("tenantId") UUID tenantId,
+            @Param("classId")  UUID classId,
+            @Param("now")      Instant now);
 }

@@ -7,8 +7,10 @@ import { useCancelRegistration } from "@/hooks/useCancelRegistration";
 import { useAttendanceStats } from "@/hooks/useAttendanceStats";
 import AttendanceStatsBar from "@/components/attendance/AttendanceStatsBar";
 import RegistrationStatusBadge from "@/components/attendance/RegistrationStatusBadge";
-import { Badge, Button } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { Registration } from "@/lib/types/attendance";
+import { ClassLevel } from "@/lib/types/programClass";
+import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import { AttendanceTimeConstants, formatSessionDate } from "@/lib/attendanceConstants";
 
 function isCancellable(reg: Registration): boolean {
@@ -180,19 +182,7 @@ export default function StudentAttendancePage() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge
-                        variant={
-                          r.level === "BEGINNER"
-                            ? "beginner"
-                            : r.level === "INTERMEDIATE"
-                            ? "intermediate"
-                            : r.level === "ADVANCED"
-                            ? "advanced"
-                            : "info"
-                        }
-                        label={r.level}
-                        small
-                      />
+                      <ClassLevelBadge level={r.level as ClassLevel} />
                     </td>
                     <td className="px-4 py-3 text-sm text-k-muted">
                       {r.intendedHours}h

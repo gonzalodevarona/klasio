@@ -13,5 +13,12 @@ public record ClassUpdated(
         String level,
         int maxStudents,
         UUID updatedBy,
-        Instant occurredAt
+        Instant occurredAt,
+        /**
+         * True when the schedule entries (day/time slots) were modified.
+         * The ClassScheduleChangedListener uses this flag to decide whether to
+         * cancel future registrations — a level-only change must not trigger that
+         * cancellation, because the dedicated cascade service (RF-36) handles it.
+         */
+        boolean scheduleChanged
 ) implements DomainEvent {}

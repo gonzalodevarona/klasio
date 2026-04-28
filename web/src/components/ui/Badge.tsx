@@ -5,6 +5,7 @@ export type BadgeVariant =
   | "active" | "expiring" | "inactive"
   | "pending" | "approved" | "rejected"
   | "beginner" | "intermediate" | "advanced"
+  | "open"
   | "info";
 
 export interface BadgeProps {
@@ -26,6 +27,7 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   beginner:     "bg-k-info-bg text-k-info-text",
   intermediate: "bg-k-warn-bg text-k-warn-text",
   advanced:     "bg-k-volt text-k-volt-text",
+  open:         "bg-slate-100 text-slate-700 ring-1 ring-slate-300",
   info:         "bg-k-info-bg text-k-info-text",
 };
 

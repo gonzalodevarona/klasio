@@ -1,5 +1,6 @@
 package com.klasio.programclass.application.service;
 
+import com.klasio.attendance.application.port.input.CancelMismatchingFutureRegistrationsUseCase;
 import com.klasio.programclass.application.dto.UpdateClassCommand;
 import com.klasio.programclass.domain.event.ClassUpdated;
 import com.klasio.programclass.domain.model.ClassLevel;
@@ -40,6 +41,9 @@ class UpdateClassServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private CancelMismatchingFutureRegistrationsUseCase cancelMismatchingFutureRegistrationsUseCase;
+
     private UpdateClassService service;
 
     private static final UUID TENANT_ID = UUID.randomUUID();
@@ -56,7 +60,7 @@ class UpdateClassServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new UpdateClassService(programClassRepository, eventPublisher);
+        service = new UpdateClassService(programClassRepository, eventPublisher, cancelMismatchingFutureRegistrationsUseCase);
     }
 
     private ProgramClass createExistingClass(String name, ClassLevel level, int maxStudents) {

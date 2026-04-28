@@ -98,6 +98,7 @@ export default function AllClassesPage() {
               <option value="BEGINNER">{t("filterBeginnerOption")}</option>
               <option value="INTERMEDIATE">{t("filterIntermediateOption")}</option>
               <option value="ADVANCED">{t("filterAdvancedOption")}</option>
+              <option value="OPEN">{t("filterOpenOption")}</option>
             </Select>
           </div>
 

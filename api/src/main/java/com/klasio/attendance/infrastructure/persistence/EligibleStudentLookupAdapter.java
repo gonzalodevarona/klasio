@@ -63,7 +63,7 @@ public class EligibleStudentLookupAdapter implements EligibleStudentLookupPort {
                 ON spe.student_id = s.id
                 AND spe.program_id = CAST(:programId AS uuid)
                 AND spe.status     = 'ACTIVE'
-                AND spe.level      = :level
+                AND (CAST(:level AS text) IS NULL OR spe.level = :level)
                 AND spe.tenant_id  = CAST(:tenantId AS uuid)
             JOIN memberships m
                 ON m.student_id  = s.id

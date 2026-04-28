@@ -236,7 +236,8 @@
     "classLevel": {
       "BEGINNER": "Principiante",
       "INTERMEDIATE": "Intermedio",
-      "ADVANCED": "Avanzado"
+      "ADVANCED": "Avanzado",
+      "OPEN": "Abierto"
     },
     "classType": {
       "RECURRING": "Recurrente",
@@ -678,6 +679,7 @@
     "filterBeginnerOption": "Principiante",
     "filterIntermediateOption": "Intermedio",
     "filterAdvancedOption": "Avanzado",
+    "filterOpenOption": "Abierto",
     "detailName": "Nombre",
     "detailLevel": "Nivel",
     "detailType": "Tipo",
@@ -744,6 +746,8 @@
     "formScheduleDayRequired": "Las clases recurrentes requieren un día de la semana en cada entrada.",
     "formScheduleDateRequired": "Las clases únicas requieren una fecha específica.",
     "formScheduleOneTimeMax": "Las clases únicas solo pueden tener una entrada de horario.",
+    "formLevelOpen": "Abierto (todos los niveles)",
+    "editLevelCascadeConfirm": "Cambiar esta clase a {newLevel} cancelará las inscripciones futuras de estudiantes cuyo nivel no coincida. ¿Continuar?",
     "professorAssignmentTitle": "Asignación de profesor",
     "professorCurrentLabel": "Profesor actual",
     "professorIdLabel": "ID del profesor",
@@ -935,7 +939,10 @@
     "tabUnreadOnly": "Solo no leídas",
     "markAllAsRead": "Marcar todo como leído",
     "listEmpty": "No se encontraron notificaciones.",
-    "pageTitle": "Notificaciones"
+    "pageTitle": "Notificaciones",
+    "session": {
+      "registrationCancelledLevelChange": "Tu inscripción a {className} el {date} fue cancelada porque el nivel de la clase cambió a {newLevel}."
+    }
   },
   "tenants": {
     "pageTitle": "Ligas",

@@ -8,7 +8,7 @@ import { useAvailableSessions } from "@/hooks/useAvailableSessions";
 import { useRegisterForSession } from "@/hooks/useRegisterForSession";
 import { useCancelRegistration } from "@/hooks/useCancelRegistration";
 import SessionCapacityBar from "@/components/attendance/SessionCapacityBar";
-import { Badge } from "@/components/ui";
+import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import { AvailableSession } from "@/lib/types/attendance";
 import { ProgramClassSummary } from "@/lib/types/programClass";
 import { AttendanceTimeConstants, todayInTenantZone, addDays, formatSessionDate } from "@/lib/attendanceConstants";
@@ -295,19 +295,7 @@ export default function StudentClassesPage() {
                         {c.programName ?? "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge
-                          variant={
-                            c.level === "BEGINNER"
-                              ? "beginner"
-                              : c.level === "INTERMEDIATE"
-                              ? "intermediate"
-                              : c.level === "ADVANCED"
-                              ? "advanced"
-                              : "info"
-                          }
-                          label={c.level}
-                          small
-                        />
+                        <ClassLevelBadge level={c.level} />
                       </td>
                       <td className="px-4 py-3 text-sm text-k-muted">
                         {c.maxStudents}

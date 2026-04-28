@@ -10,6 +10,8 @@ import HourBalance from "@/components/memberships/HourBalance";
 import { UnlimitedBadge } from "@/components/memberships/UnlimitedBadge";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
 import { Badge, Button, Card } from "@/components/ui";
+import { ClassLevel } from "@/lib/types/programClass";
+import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import { todayInTenantZone, formatSessionDate } from "@/lib/attendanceConstants";
 
 function formatDate(iso: string | null): string {
@@ -155,19 +157,7 @@ export default function StudentDashboard() {
                     </span>
                   )}
                 </div>
-                <Badge
-                  variant={
-                    r.level === "BEGINNER"
-                      ? "beginner"
-                      : r.level === "INTERMEDIATE"
-                      ? "intermediate"
-                      : r.level === "ADVANCED"
-                      ? "advanced"
-                      : "info"
-                  }
-                  label={r.level}
-                  small
-                />
+                <ClassLevelBadge level={r.level as ClassLevel} />
               </li>
             ))}
           </ul>
