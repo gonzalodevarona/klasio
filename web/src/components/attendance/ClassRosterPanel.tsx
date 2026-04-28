@@ -10,6 +10,8 @@ import SessionStatusBadge from "./SessionStatusBadge";
 import SessionActionsPanel from "./SessionActionsPanel";
 import { WalkInButton } from "./WalkInButton";
 import { RegistrarBadge } from "./RegistrarBadge";
+import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
+import { ClassLevel } from "@/lib/types/programClass";
 
 interface ClassRosterPanelProps {
   classId: string;
@@ -66,11 +68,6 @@ function computeDurationMinutes(start: string, end: string): number {
   return (eh * 60 + em) - (sh * 60 + sm);
 }
 
-const LEVEL_STYLES: Record<string, string> = {
-  BEGINNER:     "bg-green-100 text-green-700",
-  INTERMEDIATE: "bg-yellow-100 text-yellow-700",
-  ADVANCED:     "bg-red-100 text-red-700",
-};
 
 export default function ClassRosterPanel({
   classId,
@@ -80,7 +77,6 @@ export default function ClassRosterPanel({
   professorClassIds,
 }: ClassRosterPanelProps) {
   const t = useTranslations("classes");
-  const tBadges = useTranslations("badges.classLevel");
   const locale = useLocale();
 
   const [monday, setMonday] = useState<Date>(() => weekStart(new Date()));
@@ -224,11 +220,7 @@ export default function ClassRosterPanel({
                           )}
                         </td>
                         <td className="px-4 py-2">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL_STYLES[r.level] ?? "bg-gray-100 text-gray-600"}`}
-                          >
-                            {tBadges(r.level)}
-                          </span>
+                          <ClassLevelBadge level={r.level as ClassLevel} />
                         </td>
                         <td className="px-4 py-2 text-gray-600">{r.intendedHours}h</td>
                         <td className="px-4 py-2">
