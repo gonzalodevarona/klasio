@@ -14,7 +14,7 @@ public interface MembershipPlanSnapshotPort {
     record PlanSnapshot(
             String planName,
             String programName,
-            int purchasedHours,
+            Integer purchasedHours,
             BigDecimal cost
     ) {}
 
