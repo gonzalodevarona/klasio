@@ -58,7 +58,7 @@ public class Tenant {
         validateNotBlank(timezone, "Timezone");
         try {
             ZoneId.of(timezone);
-        } catch (java.time.zone.ZoneRulesException e) {
+        } catch (java.time.DateTimeException e) {
             throw new IllegalArgumentException("Invalid timezone identifier: " + timezone, e);
         }
 

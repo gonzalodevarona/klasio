@@ -142,6 +142,7 @@ public class SessionEventsNotificationListener {
             if (!emailedStudents.add(studentId)) continue;
             studentEmailPort.findEmail(studentId, e.tenantId()).ifPresent(email -> {
                 Map<String, Object> params = new HashMap<>();
+                // studentEmailPort only resolves email; no StudentNamePort available here — falls back to email address as display name
                 params.put("studentName", email);
                 params.put("className", className);
                 params.put("startsAt", startsAt);
@@ -189,6 +190,7 @@ public class SessionEventsNotificationListener {
         for (AttendanceRegistration reg : regs) {
             studentEmailPort.findEmail(reg.getStudentId(), tenantId).ifPresent(email -> {
                 Map<String, Object> params = new HashMap<>();
+                // studentEmailPort only resolves email; no StudentNamePort available here — falls back to email address as display name
                 params.put("studentName", email);
                 params.put("className", title);
                 params.put("startsAt", startsAt);
