@@ -2,9 +2,10 @@ package com.klasio.attendance.infrastructure.persistence;
 
 import com.klasio.attendance.domain.port.ProfessorUserIdPort;
 import com.klasio.attendance.domain.port.StudentUserIdPort;
-import jakarta.persistence.EntityManager;
+import com.klasio.shared.infrastructure.persistence.TenantScopedRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,22 +18,23 @@ import java.util.UUID;
  * For professors: bridges via email — professors have no user_id FK yet (RF-32 pending),
  *   but both professors.email and users.email are unique identifiers shared between tables.
  *
- * Uses native SQL via EntityManager, following the same pattern as ProfessorIdLookupAdapter.
+ * Extends TenantScopedRepository so that applyTenantContext() sets app.current_tenant on
+ * the current connection before each query — required because the students and professors
+ * tables have FORCE ROW LEVEL SECURITY, and this adapter is also called from
+ * @TransactionalEventListener(AFTER_COMMIT) handlers where the HTTP-request ThreadLocal
+ * may have already been cleared (or restored explicitly by the listener before calling us).
  */
 @Slf4j
 @Component
-public class StudentAndProfessorUserIdAdapter implements StudentUserIdPort, ProfessorUserIdPort {
-
-    private final EntityManager em;
-
-    public StudentAndProfessorUserIdAdapter(EntityManager em) {
-        this.em = em;
-    }
+public class StudentAndProfessorUserIdAdapter extends TenantScopedRepository
+        implements StudentUserIdPort, ProfessorUserIdPort {
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<UUID> findUserIdByStudentId(UUID tenantId, UUID studentId) {
+        applyTenantContext();
         @SuppressWarnings("unchecked")
-        List<UUID> userIds = em.createNativeQuery(
+        List<UUID> userIds = entityManager.createNativeQuery(
                         "SELECT user_id FROM students WHERE id = :studentId AND tenant_id = :tenantId")
                 .setParameter("studentId", studentId)
                 .setParameter("tenantId", tenantId)
@@ -46,10 +48,12 @@ public class StudentAndProfessorUserIdAdapter implements StudentUserIdPort, Prof
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<UUID> findUserIdByProfessorId(UUID tenantId, UUID professorId) {
+        applyTenantContext();
         // Step 1: resolve professor's email
         @SuppressWarnings("unchecked")
-        List<String> emails = em.createNativeQuery(
+        List<String> emails = entityManager.createNativeQuery(
                         "SELECT email FROM professors WHERE id = :professorId AND tenant_id = :tenantId")
                 .setParameter("professorId", professorId)
                 .setParameter("tenantId", tenantId)
@@ -61,9 +65,9 @@ public class StudentAndProfessorUserIdAdapter implements StudentUserIdPort, Prof
         }
         String email = emails.get(0);
 
-        // Step 2: find user by email
+        // Step 2: find user by email (users table has no RLS — no tenant filter needed)
         @SuppressWarnings("unchecked")
-        List<UUID> userIds = em.createNativeQuery(
+        List<UUID> userIds = entityManager.createNativeQuery(
                         "SELECT id FROM users WHERE email = :email")
                 .setParameter("email", email)
                 .getResultList();

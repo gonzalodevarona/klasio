@@ -1,8 +1,8 @@
 -- V068: extend audit_log and notifications constraints with level-change cancellation types (RF-36)
 
 -- ── audit_log ────────────────────────────────────────────────────────────────
-ALTER TABLE audit_log DROP CONSTRAINT chk_action_type;
-ALTER TABLE audit_log ADD CONSTRAINT chk_action_type CHECK (action_type IN (
+ALTER TABLE audit_log DROP CONSTRAINT chk_audit_action_type;
+ALTER TABLE audit_log ADD CONSTRAINT chk_audit_action_type CHECK (action_type IN (
     -- Tenants
     'TENANT_CREATED',
     'TENANT_DEACTIVATED',

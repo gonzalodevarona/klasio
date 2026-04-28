@@ -5,8 +5,11 @@ import com.klasio.attendance.domain.port.StudentUserIdPort;
 import com.klasio.notifications.application.dto.CreateNotificationCommand;
 import com.klasio.notifications.application.port.input.CreateNotificationUseCase;
 import com.klasio.notifications.domain.model.NotificationType;
+import com.klasio.shared.infrastructure.persistence.TenantContextInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
 
@@ -36,36 +39,47 @@ public class LevelChangeNotificationListener {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onRegistrationCancelledByLevelChange(RegistrationCancelledByLevelChange e) {
         log.info("[NOTIFY] Registration cancelled by level change — registrationId={}, studentId={}, {} -> {}",
                 e.registrationId(), e.studentId(), e.previousClassLevel(), e.newClassLevel());
 
-        Optional<UUID> resolvedUserId = studentUserIdPort.findUserIdByStudentId(e.tenantId(), e.studentId());
-        if (resolvedUserId.isEmpty()) {
-            log.warn("[NOTIFY] No user account found for studentId={} — skipping level-change notification",
-                    e.studentId());
-            return;
+        // Restore the tenant context for this thread. The HTTP request lifecycle
+        // (TenantContextInterceptor.afterCompletion) clears the ThreadLocal after the
+        // controller returns, which happens before @TransactionalEventListener(AFTER_COMMIT)
+        // fires. Repositories that call TenantScopedRepository.applyTenantContext() and
+        // the StudentUserIdPort query both rely on this ThreadLocal to set the correct
+        // PostgreSQL RLS parameter inside their new transactions.
+        TenantContextInterceptor.setCurrentTenant(e.tenantId().toString());
+        try {
+            Optional<UUID> resolvedUserId = studentUserIdPort.findUserIdByStudentId(e.tenantId(), e.studentId());
+            if (resolvedUserId.isEmpty()) {
+                log.warn("[NOTIFY] No user account found for studentId={} — skipping level-change notification",
+                        e.studentId());
+                return;
+            }
+            String title = "Class registration cancelled";
+            String body = "Your registration was cancelled because the class level changed"
+                    + " from " + e.previousClassLevel() + " to " + e.newClassLevel()
+                    + ". Please register for a class that matches your level.";
+
+            Map<String, String> metadata = new HashMap<>();
+            metadata.put("classId", e.classId().toString());
+            metadata.put("sessionId", e.sessionId().toString());
+            metadata.put("previousClassLevel", e.previousClassLevel());
+            metadata.put("newClassLevel", e.newClassLevel());
+            metadata.put("deepLink", "/student/registrations");
+
+            createNotification.execute(new CreateNotificationCommand(
+                    e.tenantId(),
+                    resolvedUserId.get(),
+                    NotificationType.CLASS_LEVEL_CHANGED,
+                    title,
+                    body,
+                    metadata,
+                    e.actorId()));
+        } finally {
+            TenantContextInterceptor.clearCurrentTenant();
         }
-
-        String title = "Class registration cancelled";
-        String body = "Your registration was cancelled because the class level changed"
-                + " from " + e.previousClassLevel() + " to " + e.newClassLevel()
-                + ". Please register for a class that matches your level.";
-
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put("classId", e.classId().toString());
-        metadata.put("sessionId", e.sessionId().toString());
-        metadata.put("previousClassLevel", e.previousClassLevel());
-        metadata.put("newClassLevel", e.newClassLevel());
-        metadata.put("deepLink", "/student/registrations");
-
-        createNotification.execute(new CreateNotificationCommand(
-                e.tenantId(),
-                resolvedUserId.get(),
-                NotificationType.CLASS_LEVEL_CHANGED,
-                title,
-                body,
-                metadata,
-                e.actorId()));
     }
 }
