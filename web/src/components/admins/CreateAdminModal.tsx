@@ -31,7 +31,6 @@ export default function CreateAdminModal({ onClose, onCreated, defaultTenantId }
   const [form, setForm] = useState<CreateAdminRequest>({
     tenantId:             defaultTenantId ?? "",
     email:                "",
-    password:             "",
     identityDocumentType: "CC",
     identityNumber:       "",
     firstName:            "",
@@ -139,16 +138,6 @@ export default function CreateAdminModal({ onClose, onCreated, defaultTenantId }
             {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t("formPasswordLabel")}
-            </label>
-            <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)}
-              required minLength={8} maxLength={72} placeholder={t("formPasswordPlaceholder")}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-
           {/* Identity document */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -173,7 +162,11 @@ export default function CreateAdminModal({ onClose, onCreated, defaultTenantId }
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <p className="text-xs text-gray-500">
+            {t("formSetupEmailNote")}
+          </p>
+
+          <div className="flex justify-end gap-3 pt-1">
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
               {t("formCancelButton")}

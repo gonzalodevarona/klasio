@@ -75,7 +75,7 @@ export function useTenantOptions(): {
 }
 
 export function useUpdateAdmin(): {
-  update: (id: string, req: Partial<Omit<CreateAdminRequest, "tenantId" | "password">>) => Promise<AdminSummary>;
+  update: (id: string, req: Partial<Omit<CreateAdminRequest, "tenantId">>) => Promise<AdminSummary>;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -84,7 +84,7 @@ export function useUpdateAdmin(): {
   const [error, setError] = useState<string | null>(null);
 
   const update = useCallback(
-    async (id: string, req: Partial<Omit<CreateAdminRequest, "tenantId" | "password">>): Promise<AdminSummary> => {
+    async (id: string, req: Partial<Omit<CreateAdminRequest, "tenantId">>): Promise<AdminSummary> => {
       setLoading(true);
       setError(null);
       try {

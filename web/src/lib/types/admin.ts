@@ -23,7 +23,6 @@ export interface AdminListResponse {
 export interface CreateAdminRequest {
   tenantId: string;
   email: string;
-  password: string;
   identityDocumentType: string;
   identityNumber: string;
   firstName: string;
