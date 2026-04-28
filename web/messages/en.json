@@ -1098,6 +1098,8 @@
     "kpiPendingPayments": "Pending payments",
     "kpiPendingAction": "Action required",
     "kpiUpToDate": "Up to date",
+    "kpiHoursConsumed": "Hours consumed",
+    "kpiHoursConsumedSub": "This month",
     "kpiActivePrograms": "Active programs",
     "attendanceTitle": "Attendance control",
     "attendanceStartClass": "Start class",
