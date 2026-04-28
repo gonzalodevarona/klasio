@@ -6,6 +6,7 @@ import com.klasio.attendance.domain.event.AttendanceMarkedPresent;
 import com.klasio.attendance.domain.event.AttendanceMarkedPresentNoHours;
 import com.klasio.attendance.domain.event.AttendanceRegistered;
 import com.klasio.attendance.domain.event.RegistrationCancelled;
+import com.klasio.attendance.domain.event.RegistrationCancelledByLevelChange;
 import com.klasio.attendance.domain.event.RegistrationCancelledBySession;
 import com.klasio.shared.domain.DomainEvent;
 
@@ -416,6 +417,36 @@ public class AttendanceRegistration {
                 this.id.value(), this.sessionId, this.tenantId, this.classId,
                 this.studentId, this.sessionDate, this.sessionStartTime,
                 actorId, now));
+    }
+
+    /**
+     * Transitions REGISTERED → CANCELLED_BY_SYSTEM when the student's class level is changed.
+     * Registrations for future sessions of the old level become invalid and must be cancelled
+     * so the student can re-register for sessions matching their new level.
+     *
+     * @param actorId            the system/admin actor performing the level change
+     * @param now                timestamp of the cancellation
+     * @param previousClassLevel the level the class was tagged with before the change (e.g. "OPEN")
+     * @param newClassLevel      the level the student is now assigned to (e.g. "BEGINNER")
+     */
+    public void cancelByLevelChange(UUID actorId, Instant now,
+                                    String previousClassLevel, String newClassLevel) {
+        Objects.requireNonNull(actorId, "actorId must not be null");
+        Objects.requireNonNull(now, "now must not be null");
+        Objects.requireNonNull(previousClassLevel, "previousClassLevel must not be null");
+        Objects.requireNonNull(newClassLevel, "newClassLevel must not be null");
+        if (this.status != AttendanceRegistrationStatus.REGISTERED) {
+            throw new IllegalStateException(
+                    "Cannot cancel by level change from status: " + this.status);
+        }
+        this.status = AttendanceRegistrationStatus.CANCELLED_BY_SYSTEM;
+        this.cancelledAt = now;
+        this.cancelledBy = actorId;
+        this.updatedAt = now;
+        this.updatedBy = actorId;
+        this.domainEvents.add(new RegistrationCancelledByLevelChange(
+                this.id.value(), this.tenantId, this.sessionId, this.classId,
+                this.studentId, previousClassLevel, newClassLevel, actorId, now));
     }
 
     public List<DomainEvent> getDomainEvents() {
