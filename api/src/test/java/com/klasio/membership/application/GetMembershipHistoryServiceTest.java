@@ -58,6 +58,7 @@ class GetMembershipHistoryServiceTest {
             assertThat(result.get(1).availableHours()).isEqualTo(3);
             assertThat(result.get(0).consumedHours()).isEqualTo(2); // 10 - 8
             assertThat(result.get(1).consumedHours()).isEqualTo(7); // 10 - 3
+            assertThat(result.get(0).modality()).isEqualTo("HOURS_BASED");
         }
 
         @Test
@@ -107,7 +108,7 @@ class GetMembershipHistoryServiceTest {
 
         @Test
         @DisplayName("renders UNLIMITED rows with dashes instead of null for hour columns")
-        void testMembershipHistoryCsvRendersUnlimitedRowsWithDashes() {
+        void exportCsv_unlimitedMembership_rendersHourColumnsAsDashes() {
             Membership m = buildUnlimitedMembership(LocalDate.of(2026, 4, 1), MembershipStatus.ACTIVE);
             when(membershipRepository.findAllByStudentIdAndProgramId(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                     .thenReturn(List.of(m));
@@ -117,6 +118,9 @@ class GetMembershipHistoryServiceTest {
             assertThat(csv).contains("UNLIMITED");
             assertThat(csv).contains("—");
             assertThat(csv).doesNotContain("null");
+            String[] lines = csv.split("\n");
+            // Skip header line (lines[0]); first data row is lines[1]
+            assertThat(lines[1]).contains(",UNLIMITED,—,—,—,");
         }
     }
 
