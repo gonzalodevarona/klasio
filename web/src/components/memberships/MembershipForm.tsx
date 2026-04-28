@@ -20,6 +20,7 @@ export default function MembershipForm({
   onCancel,
 }: MembershipFormProps) {
   const t = useTranslations("memberships");
+  const tMembership = useTranslations("membership");
   const tCommon = useTranslations("common");
 
   const today = new Date();
@@ -78,15 +79,23 @@ export default function MembershipForm({
               <div>
                 <span className="text-k-volt font-medium">{t("formModalityLabel")}</span>
                 <span className="text-k-subtle">
-                  {selectedPlan.modality === "HOURS_BASED" ? t("formModalityHoursBased") : t("formModalityClassesPerWeek")}
+                  {selectedPlan.modality === "HOURS_BASED"
+                    ? t("formModalityHoursBased")
+                    : selectedPlan.modality === "UNLIMITED"
+                    ? tMembership("modality.unlimited")
+                    : t("formModalityClassesPerWeek")}
                 </span>
               </div>
-              {selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null && (
+              {selectedPlan.modality === "UNLIMITED" ? (
+                <div>
+                  <span className="text-k-subtle">{tMembership("unlimited.label")}</span>
+                </div>
+              ) : selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null ? (
                 <div>
                   <span className="text-k-volt font-medium">{t("formHoursLabel")}</span>
                   <span className="text-k-subtle">{selectedPlan.hours}h / month</span>
                 </div>
-              )}
+              ) : null}
               <div>
                 <span className="text-k-volt font-medium">{t("formCostLabel")}</span>
                 <span className="text-k-subtle">${Number(selectedPlan.cost).toLocaleString()}</span>
