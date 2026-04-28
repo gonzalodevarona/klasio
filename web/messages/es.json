@@ -679,6 +679,7 @@
     "filterBeginnerOption": "Principiante",
     "filterIntermediateOption": "Intermedio",
     "filterAdvancedOption": "Avanzado",
+    "filterOpenOption": "Abierto",
     "detailName": "Nombre",
     "detailLevel": "Nivel",
     "detailType": "Tipo",
