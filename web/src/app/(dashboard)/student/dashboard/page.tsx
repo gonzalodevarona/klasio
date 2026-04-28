@@ -7,6 +7,7 @@ import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import HourBalance from "@/components/memberships/HourBalance";
+import { UnlimitedBadge } from "@/components/memberships/UnlimitedBadge";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
 import { Badge, Button, Card } from "@/components/ui";
 import { todayInTenantZone, formatSessionDate } from "@/lib/attendanceConstants";
@@ -59,10 +60,14 @@ export default function StudentDashboard() {
               </span>
               <MembershipStatusBadge status={activeMembership.status} />
             </div>
-            <HourBalance
-              available={activeMembership.availableHours}
-              purchased={activeMembership.purchasedHours}
-            />
+            {activeMembership.modality === "UNLIMITED" ? (
+              <UnlimitedBadge expiresAt={new Date(activeMembership.expirationDate)} />
+            ) : (
+              <HourBalance
+                available={activeMembership.availableHours ?? 0}
+                purchased={activeMembership.purchasedHours ?? 0}
+              />
+            )}
             <p className="text-xs text-k-muted font-mono">
               {t("membershipPeriod")} {formatDate(activeMembership.startDate)} → {formatDate(activeMembership.expirationDate)}
             </p>
