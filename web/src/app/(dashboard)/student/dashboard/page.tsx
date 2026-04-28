@@ -66,6 +66,7 @@ export default function StudentDashboard() {
               <HourBalance
                 available={activeMembership.availableHours ?? 0}
                 purchased={activeMembership.purchasedHours ?? 0}
+                data-testid="hour-balance"
               />
             )}
             <p className="text-xs text-k-muted font-mono">
