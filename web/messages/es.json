@@ -745,6 +745,8 @@
     "formScheduleDayRequired": "Las clases recurrentes requieren un día de la semana en cada entrada.",
     "formScheduleDateRequired": "Las clases únicas requieren una fecha específica.",
     "formScheduleOneTimeMax": "Las clases únicas solo pueden tener una entrada de horario.",
+    "formLevelOpen": "Abierto (todos los niveles)",
+    "editLevelCascadeConfirm": "Cambiar esta clase a {newLevel} cancelará las inscripciones futuras de estudiantes cuyo nivel no coincida. ¿Continuar?",
     "professorAssignmentTitle": "Asignación de profesor",
     "professorCurrentLabel": "Profesor actual",
     "professorIdLabel": "ID del profesor",

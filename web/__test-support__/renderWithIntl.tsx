@@ -414,6 +414,8 @@ const testMessages = {
     formScheduleDayRequired: "Recurring classes require a day of the week for each entry.",
     formScheduleDateRequired: "One-time classes require a specific date.",
     formScheduleOneTimeMax: "One-time classes can only have one schedule entry.",
+    formLevelOpen: "Open (any level)",
+    editLevelCascadeConfirm: "Changing this class to {newLevel} will cancel future registrations of students whose enrollment level doesn't match. Proceed?",
     formSaveButton: "Save Changes",
     formSavingButton: "Saving...",
     formCreateButton: "Create Class",

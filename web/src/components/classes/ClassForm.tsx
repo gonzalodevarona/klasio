@@ -14,6 +14,7 @@ import {
 } from "@/lib/types/programClass";
 import { useAllActiveProfessors } from "@/hooks/useProfessors";
 import { Input, Select, Button } from "@/components/ui";
+import { Modal } from "@/components/ui/Modal";
 
 interface FieldErrors {
   name?: string;
@@ -47,7 +48,7 @@ const DAYS_OF_WEEK = [
   "SUNDAY",
 ];
 
-const LEVELS: ClassLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+const LEVELS: ClassLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "OPEN"];
 
 function emptyScheduleEntry(): ScheduleEntryFormData {
   return { dayOfWeek: "", specificDate: "", startTime: "", endTime: "" };
@@ -85,6 +86,10 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Cascade confirmation modal: shown when editing an OPEN class to a specific level.
+  // Future registrations of students whose enrollment level doesn't match will be cancelled.
+  const [showCascadeModal, setShowCascadeModal] = useState(false);
 
   function validate(): FieldErrors {
     const errors: FieldErrors = {};
@@ -167,17 +172,8 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
     }));
   }
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-
-    const errors = validate();
-    setFieldErrors(errors);
-    setApiError(null);
-
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-
+  /** Performs the actual API calls after all validations and confirmations pass. */
+  async function doSubmit() {
     setSubmitting(true);
 
     try {
@@ -240,7 +236,62 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
     }
   }
 
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+
+    const errors = validate();
+    setFieldErrors(errors);
+    setApiError(null);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    // Warn when an OPEN class is restricted to a specific level: future registrations
+    // of students whose enrollment level doesn't match will be cancelled.
+    if (isEdit && programClass.level === "OPEN" && level !== "OPEN") {
+      setShowCascadeModal(true);
+      return;
+    }
+
+    await doSubmit();
+  }
+
   return (
+    <>
+    {/* Cascade confirmation modal: shown when restricting an OPEN class to a specific level */}
+    <Modal
+      open={showCascadeModal}
+      onClose={() => setShowCascadeModal(false)}
+      title={t("formLevelLabel")}
+      size="sm"
+    >
+      <p className="text-sm text-k-subtle mb-6">
+        {t("editLevelCascadeConfirm", { newLevel: level })}
+      </p>
+      <div className="flex justify-end gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          type="button"
+          onClick={() => setShowCascadeModal(false)}
+        >
+          {tCommon("cancel")}
+        </Button>
+        <Button
+          variant="volt"
+          size="sm"
+          type="button"
+          disabled={submitting}
+          onClick={() => {
+            setShowCascadeModal(false);
+            doSubmit();
+          }}
+        >
+          {tCommon("confirm")}
+        </Button>
+      </div>
+    </Modal>
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6" noValidate>
       {apiError && (
         <div
@@ -272,7 +323,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
         <option value="">{t("formLevelPlaceholder")}</option>
         {LEVELS.map((l) => (
           <option key={l} value={l}>
-            {l.charAt(0) + l.slice(1).toLowerCase()}
+            {l === "OPEN" ? t("formLevelOpen") : l.charAt(0) + l.slice(1).toLowerCase()}
           </option>
         ))}
       </Select>
@@ -471,5 +522,6 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
         </Button>
       </div>
     </form>
+    </>
   );
 }
