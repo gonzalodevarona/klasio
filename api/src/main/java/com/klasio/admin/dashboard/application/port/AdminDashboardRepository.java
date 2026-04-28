@@ -8,6 +8,7 @@ import java.util.UUID;
 public interface AdminDashboardRepository {
     long countStudents(UUID tenantId);
     long countNewStudentsThisMonth(UUID tenantId);
+    long countActiveMemberships(UUID tenantId);
     long sumConsumedHours(UUID tenantId);
     long countPendingProofs(UUID tenantId);
     long countActivePrograms(UUID tenantId);
