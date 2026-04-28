@@ -323,4 +323,28 @@ class MarkAttendanceServiceTest {
                 commandForAdmin(List.of(new MarkAttendanceCommand.MarkEntry(unknownRegId, "PRESENT")))))
                 .isInstanceOf(RegistrationNotFoundException.class);
     }
+
+    // ------------------------------------------------------------------
+    // Task 13: UNLIMITED membership → PRESENT status, no hour deduction, no warning
+    // ------------------------------------------------------------------
+
+    @Test
+    void unlimitedMembership_marksPresent_noHoursWarning() {
+        MembershipHoursPort.ActiveMembershipView unlimitedMembership =
+                new MembershipHoursPort.ActiveMembershipView(
+                        MEMBERSHIP_ID, Integer.MAX_VALUE, sessionDate.plusMonths(1), true);
+
+        when(registrationRepository.findByClassAndDateRange(TENANT_ID, CLASS_ID, sessionDate, sessionDate))
+                .thenReturn(List.of(registeredReg(REG_ID)));
+        when(membershipHoursPort.findActiveForStudentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                .thenReturn(Optional.of(unlimitedMembership));
+
+        MarkAttendanceResult result = service.execute(
+                commandForAdmin(List.of(new MarkAttendanceCommand.MarkEntry(REG_ID, "PRESENT"))));
+
+        assertThat(result.results()).hasSize(1);
+        assertThat(result.results().get(0).status()).isEqualTo("PRESENT");
+        assertThat(result.results().get(0).noHoursWarning()).isFalse();
+        verify(deductHoursUseCase, never()).execute(any());
+    }
 }

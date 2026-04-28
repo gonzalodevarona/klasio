@@ -252,4 +252,29 @@ class RegisterForClassServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("intendedHours must be between");
     }
+
+    // Task 12: UNLIMITED membership skips the hour check and registers successfully
+    @Test
+    void unlimitedMembership_registersWithoutHourCheck() {
+        ActiveMembershipView unlimitedMembership = new ActiveMembershipView(
+                MEMBERSHIP_ID, Integer.MAX_VALUE,
+                LocalDate.now(ZoneId.of("America/Bogota")).plusMonths(1), true);
+
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(activeClass));
+        when(enrollmentLookupPort.findActiveEnrollmentInProgramAtLevel(TENANT_ID, STUDENT_ID, PROGRAM_ID, "BEGINNER"))
+                .thenReturn(Optional.of(enrollment));
+        when(membershipHoursPort.findActiveForStudentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                .thenReturn(Optional.of(unlimitedMembership));
+        when(classSessionRepository.findOrCreate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(scheduledSession);
+        when(classSessionRepository.incrementCapacityIfSpace(any(), eq(5))).thenReturn(true);
+
+        // UNLIMITED memberships must not throw InsufficientHoursException — they bypass the balance check
+        AttendanceRegistration result = service.execute(command(FUTURE_MONDAY, 1));
+
+        assertThat(result.getStatus().name()).isEqualTo("REGISTERED");
+        verify(registrationRepository).save(any());
+        // publishEvent uses Object overload — verify via atLeastOnce to avoid Mockito overload resolution issue
+        verify(eventPublisher, atLeastOnce()).publishEvent(any(Object.class));
+    }
 }

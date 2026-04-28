@@ -225,13 +225,15 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
             registration.markPresentByStaff(cmd.actorUserId(), nowInstant, cmd.hoursToCharge(), durationMinutes);
         }
 
-        // 12. Deduct hours from membership
-        deductHoursUseCase.execute(new DeductHoursCommand(
-                cmd.tenantId(),
-                membership.membershipId(),
-                cmd.hoursToCharge(),
-                cmd.actorUserId(),
-                actorRole));
+        // 12. Deduct hours from membership (UNLIMITED memberships skip deduction)
+        if (!membership.unlimited()) {
+            deductHoursUseCase.execute(new DeductHoursCommand(
+                    cmd.tenantId(),
+                    membership.membershipId(),
+                    cmd.hoursToCharge(),
+                    cmd.actorUserId(),
+                    actorRole));
+        }
 
         // 13. Persist, publish events, clear
         List<DomainEvent> events = List.copyOf(registration.getDomainEvents());
