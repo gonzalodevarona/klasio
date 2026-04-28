@@ -7,6 +7,7 @@ import com.klasio.membership.domain.model.MembershipId;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.HourTransactionRepository;
 import com.klasio.membership.domain.port.MembershipRepository;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -115,6 +116,7 @@ class AdjustHoursServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(), "Test Plan",
+                ProgramModality.HOURS_BASED,
                 10, availableHours,
                 start, start.withDayOfMonth(start.lengthOfMonth()),
                 MembershipStatus.ACTIVE,

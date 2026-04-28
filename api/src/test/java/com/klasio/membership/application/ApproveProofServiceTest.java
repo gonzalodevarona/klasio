@@ -11,6 +11,7 @@ import com.klasio.membership.domain.model.ProofStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.membership.domain.port.PaymentProofRepository;
 import com.klasio.membership.infrastructure.persistence.DelegationReminderJpaAdapter;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import com.klasio.shared.infrastructure.exception.PaymentProofNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +61,7 @@ class ApproveProofServiceTest {
 
     private Membership pendingPaymentMembership() {
         Membership m = Membership.create(TENANT_ID, STUDENT_ID, UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), "Plan", 10, LocalDate.of(2026, 4, 1), ADMIN_ID);
+                UUID.randomUUID(), "Plan", 10, ProgramModality.HOURS_BASED, LocalDate.of(2026, 4, 1), ADMIN_ID);
         m.markProofUploaded(); // PENDING_PAYMENT → PENDING_PAYMENT_VALIDATION
         m.clearDomainEvents();
         return m;

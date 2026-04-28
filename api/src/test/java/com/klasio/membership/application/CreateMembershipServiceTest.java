@@ -133,7 +133,7 @@ class CreateMembershipServiceTest {
     }
 
     @Test
-    @DisplayName("throws IllegalArgumentException for non-HOURS_BASED plan")
+    @DisplayName("throws IllegalArgumentException for CLASSES_PER_WEEK plan")
     void execute_classesPerWeekPlan_throwsIllegalArgument() {
         ProgramPlanPort.PlanView classesplan = new ProgramPlanPort.PlanView(
                 PLAN_ID, PROGRAM_ID, TENANT_ID, "Kids Classes", "CLASSES_PER_WEEK", 0, MANAGER_ID);
@@ -144,7 +144,7 @@ class CreateMembershipServiceTest {
 
         assertThatThrownBy(() -> service.execute(cmd))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("HOURS_BASED");
+                .hasMessageContaining("CLASSES_PER_WEEK");
 
         verify(membershipRepository, never()).save(any());
     }

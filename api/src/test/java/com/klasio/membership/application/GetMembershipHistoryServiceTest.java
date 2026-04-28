@@ -6,6 +6,7 @@ import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipId;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
+import com.klasio.program.domain.model.ProgramModality;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -111,6 +112,7 @@ class GetMembershipHistoryServiceTest {
                 TENANT_ID, STUDENT_ID,
                 UUID.randomUUID(), PROGRAM_ID,
                 UUID.randomUUID(), "Test Plan",
+                ProgramModality.HOURS_BASED,
                 purchased, available,
                 start, start.withDayOfMonth(start.lengthOfMonth()),
                 status,

@@ -1,11 +1,13 @@
 package com.klasio.membership.domain;
 
+import com.klasio.membership.domain.event.MembershipDepleted;
 import com.klasio.membership.domain.event.MembershipProofUploaded;
 import com.klasio.membership.domain.event.MembershipRenewed;
 import com.klasio.membership.domain.model.HourTransactionType;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipId;
 import com.klasio.membership.domain.model.MembershipStatus;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.domain.DomainEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,7 +31,7 @@ class MembershipTest {
 
     private Membership createDefault() {
         return Membership.create(TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
-                PLAN_ID, "Test Plan", 10, START_DATE, ACTOR_ID);
+                PLAN_ID, "Test Plan", 10, ProgramModality.HOURS_BASED, START_DATE, ACTOR_ID);
     }
 
     // ---- create() ----
@@ -63,7 +65,7 @@ class MembershipTest {
         void create_zeroHours_throwsIllegalArgument() {
             assertThrows(IllegalArgumentException.class, () ->
                     Membership.create(TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
-                            PLAN_ID, "Test Plan", 0, START_DATE, ACTOR_ID));
+                            PLAN_ID, "Test Plan", 0, ProgramModality.HOURS_BASED, START_DATE, ACTOR_ID));
         }
 
         @Test
@@ -508,6 +510,64 @@ class MembershipTest {
             assertEquals(m.getId().value(), event.membershipId());
             assertEquals(8, event.purchasedHours());
             assertEquals(ACTOR_ID, event.renewedBy());
+        }
+    }
+
+    // ---- UNLIMITED modality ----
+
+    @Nested
+    @DisplayName("UNLIMITED modality")
+    class UnlimitedModality {
+
+        @Test
+        @DisplayName("creates UNLIMITED membership with null hours")
+        void testCreateUnlimitedMembershipWithNullHours() {
+            Membership membership = Membership.create(
+                    TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
+                    PLAN_ID, "Unlimited Plan", null,
+                    ProgramModality.UNLIMITED, START_DATE, ACTOR_ID);
+
+            assertTrue(membership.isUnlimited());
+            assertNull(membership.getPurchasedHours());
+            assertNull(membership.getAvailableHours());
+        }
+
+        @Test
+        @DisplayName("deductHours on UNLIMITED membership throws IllegalStateException")
+        void testUnlimitedMembershipDeductHoursThrows() {
+            Membership unlimited = Membership.create(
+                    TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
+                    PLAN_ID, "Unlimited Plan", null,
+                    ProgramModality.UNLIMITED, START_DATE, ACTOR_ID);
+
+            assertThrows(IllegalStateException.class, () ->
+                    unlimited.deductHours(5, ACTOR_ID, "PROFESSOR"));
+        }
+
+        @Test
+        @DisplayName("adjustHours on UNLIMITED membership throws IllegalStateException")
+        void testUnlimitedMembershipAdjustHoursThrows() {
+            Membership unlimited = Membership.create(
+                    TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
+                    PLAN_ID, "Unlimited Plan", null,
+                    ProgramModality.UNLIMITED, START_DATE, ACTOR_ID);
+
+            assertThrows(IllegalStateException.class, () ->
+                    unlimited.adjustHours(10, "manual adjustment", ACTOR_ID, "ADMIN"));
+        }
+
+        @Test
+        @DisplayName("UNLIMITED membership never emits MembershipDepleted event")
+        void testUnlimitedMembershipNeverEmitsMembershipDepletedEvent() {
+            Membership unlimited = Membership.create(
+                    TENANT_ID, STUDENT_ID, ENROLLMENT_ID, PROGRAM_ID,
+                    PLAN_ID, "Unlimited Plan", null,
+                    ProgramModality.UNLIMITED, START_DATE, ACTOR_ID);
+
+            List<DomainEvent> events = unlimited.getDomainEvents();
+            boolean hasDepletion = events.stream()
+                    .anyMatch(e -> e instanceof MembershipDepleted);
+            assertFalse(hasDepletion);
         }
     }
 

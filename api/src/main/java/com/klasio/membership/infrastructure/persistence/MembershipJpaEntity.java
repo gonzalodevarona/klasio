@@ -39,6 +39,10 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     @Column(name = "plan_name", nullable = false, length = 255)
     private String planName;
 
+    // modality column added in Task 5 Flyway migration; nullable here until migration runs
+    @Column(name = "modality", length = 20)
+    private String modality;
+
     @Column(name = "purchased_hours", nullable = false)
     private int purchasedHours;
 
@@ -104,6 +108,8 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     public void setPlanId(UUID planId) { this.planId = planId; }
     public String getPlanName() { return planName; }
     public void setPlanName(String planName) { this.planName = planName; }
+    public String getModality() { return modality; }
+    public void setModality(String modality) { this.modality = modality; }
     public int getPurchasedHours() { return purchasedHours; }
     public void setPurchasedHours(int purchasedHours) { this.purchasedHours = purchasedHours; }
     public int getAvailableHours() { return availableHours; }

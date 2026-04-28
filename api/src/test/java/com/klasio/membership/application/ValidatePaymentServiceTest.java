@@ -11,6 +11,7 @@ import com.klasio.membership.domain.model.PaymentProof;
 import com.klasio.membership.domain.model.ProofStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.membership.domain.port.PaymentProofRepository;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +50,7 @@ class ValidatePaymentServiceTest {
 
     private Membership pendingMembership() {
         Membership m = Membership.create(TENANT_ID, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), "Test Plan", 10, LocalDate.of(2026, 4, 1), UUID.randomUUID());
+                UUID.randomUUID(), "Test Plan", 10, ProgramModality.HOURS_BASED, LocalDate.of(2026, 4, 1), UUID.randomUUID());
         m.markProofUploaded(); // PENDING_PAYMENT → PENDING_PAYMENT_VALIDATION
         m.clearDomainEvents();
         return m;

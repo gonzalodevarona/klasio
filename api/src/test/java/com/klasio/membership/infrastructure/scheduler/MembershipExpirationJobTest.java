@@ -3,6 +3,7 @@ package com.klasio.membership.infrastructure.scheduler;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
+import com.klasio.program.domain.model.ProgramModality;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -138,6 +139,7 @@ class MembershipExpirationJobTest {
                 java.util.UUID.randomUUID(),
                 java.util.UUID.randomUUID(),
                 java.util.UUID.randomUUID(), "Test Plan",
+                ProgramModality.HOURS_BASED,
                 10, 5, start, start.withDayOfMonth(start.lengthOfMonth()),
                 MembershipStatus.ACTIVE,
                 true, java.util.UUID.randomUUID(), java.time.Instant.now(),
@@ -156,6 +158,7 @@ class MembershipExpirationJobTest {
                 java.util.UUID.randomUUID(),
                 java.util.UUID.randomUUID(),
                 java.util.UUID.randomUUID(), "Test Plan",
+                ProgramModality.HOURS_BASED,
                 10, 0, start, start.withDayOfMonth(start.lengthOfMonth()),
                 MembershipStatus.INACTIVE,
                 true, java.util.UUID.randomUUID(), java.time.Instant.now(),

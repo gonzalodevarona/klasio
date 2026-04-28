@@ -138,7 +138,7 @@ class CreateSelfMembershipServiceTest {
 
         assertThatThrownBy(() -> service.execute(cmd))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("HOURS_BASED");
+                .hasMessageContaining("CLASSES_PER_WEEK");
 
         verify(membershipRepository, never()).save(any());
     }
