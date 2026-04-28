@@ -1239,5 +1239,25 @@
     "alertDefault": "Alerta emitida para esta sesión",
     "registerError": "No se pudo inscribir. Inténtalo de nuevo.",
     "cancelError": "No se pudo cancelar. Inténtalo de nuevo."
+  },
+  "membership": {
+    "modality": {
+      "unlimited": "Ilimitado"
+    },
+    "unlimited": {
+      "label": "Horas ilimitadas",
+      "badge": "Ilimitado",
+      "daysRemaining": "Vence en {days} días"
+    }
+  },
+  "plan": {
+    "modality": {
+      "unlimited": "Ilimitado"
+    }
+  },
+  "csv": {
+    "hours": {
+      "notApplicable": "—"
+    }
   }
 }

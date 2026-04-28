@@ -1239,5 +1239,25 @@
     "alertDefault": "Alert issued for this session",
     "registerError": "Failed to register. Please try again.",
     "cancelError": "Failed to cancel. Please try again."
+  },
+  "membership": {
+    "modality": {
+      "unlimited": "Unlimited"
+    },
+    "unlimited": {
+      "label": "Unlimited hours",
+      "badge": "Unlimited",
+      "daysRemaining": "Expires in {days} days"
+    }
+  },
+  "plan": {
+    "modality": {
+      "unlimited": "Unlimited"
+    }
+  },
+  "csv": {
+    "hours": {
+      "notApplicable": "—"
+    }
   }
 }
