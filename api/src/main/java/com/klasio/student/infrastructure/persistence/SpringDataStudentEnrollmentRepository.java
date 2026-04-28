@@ -3,6 +3,7 @@ package com.klasio.student.infrastructure.persistence;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,6 +21,9 @@ public interface SpringDataStudentEnrollmentRepository extends JpaRepository<Stu
 
     Optional<StudentEnrollmentJpaEntity> findFirstByTenantIdAndStudentIdAndProgramIdAndStatus(
             UUID tenantId, UUID studentId, UUID programId, String status);
+
+    List<StudentEnrollmentJpaEntity> findByTenantIdAndStudentIdAndStatus(
+            UUID tenantId, UUID studentId, String status);
 
     @Query(value = "SELECT e.* FROM student_enrollments e WHERE e.tenant_id = :tenantId " +
             "AND e.student_id = :studentId " +
