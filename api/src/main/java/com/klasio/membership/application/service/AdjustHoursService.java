@@ -7,6 +7,7 @@ import com.klasio.membership.domain.port.HourTransactionRepository;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
+import com.klasio.shared.infrastructure.exception.UnlimitedMembershipNotAdjustableException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,11 @@ public class AdjustHoursService implements AdjustHoursUseCase {
                 .findById(command.tenantId(), command.membershipId())
                 .orElseThrow(() -> new MembershipNotFoundException(
                         "Membership not found: " + command.membershipId()));
+
+        if (membership.isUnlimited()) {
+            throw new UnlimitedMembershipNotAdjustableException(
+                    "UNLIMITED memberships do not have adjustable hours");
+        }
 
         membership.adjustHours(command.delta(), command.reason(), command.actorId(), command.actorRole());
 

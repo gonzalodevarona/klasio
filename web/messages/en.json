@@ -569,9 +569,11 @@
     "plansView": "View",
     "modalityHoursBased": "Hours Based",
     "modalityClassesPerWeek": "Classes per Week",
+    "modalityUnlimited": "Unlimited",
     "formNameLabel": "Name",
     "formNamePlaceholderHours": "e.g., 4 Hours",
     "formNamePlaceholderSchedule": "e.g., Mon/Wed/Thu Evening",
+    "formNamePlaceholderUnlimited": "e.g., Unlimited Monthly",
     "formModalityLabel": "Modality",
     "formModalityCannotChange": "Modality cannot be changed after creation.",
     "formCostLabel": "Cost (COP)",
@@ -848,6 +850,7 @@
     "formPlanSelectPlaceholder": "— Select a plan —",
     "formModalityHoursBased": "Hours-based",
     "formModalityClassesPerWeek": "Classes per week",
+    "formModalityUnlimited": "Unlimited",
     "formModalityLabel": "Modality: ",
     "formHoursLabel": "Hours: ",
     "formCostLabel": "Cost: ",
@@ -864,7 +867,7 @@
     "newLoadingStudent": "Loading student…",
     "newNoEnrollments": "This student has no active program enrollments. Enroll them in a program first.",
     "newLoadingPlans": "Loading plans…",
-    "newNoPlans": "No active HOURS_BASED plans found for this program.",
+    "newNoPlans": "No active plans found for this program.",
     "hourBalanceTotalSuffix": "/ {purchased}h",
     "hourBalanceRemaining": "hours remaining",
     "hourBalanceConsumed": "Consumed: {hours}h",
@@ -1239,5 +1242,25 @@
     "alertDefault": "Alert issued for this session",
     "registerError": "Failed to register. Please try again.",
     "cancelError": "Failed to cancel. Please try again."
+  },
+  "membership": {
+    "modality": {
+      "unlimited": "Unlimited"
+    },
+    "unlimited": {
+      "label": "Unlimited hours",
+      "badge": "Unlimited",
+      "daysRemaining": "Expires in {days} days"
+    }
+  },
+  "plan": {
+    "modality": {
+      "unlimited": "Unlimited"
+    }
+  },
+  "csv": {
+    "hours": {
+      "notApplicable": "—"
+    }
   }
 }

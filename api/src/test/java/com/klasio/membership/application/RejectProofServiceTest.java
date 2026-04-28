@@ -9,6 +9,7 @@ import com.klasio.membership.domain.model.PaymentProofId;
 import com.klasio.membership.domain.model.ProofStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.membership.domain.port.PaymentProofRepository;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.PaymentProofNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +56,7 @@ class RejectProofServiceTest {
     /** Membership in PENDING_PAYMENT_VALIDATION (proof already uploaded). */
     private Membership membershipInValidation() {
         Membership m = Membership.create(TENANT_ID, UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), UUID.randomUUID(), "Plan", 10,
+                UUID.randomUUID(), UUID.randomUUID(), "Plan", 10, ProgramModality.HOURS_BASED,
                 LocalDate.of(2026, 4, 1), ADMIN_ID);
         m.markProofUploaded();
         m.clearDomainEvents();

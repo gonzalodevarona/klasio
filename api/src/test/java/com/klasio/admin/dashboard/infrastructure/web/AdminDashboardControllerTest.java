@@ -90,7 +90,7 @@ class AdminDashboardControllerTest {
     @Test
     @DisplayName("returns 200 with full dashboard DTO for ADMIN")
     void returns200ForAdmin() throws Exception {
-        AdminDashboardDto dto = new AdminDashboardDto(10, 2, 100, 3, 5, List.of());
+        AdminDashboardDto dto = new AdminDashboardDto(10, 2, 90, 100, 3, 5, List.of());
         when(getDashboard.execute(any())).thenReturn(dto);
 
         mockMvc.perform(get("/api/v1/admin/dashboard").with(authentication(authAs("ADMIN"))))
@@ -106,7 +106,7 @@ class AdminDashboardControllerTest {
     @Test
     @DisplayName("returns 200 for MANAGER role")
     void returns200ForManager() throws Exception {
-        when(getDashboard.execute(any())).thenReturn(new AdminDashboardDto(0, 0, 0, 0, 0, List.of()));
+        when(getDashboard.execute(any())).thenReturn(new AdminDashboardDto(0, 0, 0, 0, 0, 0, List.of()));
 
         mockMvc.perform(get("/api/v1/admin/dashboard").with(authentication(authAs("MANAGER"))))
                 .andExpect(status().isOk());
@@ -115,7 +115,7 @@ class AdminDashboardControllerTest {
     @Test
     @DisplayName("returns 200 for SUPERADMIN role")
     void returns200ForSuperadmin() throws Exception {
-        when(getDashboard.execute(any())).thenReturn(new AdminDashboardDto(0, 0, 0, 0, 0, List.of()));
+        when(getDashboard.execute(any())).thenReturn(new AdminDashboardDto(0, 0, 0, 0, 0, 0, List.of()));
 
         mockMvc.perform(get("/api/v1/admin/dashboard").with(authentication(authAs("SUPERADMIN"))))
                 .andExpect(status().isOk());

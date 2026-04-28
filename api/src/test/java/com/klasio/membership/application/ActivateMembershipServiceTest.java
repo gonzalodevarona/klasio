@@ -7,6 +7,7 @@ import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.shared.infrastructure.exception.ManagerProgramMismatchException;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ class ActivateMembershipServiceTest {
 
     private Membership pendingManagerMembership() {
         Membership m = Membership.create(TENANT_ID, UUID.randomUUID(), UUID.randomUUID(), PROGRAM_ID,
-                UUID.randomUUID(), "Test Plan", 10, LocalDate.of(2026, 4, 1), ADMIN_ID);
+                UUID.randomUUID(), "Test Plan", 10, ProgramModality.HOURS_BASED, LocalDate.of(2026, 4, 1), ADMIN_ID);
         m.markProofUploaded(); // PENDING_PAYMENT → PENDING_PAYMENT_VALIDATION
         m.validatePayment(ADMIN_ID, false); // → PENDING_MANAGER_ACTIVATION
         m.clearDomainEvents();
@@ -113,7 +114,7 @@ class ActivateMembershipServiceTest {
     @DisplayName("throws when not in PENDING_MANAGER_ACTIVATION status")
     void execute_wrongStatus_throwsIllegalState() {
         Membership m = Membership.create(TENANT_ID, UUID.randomUUID(), UUID.randomUUID(), PROGRAM_ID,
-                UUID.randomUUID(), "Test Plan", 10, LocalDate.of(2026, 4, 1), ADMIN_ID);
+                UUID.randomUUID(), "Test Plan", 10, ProgramModality.HOURS_BASED, LocalDate.of(2026, 4, 1), ADMIN_ID);
         // still PENDING_PAYMENT (no proof uploaded yet)
         UUID id = m.getId().value();
         when(membershipRepository.findById(TENANT_ID, id)).thenReturn(Optional.of(m));

@@ -6,6 +6,7 @@ import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.membership.domain.port.ProgramPlanPort;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ class RenewMembershipServiceTest {
 
     private Membership expiredMembership() {
         Membership m = Membership.create(TENANT_ID, UUID.randomUUID(), UUID.randomUUID(),
-                PROGRAM_ID, PLAN_ID, "Plan", 10, LocalDate.of(2026, 4, 1), ACTOR_ID);
+                PROGRAM_ID, PLAN_ID, "Plan", 10, ProgramModality.HOURS_BASED, LocalDate.of(2026, 4, 1), ACTOR_ID);
         m.markProofUploaded();
         m.validatePayment(ACTOR_ID, true);
         m.expire();

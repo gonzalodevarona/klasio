@@ -3,12 +3,17 @@ package com.klasio.membership.infrastructure.persistence;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipId;
 import com.klasio.membership.domain.model.MembershipStatus;
+import com.klasio.program.domain.model.ProgramModality;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MembershipMapper {
 
     public Membership toDomain(MembershipJpaEntity entity) {
+        // modality column added in Task 5 — default to HOURS_BASED for existing rows
+        ProgramModality modality = entity.getModality() != null
+                ? ProgramModality.valueOf(entity.getModality())
+                : ProgramModality.HOURS_BASED;
         return Membership.reconstitute(
                 MembershipId.of(entity.getId()),
                 entity.getTenantId(),
@@ -17,6 +22,7 @@ public class MembershipMapper {
                 entity.getProgramId(),
                 entity.getPlanId(),
                 entity.getPlanName(),
+                modality,
                 entity.getPurchasedHours(),
                 entity.getAvailableHours(),
                 entity.getStartDate(),
@@ -43,8 +49,10 @@ public class MembershipMapper {
         entity.setProgramId(membership.getProgramId());
         entity.setPlanId(membership.getPlanId());
         entity.setPlanName(membership.getPlanName());
-        entity.setPurchasedHours(membership.getPurchasedHours());
-        entity.setAvailableHours(membership.getAvailableHours());
+        entity.setModality(membership.getModality().name());
+        // UNLIMITED memberships have null hours; JPA entity still uses int for now (Task 5 migrates column)
+        entity.setPurchasedHours(membership.getPurchasedHours() != null ? membership.getPurchasedHours() : 0);
+        entity.setAvailableHours(membership.getAvailableHours() != null ? membership.getAvailableHours() : 0);
         entity.setStartDate(membership.getStartDate());
         entity.setExpirationDate(membership.getExpirationDate());
         entity.setStatus(membership.getStatus().name());

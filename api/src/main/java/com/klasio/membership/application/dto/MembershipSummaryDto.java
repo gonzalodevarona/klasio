@@ -11,9 +11,10 @@ public record MembershipSummaryDto(
         UUID programId,
         UUID planId,
         String planName,
+        String modality,
         MembershipStatus status,
-        int purchasedHours,
-        int availableHours,
+        Integer purchasedHours,
+        Integer availableHours,
         LocalDate startDate,
         LocalDate expirationDate
 ) {}

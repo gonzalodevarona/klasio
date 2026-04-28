@@ -109,7 +109,7 @@ class RegisterWalkInServiceTest {
                         TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
         );
         enrollment = new EnrollmentView(ENROLLMENT_ID, "BEGINNER");
-        membership = new ActiveMembershipView(MEMBERSHIP_ID, 10, TODAY.plusMonths(1));
+        membership = new ActiveMembershipView(MEMBERSHIP_ID, 10, TODAY.plusMonths(1), false);
         scheduledSession = ClassSession.materialize(TENANT_ID, CLASS_ID, TODAY, SESSION_START, SESSION_END, ACTOR_USER_ID);
     }
 
@@ -482,7 +482,7 @@ class RegisterWalkInServiceTest {
         when(enrollmentLookupPort.findActiveEnrollmentInProgramAtLevel(any(), any(), any(), any()))
                 .thenReturn(Optional.of(enrollment));
         when(membershipHoursPort.findActiveForStudentInProgram(any(), any(), any()))
-                .thenReturn(Optional.of(new ActiveMembershipView(MEMBERSHIP_ID, 0, TODAY.plusMonths(1))));
+                .thenReturn(Optional.of(new ActiveMembershipView(MEMBERSHIP_ID, 0, TODAY.plusMonths(1), false)));
 
         assertThatThrownBy(() -> service.execute(adminCommand()))
                 .isInstanceOf(InsufficientHoursException.class);
@@ -695,5 +695,30 @@ class RegisterWalkInServiceTest {
         assertThatThrownBy(() -> service.execute(adminCommand()))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("deduction failed");
+    }
+
+    // ---------------------------------------------------------------
+    // Task 14: UNLIMITED membership walk-in does NOT deduct hours
+    // ---------------------------------------------------------------
+
+    @Test
+    void execute_unlimitedMembership_walkIn_doesNotDeductHours() {
+        ActiveMembershipView unlimitedMembership = new ActiveMembershipView(
+                MEMBERSHIP_ID, Integer.MAX_VALUE, TODAY.plusMonths(1), true);
+
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
+        when(enrollmentLookupPort.findActiveEnrollmentInProgramAtLevel(TENANT_ID, STUDENT_ID, PROGRAM_ID, "BEGINNER"))
+                .thenReturn(Optional.of(enrollment));
+        when(membershipHoursPort.findActiveForStudentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                .thenReturn(Optional.of(unlimitedMembership));
+        when(classSessionRepository.findOrCreate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(scheduledSession);
+        when(classSessionRepository.incrementCapacityIfSpace(any(), anyInt())).thenReturn(true);
+        when(registrationRepository.findActiveBySessionAndStudent(any(), any(), any())).thenReturn(Optional.empty());
+
+        AttendanceRegistration result = service.execute(adminCommand());
+
+        assertThat(result.getStatus()).isEqualTo(AttendanceRegistrationStatus.PRESENT);
+        verify(deductHoursUseCase, never()).execute(any());
     }
 }

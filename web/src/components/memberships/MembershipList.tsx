@@ -54,7 +54,7 @@ export default function MembershipList({
               <MembershipStatusBadge status={m.status} />
             </Td>
             <Td>
-              <HourBalance available={m.availableHours} purchased={m.purchasedHours} />
+              <HourBalance available={m.availableHours ?? 0} purchased={m.purchasedHours ?? 0} />
             </Td>
             <Td muted>{formatDate(m.startDate)}</Td>
             <Td muted>{formatDate(m.expirationDate)}</Td>

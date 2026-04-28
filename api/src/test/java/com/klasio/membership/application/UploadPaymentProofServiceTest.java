@@ -10,6 +10,7 @@ import com.klasio.membership.domain.model.ProofStatus;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.membership.domain.port.PaymentProofRepository;
 import com.klasio.membership.domain.port.PaymentProofStorage;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.InvalidMembershipStatusForUploadException;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +54,7 @@ class UploadPaymentProofServiceTest {
 
     private Membership pendingMembership() {
         return Membership.create(TENANT_ID, STUDENT_ID, UUID.randomUUID(), UUID.randomUUID(),
-                UUID.randomUUID(), "Plan", 10, LocalDate.of(2026, 4, 1), ACTOR_ID);
+                UUID.randomUUID(), "Plan", 10, ProgramModality.HOURS_BASED, LocalDate.of(2026, 4, 1), ACTOR_ID);
     }
 
     private UploadPaymentProofCommand validCommand() {

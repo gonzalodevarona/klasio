@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { MembershipDetail as MembershipDetailType } from "@/lib/types/membership";
 import MembershipStatusBadge from "./MembershipStatusBadge";
 import HourBalance from "./HourBalance";
+import { UnlimitedBadge } from "./UnlimitedBadge";
 import HourTransactionList from "./HourTransactionList";
 import HourAdjustmentForm from "./HourAdjustmentForm";
 import { useMembershipActions } from "@/hooks/useMemberships";
@@ -103,7 +104,7 @@ export default function MembershipDetail({
               {t("btnActivate")}
             </button>
           )}
-          {membership.status === "ACTIVE" && isAdmin && (
+          {membership.status === "ACTIVE" && isAdmin && membership.modality !== "UNLIMITED" && (
             <button
               onClick={() => setShowAdjust(true)}
               className="rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
@@ -120,9 +121,17 @@ export default function MembershipDetail({
         </div>
       )}
 
-      {/* Hours balance */}
+      {/* Hours balance / unlimited */}
       <div className="rounded-md border border-gray-200 p-4 bg-gray-50">
-        <HourBalance available={membership.availableHours} purchased={membership.purchasedHours} />
+        {membership.modality === "UNLIMITED" ? (
+          <UnlimitedBadge expiresAt={new Date(membership.expirationDate)} />
+        ) : (
+          <HourBalance
+            available={membership.availableHours ?? 0}
+            purchased={membership.purchasedHours ?? 0}
+            data-testid="hour-balance"
+          />
+        )}
       </div>
 
       {/* Details */}
@@ -147,8 +156,8 @@ export default function MembershipDetail({
         <HourTransactionList membershipId={membership.id} />
       </div>
 
-      {/* Adjust hours modal */}
-      {showAdjust && (
+      {/* Adjust hours modal — not applicable for UNLIMITED memberships */}
+      {showAdjust && membership.modality !== "UNLIMITED" && (
         <HourAdjustmentForm
           membershipId={membership.id}
           onSubmit={handleAdjustHours}

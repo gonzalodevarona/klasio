@@ -47,6 +47,19 @@ public class AdminDashboardAdapter implements AdminDashboardRepository {
     }
 
     @Override
+    public long countActiveMemberships(UUID tenantId) {
+        Number result = (Number) em.createNativeQuery("""
+                SELECT COUNT(*)
+                FROM memberships m
+                WHERE m.tenant_id = :tenantId
+                  AND m.status = 'ACTIVE'
+                """)
+                .setParameter("tenantId", tenantId)
+                .getSingleResult();
+        return result.longValue();
+    }
+
+    @Override
     public long sumConsumedHours(UUID tenantId) {
         Number result = (Number) em.createNativeQuery("""
                 SELECT COALESCE(SUM(m.purchased_hours - m.available_hours), 0)

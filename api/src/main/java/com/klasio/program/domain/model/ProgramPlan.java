@@ -221,6 +221,13 @@ public class ProgramPlan {
             if (scheduleEntries == null || scheduleEntries.isEmpty()) {
                 throw new IllegalArgumentException("Schedule entries are required for CLASSES_PER_WEEK plans");
             }
+        } else if (modality == ProgramModality.UNLIMITED) {
+            if (hours != null) {
+                throw new IllegalArgumentException("Hours must be null for UNLIMITED plans");
+            }
+            if (scheduleEntries != null && !scheduleEntries.isEmpty()) {
+                throw new IllegalArgumentException("Schedule entries must be empty for UNLIMITED plans");
+            }
         }
     }
 }

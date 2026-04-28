@@ -23,6 +23,8 @@ public class MembershipHoursAdapter implements MembershipHoursPort {
         return membershipRepository
                 .findByTenantIdAndStudentIdAndProgramIdAndStatus(
                         tenantId, studentId, programId, MembershipStatus.ACTIVE.name())
-                .map(e -> new ActiveMembershipView(e.getId(), e.getAvailableHours(), e.getExpirationDate()));
+                .map(e -> "UNLIMITED".equals(e.getModality())
+                        ? ActiveMembershipView.unlimited(e.getId(), e.getExpirationDate())
+                        : ActiveMembershipView.hoursBase(e.getId(), e.getAvailableHours(), e.getExpirationDate()));
     }
 }

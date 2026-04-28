@@ -7,7 +7,9 @@ import com.klasio.membership.domain.model.MembershipId;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.HourTransactionRepository;
 import com.klasio.membership.domain.port.MembershipRepository;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
+import com.klasio.shared.infrastructure.exception.UnlimitedMembershipNotAdjustableException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -104,6 +106,31 @@ class AdjustHoursServiceTest {
             assertThatThrownBy(() -> service.execute(cmd))
                     .isInstanceOf(MembershipNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("throws UnlimitedMembershipNotAdjustableException for UNLIMITED membership")
+        void execute_unlimitedMembership_throws() {
+            Membership unlimited = Membership.create(
+                    TENANT_ID,
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    UUID.randomUUID(),
+                    "Unlimited Plan",
+                    null,
+                    ProgramModality.UNLIMITED,
+                    LocalDate.of(2026, 4, 1),
+                    ACTOR_ID
+            );
+            when(membershipRepository.findById(TENANT_ID, unlimited.getId().value()))
+                    .thenReturn(Optional.of(unlimited));
+
+            AdjustHoursCommand cmd = new AdjustHoursCommand(
+                    TENANT_ID, unlimited.getId().value(), 5, "Adding hours for valid reason", ACTOR_ID, "ADMIN");
+
+            assertThatThrownBy(() -> service.execute(cmd))
+                    .isInstanceOf(UnlimitedMembershipNotAdjustableException.class);
+        }
     }
 
     private Membership buildActiveMembership(int availableHours) {
@@ -115,6 +142,7 @@ class AdjustHoursServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(), "Test Plan",
+                ProgramModality.HOURS_BASED,
                 10, availableHours,
                 start, start.withDayOfMonth(start.lengthOfMonth()),
                 MembershipStatus.ACTIVE,

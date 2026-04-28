@@ -42,7 +42,7 @@ public class MembershipPlanSnapshotAdapter implements MembershipPlanSnapshotPort
         Object[] row = rows.get(0);
         String planName      = (String) row[0];
         String programName   = (String) row[1];
-        int purchasedHours   = ((Number) row[2]).intValue();
+        Integer purchasedHours = row[2] != null ? ((Number) row[2]).intValue() : null;
         BigDecimal cost      = (BigDecimal) row[3];
 
         return Optional.of(new PlanSnapshot(planName, programName, purchasedHours, cost));

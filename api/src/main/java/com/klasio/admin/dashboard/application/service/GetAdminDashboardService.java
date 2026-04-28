@@ -23,6 +23,7 @@ public class GetAdminDashboardService implements GetAdminDashboardUseCase {
         return new AdminDashboardDto(
                 dashboardRepository.countStudents(tenantId),
                 dashboardRepository.countNewStudentsThisMonth(tenantId),
+                dashboardRepository.countActiveMemberships(tenantId),
                 dashboardRepository.sumConsumedHours(tenantId),
                 dashboardRepository.countPendingProofs(tenantId),
                 dashboardRepository.countActivePrograms(tenantId),

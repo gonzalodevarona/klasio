@@ -148,8 +148,8 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
                 .orElseThrow(() -> new MembershipNotActiveException(
                         "Student does not have an active membership for this program."));
 
-        // 8. Hours validation
-        if (membership.availableHours() < cmd.hoursToCharge()) {
+        // 8. Hours validation (UNLIMITED memberships skip the balance check)
+        if (!membership.unlimited() && membership.availableHours() < cmd.hoursToCharge()) {
             throw new InsufficientHoursException(
                     "Student has " + membership.availableHours() + " available hours but walk-in requires "
                             + cmd.hoursToCharge());
@@ -225,13 +225,15 @@ public class RegisterWalkInService implements RegisterWalkInUseCase {
             registration.markPresentByStaff(cmd.actorUserId(), nowInstant, cmd.hoursToCharge(), durationMinutes);
         }
 
-        // 12. Deduct hours from membership
-        deductHoursUseCase.execute(new DeductHoursCommand(
-                cmd.tenantId(),
-                membership.membershipId(),
-                cmd.hoursToCharge(),
-                cmd.actorUserId(),
-                actorRole));
+        // 12. Deduct hours from membership (UNLIMITED memberships skip deduction)
+        if (!membership.unlimited()) {
+            deductHoursUseCase.execute(new DeductHoursCommand(
+                    cmd.tenantId(),
+                    membership.membershipId(),
+                    cmd.hoursToCharge(),
+                    cmd.actorUserId(),
+                    actorRole));
+        }
 
         // 13. Persist, publish events, clear
         List<DomainEvent> events = List.copyOf(registration.getDomainEvents());

@@ -569,9 +569,11 @@
     "plansView": "Ver",
     "modalityHoursBased": "Por horas",
     "modalityClassesPerWeek": "Clases por semana",
+    "modalityUnlimited": "Ilimitado",
     "formNameLabel": "Nombre",
     "formNamePlaceholderHours": "ej., 4 horas",
     "formNamePlaceholderSchedule": "ej., Lun/Mié/Jue noche",
+    "formNamePlaceholderUnlimited": "ej., Mensual Ilimitado",
     "formModalityLabel": "Modalidad",
     "formModalityCannotChange": "La modalidad no se puede cambiar después de la creación.",
     "formCostLabel": "Costo (COP)",
@@ -848,6 +850,7 @@
     "formPlanSelectPlaceholder": "— Selecciona un plan —",
     "formModalityHoursBased": "Por horas",
     "formModalityClassesPerWeek": "Clases por semana",
+    "formModalityUnlimited": "Ilimitado",
     "formModalityLabel": "Modalidad: ",
     "formHoursLabel": "Horas: ",
     "formCostLabel": "Costo: ",
@@ -864,7 +867,7 @@
     "newLoadingStudent": "Cargando estudiante…",
     "newNoEnrollments": "Este estudiante no tiene inscripciones activas. Inscríbelo en un programa primero.",
     "newLoadingPlans": "Cargando planes…",
-    "newNoPlans": "No se encontraron planes HOURS_BASED activos para este programa.",
+    "newNoPlans": "No se encontraron planes activos para este programa.",
     "hourBalanceTotalSuffix": "/ {purchased}h",
     "hourBalanceRemaining": "horas restantes",
     "hourBalanceConsumed": "Consumido: {hours}h",
@@ -1239,5 +1242,25 @@
     "alertDefault": "Alerta emitida para esta sesión",
     "registerError": "No se pudo inscribir. Inténtalo de nuevo.",
     "cancelError": "No se pudo cancelar. Inténtalo de nuevo."
+  },
+  "membership": {
+    "modality": {
+      "unlimited": "Ilimitado"
+    },
+    "unlimited": {
+      "label": "Horas ilimitadas",
+      "badge": "Ilimitado",
+      "daysRemaining": "Vence en {days} días"
+    }
+  },
+  "plan": {
+    "modality": {
+      "unlimited": "Ilimitado"
+    }
+  },
+  "csv": {
+    "hours": {
+      "notApplicable": "—"
+    }
   }
 }

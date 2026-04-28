@@ -122,6 +122,50 @@ class ProgramPlanTest {
     }
 
     @Nested
+    @DisplayName("create() factory — UNLIMITED")
+    class CreateUnlimited {
+
+        @Test
+        @DisplayName("should create plan with UNLIMITED modality, null hours, and empty schedule entries")
+        void testCreateUnlimitedPlanSucceedsWithNullHoursAndEmptySchedule() {
+            ProgramPlan plan = ProgramPlan.create(
+                    PROGRAM_ID, TENANT_ID, "Unlimited Plan", ProgramModality.UNLIMITED,
+                    BigDecimal.valueOf(300.0),
+                    null,
+                    Collections.emptyList(),
+                    MANAGER_ID, CREATED_BY);
+
+            assertEquals(ProgramModality.UNLIMITED, plan.getModality());
+            assertNull(plan.getHours());
+        }
+
+        @Test
+        @DisplayName("should throw when hours non-null for UNLIMITED plan")
+        void testCreateUnlimitedPlanThrowsWhenHoursNonNull() {
+            assertThrows(IllegalArgumentException.class, () -> ProgramPlan.create(
+                    PROGRAM_ID, TENANT_ID, "Bad Unlimited", ProgramModality.UNLIMITED,
+                    BigDecimal.valueOf(300.0),
+                    100,
+                    Collections.emptyList(),
+                    MANAGER_ID, CREATED_BY));
+        }
+
+        @Test
+        @DisplayName("should throw when schedule entries non-empty for UNLIMITED plan")
+        void testCreateUnlimitedPlanThrowsWhenScheduleEntriesNonEmpty() {
+            List<ScheduleEntry> schedule = List.of(
+                    new ScheduleEntry(DayOfWeek.MONDAY, LocalTime.of(9, 0), LocalTime.of(10, 0)));
+
+            assertThrows(IllegalArgumentException.class, () -> ProgramPlan.create(
+                    PROGRAM_ID, TENANT_ID, "Bad Unlimited", ProgramModality.UNLIMITED,
+                    BigDecimal.valueOf(300.0),
+                    null,
+                    schedule,
+                    MANAGER_ID, CREATED_BY));
+        }
+    }
+
+    @Nested
     @DisplayName("Validation")
     class Validation {
 

@@ -68,6 +68,35 @@ public final class HourTransaction {
         );
     }
 
+    /**
+     * Creates an audit-only ledger row for UNLIMITED memberships.
+     * Delta is always 0 — no balance change occurs; the row exists purely for traceability.
+     */
+    public static HourTransaction createForUnlimited(UUID tenantId,
+                                                      UUID membershipId,
+                                                      HourTransactionType type,
+                                                      String reason,
+                                                      UUID actorId,
+                                                      String actorRole) {
+        Objects.requireNonNull(tenantId, "tenantId must not be null");
+        Objects.requireNonNull(membershipId, "membershipId must not be null");
+        Objects.requireNonNull(type, "type must not be null");
+        Objects.requireNonNull(actorId, "actorId must not be null");
+        Objects.requireNonNull(actorRole, "actorRole must not be null");
+
+        return new HourTransaction(
+                HourTransactionId.generate(),
+                tenantId,
+                membershipId,
+                type,
+                0,
+                reason,
+                actorId,
+                actorRole,
+                Instant.now()
+        );
+    }
+
     public static HourTransaction reconstitute(HourTransactionId id,
                                                 UUID tenantId,
                                                 UUID membershipId,

@@ -2,17 +2,20 @@ package com.klasio.membership.application;
 
 import com.klasio.membership.application.dto.DeductHoursCommand;
 import com.klasio.membership.application.service.DeductHoursService;
+import com.klasio.membership.domain.model.HourTransaction;
 import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.model.MembershipId;
 import com.klasio.membership.domain.model.MembershipStatus;
 import com.klasio.membership.domain.port.HourTransactionRepository;
 import com.klasio.membership.domain.port.MembershipRepository;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.infrastructure.exception.MembershipNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -22,6 +25,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -89,6 +93,25 @@ class DeductHoursServiceTest {
             assertThatThrownBy(() -> service.execute(cmd))
                     .isInstanceOf(MembershipNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("writes delta=0 audit ledger row for UNLIMITED membership without changing balance")
+        void execute_unlimitedMembership_writesDeltaZeroLedgerRow() {
+            Membership unlimited = buildUnlimitedActiveMembership();
+            when(membershipRepository.findById(TENANT_ID, MEMBERSHIP_ID))
+                    .thenReturn(Optional.of(unlimited));
+
+            DeductHoursCommand cmd = new DeductHoursCommand(TENANT_ID, MEMBERSHIP_ID, 1, ACTOR_ID, "PROFESSOR");
+            service.execute(cmd);
+
+            ArgumentCaptor<HourTransaction> captor = ArgumentCaptor.forClass(HourTransaction.class);
+            verify(hourTransactionRepository).save(captor.capture());
+            HourTransaction saved = captor.getValue();
+            assertThat(saved.getDelta()).isEqualTo(0);
+
+            // No balance change — membership aggregate must NOT be persisted
+            verify(membershipRepository, never()).save(any());
+        }
     }
 
     private Membership buildActiveMembership(int availableHours) {
@@ -100,7 +123,28 @@ class DeductHoursServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(), "Test Plan",
+                ProgramModality.HOURS_BASED,
                 10, availableHours,
+                start, start.withDayOfMonth(start.lengthOfMonth()),
+                MembershipStatus.ACTIVE,
+                true, UUID.randomUUID(), Instant.now(),
+                UUID.randomUUID(), Instant.now(),
+                Instant.now(), UUID.randomUUID(),
+                null, null
+        );
+    }
+
+    private Membership buildUnlimitedActiveMembership() {
+        LocalDate start = LocalDate.of(2026, 3, 1);
+        return Membership.reconstitute(
+                MembershipId.of(MEMBERSHIP_ID),
+                TENANT_ID,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(), "Unlimited Plan",
+                ProgramModality.UNLIMITED,
+                null, null,
                 start, start.withDayOfMonth(start.lengthOfMonth()),
                 MembershipStatus.ACTIVE,
                 true, UUID.randomUUID(), Instant.now(),

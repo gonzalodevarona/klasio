@@ -70,7 +70,7 @@ export default function StudentMembershipsPage() {
               </div>
 
               {/* Hour balance bar */}
-              <HourBalance available={m.availableHours} purchased={m.purchasedHours} />
+              <HourBalance available={m.availableHours ?? 0} purchased={m.purchasedHours ?? 0} />
 
               {/* Key info */}
               <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">

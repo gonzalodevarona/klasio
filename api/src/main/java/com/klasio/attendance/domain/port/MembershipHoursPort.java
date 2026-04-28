@@ -12,5 +12,16 @@ public interface MembershipHoursPort {
 
     Optional<ActiveMembershipView> findActiveForStudentInProgram(UUID tenantId, UUID studentId, UUID programId);
 
-    record ActiveMembershipView(UUID membershipId, int availableHours, LocalDate expirationDate) {}
+    record ActiveMembershipView(UUID membershipId, int availableHours, LocalDate expirationDate, boolean unlimited) {
+
+        /** Convenience factory for non-UNLIMITED memberships. */
+        public static ActiveMembershipView hoursBase(UUID membershipId, int availableHours, LocalDate expirationDate) {
+            return new ActiveMembershipView(membershipId, availableHours, expirationDate, false);
+        }
+
+        /** Convenience factory for UNLIMITED memberships. */
+        public static ActiveMembershipView unlimited(UUID membershipId, LocalDate expirationDate) {
+            return new ActiveMembershipView(membershipId, Integer.MAX_VALUE, expirationDate, true);
+        }
+    }
 }

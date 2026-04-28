@@ -11,6 +11,7 @@ const TYPE_STYLES: Record<HourTransactionType, string> = {
 };
 
 function formatDelta(delta: number): string {
+  if (delta === 0) return "—";
   return delta > 0 ? `+${delta}` : String(delta);
 }
 
@@ -61,7 +62,10 @@ export default function HourTransactionList({ membershipId }: HourTransactionLis
                   {tType(tx.type)}
                 </span>
               </td>
-              <td className={`py-2 pr-4 text-right font-mono ${TYPE_STYLES[tx.type]}`}>
+              <td
+                className={`py-2 pr-4 text-right font-mono ${TYPE_STYLES[tx.type]}`}
+                data-testid={`tx-delta-${tx.id}`}
+              >
                 {formatDelta(tx.delta)}
               </td>
               <td className="py-2 pr-4 text-gray-600 max-w-xs truncate">{tx.reason ?? "—"}</td>

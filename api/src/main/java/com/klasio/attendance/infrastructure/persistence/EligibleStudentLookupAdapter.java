@@ -69,7 +69,7 @@ public class EligibleStudentLookupAdapter implements EligibleStudentLookupPort {
                 ON m.student_id  = s.id
                 AND m.program_id = CAST(:programId AS uuid)
                 AND m.status     = 'ACTIVE'
-                AND m.available_hours >= :minHours
+                AND (m.modality = 'UNLIMITED' OR m.available_hours >= :minHours)
                 AND m.tenant_id  = CAST(:tenantId AS uuid)
             WHERE
                 s.tenant_id = CAST(:tenantId AS uuid)
