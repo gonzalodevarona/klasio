@@ -13,6 +13,7 @@ public interface ListEligibleStudentsUseCase {
                                       LocalDate sessionDate,
                                       LocalTime startTime,
                                       String nameFilter,
+                                      String levelFilter,
                                       String role,
                                       UUID actorUserId,
                                       UUID programIdFromJwt);

@@ -38,7 +38,8 @@ public class WalkInEligibilityController {
             @PathVariable UUID classId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate sessionDate,
             @RequestParam String startTime,
-            @RequestParam(required = false) String q) {
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String level) {
 
         UUID tenantId  = extractTenantId();
         UUID userId    = extractUserId();
@@ -51,6 +52,7 @@ public class WalkInEligibilityController {
                 sessionDate,
                 LocalTime.parse(startTime),
                 q,
+                level,
                 role,
                 userId,
                 programId

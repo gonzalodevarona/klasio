@@ -34,6 +34,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,6 +74,8 @@ class ListEligibleStudentsServiceOpenLevelTest {
 
     /** OPEN-level class registration view. */
     private ClassRegistrationView openClassRegView;
+    /** BEGINNER-level class registration view (used to test that client levelFilter is ignored). */
+    private ClassRegistrationView beginnerClassRegView;
     private ClassSummaryView classSummary;
     private ClassSession existingSession;
 
@@ -91,6 +94,15 @@ class ListEligibleStudentsServiceOpenLevelTest {
                 "OPEN",        // <-- level is OPEN
                 "ACTIVE", "RECURRING",
                 10, "All Levels Open Session",
+                List.of(new ClassDetailsPort.ScheduleEntryView(
+                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
+        );
+
+        beginnerClassRegView = new ClassRegistrationView(
+                CLASS_ID, PROGRAM_ID, PROFESSOR_ID,
+                "BEGINNER",    // <-- non-OPEN level
+                "ACTIVE", "RECURRING",
+                10, "Beginners Session",
                 List.of(new ClassDetailsPort.ScheduleEntryView(
                         TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
         );
@@ -143,7 +155,7 @@ class ListEligibleStudentsServiceOpenLevelTest {
 
         List<EligibleStudentView> result = service.execute(
                 TENANT_ID, CLASS_ID, TODAY, SESSION_START,
-                null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+                null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         assertThat(result).hasSize(3);
     }
@@ -166,12 +178,59 @@ class ListEligibleStudentsServiceOpenLevelTest {
 
         service.execute(
                 TENANT_ID, CLASS_ID, TODAY, SESSION_START,
-                null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+                null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         ArgumentCaptor<String> levelCaptor = ArgumentCaptor.forClass(String.class);
         verify(eligibleStudentLookupPort).findEligible(
                 any(), any(), levelCaptor.capture(), anyInt(), any(), any(), anyInt());
 
         assertThat(levelCaptor.getValue()).isNull();
+    }
+
+    // ---------------------------------------------------------------
+    // Test 3: OPEN class with levelFilter="ADVANCED" — port receives "ADVANCED"
+    // ---------------------------------------------------------------
+
+    @Test
+    void execute_openClass_appliesLevelFilter() {
+        when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID))
+                .thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID))
+                .thenReturn(Optional.of(openClassRegView));
+        when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
+                .thenReturn(Optional.empty());
+        when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), any(), any(), anyInt()))
+                .thenReturn(List.of(studentAt("ADVANCED")));
+
+        service.execute(
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START,
+                null, "ADVANCED", "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+
+        verify(eligibleStudentLookupPort)
+                .findEligible(eq(TENANT_ID), eq(PROGRAM_ID), eq("ADVANCED"),
+                        anyInt(), isNull(), any(), anyInt());
+    }
+
+    // ---------------------------------------------------------------
+    // Test 4: Non-OPEN class ignores levelFilter — port receives the class level ("BEGINNER")
+    // ---------------------------------------------------------------
+
+    @Test
+    void execute_nonOpenClass_ignoresLevelFilter_usesClassLevel() {
+        when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID))
+                .thenReturn(Optional.of(classSummary));
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID))
+                .thenReturn(Optional.of(beginnerClassRegView));
+        when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
+                .thenReturn(Optional.empty());
+        when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), any(), any(), anyInt()))
+                .thenReturn(List.of(studentAt("BEGINNER")));
+
+        service.execute(
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START,
+                null, "ADVANCED", "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+
+        verify(eligibleStudentLookupPort)
+                .findEligible(any(), any(), eq("BEGINNER"), anyInt(), any(), any(), anyInt());
     }
 }

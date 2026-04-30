@@ -121,7 +121,7 @@ class ListEligibleStudentsServiceTest {
                 .thenReturn(expected);
 
         List<EligibleStudentView> result = service.execute(
-                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         assertThat(result).hasSize(1);
     }
@@ -140,7 +140,7 @@ class ListEligibleStudentsServiceTest {
                 .thenReturn(List.of(sampleStudent()));
 
         List<EligibleStudentView> result = service.execute(
-                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "MANAGER", ACTOR_USER_ID, PROGRAM_ID);
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "MANAGER", ACTOR_USER_ID, PROGRAM_ID);
 
         assertThat(result).hasSize(1);
     }
@@ -161,7 +161,7 @@ class ListEligibleStudentsServiceTest {
                 .thenReturn(List.of(sampleStudent()));
 
         List<EligibleStudentView> result = service.execute(
-                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "PROFESSOR", ACTOR_USER_ID, PROGRAM_ID);
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "PROFESSOR", ACTOR_USER_ID, PROGRAM_ID);
 
         assertThat(result).hasSize(1);
     }
@@ -176,7 +176,7 @@ class ListEligibleStudentsServiceTest {
 
         UUID otherProgram = UUID.randomUUID();
         assertThatThrownBy(() -> service.execute(
-                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "MANAGER", ACTOR_USER_ID, otherProgram))
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "MANAGER", ACTOR_USER_ID, otherProgram))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -192,7 +192,7 @@ class ListEligibleStudentsServiceTest {
                 .thenReturn(Optional.of(otherProfessorId));
 
         assertThatThrownBy(() -> service.execute(
-                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "PROFESSOR", ACTOR_USER_ID, PROGRAM_ID))
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "PROFESSOR", ACTOR_USER_ID, PROGRAM_ID))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
@@ -210,16 +210,16 @@ class ListEligibleStudentsServiceTest {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
 
         assertThatThrownBy(() -> service.execute(
-                TENANT_ID, CLASS_ID, sessionDate, futureStart, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID))
+                TENANT_ID, CLASS_ID, sessionDate, futureStart, null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID))
                 .isInstanceOf(com.klasio.shared.infrastructure.exception.MarkingWindowException.class);
     }
 
     // ---------------------------------------------------------------
-    // Test 7: No name filter → limit=50 passed to port
+    // Test 7: No name filter → limit=500 passed to port
     // ---------------------------------------------------------------
 
     @Test
-    void execute_capsResultAt50_whenNoNameFilter() {
+    void execute_capsResultAt500_whenNoNameFilter() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
@@ -227,19 +227,19 @@ class ListEligibleStudentsServiceTest {
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), isNull(), any(), anyInt()))
                 .thenReturn(List.of());
 
-        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         ArgumentCaptor<Integer> limitCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(eligibleStudentLookupPort).findEligible(any(), any(), any(), anyInt(), isNull(), any(), limitCaptor.capture());
-        assertThat(limitCaptor.getValue()).isEqualTo(50);
+        assertThat(limitCaptor.getValue()).isEqualTo(500);
     }
 
     // ---------------------------------------------------------------
-    // Test 8: Name filter provided → limit=20 passed to port
+    // Test 8: Name filter provided → limit=500 passed to port
     // ---------------------------------------------------------------
 
     @Test
-    void execute_capsResultAt20_withNameFilter() {
+    void execute_capsResultAt500_withNameFilter() {
         when(classDetailsPort.findClassSummary(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classSummary));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(classRegView));
         when(classSessionRepository.findByClassAndDate(TENANT_ID, CLASS_ID, TODAY))
@@ -247,11 +247,11 @@ class ListEligibleStudentsServiceTest {
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), eq("Alice"), any(), anyInt()))
                 .thenReturn(List.of());
 
-        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, "Alice", "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, "Alice", null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         ArgumentCaptor<Integer> limitCaptor = ArgumentCaptor.forClass(Integer.class);
         verify(eligibleStudentLookupPort).findEligible(any(), any(), any(), anyInt(), eq("Alice"), any(), limitCaptor.capture());
-        assertThat(limitCaptor.getValue()).isEqualTo(20);
+        assertThat(limitCaptor.getValue()).isEqualTo(500);
     }
 
     // ---------------------------------------------------------------
@@ -270,7 +270,7 @@ class ListEligibleStudentsServiceTest {
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), any(), any(), anyInt()))
                 .thenReturn(List.of());
 
-        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Set<UUID>> excludeCaptor = ArgumentCaptor.forClass(Set.class);
@@ -291,7 +291,7 @@ class ListEligibleStudentsServiceTest {
         when(eligibleStudentLookupPort.findEligible(any(), any(), any(), anyInt(), any(), any(), anyInt()))
                 .thenReturn(List.of());
 
-        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+        service.execute(TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Set<UUID>> excludeCaptor = ArgumentCaptor.forClass(Set.class);
@@ -313,7 +313,7 @@ class ListEligibleStudentsServiceTest {
                 .thenReturn(List.of());
 
         List<EligibleStudentView> result = service.execute(
-                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
+                TENANT_ID, CLASS_ID, TODAY, SESSION_START, null, null, "ADMIN", ACTOR_USER_ID, PROGRAM_ID);
 
         assertThat(result).isEmpty();
     }

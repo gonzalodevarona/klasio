@@ -54,6 +54,7 @@ public class ListEligibleStudentsService implements ListEligibleStudentsUseCase 
                                               LocalDate sessionDate,
                                               LocalTime startTime,
                                               String nameFilter,
+                                              String levelFilter,
                                               String role,
                                               UUID actorUserId,
                                               UUID programIdFromJwt) {
@@ -101,22 +102,23 @@ public class ListEligibleStudentsService implements ListEligibleStudentsUseCase 
             excludeStudentIds = registrationRepository.findActiveStudentIdsBySession(tenantId, sessionId);
         }
 
-        // 5. Compute limit: 50 without filter, 20 with filter
-        int limit = (nameFilter == null) ? 50 : 20;
+        // 5. Flat limit of 500 rows — covers large programs in walk-in picker (RF-36).
+        int limit = 500;
 
         // 6. Load class level — needed to filter eligible students by level.
-        //    OPEN classes bypass the level filter: pass null so the adapter returns
-        //    all enrolled students in the program regardless of their level (RF-36).
+        //    OPEN classes pass through the client levelFilter (may be null = all levels).
+        //    Non-OPEN classes always use the class's own level, ignoring any client filter
+        //    as a defense-in-depth measure (RF-36).
         String rawLevel = classDetailsPort.findForRegistration(tenantId, classId)
                 .map(ClassDetailsPort.ClassRegistrationView::level)
                 .orElseThrow(() -> new ClassNotFoundException("Class registration view not found: " + classId));
-        String level = "OPEN".equals(rawLevel) ? null : rawLevel;
+        String effectiveLevel = "OPEN".equals(rawLevel) ? levelFilter : rawLevel;
 
         // 7. Delegate to the lookup port
         return eligibleStudentLookupPort.findEligible(
                 tenantId,
                 classSummary.programId(),
-                level,
+                effectiveLevel,
                 1,
                 nameFilter,
                 excludeStudentIds,

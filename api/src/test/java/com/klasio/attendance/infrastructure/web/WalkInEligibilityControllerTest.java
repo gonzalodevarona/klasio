@@ -122,7 +122,7 @@ class WalkInEligibilityControllerTest {
         UUID enrollmentId = UUID.randomUUID();
         UUID membershipId = UUID.randomUUID();
 
-        when(listEligibleStudentsUseCase.execute(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(listEligibleStudentsUseCase.execute(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(new EligibleStudentView(
                         studentId, "Ana Ruiz", "1234567", enrollmentId, membershipId, 3, "BEGINNER")));
 
@@ -159,7 +159,7 @@ class WalkInEligibilityControllerTest {
     @Test
     @DisplayName("GET /eligible-students passes q param as name filter to use case")
     void list_passesNameFilterToService() throws Exception {
-        when(listEligibleStudentsUseCase.execute(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(listEligibleStudentsUseCase.execute(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
 
         mockMvc.perform(withAuth(
@@ -170,6 +170,6 @@ class WalkInEligibilityControllerTest {
                 .andExpect(status().isOk());
 
         verify(listEligibleStudentsUseCase).execute(
-                any(), any(), any(), any(), eq("Ana"), any(), any(), any());
+                any(), any(), any(), any(), eq("Ana"), any(), any(), any(), any());
     }
 }
