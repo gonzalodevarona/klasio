@@ -232,6 +232,7 @@ export default function ClassDetail({
         <div className="border-t border-gray-200">
           <ClassRosterPanel
             classId={programClass.id}
+            classLevel={programClass.level}
             userRole={user ? primaryRole(user.roles) : undefined}
             programId={programId}
             managedProgramIds={[]}

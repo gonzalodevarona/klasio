@@ -10,6 +10,7 @@ type Props = {
   startTime: string;
   endTime: string;
   durationMinutes: number;
+  classLevel: string;
   onRegistered: () => void;
 };
 
@@ -22,6 +23,7 @@ export function WalkInButton({
   startTime,
   endTime,
   durationMinutes,
+  classLevel,
   onRegistered,
 }: Props) {
   const t = useTranslations("attendance.walkIn");
@@ -46,6 +48,7 @@ export function WalkInButton({
           sessionDate={sessionDate}
           startTime={startTime}
           durationMinutes={durationMinutes}
+          classLevel={classLevel}
           onClose={() => setOpen(false)}
           onSuccess={() => {
             setOpen(false);

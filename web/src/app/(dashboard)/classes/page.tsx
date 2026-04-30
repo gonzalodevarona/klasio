@@ -227,7 +227,7 @@ export default function AllClassesPage() {
                       {expandedClassId === c.id && (
                         <tr>
                           <td colSpan={9} className="p-0">
-                            <ClassRosterPanel classId={c.id} userRole={user ? primaryRole(user.roles) : undefined} />
+                            <ClassRosterPanel classId={c.id} classLevel={c.level} userRole={user ? primaryRole(user.roles) : undefined} />
                           </td>
                         </tr>
                       )}

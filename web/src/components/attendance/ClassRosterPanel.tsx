@@ -15,6 +15,8 @@ import { ClassLevel } from "@/lib/types/programClass";
 
 interface ClassRosterPanelProps {
   classId: string;
+  /** Level of the class (BEGINNER, INTERMEDIATE, ADVANCED, OPEN). Used to decide whether to show the level filter in the walk-in modal. */
+  classLevel?: string;
   /** When provided, enables interactive marking for the given role (PROFESSOR, MANAGER, ADMIN, SUPERADMIN). */
   userRole?: string;
   /** Program the class belongs to — used for manager scope check. */
@@ -71,6 +73,7 @@ function computeDurationMinutes(start: string, end: string): number {
 
 export default function ClassRosterPanel({
   classId,
+  classLevel = "OPEN",
   userRole,
   programId,
   managedProgramIds,
@@ -180,6 +183,7 @@ export default function ClassRosterPanel({
                     startTime={session.startTime}
                     endTime={session.endTime}
                     durationMinutes={computeDurationMinutes(session.startTime, session.endTime)}
+                    classLevel={classLevel}
                     onRegistered={refetch}
                   />
                 )}
