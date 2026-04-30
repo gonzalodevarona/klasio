@@ -57,7 +57,8 @@ public class EligibleStudentLookupAdapter implements EligibleStudentLookupPort {
                 s.identity_number      AS id_document,
                 spe.id                 AS enrollment_id,
                 m.id                   AS membership_id,
-                COALESCE(m.available_hours, -1) AS available_hours
+                COALESCE(m.available_hours, -1) AS available_hours,
+                spe.level              AS level
             FROM students s
             JOIN student_enrollments spe
                 ON spe.student_id = s.id
@@ -119,7 +120,8 @@ public class EligibleStudentLookupAdapter implements EligibleStudentLookupPort {
                         (String) r[2],
                         UUID.fromString(r[3].toString()),
                         UUID.fromString(r[4].toString()),
-                        ((Number) r[5]).intValue()))
+                        ((Number) r[5]).intValue(),
+                        (String) r[6]))
                 .toList();
     }
 

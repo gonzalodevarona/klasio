@@ -109,7 +109,7 @@ class ListEligibleStudentsServiceOpenLevelTest {
     private EligibleStudentView studentAt(String level) {
         return new EligibleStudentView(
                 UUID.randomUUID(), "Student " + level, "ID-" + level,
-                UUID.randomUUID(), UUID.randomUUID(), 5);
+                UUID.randomUUID(), UUID.randomUUID(), 5, level);
     }
 
     // ---------------------------------------------------------------

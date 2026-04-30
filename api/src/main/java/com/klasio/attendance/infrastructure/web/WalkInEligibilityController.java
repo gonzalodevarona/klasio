@@ -67,7 +67,8 @@ public class WalkInEligibilityController {
             String idDocument,
             String enrollmentId,
             String membershipId,
-            int availableHours
+            int availableHours,
+            String level
     ) {
         static EligibleStudentResponse from(EligibleStudentView view) {
             return new EligibleStudentResponse(
@@ -76,7 +77,8 @@ public class WalkInEligibilityController {
                     view.idDocument(),
                     view.enrollmentId().toString(),
                     view.membershipId().toString(),
-                    view.availableHours()
+                    view.availableHours(),
+                    view.level()
             );
         }
     }

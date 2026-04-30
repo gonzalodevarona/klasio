@@ -317,6 +317,8 @@ class EligibleStudentLookupAdapterIT {
         assertThat(result).hasSize(2);
         assertThat(result).extracting(EligibleStudentView::studentId)
                 .containsExactlyInAnyOrder(studentA, studentB);
+        assertThat(result).extracting(EligibleStudentView::level)
+                .containsOnly("BEGINNER");
     }
 
     @Test

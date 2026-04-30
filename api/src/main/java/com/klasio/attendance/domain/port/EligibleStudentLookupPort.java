@@ -27,6 +27,7 @@ public interface EligibleStudentLookupPort {
             String idDocument,
             UUID enrollmentId,
             UUID membershipId,
-            int availableHours
+            int availableHours,
+            String level
     ) {}
 }

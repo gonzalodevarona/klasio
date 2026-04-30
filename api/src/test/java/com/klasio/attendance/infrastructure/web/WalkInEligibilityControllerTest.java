@@ -124,7 +124,7 @@ class WalkInEligibilityControllerTest {
 
         when(listEligibleStudentsUseCase.execute(any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(new EligibleStudentView(
-                        studentId, "Ana Ruiz", "1234567", enrollmentId, membershipId, 3)));
+                        studentId, "Ana Ruiz", "1234567", enrollmentId, membershipId, 3, "BEGINNER")));
 
         mockMvc.perform(withAuth(
                         get(ELIGIBLE_URL, CLASS_ID, SESSION_DATE)

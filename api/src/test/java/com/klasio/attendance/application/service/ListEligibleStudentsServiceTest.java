@@ -101,7 +101,7 @@ class ListEligibleStudentsServiceTest {
     private EligibleStudentView sampleStudent() {
         return new EligibleStudentView(
                 UUID.randomUUID(), "Alice Smith", "12345678",
-                UUID.randomUUID(), UUID.randomUUID(), 5);
+                UUID.randomUUID(), UUID.randomUUID(), 5, "BEGINNER");
     }
 
     // ---------------------------------------------------------------
