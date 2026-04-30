@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { FixedSizeList } from "react-window";
 import { useTranslations } from "next-intl";
 import { X, Loader2, Search } from "lucide-react";
 import { useWalkInEligibleStudents } from "@/hooks/useWalkInEligibleStudents";
@@ -244,38 +245,77 @@ export function WalkInModal({
                 </p>
               )}
               {!isLoading && filtered.length > 0 && (
-                <ul className="divide-y divide-gray-100">
-                  {filtered.map((s) => {
-                    const checked = selectedIds.has(s.studentId);
-                    return (
-                      <li key={s.studentId}>
-                        <button
-                          type="button"
-                          onClick={() => toggleStudent(s.studentId)}
-                          className={`w-full text-left px-4 py-3 text-sm flex items-center gap-3 ${
-                            checked ? "bg-indigo-50 text-indigo-900" : "text-gray-900 hover:bg-gray-50"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            readOnly
-                            className="pointer-events-none"
-                            aria-label={`${s.fullName} ${s.idDocument}`}
-                          />
-                          <span className="font-medium">{s.fullName}</span>
-                          <span className="text-gray-400 text-xs">{s.idDocument}</span>
-                          <span className="ml-auto text-xs text-gray-500 uppercase tracking-wide">
-                            {s.level}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {s.availableHours === -1 ? "∞" : `${s.availableHours}h`}
-                          </span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
+                filtered.length > 100 ? (
+                  <FixedSizeList
+                    height={Math.min(400, filtered.length * 52)}
+                    itemCount={filtered.length}
+                    itemSize={52}
+                    width="100%"
+                  >
+                    {({ index, style }) => {
+                      const s = filtered[index];
+                      const checked = selectedIds.has(s.studentId);
+                      return (
+                        <div style={style} key={s.studentId} className="border-b border-gray-100">
+                          <button
+                            type="button"
+                            onClick={() => toggleStudent(s.studentId)}
+                            className={`w-full h-full text-left px-4 py-3 text-sm flex items-center gap-3 ${
+                              checked ? "bg-indigo-50 text-indigo-900" : "text-gray-900 hover:bg-gray-50"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              readOnly
+                              className="pointer-events-none"
+                              aria-label={`${s.fullName} ${s.idDocument}`}
+                            />
+                            <span className="font-medium">{s.fullName}</span>
+                            <span className="text-gray-400 text-xs">{s.idDocument}</span>
+                            <span className="ml-auto text-xs text-gray-500 uppercase tracking-wide">{s.level}</span>
+                            <span className="text-xs text-gray-500">
+                              {s.availableHours === -1 ? "∞" : `${s.availableHours}h`}
+                            </span>
+                          </button>
+                        </div>
+                      );
+                    }}
+                  </FixedSizeList>
+                ) : (
+                  <ul className="divide-y divide-gray-100">
+                    {filtered.map((s) => {
+                      const checked = selectedIds.has(s.studentId);
+                      return (
+                        <li key={s.studentId}>
+                          <button
+                            type="button"
+                            onClick={() => toggleStudent(s.studentId)}
+                            className={`w-full text-left px-4 py-3 text-sm flex items-center gap-3 ${
+                              checked ? "bg-indigo-50 text-indigo-900" : "text-gray-900 hover:bg-gray-50"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              readOnly
+                              className="pointer-events-none"
+                              aria-label={`${s.fullName} ${s.idDocument}`}
+                            />
+                            <span className="font-medium">{s.fullName}</span>
+                            <span className="text-gray-400 text-xs">{s.idDocument}</span>
+                            <span className="ml-auto text-xs text-gray-500 uppercase tracking-wide">
+                              {s.level}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {s.availableHours === -1 ? "∞" : `${s.availableHours}h`}
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )
               )}
             </div>
 
