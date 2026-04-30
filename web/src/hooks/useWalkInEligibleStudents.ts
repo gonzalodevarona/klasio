@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
+
 export type EligibleStudent = {
   studentId: string;
   fullName: string;
@@ -26,7 +28,7 @@ export function useWalkInEligibleStudents(
     const handle = setTimeout(() => {
       const params = new URLSearchParams({ startTime });
       if (q && q.trim().length > 0) params.set("q", q.trim());
-      const url = `/api/v1/classes/${classId}/sessions/${sessionDate}/walk-in/eligible-students?${params.toString()}`;
+      const url = `${API_BASE}/classes/${classId}/sessions/${sessionDate}/walk-in/eligible-students?${params.toString()}`;
       setIsLoading(true);
       setError(null);
       fetch(url, { credentials: "include" })

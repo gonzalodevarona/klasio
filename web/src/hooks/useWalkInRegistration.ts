@@ -1,6 +1,8 @@
 "use client";
 import { useState, useCallback } from "react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
+
 export type WalkInPayload = { startTime: string; studentId: string; hoursToCharge: number };
 export type WalkInResponse = { registrationId: string; status: string; intendedHours: number };
 export type WalkInError = { code: string; message: string };
@@ -15,7 +17,7 @@ export function useWalkInRegistration(classId: string, sessionDate: string) {
       setError(null);
       try {
         const res = await fetch(
-          `/api/v1/classes/${classId}/sessions/${sessionDate}/walk-in`,
+          `${API_BASE}/classes/${classId}/sessions/${sessionDate}/walk-in`,
           {
             method: "POST",
             credentials: "include",
