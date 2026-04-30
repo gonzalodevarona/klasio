@@ -89,4 +89,24 @@ describe("WalkInModal", () => {
     }));
     expect(onSuccess).toHaveBeenCalled();
   });
+
+  it("shows fetch error message when eligible students request fails", () => {
+    (eligibleHook.useWalkInEligibleStudents as jest.Mock).mockReturnValue({
+      students: [], isLoading: false, error: new Error("HTTP 500"),
+    });
+    wrap(<WalkInModal {...defaultProps} />);
+    expect(screen.getByText(/could not load/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no eligible students/i)).not.toBeInTheDocument();
+  });
+
+  it("shows ∞ symbol for unlimited membership students (availableHours === -1)", () => {
+    (eligibleHook.useWalkInEligibleStudents as jest.Mock).mockReturnValue({
+      students: [{ studentId: "s2", fullName: "Ana Gomez", idDocument: "2005",
+                   enrollmentId: "e2", membershipId: "m2", availableHours: -1 }],
+      isLoading: false, error: null,
+    });
+    wrap(<WalkInModal {...defaultProps} />);
+    expect(screen.getByText("Ana Gomez")).toBeInTheDocument();
+    expect(screen.getByText("∞")).toBeInTheDocument();
+  });
 });

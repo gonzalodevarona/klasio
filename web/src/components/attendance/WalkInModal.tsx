@@ -51,7 +51,7 @@ export function WalkInModal({
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [hoursToCharge, setHoursToCharge] = useState<number>(maxHours);
 
-  const { students, isLoading } = useWalkInEligibleStudents(classId, sessionDate, startTime, q);
+  const { students, isLoading, error: eligibleError } = useWalkInEligibleStudents(classId, sessionDate, startTime, q);
   const { mutate, isPending, error } = useWalkInRegistration(classId, sessionDate);
 
   const showSearch = students.length >= 50 || q.length > 0;
@@ -115,7 +115,12 @@ export function WalkInModal({
                 {tCommon("loading")}
               </div>
             )}
-            {!isLoading && students.length === 0 && (
+            {!isLoading && eligibleError && (
+              <p className="px-4 py-6 text-sm text-red-500 italic text-center">
+                {t("fetchError")}
+              </p>
+            )}
+            {!isLoading && !eligibleError && students.length === 0 && (
               <p className="px-4 py-6 text-sm text-gray-400 italic text-center">
                 {t("noResults")}
               </p>
@@ -136,7 +141,7 @@ export function WalkInModal({
                       <span className="font-medium">{s.fullName}</span>
                       <span className="ml-2 text-gray-400 text-xs">{s.idDocument}</span>
                       <span className="ml-auto float-right text-xs text-gray-500">
-                        {s.availableHours}h
+                        {s.availableHours === -1 ? "∞" : `${s.availableHours}h`}
                       </span>
                     </button>
                   </li>

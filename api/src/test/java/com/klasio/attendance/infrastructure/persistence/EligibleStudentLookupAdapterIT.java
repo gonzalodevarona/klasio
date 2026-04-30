@@ -240,10 +240,10 @@ class EligibleStudentLookupAdapterIT {
 
         em.createNativeQuery("""
                 INSERT INTO memberships (id, tenant_id, student_id, enrollment_id, program_id,
-                  plan_id, plan_name, purchased_hours, available_hours,
+                  plan_id, plan_name, modality, purchased_hours, available_hours,
                   start_date, expiration_date, status, created_at, created_by)
                 VALUES (:id, :tenantId, :studentId, :enrollmentId, :programId,
-                        :planId, 'Basic Plan', 8, :availableHours,
+                        :planId, 'Basic Plan', 'HOURS_BASED', 8, :availableHours,
                         '2026-05-01', '2026-05-31', :status, NOW(), :createdBy)
                 """)
                 .setParameter("id", membershipId)
@@ -253,6 +253,31 @@ class EligibleStudentLookupAdapterIT {
                 .setParameter("programId", programId)
                 .setParameter("planId", planId)
                 .setParameter("availableHours", availableHours)
+                .setParameter("status", status)
+                .setParameter("createdBy", ACTOR_ID)
+                .executeUpdate();
+
+        return membershipId;
+    }
+
+    private UUID insertUnlimitedMembership(UUID tenantId, UUID studentId, UUID enrollmentId,
+                                            UUID programId, UUID planId, String status) {
+        UUID membershipId = UUID.randomUUID();
+
+        em.createNativeQuery("""
+                INSERT INTO memberships (id, tenant_id, student_id, enrollment_id, program_id,
+                  plan_id, plan_name, modality, purchased_hours, available_hours,
+                  start_date, expiration_date, status, created_at, created_by)
+                VALUES (:id, :tenantId, :studentId, :enrollmentId, :programId,
+                        :planId, 'Unlimited Plan', 'UNLIMITED', NULL, NULL,
+                        '2026-05-01', '2026-05-31', :status, NOW(), :createdBy)
+                """)
+                .setParameter("id", membershipId)
+                .setParameter("tenantId", tenantId)
+                .setParameter("studentId", studentId)
+                .setParameter("enrollmentId", enrollmentId)
+                .setParameter("programId", programId)
+                .setParameter("planId", planId)
                 .setParameter("status", status)
                 .setParameter("createdBy", ACTOR_ID)
                 .executeUpdate();
@@ -389,6 +414,21 @@ class EligibleStudentLookupAdapterIT {
                 TENANT_ID, PROGRAM_ID, "BEGINNER", 1, null, Set.of(), 1);
 
         assertThat(result).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("UNLIMITED membership student is returned with availableHours == -1")
+    void findEligible_unlimitedMembership_returnsWithSentinelMinusOne() {
+        UUID student = insertStudent(TENANT_ID, "Libre", "Ilimitada");
+        UUID enroll  = insertEnrollment(TENANT_ID, student, PROGRAM_ID, "BEGINNER");
+        insertUnlimitedMembership(TENANT_ID, student, enroll, PROGRAM_ID, PLAN_ID, "ACTIVE");
+
+        List<EligibleStudentView> result = adapter.findEligible(
+                TENANT_ID, PROGRAM_ID, "BEGINNER", 1, null, Set.of(), 50);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).studentId()).isEqualTo(student);
+        assertThat(result.get(0).availableHours()).isEqualTo(-1);
     }
 
     @Test

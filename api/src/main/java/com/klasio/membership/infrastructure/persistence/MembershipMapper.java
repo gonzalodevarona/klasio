@@ -50,9 +50,8 @@ public class MembershipMapper {
         entity.setPlanId(membership.getPlanId());
         entity.setPlanName(membership.getPlanName());
         entity.setModality(membership.getModality().name());
-        // UNLIMITED memberships have null hours; JPA entity still uses int for now (Task 5 migrates column)
-        entity.setPurchasedHours(membership.getPurchasedHours() != null ? membership.getPurchasedHours() : 0);
-        entity.setAvailableHours(membership.getAvailableHours() != null ? membership.getAvailableHours() : 0);
+        entity.setPurchasedHours(membership.getPurchasedHours());
+        entity.setAvailableHours(membership.getAvailableHours());
         entity.setStartDate(membership.getStartDate());
         entity.setExpirationDate(membership.getExpirationDate());
         entity.setStatus(membership.getStatus().name());

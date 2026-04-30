@@ -43,11 +43,11 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     @Column(name = "modality", length = 20)
     private String modality;
 
-    @Column(name = "purchased_hours", nullable = false)
-    private int purchasedHours;
+    @Column(name = "purchased_hours")
+    private Integer purchasedHours;
 
-    @Column(name = "available_hours", nullable = false)
-    private int availableHours;
+    @Column(name = "available_hours")
+    private Integer availableHours;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -110,10 +110,10 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     public void setPlanName(String planName) { this.planName = planName; }
     public String getModality() { return modality; }
     public void setModality(String modality) { this.modality = modality; }
-    public int getPurchasedHours() { return purchasedHours; }
-    public void setPurchasedHours(int purchasedHours) { this.purchasedHours = purchasedHours; }
-    public int getAvailableHours() { return availableHours; }
-    public void setAvailableHours(int availableHours) { this.availableHours = availableHours; }
+    public Integer getPurchasedHours() { return purchasedHours; }
+    public void setPurchasedHours(Integer purchasedHours) { this.purchasedHours = purchasedHours; }
+    public Integer getAvailableHours() { return availableHours; }
+    public void setAvailableHours(Integer availableHours) { this.availableHours = availableHours; }
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
     public LocalDate getExpirationDate() { return expirationDate; }

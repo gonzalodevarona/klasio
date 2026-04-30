@@ -57,7 +57,7 @@ public class EligibleStudentLookupAdapter implements EligibleStudentLookupPort {
                 s.identity_number      AS id_document,
                 spe.id                 AS enrollment_id,
                 m.id                   AS membership_id,
-                m.available_hours      AS available_hours
+                COALESCE(m.available_hours, -1) AS available_hours
             FROM students s
             JOIN student_enrollments spe
                 ON spe.student_id = s.id
