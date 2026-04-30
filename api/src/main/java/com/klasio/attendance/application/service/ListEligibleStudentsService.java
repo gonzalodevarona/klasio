@@ -5,7 +5,6 @@ import com.klasio.attendance.application.port.input.ListEligibleStudentsUseCase;
 import com.klasio.attendance.domain.model.ClassSession;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
-import com.klasio.attendance.domain.port.ClassDetailsPort.ClassSummaryView;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.attendance.domain.port.EligibleStudentLookupPort;
 import com.klasio.attendance.domain.port.EligibleStudentLookupPort.EligibleStudentView;
@@ -58,8 +57,9 @@ public class ListEligibleStudentsService implements ListEligibleStudentsUseCase 
                                               String role,
                                               UUID actorUserId,
                                               UUID programIdFromJwt) {
-        // 1. Load class summary — validates existence
-        ClassSummaryView classSummary = classDetailsPort.findClassSummary(tenantId, classId)
+        // 1. Load full class registration view — validates existence and provides all needed fields
+        //    (programId, professorId, level) in a single DB call.
+        ClassDetailsPort.ClassRegistrationView classView = classDetailsPort.findForRegistration(tenantId, classId)
                 .orElseThrow(() -> new ClassNotFoundException("Class not found: " + classId));
 
         // 2. RBAC scope check
@@ -68,11 +68,11 @@ public class ListEligibleStudentsService implements ListEligibleStudentsUseCase 
                     .findProfessorIdByUserId(tenantId, actorUserId)
                     .orElseThrow(() -> new AccessDeniedException(
                             "Professor not found for user: " + actorUserId));
-            if (!resolvedProfessorId.equals(classSummary.professorId())) {
+            if (!resolvedProfessorId.equals(classView.professorId())) {
                 throw new AccessDeniedException("Professor is not assigned to this class");
             }
         } else if ("MANAGER".equals(role)) {
-            if (!programIdFromJwt.equals(classSummary.programId())) {
+            if (!programIdFromJwt.equals(classView.programId())) {
                 throw new AccessDeniedException("Manager does not belong to this class's program");
             }
         }
@@ -105,19 +105,16 @@ public class ListEligibleStudentsService implements ListEligibleStudentsUseCase 
         // 5. Flat limit of 500 rows — covers large programs in walk-in picker (RF-36).
         int limit = 500;
 
-        // 6. Load class level — needed to filter eligible students by level.
+        // 6. Resolve effective level filter.
         //    OPEN classes pass through the client levelFilter (may be null = all levels).
         //    Non-OPEN classes always use the class's own level, ignoring any client filter
         //    as a defense-in-depth measure (RF-36).
-        String rawLevel = classDetailsPort.findForRegistration(tenantId, classId)
-                .map(ClassDetailsPort.ClassRegistrationView::level)
-                .orElseThrow(() -> new ClassNotFoundException("Class registration view not found: " + classId));
-        String effectiveLevel = "OPEN".equals(rawLevel) ? levelFilter : rawLevel;
+        String effectiveLevel = "OPEN".equals(classView.level()) ? levelFilter : classView.level();
 
         // 7. Delegate to the lookup port
         return eligibleStudentLookupPort.findEligible(
                 tenantId,
-                classSummary.programId(),
+                classView.programId(),
                 effectiveLevel,
                 1,
                 nameFilter,

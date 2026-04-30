@@ -172,4 +172,25 @@ class WalkInEligibilityControllerTest {
         verify(listEligibleStudentsUseCase).execute(
                 any(), any(), any(), any(), eq("Ana"), any(), any(), any(), any());
     }
+
+    // ------------------------------------------------------------------
+    // GET /eligible-students passes level filter to use case
+    // ------------------------------------------------------------------
+
+    @Test
+    @DisplayName("GET /eligible-students passes level param as level filter to use case")
+    void list_passesLevelFilterToService() throws Exception {
+        when(listEligibleStudentsUseCase.execute(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(withAuth(
+                        get(ELIGIBLE_URL, CLASS_ID, SESSION_DATE)
+                                .param("startTime", "18:00:00")
+                                .param("level", "BEGINNER"),
+                        "ADMIN"))
+                .andExpect(status().isOk());
+
+        verify(listEligibleStudentsUseCase).execute(
+                any(), any(), any(), any(), any(), eq("BEGINNER"), any(), any(), any());
+    }
 }
