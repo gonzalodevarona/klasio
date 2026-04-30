@@ -20,7 +20,7 @@
     "next-intl": "^4.9.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-window": "^2.2.7",
+    "react-window": "^1.8.11",
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
