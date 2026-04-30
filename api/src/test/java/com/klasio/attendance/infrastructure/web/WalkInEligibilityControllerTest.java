@@ -134,7 +134,8 @@ class WalkInEligibilityControllerTest {
                 .andExpect(jsonPath("$[0].studentId").value(studentId.toString()))
                 .andExpect(jsonPath("$[0].fullName").value("Ana Ruiz"))
                 .andExpect(jsonPath("$[0].idDocument").value("1234567"))
-                .andExpect(jsonPath("$[0].availableHours").value(3));
+                .andExpect(jsonPath("$[0].availableHours").value(3))
+                .andExpect(jsonPath("$[0].level").value("BEGINNER"));
     }
 
     // ------------------------------------------------------------------
