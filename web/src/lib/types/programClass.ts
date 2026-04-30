@@ -1,4 +1,4 @@
-export type ClassLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+export type ClassLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "OPEN";
 export type ClassType = "RECURRING" | "ONE_TIME";
 export type ClassStatus = "ACTIVE" | "INACTIVE";
 

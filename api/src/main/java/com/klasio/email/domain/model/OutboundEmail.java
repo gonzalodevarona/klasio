@@ -11,7 +11,5 @@ public record OutboundEmail(
         String subject,
         String htmlBody,
         String textBody,
-        Long brevoTemplateId,
-        Map<String, Object> brevoParams,
         String idempotencyKey
 ) {}

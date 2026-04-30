@@ -6,7 +6,9 @@ import com.klasio.auth.domain.model.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface UserRepository {
@@ -35,4 +37,10 @@ public interface UserRepository {
      * Used by SUPERADMIN to list all admins across all tenants.
      */
     Page<User> findByRole(Role role, UUID tenantId, UserStatus status, Pageable pageable);
+
+    /**
+     * Returns all users that belong to {@code tenantId} and whose id is in {@code userIds}.
+     * IDs not found in the tenant are silently omitted.
+     */
+    List<User> findAllByIds(UUID tenantId, Set<UUID> userIds);
 }

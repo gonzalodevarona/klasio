@@ -77,13 +77,13 @@ class RegisterForClassServiceTest {
     @BeforeEach
     void setUp() {
         activeClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
                 List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME))
         );
         enrollment = new EnrollmentView(ENROLLMENT_ID, "BEGINNER");
         membership = new ActiveMembershipView(MEMBERSHIP_ID, 10,
-                LocalDate.now(ZoneId.of("America/Bogota")).plusMonths(1));
+                LocalDate.now(ZoneId.of("America/Bogota")).plusMonths(1), false);
         scheduledSession = ClassSession.materialize(
                 TENANT_ID, CLASS_ID, FUTURE_MONDAY, START_TIME, END_TIME, USER_ID);
     }
@@ -122,7 +122,7 @@ class RegisterForClassServiceTest {
     @Test
     void classInactive_throws400() {
         ClassRegistrationView inactive = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "INACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "INACTIVE", "RECURRING",
                 5, "Old Class", List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(inactive));
 
@@ -196,7 +196,7 @@ class RegisterForClassServiceTest {
                 .thenReturn(Optional.of(enrollment));
         when(membershipHoursPort.findActiveForStudentInProgram(any(), any(), any()))
                 .thenReturn(Optional.of(new ActiveMembershipView(MEMBERSHIP_ID, 0,
-                        LocalDate.now().plusMonths(1))));
+                        LocalDate.now().plusMonths(1), false)));
 
         assertThatThrownBy(() -> service.execute(command(FUTURE_MONDAY, 1)))
                 .isInstanceOf(InsufficientHoursException.class);
@@ -251,5 +251,30 @@ class RegisterForClassServiceTest {
         assertThatThrownBy(() -> service.execute(command(FUTURE_MONDAY, 2)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("intendedHours must be between");
+    }
+
+    // Task 12: UNLIMITED membership skips the hour check and registers successfully
+    @Test
+    void unlimitedMembership_registersWithoutHourCheck() {
+        ActiveMembershipView unlimitedMembership = new ActiveMembershipView(
+                MEMBERSHIP_ID, Integer.MAX_VALUE,
+                LocalDate.now(ZoneId.of("America/Bogota")).plusMonths(1), true);
+
+        when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(activeClass));
+        when(enrollmentLookupPort.findActiveEnrollmentInProgramAtLevel(TENANT_ID, STUDENT_ID, PROGRAM_ID, "BEGINNER"))
+                .thenReturn(Optional.of(enrollment));
+        when(membershipHoursPort.findActiveForStudentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                .thenReturn(Optional.of(unlimitedMembership));
+        when(classSessionRepository.findOrCreate(any(), any(), any(), any(), any(), any()))
+                .thenReturn(scheduledSession);
+        when(classSessionRepository.incrementCapacityIfSpace(any(), eq(5))).thenReturn(true);
+
+        // UNLIMITED memberships must not throw InsufficientHoursException — they bypass the balance check
+        AttendanceRegistration result = service.execute(command(FUTURE_MONDAY, 1));
+
+        assertThat(result.getStatus().name()).isEqualTo("REGISTERED");
+        verify(registrationRepository).save(any());
+        // publishEvent uses Object overload — verify via atLeastOnce to avoid Mockito overload resolution issue
+        verify(eventPublisher, atLeastOnce()).publishEvent(any(Object.class));
     }
 }

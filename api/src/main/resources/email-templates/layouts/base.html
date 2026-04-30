@@ -6,10 +6,8 @@
     <h2 th:text="${tenantName}" style="color:#2563eb;margin-bottom:24px">League</h2>
     <th:block th:fragment="body"><!-- content here --></th:block>
     <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb">
-    <p style="color:#9ca3af;font-size:12px;text-align:center">
-      Sent by <span th:text="${tenantName}">League</span> via Klasio.
-      If you did not expect this email, please ignore it.
-    </p>
+    <p th:text="#{layout.footer(${tenantName})}"
+       style="color:#9ca3af;font-size:12px;text-align:center"></p>
   </div>
 </body>
 </html>

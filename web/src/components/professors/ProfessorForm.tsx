@@ -11,6 +11,7 @@ import {
 } from "@/lib/types/professor";
 import type { IdentityDocumentType } from "@/lib/types/identity";
 import DocumentFields from "@/components/common/DocumentFields";
+import { Input, Button } from "@/components/ui";
 
 interface FieldErrors {
   firstName?: string;
@@ -151,96 +152,44 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
       )}
 
       {/* First Name */}
-      <div>
-        <label
-          htmlFor="firstName"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formFirstNameLabel")}
-        </label>
-        <input
-          id="firstName"
-          type="text"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.firstName ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder={t("formFirstNamePlaceholder")}
-        />
-        {fieldErrors.firstName && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.firstName}</p>
-        )}
-      </div>
+      <Input
+        label={t("formFirstNameLabel")}
+        type="text"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+        placeholder={t("formFirstNamePlaceholder")}
+        error={fieldErrors.firstName}
+      />
 
       {/* Last Name */}
-      <div>
-        <label
-          htmlFor="lastName"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formLastNameLabel")}
-        </label>
-        <input
-          id="lastName"
-          type="text"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.lastName ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder={t("formLastNamePlaceholder")}
-        />
-        {fieldErrors.lastName && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.lastName}</p>
-        )}
-      </div>
+      <Input
+        label={t("formLastNameLabel")}
+        type="text"
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
+        placeholder={t("formLastNamePlaceholder")}
+        error={fieldErrors.lastName}
+      />
 
       {/* Email */}
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formEmailLabel")}
-        </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.email ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder={t("formEmailPlaceholder")}
-        />
-        {fieldErrors.email && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
-        )}
-      </div>
+      <Input
+        label={t("formEmailLabel")}
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder={t("formEmailPlaceholder")}
+        error={fieldErrors.email}
+      />
 
       {/* Phone Number */}
-      <div>
-        <label
-          htmlFor="phoneNumber"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formPhoneLabel")}
-        </label>
-        <input
-          id="phoneNumber"
-          type="tel"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.phoneNumber ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder={t("formPhonePlaceholder")}
-        />
-        {fieldErrors.phoneNumber && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.phoneNumber}</p>
-        )}
-      </div>
+      <Input
+        label={t("formPhoneLabel")}
+        type="tel"
+        value={phoneNumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+        placeholder={t("formPhonePlaceholder")}
+        error={fieldErrors.phoneNumber}
+      />
 
       {/* Identity Document */}
       <DocumentFields
@@ -257,11 +206,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
 
       {/* Submit */}
       <div className="pt-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <Button variant="volt" type="submit" disabled={submitting}>
           {submitting
             ? isEdit
               ? t("formSavingButton")
@@ -269,7 +214,7 @@ export default function ProfessorForm({ professor }: ProfessorFormProps) {
             : isEdit
               ? t("formSaveButton")
               : t("formCreateButton")}
-        </button>
+        </Button>
       </div>
     </form>
   );

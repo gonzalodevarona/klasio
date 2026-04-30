@@ -149,7 +149,7 @@ class CorrectMarkServiceTest {
         when(registrationRepository.findById(TENANT_ID, REG_ID))
                 .thenReturn(Optional.of(markedReg(AttendanceRegistrationStatus.ABSENT, recentlyMarked)));
         when(membershipHoursPort.findActiveForStudentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
-                .thenReturn(Optional.of(new MembershipHoursPort.ActiveMembershipView(MEMBERSHIP_ID, 5, SESSION_DATE.plusMonths(1))));
+                .thenReturn(Optional.of(new MembershipHoursPort.ActiveMembershipView(MEMBERSHIP_ID, 5, SESSION_DATE.plusMonths(1), false)));
         when(deductHoursUseCase.execute(any())).thenReturn(null);
 
         MarkedRegistration result = service.execute(commandForAdmin("PRESENT"));

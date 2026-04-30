@@ -19,6 +19,7 @@ jest.mock("@/hooks/useNotifications", () => ({
     isLoading: false,
     error: null,
     refresh: jest.fn(),
+    markReadOptimistic: jest.fn(),
   })),
   useMarkNotificationRead: jest.fn(() => ({ markRead: jest.fn() })),
   useMarkAllNotificationsRead: jest.fn(() => ({ markAllRead: jest.fn() })),

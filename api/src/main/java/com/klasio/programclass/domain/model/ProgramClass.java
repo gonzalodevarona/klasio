@@ -133,6 +133,8 @@ public class ProgramClass {
         validateMaxStudents(maxStudents);
         validateScheduleEntries(scheduleEntries, this.type);
 
+        boolean scheduleChanged = !new ArrayList<>(scheduleEntries).equals(this.scheduleEntries);
+
         this.name = name.trim();
         this.level = level;
         this.scheduleEntries = new ArrayList<>(scheduleEntries);
@@ -143,7 +145,7 @@ public class ProgramClass {
 
         domainEvents.add(new ClassUpdated(
                 id.value(), tenantId, programId, this.name,
-                level.name(), maxStudents, updatedBy, now));
+                level.name(), maxStudents, updatedBy, now, scheduleChanged));
     }
 
     public void deactivate(UUID deactivatedBy) {

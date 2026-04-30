@@ -42,6 +42,20 @@ public class RefundHoursService implements RefundHoursUseCase {
                 .orElseThrow(() -> new MembershipNotFoundException(
                         "Membership not found: " + command.membershipId()));
 
+        if (membership.isUnlimited()) {
+            // UNLIMITED: write a delta=0 audit row for traceability — no balance change
+            HourTransaction tx = HourTransaction.createForUnlimited(
+                    membership.getTenantId(),
+                    membership.getId().value(),
+                    HourTransactionType.ATTENDANCE_REFUND,
+                    "Attendance correction (UNLIMITED plan)",
+                    command.actorId(),
+                    command.actorRole()
+            );
+            hourTransactionRepository.save(tx);
+            return membership;
+        }
+
         membership.refundHours(command.hours(), command.actorId(), command.actorRole());
 
         HourTransaction tx = HourTransaction.create(

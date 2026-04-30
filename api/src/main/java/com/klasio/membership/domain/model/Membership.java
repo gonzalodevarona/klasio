@@ -9,6 +9,7 @@ import com.klasio.membership.domain.event.MembershipPaymentValidated;
 import com.klasio.membership.domain.event.MembershipPendingManagerActivation;
 import com.klasio.membership.domain.event.MembershipProofUploaded;
 import com.klasio.membership.domain.event.MembershipRenewed;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.domain.DomainEvent;
 
 import java.time.Instant;
@@ -32,8 +33,9 @@ public class Membership {
     private final UUID programId;
     private final UUID planId;
     private final String planName;
-    private int purchasedHours;
-    private int availableHours;
+    private final ProgramModality modality;  // snapshot from plan at creation
+    private Integer purchasedHours;
+    private Integer availableHours;
     private LocalDate startDate;
     private LocalDate expirationDate;
     private MembershipStatus status;
@@ -56,8 +58,9 @@ public class Membership {
                        UUID programId,
                        UUID planId,
                        String planName,
-                       int purchasedHours,
-                       int availableHours,
+                       ProgramModality modality,
+                       Integer purchasedHours,
+                       Integer availableHours,
                        LocalDate startDate,
                        LocalDate expirationDate,
                        MembershipStatus status,
@@ -77,6 +80,7 @@ public class Membership {
         this.programId = programId;
         this.planId = planId;
         this.planName = planName;
+        this.modality = modality;
         this.purchasedHours = purchasedHours;
         this.availableHours = availableHours;
         this.startDate = startDate;
@@ -101,7 +105,8 @@ public class Membership {
                                     UUID programId,
                                     UUID planId,
                                     String planName,
-                                    int purchasedHours,
+                                    Integer purchasedHours,
+                                    ProgramModality modality,
                                     LocalDate startDate,
                                     UUID createdBy) {
         Objects.requireNonNull(tenantId, "tenantId must not be null");
@@ -110,19 +115,27 @@ public class Membership {
         Objects.requireNonNull(programId, "programId must not be null");
         Objects.requireNonNull(planId, "planId must not be null");
         Objects.requireNonNull(planName, "planName must not be null");
+        Objects.requireNonNull(modality, "modality must not be null");
         Objects.requireNonNull(startDate, "startDate must not be null");
         Objects.requireNonNull(createdBy, "createdBy must not be null");
 
-        if (purchasedHours < 1) {
-            throw new IllegalArgumentException("purchasedHours must be >= 1");
+        if (modality == ProgramModality.UNLIMITED) {
+            if (purchasedHours != null) {
+                throw new IllegalArgumentException("purchasedHours must be null for UNLIMITED memberships");
+            }
+        } else {
+            if (purchasedHours == null || purchasedHours < 1) {
+                throw new IllegalArgumentException("purchasedHours must be >= 1 for non-UNLIMITED memberships");
+            }
         }
+
         LocalDate expirationDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
         Instant now = Instant.now();
         MembershipId membershipId = MembershipId.generate();
 
         Membership membership = new Membership(
                 membershipId, tenantId, studentId, enrollmentId, programId,
-                planId, planName, purchasedHours, purchasedHours, startDate, expirationDate,
+                planId, planName, modality, purchasedHours, purchasedHours, startDate, expirationDate,
                 MembershipStatus.PENDING_PAYMENT,
                 false, null, null, null, null,
                 now, createdBy, null, null
@@ -130,7 +143,7 @@ public class Membership {
 
         membership.domainEvents.add(new MembershipCreated(
                 membershipId.value(), tenantId, studentId, programId,
-                purchasedHours, startDate, expirationDate, createdBy, now));
+                purchasedHours, modality.name(), startDate, expirationDate, createdBy, now));
 
         return membership;
     }
@@ -142,8 +155,9 @@ public class Membership {
                                           UUID programId,
                                           UUID planId,
                                           String planName,
-                                          int purchasedHours,
-                                          int availableHours,
+                                          ProgramModality modality,
+                                          Integer purchasedHours,
+                                          Integer availableHours,
                                           LocalDate startDate,
                                           LocalDate expirationDate,
                                           MembershipStatus status,
@@ -157,7 +171,7 @@ public class Membership {
                                           Instant updatedAt,
                                           UUID updatedBy) {
         return new Membership(id, tenantId, studentId, enrollmentId, programId,
-                planId, planName, purchasedHours, availableHours, startDate, expirationDate, status,
+                planId, planName, modality, purchasedHours, availableHours, startDate, expirationDate, status,
                 paymentValidated, paymentValidatedBy, paymentValidatedAt,
                 activatedBy, activatedAt, createdAt, createdBy, updatedAt, updatedBy);
     }
@@ -252,6 +266,9 @@ public class Membership {
 
     public void deductHours(int hours, UUID actorId, String actorRole) {
         Objects.requireNonNull(actorId, "actorId must not be null");
+        if (isUnlimited()) {
+            throw new IllegalStateException("Cannot deduct hours from an UNLIMITED membership");
+        }
         if (this.status != MembershipStatus.ACTIVE) {
             throw new IllegalStateException(
                     "Cannot deduct hours from a membership that is not ACTIVE. Current: " + this.status);
@@ -280,6 +297,9 @@ public class Membership {
     public void adjustHours(int delta, String reason, UUID actorId, String actorRole) {
         Objects.requireNonNull(actorId, "actorId must not be null");
         Objects.requireNonNull(reason, "reason must not be null");
+        if (isUnlimited()) {
+            throw new IllegalStateException("Cannot adjust hours on an UNLIMITED membership");
+        }
         if (this.status != MembershipStatus.ACTIVE) {
             throw new IllegalStateException(
                     "Cannot adjust hours on a membership that is not ACTIVE. Current: " + this.status);
@@ -313,6 +333,9 @@ public class Membership {
 
     public void refundHours(int hours, UUID actorId, String actorRole) {
         Objects.requireNonNull(actorId, "actorId must not be null");
+        if (isUnlimited()) {
+            return;  // UNLIMITED: no balance to restore, silently no-op
+        }
         if (hours < 1) {
             throw new IllegalArgumentException("refund hours must be >= 1");
         }
@@ -380,6 +403,36 @@ public class Membership {
                 id.value(), tenantId, studentId, programId, newPurchasedHours, renewedBy, now));
     }
 
+    /**
+     * Renews an UNLIMITED membership. No hour counters to reset — only resets payment
+     * state so the student can upload a new proof for the next period.
+     */
+    public void renewUnlimited(UUID renewedBy) {
+        Objects.requireNonNull(renewedBy, "renewedBy must not be null");
+        if (!isUnlimited()) {
+            throw new IllegalStateException("renewUnlimited() must only be called on UNLIMITED memberships");
+        }
+        if (this.status != MembershipStatus.EXPIRED && this.status != MembershipStatus.INACTIVE) {
+            throw new IllegalStateException(
+                    "Only EXPIRED or INACTIVE memberships can be renewed. Current: " + this.status);
+        }
+
+        Instant now = Instant.now();
+        this.startDate = null;
+        this.expirationDate = null;
+        this.status = MembershipStatus.PENDING_PAYMENT;
+        this.paymentValidated = false;
+        this.paymentValidatedBy = null;
+        this.paymentValidatedAt = null;
+        this.activatedBy = null;
+        this.activatedAt = null;
+        this.updatedAt = now;
+        this.updatedBy = renewedBy;
+
+        domainEvents.add(new MembershipRenewed(
+                id.value(), tenantId, studentId, programId, null, renewedBy, now));
+    }
+
     // ---- Domain events ----
 
     public List<DomainEvent> getDomainEvents() {
@@ -399,8 +452,10 @@ public class Membership {
     public UUID getProgramId() { return programId; }
     public UUID getPlanId() { return planId; }
     public String getPlanName() { return planName; }
-    public int getPurchasedHours() { return purchasedHours; }
-    public int getAvailableHours() { return availableHours; }
+    public ProgramModality getModality() { return modality; }
+    public boolean isUnlimited() { return modality == ProgramModality.UNLIMITED; }
+    public Integer getPurchasedHours() { return purchasedHours; }
+    public Integer getAvailableHours() { return availableHours; }
     public LocalDate getStartDate() { return startDate; }
     public LocalDate getExpirationDate() { return expirationDate; }
     public MembershipStatus getStatus() { return status; }

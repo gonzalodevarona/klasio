@@ -24,9 +24,6 @@ public class LoggingEmailTransport implements EmailTransport {
                 email.type(), email.to().email(), email.subject(), email.idempotencyKey());
         if (email.htmlBody() != null) {
             writePreview(email);
-        } else {
-            log.info("[EMAIL] Brevo-hosted templateId={} params={}",
-                    email.brevoTemplateId(), email.brevoParams());
         }
     }
 

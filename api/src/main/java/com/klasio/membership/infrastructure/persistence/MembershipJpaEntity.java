@@ -39,11 +39,15 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     @Column(name = "plan_name", nullable = false, length = 255)
     private String planName;
 
-    @Column(name = "purchased_hours", nullable = false)
-    private int purchasedHours;
+    // modality column added in Task 5 Flyway migration; nullable here until migration runs
+    @Column(name = "modality", length = 20)
+    private String modality;
 
-    @Column(name = "available_hours", nullable = false)
-    private int availableHours;
+    @Column(name = "purchased_hours")
+    private Integer purchasedHours;
+
+    @Column(name = "available_hours")
+    private Integer availableHours;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -104,10 +108,12 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     public void setPlanId(UUID planId) { this.planId = planId; }
     public String getPlanName() { return planName; }
     public void setPlanName(String planName) { this.planName = planName; }
-    public int getPurchasedHours() { return purchasedHours; }
-    public void setPurchasedHours(int purchasedHours) { this.purchasedHours = purchasedHours; }
-    public int getAvailableHours() { return availableHours; }
-    public void setAvailableHours(int availableHours) { this.availableHours = availableHours; }
+    public String getModality() { return modality; }
+    public void setModality(String modality) { this.modality = modality; }
+    public Integer getPurchasedHours() { return purchasedHours; }
+    public void setPurchasedHours(Integer purchasedHours) { this.purchasedHours = purchasedHours; }
+    public Integer getAvailableHours() { return availableHours; }
+    public void setAvailableHours(Integer availableHours) { this.availableHours = availableHours; }
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
     public LocalDate getExpirationDate() { return expirationDate; }

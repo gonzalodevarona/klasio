@@ -49,6 +49,14 @@ public class ClassScheduleChangedListener {
     @EventListener
     @Transactional
     public void onClassUpdated(ClassUpdated event) {
+        // Skip the schedule-change cascade when only non-schedule fields changed (e.g., level).
+        // The level-change cascade (RF-36) is handled separately by CancelMismatchingFutureRegistrationsService,
+        // and unconditionally cancelling all registrations here would pre-empt that targeted logic.
+        if (!event.scheduleChanged()) {
+            log.debug("ClassScheduleChangedListener: skipping cascade for class {} — schedule unchanged", event.classId());
+            return;
+        }
+
         UUID tenantId = event.tenantId();
         UUID classId  = event.classId();
         LocalDate today = LocalDate.now();

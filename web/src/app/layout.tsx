@@ -18,8 +18,11 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Klasio - Sports League Management",
+  title: "Klasio",
   description: "Multitenant platform for managing sports leagues",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default async function RootLayout({

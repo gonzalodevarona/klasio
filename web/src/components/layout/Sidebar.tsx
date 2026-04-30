@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSidebarIdentity } from "@/hooks/useSidebarIdentity";
 import { usePendingProofsCount } from "@/hooks/usePaymentProofs";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import KLogo from "@/components/layout/KLogo";
 import type { Role } from "@/lib/types/auth";
 import { primaryRole } from "@/lib/types/auth";
 import {
@@ -43,7 +44,7 @@ interface NavItem {
 function NotificationBadge({ count, badgeMax }: { count: number; badgeMax: string }) {
   const label = count > 10 ? badgeMax : String(count);
   return (
-    <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none shrink-0">
+    <span className="ml-auto flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-k-danger-text text-white text-[10px] font-bold leading-none shrink-0">
       {label}
     </span>
   );
@@ -87,7 +88,7 @@ function makeNavItemsByRole(t: LayoutT): Record<Role, NavItem[]> {
       { label: t("navMyMemberships"),   href: "/student/memberships",   icon: BadgeCheck },
       { label: t("navMyEnrollments"),   href: "/student/enrollments",   icon: ClipboardList },
       { label: t("navMyClasses"),       href: "/student/classes",       icon: Calendar },
-      { label: t("navMyRegistrations"), href: "/student/registrations", icon: CalendarCheck },
+      { label: t("navAttendance"), href: "/student/attendance", icon: CalendarCheck },
     ],
   };
 }
@@ -105,6 +106,16 @@ function computeNavItems(roles: Role[], navItemsByRole: Record<Role, NavItem[]>)
     }
   }
   return result;
+}
+
+function navItemClasses(active: boolean, collapsed: boolean) {
+  return [
+    "relative flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+    active
+      ? "bg-k-sidebar-active text-white"
+      : "text-k-muted hover:bg-k-sidebar-active hover:text-white",
+    collapsed ? "justify-center" : "",
+  ].join(" ");
 }
 
 // Module-level component so its identity is stable across renders.
@@ -134,24 +145,24 @@ function NavLinks({
           pendingProofsCount != null &&
           pendingProofsCount > 0;
         return (
-          <li key={href}>
+          <li key={href} className="relative">
             <Link
               href={href}
               onClick={onLinkClick}
               title={collapsed ? label : undefined}
-              className={[
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-gray-700 text-white"
-                  : "text-gray-300 hover:bg-gray-800 hover:text-white",
-                collapsed ? "justify-center" : "",
-              ].join(" ")}
+              className={navItemClasses(isActive, collapsed)}
             >
+              {isActive && (
+                <span
+                  aria-hidden="true"
+                  className="absolute left-0 top-[20%] bottom-[20%] w-[3px] bg-k-volt rounded-r-full"
+                />
+              )}
               <div className="relative shrink-0">
-                <Icon className="h-5 w-5" />
+                <Icon className={`h-5 w-5 ${isActive ? "text-k-volt" : "text-k-subtle"}`} />
                 {/* Collapsed mode: dot indicator on the icon itself */}
                 {collapsed && pendingProofsCount != null && pendingProofsCount > 0 && href === "/payment-proofs" && (
-                  <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-red-500" />
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-k-danger-text" />
                 )}
               </div>
               {!collapsed && <span className="truncate">{label}</span>}
@@ -164,39 +175,40 @@ function NavLinks({
   );
 }
 
-// Brand block shown in the sidebar header.
+// Brand block shown in the sidebar header (desktop expanded only).
 function Brand({
   tenantName,
+  role,
   collapsed,
-  brand,
-  brandSubtitle,
 }: {
   tenantName: string | null;
+  role: Role | undefined;
   collapsed: boolean;
-  brand: string;
-  brandSubtitle: string;
 }) {
   if (collapsed) return null;
   return (
-    <div className="overflow-hidden">
-      <h1 className="text-xl font-bold text-white whitespace-nowrap">{brand}</h1>
-      <p className="text-xs text-gray-400 whitespace-nowrap">{brandSubtitle}</p>
+    <div className="overflow-hidden min-w-0">
+      <KLogo />
+      <hr className="border-k-sidebar-active my-2" />
       {tenantName && (
-        <p className="text-xs font-medium text-indigo-400 whitespace-nowrap mt-0.5 truncate">
-          {tenantName}
-        </p>
+        <p className="text-xs font-medium text-white truncate">{tenantName}</p>
+      )}
+      {role && (
+        <p className="text-[11px] text-k-subtle truncate">{role}</p>
       )}
     </div>
   );
 }
 
 // User identity block shown at the bottom of the sidebar.
+// `forceExpanded` lets the mobile drawer reuse this component without honoring `collapsed`.
 function UserFooter({
   role,
   displayName,
   identityDocumentType,
   identityNumber,
   collapsed,
+  forceExpanded,
   onLogout,
   signOut,
 }: {
@@ -205,21 +217,23 @@ function UserFooter({
   identityDocumentType: string | null;
   identityNumber: string | null;
   collapsed: boolean;
+  forceExpanded?: boolean;
   onLogout: () => void;
   signOut: string;
 }) {
+  const expanded = forceExpanded || !collapsed;
   return (
-    <div className="px-2 py-4 border-t border-gray-700 shrink-0">
-      {!collapsed && (
+    <div className="px-2 py-4 border-t border-k-sidebar-active shrink-0">
+      {expanded && (
         <div className="px-3 mb-2 space-y-0.5">
           {displayName && (
             <p className="text-xs font-medium text-white truncate">
               {displayName}
             </p>
           )}
-          <p className="text-xs text-gray-400 truncate">{role}</p>
+          <p className="text-xs text-k-subtle truncate">{role}</p>
           {identityDocumentType && identityNumber && (
-            <p className="text-xs text-gray-500 truncate">
+            <p className="text-xs text-k-subtle truncate">
               {identityDocumentType} {identityNumber}
             </p>
           )}
@@ -227,57 +241,15 @@ function UserFooter({
       )}
       <button
         onClick={onLogout}
-        title={collapsed ? signOut : undefined}
+        title={!expanded ? signOut : undefined}
         className={[
-          "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-gray-300",
-          "hover:text-white hover:bg-gray-800 transition-colors",
-          collapsed ? "justify-center" : "",
+          "flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-k-subtle",
+          "hover:text-white hover:bg-k-sidebar-active transition-colors",
+          !expanded ? "justify-center" : "",
         ].join(" ")}
       >
         <LogOut className="h-5 w-5 shrink-0" />
-        {!collapsed && <span>{signOut}</span>}
-      </button>
-    </div>
-  );
-}
-
-// Mobile-drawer version of the user footer (never collapsed).
-function MobileUserFooter({
-  role,
-  displayName,
-  identityDocumentType,
-  identityNumber,
-  onLogout,
-  signOut,
-}: {
-  role: Role;
-  displayName: string | null;
-  identityDocumentType: string | null;
-  identityNumber: string | null;
-  onLogout: () => void;
-  signOut: string;
-}) {
-  return (
-    <div className="px-3 py-4 border-t border-gray-700 shrink-0">
-      <div className="px-3 mb-2 space-y-0.5">
-        {displayName && (
-          <p className="text-xs font-medium text-white truncate">
-            {displayName}
-          </p>
-        )}
-        <p className="text-xs text-gray-400 truncate">{role}</p>
-        {identityDocumentType && identityNumber && (
-          <p className="text-xs text-gray-500 truncate">
-            {identityDocumentType} {identityNumber}
-          </p>
-        )}
-      </div>
-      <button
-        onClick={onLogout}
-        className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
-      >
-        <LogOut className="h-5 w-5 shrink-0" />
-        <span>{signOut}</span>
+        {expanded && <span>{signOut}</span>}
       </button>
     </div>
   );
@@ -325,11 +297,11 @@ export default function Sidebar() {
   if (loading) {
     return (
       <>
-        <div className="lg:hidden fixed top-0 inset-x-0 z-40 h-14 bg-gray-900 border-b border-gray-700 animate-pulse" />
-        <aside className="hidden lg:flex w-64 bg-gray-900 h-screen sticky top-0 flex-col shrink-0">
+        <div className="lg:hidden fixed top-0 inset-x-0 z-40 h-14 bg-k-dark border-b border-k-sidebar-active animate-pulse" />
+        <aside className="hidden lg:flex w-[220px] bg-k-dark h-screen sticky top-0 flex-col shrink-0">
           <div className="p-6 space-y-2">
-            <div className="h-6 w-24 bg-gray-700 rounded animate-pulse" />
-            <div className="h-4 w-32 bg-gray-700 rounded animate-pulse" />
+            <div className="h-6 w-24 bg-k-sidebar-active rounded animate-pulse" />
+            <div className="h-4 w-32 bg-k-sidebar-active rounded animate-pulse" />
           </div>
         </aside>
       </>
@@ -342,18 +314,18 @@ export default function Sidebar() {
   return (
     <>
       {/* ── Mobile: top bar ─────────────────────────────────────── */}
-      <header className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center h-14 px-4 gap-3 bg-gray-900 border-b border-gray-700">
+      <header className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center h-14 px-4 gap-3 bg-k-dark border-b border-k-sidebar-active">
         <button
           onClick={() => setMobileOpen(true)}
           aria-label={t("openNav")}
-          className="p-1 text-gray-300 hover:text-white rounded transition-colors"
+          className="p-1 text-k-subtle hover:text-white rounded transition-colors"
         >
           <Menu className="h-6 w-6" />
         </button>
         <div className="min-w-0 flex-1">
-          <span className="text-lg font-bold text-white">{t("brand")}</span>
+          <KLogo />
           {tenantName && (
-            <span className="ml-2 text-xs text-indigo-400 truncate hidden sm:inline">
+            <span className="ml-2 text-xs text-k-subtle truncate hidden sm:inline">
               {tenantName}
             </span>
           )}
@@ -370,22 +342,23 @@ export default function Sidebar() {
             aria-hidden="true"
           />
 
-          <aside className="relative flex flex-col w-64 h-full bg-gray-900 shadow-2xl">
+          <aside className="relative flex flex-col w-64 h-full bg-k-dark shadow-2xl">
             {/* Drawer header */}
-            <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-gray-700">
-              <div className="min-w-0">
-                <h1 className="text-lg font-bold text-white">{t("brand")}</h1>
-                <p className="text-xs text-gray-400">{t("brandSubtitle")}</p>
+            <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
+              <div className="min-w-0 flex-1">
+                <KLogo />
+                <hr className="border-k-sidebar-active my-2" />
                 {tenantName && (
-                  <p className="text-xs font-medium text-indigo-400 truncate mt-0.5">
-                    {tenantName}
-                  </p>
+                  <p className="text-xs font-medium text-white truncate">{tenantName}</p>
+                )}
+                {primaryUserRole && (
+                  <p className="text-[11px] text-k-subtle truncate">{primaryUserRole}</p>
                 )}
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label={t("closeNav")}
-                className="p-1 text-gray-400 hover:text-white rounded transition-colors shrink-0 ml-2"
+                className="p-1 text-k-subtle hover:text-white rounded transition-colors shrink-0 ml-2"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -405,11 +378,13 @@ export default function Sidebar() {
 
             {/* Drawer footer */}
             {user && (
-              <MobileUserFooter
+              <UserFooter
                 role={primaryUserRole!}
                 displayName={displayName}
                 identityDocumentType={identityDocumentType}
                 identityNumber={identityNumber}
+                collapsed={false}
+                forceExpanded
                 onLogout={logout}
                 signOut={t("signOut")}
               />
@@ -421,25 +396,25 @@ export default function Sidebar() {
       {/* ── Desktop: collapsible sidebar ─────────────────────────── */}
       <aside
         className={[
-          "hidden lg:flex flex-col bg-gray-900 text-white h-screen sticky top-0 shrink-0",
+          "hidden lg:flex flex-col bg-k-dark text-white h-screen sticky top-0 shrink-0",
           "transition-[width] duration-300 ease-in-out overflow-hidden",
-          collapsed ? "w-16" : "w-64",
+          collapsed ? "w-16" : "w-[220px]",
         ].join(" ")}
       >
         {/* Sidebar header */}
         <div
           className={[
-            "flex items-center shrink-0 border-b border-gray-700 px-3 py-4",
+            "flex items-center shrink-0 border-b border-k-sidebar-active px-3 py-4",
             collapsed ? "justify-center" : "justify-between",
           ].join(" ")}
         >
-          <Brand tenantName={tenantName} collapsed={collapsed} brand={t("brand")} brandSubtitle={t("brandSubtitle")} />
+          <Brand tenantName={tenantName} role={primaryUserRole} collapsed={collapsed} />
           <div className="flex items-center gap-1 shrink-0">
             {!collapsed && <NotificationBell />}
             <button
               onClick={() => setCollapsed((c) => !c)}
               aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
-              className="p-1 text-gray-400 hover:text-white rounded transition-colors"
+              className="p-1 text-k-subtle hover:text-white rounded transition-colors"
             >
               {collapsed ? (
                 <Menu className="h-5 w-5" />

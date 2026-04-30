@@ -6,6 +6,7 @@ import com.klasio.membership.domain.model.Membership;
 import com.klasio.membership.domain.port.MembershipRepository;
 import com.klasio.membership.domain.port.ProgramPlanPort;
 import com.klasio.membership.domain.port.ProgramPlanPort.PlanView;
+import com.klasio.program.domain.model.ProgramModality;
 import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.EnrollmentNotFoundException;
 import com.klasio.shared.infrastructure.exception.MembershipAlreadyActiveException;
@@ -46,9 +47,10 @@ public class CreateMembershipService implements CreateMembershipUseCase {
                         "No active plan found with id %s for tenant %s"
                                 .formatted(command.planId(), command.tenantId())));
 
-        if (!"HOURS_BASED".equals(plan.modality())) {
+        ProgramModality modality = ProgramModality.valueOf(plan.modality());
+        if (modality == ProgramModality.CLASSES_PER_WEEK) {
             throw new IllegalArgumentException(
-                    "Only HOURS_BASED plans can be used to create memberships. Plan '%s' has modality %s"
+                    "CLASSES_PER_WEEK plans cannot be used to create memberships. Plan '%s' has modality %s"
                             .formatted(plan.name(), plan.modality()));
         }
 
@@ -66,7 +68,8 @@ public class CreateMembershipService implements CreateMembershipUseCase {
                             .formatted(command.studentId(), plan.programId()));
         }
 
-        // 4. Create the membership — purchasedHours comes from the plan
+        // 4. Create the membership — purchasedHours comes from the plan (null for UNLIMITED)
+        Integer purchasedHours = modality == ProgramModality.UNLIMITED ? null : plan.hours();
         Membership membership = Membership.create(
                 command.tenantId(),
                 command.studentId(),
@@ -74,7 +77,8 @@ public class CreateMembershipService implements CreateMembershipUseCase {
                 plan.programId(),
                 plan.id(),
                 plan.name(),
-                plan.hours(),
+                purchasedHours,
+                modality,
                 command.startDate(),
                 command.actorId()
         );

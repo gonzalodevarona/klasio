@@ -60,6 +60,7 @@ class GetTenantDetailServiceTest {
                 "Liga Bogota",
                 "Football",
                 "es",
+                "America/Bogota",
                 TenantSlug.fromName("Liga Bogota"),
                 CONTACT,
                 UUID.randomUUID(),
@@ -94,6 +95,7 @@ class GetTenantDetailServiceTest {
                 "Liga Bogota",
                 "Football",
                 "es",
+                "America/Bogota",
                 TenantSlug.fromName("Liga Bogota"),
                 CONTACT,
                 UUID.randomUUID(),
@@ -120,7 +122,7 @@ class GetTenantDetailServiceTest {
         UUID createdBy = UUID.randomUUID();
 
         Tenant tenant = Tenant.create(
-                "Liga Bogota", "Football", "es",
+                "Liga Bogota", "Football", "es", "America/Bogota",
                 TenantSlug.fromName("Liga Bogota"), CONTACT, createdBy, null
         );
         tenant.clearDomainEvents();

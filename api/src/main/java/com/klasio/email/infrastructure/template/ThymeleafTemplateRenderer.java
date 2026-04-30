@@ -25,10 +25,8 @@ public class ThymeleafTemplateRenderer implements TemplateRenderer {
     }
 
     @Override
-    public RenderedTemplate render(String templatePath, Map<String, Object> model) {
-        Context ctx = new Context(Locale.ENGLISH, model);
-        // Use the fragment-selector overload so the suffix is applied only to the
-        // template name and not to the "name :: fragment" composite string.
+    public RenderedTemplate render(String templatePath, Locale locale, Map<String, Object> model) {
+        Context ctx = new Context(locale, model);
         String subject = htmlEngine.process(templatePath, Set.of("subject"), ctx).strip();
         String htmlBody = htmlEngine.process(templatePath, ctx);
         String textBody = textEngine.process(templatePath, ctx);

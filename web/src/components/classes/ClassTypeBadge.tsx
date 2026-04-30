@@ -1,22 +1,20 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Badge, type BadgeVariant } from "@/components/ui";
 import { ClassType } from "@/lib/types/programClass";
 
 interface ClassTypeBadgeProps {
   type: ClassType;
 }
 
-const TYPE_STYLES: Record<ClassType, string> = {
-  RECURRING: "bg-blue-100 text-blue-800",
-  ONE_TIME:  "bg-purple-100 text-purple-800",
+const TYPE_VARIANT: Record<ClassType, BadgeVariant> = {
+  RECURRING: "info",
+  // TODO: no purple token in design system — collapses with default inactive grey
+  ONE_TIME:  "inactive",
 };
 
 export default function ClassTypeBadge({ type }: ClassTypeBadgeProps) {
   const t = useTranslations("badges.classType");
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${TYPE_STYLES[type]}`}>
-      {t(type)}
-    </span>
-  );
+  return <Badge variant={TYPE_VARIANT[type]} label={t(type)} />;
 }

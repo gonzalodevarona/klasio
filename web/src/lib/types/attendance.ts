@@ -23,6 +23,17 @@ export interface AvailableSession {
   status: SessionStatus;
   registrationOpen: boolean;
   alertReason?: string | null;
+  registrationId?: string | null;
+  registrationStatus?: string | null;
+}
+
+export interface AttendanceStats {
+  attended: number;
+  cancelledByStudent: number;
+  cancelledBySystem: number;
+  absent: number;
+  totalHoursConsumed: number;
+  attendanceRatePercent: number;
 }
 
 export interface Registration {
@@ -57,6 +68,8 @@ export interface RosterRegistrantView {
   level: string;
   intendedHours: number;
   status: RegistrationStatus;
+  /** userId of the actor who created this registration (null when self-registered). */
+  createdBy?: string | null;
 }
 
 export interface ClassSessionRoster {

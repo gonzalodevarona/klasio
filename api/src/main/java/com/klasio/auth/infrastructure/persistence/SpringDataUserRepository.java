@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface SpringDataUserRepository extends JpaRepository<UserJpaEntity, UUID> {
@@ -35,4 +37,13 @@ public interface SpringDataUserRepository extends JpaRepository<UserJpaEntity, U
             @Param("tenantId") UUID tenantId,
             @Param("status") UserStatus status,
             Pageable pageable);
+
+    @Query("""
+            SELECT u FROM UserJpaEntity u
+             WHERE u.tenantId = :tenantId
+               AND u.id IN :userIds
+            """)
+    List<UserJpaEntity> findByTenantIdAndIdIn(
+            @Param("tenantId") UUID tenantId,
+            @Param("userIds") Set<UUID> userIds);
 }

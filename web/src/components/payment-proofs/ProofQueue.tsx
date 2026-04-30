@@ -6,6 +6,7 @@ import { usePaymentProofs } from "@/hooks/usePaymentProofs";
 import { ProofReviewModal } from "./ProofReviewModal";
 import type { ProofQueueItem } from "@/lib/types/paymentProof";
 import { IDENTITY_DOCUMENT_TYPES } from "@/lib/types/student";
+import { Table, Thead, Th, Tr, Td, Button } from "@/components/ui";
 
 function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString();
@@ -57,54 +58,37 @@ export function ProofQueue() {
       )}
 
       {queue.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("colStudent")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("colIdDocument")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("colPlan")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("colUploaded")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t("colType")}
-                </th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {queue.map((item) => (
-                <tr key={item.proofId} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-900">{item.studentName}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    <span className="font-medium">{formatDocType(item.studentIdentityDocumentType)}</span>
-                    <span className="ml-1 text-gray-500">{item.studentIdentityNumber}</span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{item.planName}</td>
-                  <td className="px-4 py-3 text-sm text-gray-500">
-                    {formatDateTime(item.uploadedAt)}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{item.contentType}</td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => setSelected(item)}
-                      className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
-                    >
-                      {t("reviewBtn")}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <Thead>
+            <tr>
+              <Th>{t("colStudent")}</Th>
+              <Th>{t("colIdDocument")}</Th>
+              <Th>{t("colPlan")}</Th>
+              <Th>{t("colUploaded")}</Th>
+              <Th>{t("colType")}</Th>
+              <Th>{null}</Th>
+            </tr>
+          </Thead>
+          <tbody>
+            {queue.map((item) => (
+              <Tr key={item.proofId}>
+                <Td>{item.studentName}</Td>
+                <Td>
+                  <span className="font-medium">{formatDocType(item.studentIdentityDocumentType)}</span>
+                  <span className="ml-1 text-k-muted">{item.studentIdentityNumber}</span>
+                </Td>
+                <Td>{item.planName}</Td>
+                <Td muted>{formatDateTime(item.uploadedAt)}</Td>
+                <Td muted>{item.contentType}</Td>
+                <Td right>
+                  <Button variant="primary" size="sm" onClick={() => setSelected(item)}>
+                    {t("reviewBtn")}
+                  </Button>
+                </Td>
+              </Tr>
+            ))}
+          </tbody>
+        </Table>
       )}
 
       {selected && (

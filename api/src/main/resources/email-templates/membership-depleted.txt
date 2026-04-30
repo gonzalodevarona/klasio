@@ -1,0 +1,9 @@
+[(#{membershipDepleted.subject})]
+
+[(#{membershipDepleted.hi})] [(${studentName})],
+
+[(#{membershipDepleted.body(${programName})})]
+
+[(${loginUrl})]
+
+Klasio

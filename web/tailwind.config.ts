@@ -25,6 +25,7 @@ const config: Config = {
         "k-danger-bg": "#FFE8E8",
         "k-danger-text": "#CC2200",
         "k-sidebar-active": "#1A1A1A",
+        "k-volt-hover": "#B8EE3A",
       },
       borderRadius: {
         "k-sm": "8px",

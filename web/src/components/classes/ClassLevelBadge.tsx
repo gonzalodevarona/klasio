@@ -1,23 +1,23 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Badge, type BadgeVariant } from "@/components/ui";
 import { ClassLevel } from "@/lib/types/programClass";
 
 interface ClassLevelBadgeProps {
   level: ClassLevel;
 }
 
-const LEVEL_STYLES: Record<ClassLevel, string> = {
-  BEGINNER:     "bg-green-100 text-green-800",
-  INTERMEDIATE: "bg-yellow-100 text-yellow-800",
-  ADVANCED:     "bg-red-100 text-red-800",
+const LEVEL_VARIANT: Record<ClassLevel, BadgeVariant> = {
+  BEGINNER:     "beginner",
+  INTERMEDIATE: "intermediate",
+  ADVANCED:     "advanced",
+  OPEN:         "open",
 };
 
 export default function ClassLevelBadge({ level }: ClassLevelBadgeProps) {
   const t = useTranslations("badges.classLevel");
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${LEVEL_STYLES[level]}`}>
-      {t(level)}
-    </span>
-  );
+  // Defensive fallback: unknown future values fall back to "info" rather than crashing.
+  const variant: BadgeVariant = LEVEL_VARIANT[level] ?? "info";
+  return <Badge variant={variant} label={t(level)} />;
 }

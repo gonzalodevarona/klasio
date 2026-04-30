@@ -4,6 +4,7 @@ import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Button, Card, Select } from "@/components/ui";
 import MembershipForm from "@/components/memberships/MembershipForm";
 import { useMembershipActions } from "@/hooks/useMemberships";
 import { useStudentDetail } from "@/hooks/useStudents";
@@ -19,6 +20,7 @@ export default function NewMembershipPage({ params }: Props) {
   const router = useRouter();
   const t = useTranslations("memberships");
   const tStudents = useTranslations("students");
+  const tCommon = useTranslations("common");
   const { createMembership } = useMembershipActions();
   const { student, loading: studentLoading } = useStudentDetail(studentId);
   const studentName = student ? `${student.firstName} ${student.lastName}` : studentId;
@@ -39,69 +41,66 @@ export default function NewMembershipPage({ params }: Props) {
 
   return (
     <div className="max-w-xl">
-      <nav className="mb-6 text-sm text-gray-500">
-        <Link href="/students" className="hover:text-gray-700 hover:underline">
-          {tStudents("pageTitle")}
-        </Link>
-        <span className="mx-2">/</span>
-        <Link href={`/students/${studentId}`} className="hover:text-gray-700 hover:underline">
-          {studentName}
-        </Link>
-        <span className="mx-2">/</span>
-        <Link
-          href={`/students/${studentId}/memberships`}
-          className="hover:text-gray-700 hover:underline"
-        >
-          {t("detailBreadcrumb")}
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">{t("newBreadcrumb")}</span>
-      </nav>
+      <div className="mb-6">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={`/students/${studentId}/memberships`}>← {tCommon("back")}</Link>
+        </Button>
+        <nav className="mt-2 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted">
+          <Link href="/students" className="hover:text-k-subtle">{tStudents("pageTitle")}</Link>
+          <span className="mx-2">/</span>
+          <Link href={`/students/${studentId}`} className="hover:text-k-subtle">{studentName}</Link>
+          <span className="mx-2">/</span>
+          <Link href={`/students/${studentId}/memberships`} className="hover:text-k-subtle">{t("detailBreadcrumb")}</Link>
+          <span className="mx-2">/</span>
+          <span className="text-k-subtle">{t("newBreadcrumb")}</span>
+        </nav>
+      </div>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t("newPageTitle")}</h1>
+      <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark mb-6">{t("newPageTitle")}</h1>
 
       {studentLoading ? (
-        <div className="py-8 text-center text-sm text-gray-500">{t("newLoadingStudent")}</div>
+        <div className="py-8 text-center text-sm text-k-muted">{t("newLoadingStudent")}</div>
       ) : activeEnrollments.length === 0 ? (
-        <div className="rounded-md bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
+        <div className="rounded-k-sm bg-k-warn-bg border border-k-warn-text/30 p-4 text-sm text-k-warn-text">
           {t("newNoEnrollments")}
         </div>
       ) : (
-        <div className="rounded-md border border-gray-200 p-6 bg-white space-y-5">
-          {/* Program selector — scopes plan list */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t("formProgramLabel")}</label>
-            <select
-              value={selectedProgramId}
-              onChange={(e) => setSelectedProgramId(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">{t("formSelectProgram")}</option>
-              {activeEnrollments.map((e) => (
-                <option key={e.programId} value={e.programId}>
-                  {e.programName} ({e.level})
-                </option>
-              ))}
-            </select>
-          </div>
+        <Card padding="md">
+          <div className="space-y-5">
+            {/* Program selector — scopes plan list */}
+            <div>
+              <label className="block text-sm font-medium text-k-subtle mb-1">{t("formProgramLabel")}</label>
+              <Select
+                value={selectedProgramId}
+                onChange={(e) => setSelectedProgramId(e.target.value)}
+              >
+                <option value="">{t("formSelectProgram")}</option>
+                {activeEnrollments.map((e) => (
+                  <option key={e.programId} value={e.programId}>
+                    {e.programName} ({e.level})
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-          {selectedProgramId && (
-            plansLoading ? (
-              <div className="py-4 text-center text-sm text-gray-500">{t("newLoadingPlans")}</div>
-            ) : plans.length === 0 ? (
-              <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800">
-                {t("newNoPlans")}
-              </div>
-            ) : (
-              <MembershipForm
-                studentId={studentId}
-                plans={plans}
-                onSubmit={handleSubmit}
-                onCancel={() => router.push(`/students/${studentId}/memberships`)}
-              />
-            )
-          )}
-        </div>
+            {selectedProgramId && (
+              plansLoading ? (
+                <div className="py-4 text-center text-sm text-k-muted">{t("newLoadingPlans")}</div>
+              ) : plans.length === 0 ? (
+                <div className="rounded-k-sm bg-k-warn-bg border border-k-warn-text/30 p-3 text-sm text-k-warn-text">
+                  {t("newNoPlans")}
+                </div>
+              ) : (
+                <MembershipForm
+                  studentId={studentId}
+                  plans={plans}
+                  onSubmit={handleSubmit}
+                  onCancel={() => router.push(`/students/${studentId}/memberships`)}
+                />
+              )
+            )}
+          </div>
+        </Card>
       )}
     </div>
   );

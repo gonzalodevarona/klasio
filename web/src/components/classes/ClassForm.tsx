@@ -13,6 +13,8 @@ import {
   UpdateClassRequest,
 } from "@/lib/types/programClass";
 import { useAllActiveProfessors } from "@/hooks/useProfessors";
+import { Input, Select, Button } from "@/components/ui";
+import { Modal } from "@/components/ui/Modal";
 
 interface FieldErrors {
   name?: string;
@@ -46,7 +48,7 @@ const DAYS_OF_WEEK = [
   "SUNDAY",
 ];
 
-const LEVELS: ClassLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+const LEVELS: ClassLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "OPEN"];
 
 function emptyScheduleEntry(): ScheduleEntryFormData {
   return { dayOfWeek: "", specificDate: "", startTime: "", endTime: "" };
@@ -84,6 +86,10 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Cascade confirmation modal: shown when editing an OPEN class to a specific level.
+  // Future registrations of students whose enrollment level doesn't match will be cancelled.
+  const [showCascadeModal, setShowCascadeModal] = useState(false);
 
   function validate(): FieldErrors {
     const errors: FieldErrors = {};
@@ -166,17 +172,8 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
     }));
   }
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-
-    const errors = validate();
-    setFieldErrors(errors);
-    setApiError(null);
-
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-
+  /** Performs the actual API calls after all validations and confirmations pass. */
+  async function doSubmit() {
     setSubmitting(true);
 
     try {
@@ -239,7 +236,62 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
     }
   }
 
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+
+    const errors = validate();
+    setFieldErrors(errors);
+    setApiError(null);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    // Warn when an OPEN class is restricted to a specific level: future registrations
+    // of students whose enrollment level doesn't match will be cancelled.
+    if (isEdit && programClass.level === "OPEN" && level !== "OPEN") {
+      setShowCascadeModal(true);
+      return;
+    }
+
+    await doSubmit();
+  }
+
   return (
+    <>
+    {/* Cascade confirmation modal: shown when restricting an OPEN class to a specific level */}
+    <Modal
+      open={showCascadeModal}
+      onClose={() => setShowCascadeModal(false)}
+      title={t("formLevelLabel")}
+      size="sm"
+    >
+      <p className="text-sm text-k-subtle mb-6">
+        {t("editLevelCascadeConfirm", { newLevel: level })}
+      </p>
+      <div className="flex justify-end gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          type="button"
+          onClick={() => setShowCascadeModal(false)}
+        >
+          {tCommon("cancel")}
+        </Button>
+        <Button
+          variant="volt"
+          size="sm"
+          type="button"
+          disabled={submitting}
+          onClick={() => {
+            setShowCascadeModal(false);
+            doSubmit();
+          }}
+        >
+          {tCommon("confirm")}
+        </Button>
+      </div>
+    </Modal>
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-6" noValidate>
       {apiError && (
         <div
@@ -251,64 +303,40 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
       )}
 
       {/* Name */}
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formClassNameLabel")} <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.name ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder={t("formClassNamePlaceholder")}
-        />
-        {fieldErrors.name && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
-        )}
-      </div>
+      <Input
+        label={t("formClassNameLabel")}
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={t("formClassNamePlaceholder")}
+        error={fieldErrors.name}
+      />
 
       {/* Level */}
-      <div>
-        <label
-          htmlFor="level"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formLevelLabel")} <span className="text-red-500">*</span>
-        </label>
-        <select
-          id="level"
-          value={level}
-          onChange={(e) => setLevel(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.level ? "border-red-500" : "border-gray-300"
-          }`}
-        >
-          <option value="">{t("formLevelPlaceholder")}</option>
-          {LEVELS.map((l) => (
-            <option key={l} value={l}>
-              {l.charAt(0) + l.slice(1).toLowerCase()}
-            </option>
-          ))}
-        </select>
-        {fieldErrors.level && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.level}</p>
-        )}
-      </div>
+      <Select
+        label={t("formLevelLabel")}
+        value={level}
+        onChange={(e) => setLevel(e.target.value)}
+        required
+        error={fieldErrors.level}
+      >
+        <option value="">{t("formLevelPlaceholder")}</option>
+        {LEVELS.map((l) => (
+          <option key={l} value={l}>
+            {l === "OPEN" ? t("formLevelOpen") : l.charAt(0) + l.slice(1).toLowerCase()}
+          </option>
+        ))}
+      </Select>
 
       {/* Type */}
       {!isEdit && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-k-subtle mb-1">
             {t("formTypeLabel")} <span className="text-red-500">*</span>
           </label>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
+              {/* TODO: no primitive for type="radio" */}
               <input
                 type="radio"
                 name="classType"
@@ -318,11 +346,12 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                   setClassType(e.target.value);
                   setScheduleEntries([emptyScheduleEntry()]);
                 }}
-                className="text-blue-600 focus:ring-blue-500"
+                className="accent-k-volt focus:ring-k-volt"
               />
-              <span className="text-sm text-gray-700">{t("formTypeRecurring")}</span>
+              <span className="text-sm text-k-subtle">{t("formTypeRecurring")}</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
+              {/* TODO: no primitive for type="radio" */}
               <input
                 type="radio"
                 name="classType"
@@ -332,9 +361,9 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                   setClassType(e.target.value);
                   setScheduleEntries([emptyScheduleEntry()]);
                 }}
-                className="text-blue-600 focus:ring-blue-500"
+                className="accent-k-volt focus:ring-k-volt"
               />
-              <span className="text-sm text-gray-700">{t("formTypeOneTime")}</span>
+              <span className="text-sm text-k-subtle">{t("formTypeOneTime")}</span>
             </label>
           </div>
           {fieldErrors.type && (
@@ -344,63 +373,38 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
       )}
 
       {/* Max Students */}
-      <div>
-        <label
-          htmlFor="maxStudents"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formMaxStudentsLabel")} <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="maxStudents"
-          type="number"
-          min="1"
-          value={maxStudents}
-          onChange={(e) => setMaxStudents(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.maxStudents ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder={t("formMaxStudentsPlaceholder")}
-        />
-        {fieldErrors.maxStudents && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.maxStudents}</p>
-        )}
-      </div>
+      <Input
+        label={t("formMaxStudentsLabel")}
+        type="number"
+        min="1"
+        value={maxStudents}
+        onChange={(e) => setMaxStudents(e.target.value)}
+        placeholder={t("formMaxStudentsPlaceholder")}
+        error={fieldErrors.maxStudents}
+      />
 
       {/* Professor (required) */}
-      <div>
-        <label
-          htmlFor="professorId"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formProfessorLabel")} <span className="text-red-500">*</span>
-        </label>
-        <select
-          id="professorId"
-          value={professorId}
-          onChange={(e) => setProfessorId(e.target.value)}
-          disabled={professorsLoading}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-            fieldErrors.professorId ? "border-red-500" : "border-gray-300"
-          }`}
-        >
-          <option value="">
-            {professorsLoading ? t("formProfessorLoading") : t("formProfessorPlaceholder")}
+      <Select
+        label={t("formProfessorLabel")}
+        value={professorId}
+        onChange={(e) => setProfessorId(e.target.value)}
+        required
+        disabled={professorsLoading}
+        error={fieldErrors.professorId}
+      >
+        <option value="">
+          {professorsLoading ? t("formProfessorLoading") : t("formProfessorPlaceholder")}
+        </option>
+        {professors.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.firstName} {p.lastName}
           </option>
-          {professors.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.firstName} {p.lastName}
-            </option>
-          ))}
-        </select>
-        {fieldErrors.professorId && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.professorId}</p>
-        )}
-      </div>
+        ))}
+      </Select>
 
       {/* Schedule Entries */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-k-subtle mb-2">
           {t("formScheduleLabel")} <span className="text-red-500">*</span>
         </label>
         {fieldErrors.scheduleEntries && (
@@ -412,19 +416,16 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
           {scheduleEntries.map((entry, index) => (
             <div
               key={index}
-              className="flex flex-wrap items-end gap-3 p-3 border border-gray-200 rounded-md bg-gray-50"
+              className="flex flex-wrap items-end gap-3 p-3 border border-k-border rounded-md bg-k-surface"
             >
               {classType === "RECURRING" ? (
                 <div className="flex-1 min-w-[140px]">
-                  <label className="block text-xs text-gray-500 mb-1">
-                    {t("formScheduleDayLabel")}
-                  </label>
-                  <select
+                  <Select
+                    label={t("formScheduleDayLabel")}
                     value={entry.dayOfWeek}
                     onChange={(e) =>
                       updateScheduleEntry(index, "dayOfWeek", e.target.value)
                     }
-                    className="block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
                   >
                     <option value="">{t("formScheduleDayPlaceholder")}</option>
                     {DAYS_OF_WEEK.map((day) => (
@@ -432,83 +433,85 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                         {day.charAt(0) + day.slice(1).toLowerCase()}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               ) : (
                 <div className="flex-1 min-w-[140px]">
-                  <label className="block text-xs text-gray-500 mb-1">
+                  <label className="block text-xs text-k-muted mb-1">
                     {t("formScheduleDateLabel")}
                   </label>
+                  {/* TODO: no primitive for type="date" */}
                   <input
                     type="date"
                     value={entry.specificDate}
                     onChange={(e) =>
                       updateScheduleEntry(index, "specificDate", e.target.value)
                     }
-                    className="block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                    className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 text-sm focus:border-k-volt focus:outline-none block w-full"
                   />
                 </div>
               )}
 
               <div className="min-w-[100px]">
-                <label className="block text-xs text-gray-500 mb-1">
+                <label className="block text-xs text-k-muted mb-1">
                   {t("formScheduleStartLabel")}
                 </label>
+                {/* TODO: no primitive for type="time" */}
                 <input
                   type="time"
                   value={entry.startTime}
                   onChange={(e) =>
                     updateScheduleEntry(index, "startTime", e.target.value)
                   }
-                  className="block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                  className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 text-sm focus:border-k-volt focus:outline-none block w-full"
                 />
               </div>
 
               <div className="min-w-[100px]">
-                <label className="block text-xs text-gray-500 mb-1">
+                <label className="block text-xs text-k-muted mb-1">
                   {t("formScheduleEndLabel")}
                 </label>
+                {/* TODO: no primitive for type="time" */}
                 <input
                   type="time"
                   value={entry.endTime}
                   onChange={(e) =>
                     updateScheduleEntry(index, "endTime", e.target.value)
                   }
-                  className="block w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm"
+                  className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 text-sm focus:border-k-volt focus:outline-none block w-full"
                 />
               </div>
 
               {scheduleEntries.length > 1 && (
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   type="button"
                   onClick={() => removeScheduleEntry(index)}
-                  className="text-red-500 hover:text-red-700 text-sm pb-1"
                 >
                   {t("formScheduleRemoveButton")}
-                </button>
+                </Button>
               )}
             </div>
           ))}
         </div>
 
         {classType === "RECURRING" && (
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             type="button"
             onClick={addScheduleEntry}
-            className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+            className="mt-2"
           >
             {t("formScheduleAddEntry")}
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Submit */}
       <div className="pt-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <Button variant="volt" type="submit" disabled={submitting}>
           {submitting
             ? isEdit
               ? t("formSavingButton")
@@ -516,8 +519,9 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
             : isEdit
               ? t("formSaveButton")
               : t("formCreateButton")}
-        </button>
+        </Button>
       </div>
     </form>
+    </>
   );
 }

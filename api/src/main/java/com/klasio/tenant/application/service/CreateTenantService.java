@@ -61,6 +61,7 @@ public class CreateTenantService implements CreateTenantUseCase {
                     command.name(),
                     command.discipline(),
                     command.language(),
+                    command.timezone(),
                     slug,
                     contactInfo,
                     command.createdBy(),

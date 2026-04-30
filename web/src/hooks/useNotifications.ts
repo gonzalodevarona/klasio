@@ -26,6 +26,7 @@ interface UseNotificationsResult {
   isLoading: boolean;
   error: string | null;
   refresh: () => void;
+  markReadOptimistic: (id: string) => void;
 }
 
 export function useNotifications(
@@ -39,6 +40,14 @@ export function useNotifications(
   const [tick, setTick] = useState(0);
 
   const refresh = useCallback(() => setTick((t) => t + 1), []);
+
+  const markReadOptimistic = useCallback((id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) =>
+        n.id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n
+      )
+    );
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,7 +87,7 @@ export function useNotifications(
     };
   }, [page, unreadOnly, tick]);
 
-  return { notifications, totalPages, isLoading, error, refresh };
+  return { notifications, totalPages, isLoading, error, refresh, markReadOptimistic };
 }
 
 interface UseUnreadCountResult {

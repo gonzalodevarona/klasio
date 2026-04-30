@@ -135,6 +135,7 @@ class TenantControllerIntegrationTest {
                 "Liga Bogota",
                 "Football",
                 "es",
+                "America/Bogota",
                 TenantSlug.fromName("Liga Bogota"),
                 CONTACT,
                 USER_ID,
@@ -148,6 +149,7 @@ class TenantControllerIntegrationTest {
                         .param("name", "Liga Bogota")
                         .param("discipline", "Football")
                         .param("language", "es")
+                        .param("timezone", "America/Bogota")
                         .param("contactEmail", "contact@liga.com")
                         .param("contactPhone", "3001234567")
                         .param("contactPhoneIndicator", "57")
@@ -161,7 +163,8 @@ class TenantControllerIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Liga Bogota"))
                 .andExpect(jsonPath("$.discipline").value("Football"))
                 .andExpect(jsonPath("$.slug").value("liga-bogota"))
-                .andExpect(jsonPath("$.status").value("ACTIVE"));
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.timezone").value("America/Bogota"));
     }
 
     @Test
@@ -190,7 +193,15 @@ class TenantControllerIntegrationTest {
         mockMvc.perform(multipart("/api/v1/tenants")
                         .param("name", "Liga Bogota")
                         .param("discipline", "Football")
+                        .param("language", "es")
+                        .param("timezone", "America/Bogota")
                         .param("contactEmail", "contact@liga.com")
+                        .param("contactPhone", "3001234567")
+                        .param("contactPhoneIndicator", "57")
+                        .param("contactStreet", "Calle 50 #45-12")
+                        .param("contactCity", "Bogotá")
+                        .param("contactState", "Cundinamarca")
+                        .param("contactCountry", "Colombia")
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .with(authentication(superadminAuth())))
                 .andExpect(status().isConflict())
@@ -219,6 +230,7 @@ class TenantControllerIntegrationTest {
                 "Liga Bogota",
                 "Football",
                 "es",
+                "America/Bogota",
                 TenantSlug.fromName("Liga Bogota"),
                 CONTACT,
                 USER_ID,
@@ -356,6 +368,7 @@ class TenantControllerIntegrationTest {
                 "Liga Bogota",
                 "Football",
                 "es",
+                "America/Bogota",
                 "ACTIVE",
                 "https://s3.example.com/logo.png",
                 "contact@liga.com",
@@ -380,7 +393,8 @@ class TenantControllerIntegrationTest {
                 .andExpect(jsonPath("$.slug").value("liga-bogota"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.logoUrl").value("https://s3.example.com/logo.png"))
-                .andExpect(jsonPath("$.contactEmail").value("contact@liga.com"));
+                .andExpect(jsonPath("$.contactEmail").value("contact@liga.com"))
+                .andExpect(jsonPath("$.timezone").value("America/Bogota"));
     }
 
     @Test

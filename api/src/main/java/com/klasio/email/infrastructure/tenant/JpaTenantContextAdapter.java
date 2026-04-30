@@ -23,15 +23,14 @@ public class JpaTenantContextAdapter implements TenantContextPort {
     public TenantContext findById(UUID tenantId) {
         @SuppressWarnings("unchecked")
         List<Object> rows = em.createQuery(
-                        "SELECT t.id, t.slug, t.name FROM TenantJpaEntity t WHERE t.id = :id")
+                        "SELECT t.id, t.slug, t.name, t.language, t.timezone FROM TenantJpaEntity t WHERE t.id = :id")
                 .setParameter("id", tenantId)
                 .getResultList();
         if (rows.isEmpty()) {
             throw new IllegalArgumentException("Tenant not found: " + tenantId);
         }
-        // JPA returns Object[] per row for multi-select; unbox accordingly.
         Object first = rows.get(0);
         Object[] r = (first instanceof Object[]) ? (Object[]) first : rows.toArray();
-        return new TenantContext((UUID) r[0], (String) r[1], (String) r[2]);
+        return new TenantContext((UUID) r[0], (String) r[1], (String) r[2], (String) r[3], (String) r[4]);
     }
 }

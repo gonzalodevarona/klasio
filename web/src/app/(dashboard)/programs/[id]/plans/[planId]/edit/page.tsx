@@ -3,6 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Button, Card } from "@/components/ui";
 import ProgramPlanForm from "@/components/programs/ProgramPlanForm";
 import { useProgramDetail } from "@/hooks/usePrograms";
 import { useProgramPlanDetail } from "@/hooks/useProgramPlans";
@@ -13,6 +14,7 @@ interface EditPlanPageProps {
 
 export default function EditPlanPage({ params }: EditPlanPageProps) {
   const t = useTranslations("programs");
+  const tCommon = useTranslations("common");
   const { id, planId } = use(params);
   const { program, loading: programLoading } = useProgramDetail(id);
   const { plan, loading: planLoading, error } = useProgramPlanDetail(id, planId);
@@ -21,39 +23,34 @@ export default function EditPlanPage({ params }: EditPlanPageProps) {
 
   return (
     <div>
-      <nav className="mb-6 text-sm text-gray-500">
-        <Link href="/programs" className="hover:text-gray-700 hover:underline">
-          {t("detailBreadcrumb")}
-        </Link>
-        <span className="mx-2">/</span>
-        <Link
-          href={`/programs/${id}`}
-          className="hover:text-gray-700 hover:underline"
-        >
-          {program?.name ?? id}
-        </Link>
-        <span className="mx-2">/</span>
-        <Link
-          href={`/programs/${id}/plans/${planId}`}
-          className="hover:text-gray-700 hover:underline"
-        >
-          {plan?.name ?? t("planDetailBreadcrumb")}
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">{t("planEditBreadcrumb")}</span>
-      </nav>
+      <div className="mb-6">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={`/programs/${id}/plans/${planId}`}>← {tCommon("back")}</Link>
+        </Button>
+        <nav className="mt-2 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted">
+          <Link href="/programs" className="hover:text-k-subtle">{t("detailBreadcrumb")}</Link>
+          <span className="mx-2">/</span>
+          <Link href={`/programs/${id}`} className="hover:text-k-subtle">{program?.name ?? id}</Link>
+          <span className="mx-2">/</span>
+          <Link href={`/programs/${id}/plans/${planId}`} className="hover:text-k-subtle">
+            {plan?.name ?? t("planDetailBreadcrumb")}
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-k-subtle">{t("planEditBreadcrumb")}</span>
+        </nav>
+      </div>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">{t("planEditPageTitle")}</h1>
+      <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark mb-8">{t("planEditPageTitle")}</h1>
 
       {loading && (
-        <div className="text-center py-8 text-sm text-gray-500">
+        <div className="text-center py-8 text-sm text-k-muted">
           {t("planEditLoadingText")}
         </div>
       )}
 
       {error && (
         <div
-          className="rounded-md bg-red-50 p-4 text-sm text-red-700 border border-red-200"
+          className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text"
           role="alert"
         >
           {error}
@@ -61,13 +58,13 @@ export default function EditPlanPage({ params }: EditPlanPageProps) {
       )}
 
       {plan && (
-        <div className="bg-white shadow rounded-lg p-6">
+        <Card padding="md">
           <ProgramPlanForm
             programId={id}
             tenantId={program?.tenantId}
             plan={plan}
           />
-        </div>
+        </Card>
       )}
     </div>
   );

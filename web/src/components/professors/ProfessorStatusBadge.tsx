@@ -1,23 +1,20 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Badge, type BadgeVariant } from "@/components/ui";
 import { ProfessorStatus } from "@/lib/types/professor";
 
 interface ProfessorStatusBadgeProps {
   status: ProfessorStatus;
 }
 
-const STATUS_STYLES: Record<ProfessorStatus, string> = {
-  INVITED:     "bg-yellow-100 text-yellow-800",
-  ACTIVE:      "bg-green-100 text-green-800",
-  DEACTIVATED: "bg-red-100 text-red-800",
+const STATUS_VARIANT: Record<ProfessorStatus, BadgeVariant> = {
+  INVITED:     "pending",
+  ACTIVE:      "active",
+  DEACTIVATED: "rejected",
 };
 
 export default function ProfessorStatusBadge({ status }: ProfessorStatusBadgeProps) {
   const t = useTranslations("badges.professorStatus");
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[status]}`}>
-      {t(status)}
-    </span>
-  );
+  return <Badge variant={STATUS_VARIANT[status]} label={t(status)} />;
 }

@@ -1,5 +1,5 @@
 export type ProgramStatus = "ACTIVE" | "INACTIVE";
-export type ProgramModality = "HOURS_BASED" | "CLASSES_PER_WEEK";
+export type ProgramModality = "HOURS_BASED" | "CLASSES_PER_WEEK" | "UNLIMITED";
 
 export interface ProgramPlanSummary {
   id: string;

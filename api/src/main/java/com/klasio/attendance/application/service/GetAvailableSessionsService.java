@@ -3,12 +3,13 @@ package com.klasio.attendance.application.service;
 import com.klasio.attendance.AttendanceTimeConstants;
 import com.klasio.attendance.application.dto.AvailableSessionView;
 import com.klasio.attendance.application.port.input.GetAvailableSessionsUseCase;
+import com.klasio.attendance.application.util.ClassScheduleExpander;
+import com.klasio.attendance.application.util.ClassScheduleExpander.SessionTuple;
 import com.klasio.attendance.domain.model.ClassSession;
 import com.klasio.attendance.domain.model.ClassSessionStatus;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassRegistrationView;
-import com.klasio.attendance.domain.port.ClassDetailsPort.ScheduleEntryView;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.attendance.domain.port.EnrollmentLookupPort;
 import com.klasio.attendance.domain.port.EnrollmentLookupPort.EnrollmentView;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -67,14 +67,15 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
 
         String level = programEnrollment.level();
 
-        // 3. Fetch active classes in program at student's level
-        List<ClassRegistrationView> classes = classDetailsPort.findActiveByProgramAndLevel(tenantId, programId, level);
+        // 3. Fetch active classes in program at student's level + OPEN (any student can attend OPEN classes)
+        List<String> levels = "OPEN".equals(level) ? List.of("OPEN") : List.of(level, "OPEN");
+        List<ClassRegistrationView> classes = classDetailsPort.findActiveByProgramAndLevels(tenantId, programId, levels);
         if (classes.isEmpty()) {
             return List.of();
         }
 
         // 4. Expand schedule entries into concrete (classId, date, startTime, endTime) tuples
-        List<SessionTuple> tuples = expandSchedules(classes, from, to);
+        List<SessionTuple> tuples = ClassScheduleExpander.expand(classes, from, to);
         if (tuples.isEmpty()) {
             return List.of();
         }
@@ -90,13 +91,9 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
                         s -> s
                 ));
 
-        // 6. Fetch session IDs where student already has a REGISTERED registration
-        List<UUID> materializedSessionIds = materializedSessions.stream()
-                .map(s -> s.getId().value())
-                .collect(Collectors.toList());
-        Set<UUID> alreadyRegisteredIds = materializedSessionIds.isEmpty()
-                ? Set.of()
-                : registrationRepository.findRegisteredSessionIds(tenantId, studentId, materializedSessionIds);
+        // 6. Fetch active registrations for student in this window (for inline status display)
+        Map<UUID, AttendanceRegistrationRepository.RegistrationInfo> registrationBySessionId =
+                registrationRepository.findActiveRegistrationsBySessionId(tenantId, studentId, from, to);
 
         // 7. Time thresholds
         ZonedDateTime now    = ZonedDateTime.now(AttendanceTimeConstants.TENANT_ZONE);
@@ -137,14 +134,19 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
             ClassRegistrationView classView = classMap.get(tuple.classId());
             int maxStudents = classView.maxStudents();
 
-            // Filter: already registered
-            if (sessionId != null && alreadyRegisteredIds.contains(sessionId)) {
-                continue;
-            }
-
             // Filter: full unless includeFull=true
             if (!includeFull && currentCapacity >= maxStudents) {
                 continue;
+            }
+
+            UUID registrationId = null;
+            String registrationStatus = null;
+            if (sessionId != null) {
+                AttendanceRegistrationRepository.RegistrationInfo regInfo = registrationBySessionId.get(sessionId);
+                if (regInfo != null) {
+                    registrationId = regInfo.registrationId();
+                    registrationStatus = regInfo.registrationStatus();
+                }
             }
 
             result.add(new AvailableSessionView(
@@ -160,7 +162,9 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
                     maxStudents,
                     status,
                     registrationOpen,
-                    alertReason
+                    alertReason,
+                    registrationId,
+                    registrationStatus
             ));
         }
 
@@ -171,34 +175,7 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
         return result;
     }
 
-    private List<SessionTuple> expandSchedules(List<ClassRegistrationView> classes,
-                                               LocalDate from, LocalDate to) {
-        List<SessionTuple> tuples = new ArrayList<>();
-        for (ClassRegistrationView cls : classes) {
-            for (ScheduleEntryView entry : cls.scheduleEntries()) {
-                if ("ONE_TIME".equals(cls.type())) {
-                    LocalDate specificDate = entry.specificDate();
-                    if (specificDate != null && !specificDate.isBefore(from) && !specificDate.isAfter(to)) {
-                        tuples.add(new SessionTuple(cls.id(), specificDate, entry.startTime(), entry.endTime()));
-                    }
-                } else {
-                    // RECURRING: walk days in window matching dayOfWeek
-                    LocalDate cursor = from;
-                    while (!cursor.isAfter(to)) {
-                        if (entry.dayOfWeek() != null && cursor.getDayOfWeek().equals(entry.dayOfWeek())) {
-                            tuples.add(new SessionTuple(cls.id(), cursor, entry.startTime(), entry.endTime()));
-                        }
-                        cursor = cursor.plusDays(1);
-                    }
-                }
-            }
-        }
-        return tuples;
-    }
-
     private String sessionKey(UUID classId, LocalDate date, LocalTime startTime) {
         return classId + "|" + date + "|" + startTime;
     }
-
-    private record SessionTuple(UUID classId, LocalDate sessionDate, LocalTime startTime, LocalTime endTime) {}
 }

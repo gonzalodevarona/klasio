@@ -1,3 +1,4 @@
+
 import { getTranslations } from "next-intl/server";
 import RegistrationForm from "@/components/auth/RegistrationForm";
 
@@ -10,13 +11,12 @@ export default async function RegisterPage({ params }: RegisterPageProps) {
   const t = await getTranslations("registerPage");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            {t("subtitle", { tenantSlug })}
-          </p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-k-dark px-4 py-12">
+      <img src="/logo.svg" alt="Klasio" width={48} height={48} className="mb-8" />
+      <div className="w-full max-w-md bg-k-surface rounded-k-xl shadow-k-modal p-10">
+        <div className="text-center mb-6">
+          <h1 className="text-[22px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
+          <p className="mt-2 text-sm text-k-muted">{t("subtitle", { tenantSlug })}</p>
         </div>
         <RegistrationForm tenantSlug={tenantSlug} />
       </div>

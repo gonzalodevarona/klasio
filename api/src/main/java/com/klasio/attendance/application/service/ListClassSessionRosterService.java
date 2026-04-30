@@ -3,10 +3,13 @@ package com.klasio.attendance.application.service;
 import com.klasio.attendance.application.dto.ClassSessionRosterView;
 import com.klasio.attendance.application.dto.ClassSessionRosterView.RegistrantView;
 import com.klasio.attendance.application.port.input.ListClassSessionRosterUseCase;
+import com.klasio.attendance.application.util.ClassScheduleExpander;
+import com.klasio.attendance.application.util.ClassScheduleExpander.SessionTuple;
 import com.klasio.attendance.domain.model.AttendanceRegistration;
 import com.klasio.attendance.domain.model.ClassSession;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
+import com.klasio.attendance.domain.port.ClassDetailsPort.ClassRegistrationView;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassSummaryView;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.attendance.domain.port.ProfessorIdLookupPort;
@@ -20,7 +23,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +67,7 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
                     "Date range must not exceed " + MAX_WINDOW_DAYS + " days");
         }
 
-        // 2. Load class summary for scope check
+        // 2. Load class summary for RBAC scope check
         ClassSummaryView classView = classDetailsPort
                 .findClassSummary(tenantId, classId)
                 .orElseThrow(() -> new ClassNotFoundException("Class not found: " + classId));
@@ -71,59 +75,77 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
         // 3. RBAC scope guard
         enforceScope(role, userId, tenantId, classView, programIdFromJwt);
 
-        // 4. Load registrations
-        List<AttendanceRegistration> registrations =
-                registrationRepository.findByClassAndDateRange(tenantId, classId, from, to);
+        // 4. Load full class view (schedule + type needed for expansion)
+        ClassRegistrationView classDetail = classDetailsPort
+                .findForRegistration(tenantId, classId)
+                .orElseThrow(() -> new ClassNotFoundException("Class not found: " + classId));
 
-        if (registrations.isEmpty()) {
+        // 5. Expand schedule into expected session tuples within [from, to]
+        List<SessionTuple> tuples = ClassScheduleExpander.expand(List.of(classDetail), from, to);
+        if (tuples.isEmpty()) {
             return List.of();
         }
 
-        // 5. Batch-resolve student names (one call per unique studentId)
-        Set<UUID> studentIds = registrations.stream()
-                .map(AttendanceRegistration::getStudentId)
-                .collect(Collectors.toSet());
+        // 6. Load all registrations in window
+        List<AttendanceRegistration> registrations =
+                registrationRepository.findByClassAndDateRange(tenantId, classId, from, to);
 
-        Map<UUID, String> nameCache = new java.util.HashMap<>();
-        for (UUID sid : studentIds) {
-            nameCache.put(sid, studentNamePort.findFullName(sid, tenantId).orElse("Unknown"));
+        // 7. Bucket registrations by (date, startTime, endTime)
+        boolean exposeCreatedBy = "ADMIN".equals(role) || "SUPERADMIN".equals(role) || "MANAGER".equals(role);
+
+        Map<UUID, String> nameCache = new HashMap<>();
+        if (!registrations.isEmpty()) {
+            Set<UUID> studentIds = registrations.stream()
+                    .map(AttendanceRegistration::getStudentId)
+                    .collect(Collectors.toSet());
+            for (UUID sid : studentIds) {
+                nameCache.put(sid, studentNamePort.findFullName(sid, tenantId).orElse("Unknown"));
+            }
         }
 
-        // 6. Group by (sessionDate, startTime, endTime) preserving date+time order
-        LinkedHashMap<SessionKey, List<RegistrantView>> grouped = new LinkedHashMap<>();
+        Map<String, List<RegistrantView>> registrantsByKey = new HashMap<>();
         for (AttendanceRegistration r : registrations) {
-            SessionKey key = new SessionKey(r.getSessionDate(), r.getSessionStartTime(), r.getSessionEndTime());
-            grouped.computeIfAbsent(key, k -> new ArrayList<>())
+            String key = sessionKey(r.getSessionDate(), r.getSessionStartTime(), r.getSessionEndTime());
+            registrantsByKey.computeIfAbsent(key, k -> new ArrayList<>())
                     .add(new RegistrantView(
                             r.getId().value(),
                             r.getStudentId(),
                             nameCache.getOrDefault(r.getStudentId(), "Unknown"),
                             r.getLevelAtRegistration(),
                             r.getIntendedHours(),
-                            r.getStatus().name()
+                            r.getStatus().name(),
+                            exposeCreatedBy ? r.getCreatedBy() : null
                     ));
         }
 
-        // 7. Build result enriched with live session status (SCHEDULED / ALERTED / CANCELLED).
-        //    Sessions that were never persisted (no alert/cancel action) default to SCHEDULED.
-        return grouped.entrySet().stream()
-                .map(e -> {
-                    Optional<ClassSession> cs =
-                            sessionRepository.findByClassAndDate(tenantId, classId, e.getKey().date());
-                    String sessionStatus = cs.map(s -> s.getStatus().name()).orElse("SCHEDULED");
-                    String alertReason = cs.map(ClassSession::getAlertReason).orElse(null);
-                    String cancellationReason = cs.map(ClassSession::getCancellationReason).orElse(null);
-                    return new ClassSessionRosterView(
-                            e.getKey().date(),
-                            e.getKey().startTime(),
-                            e.getKey().endTime(),
-                            sessionStatus,
-                            alertReason,
-                            cancellationReason,
-                            List.copyOf(e.getValue())
-                    );
-                })
-                .toList();
+        // 8. Build one view per tuple, enriching with materialized session status
+        List<ClassSessionRosterView> result = new ArrayList<>();
+        for (SessionTuple tuple : tuples) {
+            Optional<ClassSession> cs =
+                    sessionRepository.findByClassAndDate(tenantId, classId, tuple.sessionDate());
+            String sessionStatus      = cs.map(s -> s.getStatus().name()).orElse("SCHEDULED");
+            String alertReason        = cs.map(ClassSession::getAlertReason).orElse(null);
+            String cancellationReason = cs.map(ClassSession::getCancellationReason).orElse(null);
+
+            String key = sessionKey(tuple.sessionDate(), tuple.startTime(), tuple.endTime());
+            List<RegistrantView> registrants = registrantsByKey.getOrDefault(key, List.of());
+
+            result.add(new ClassSessionRosterView(
+                    tuple.sessionDate(),
+                    tuple.startTime(),
+                    tuple.endTime(),
+                    sessionStatus,
+                    alertReason,
+                    cancellationReason,
+                    List.copyOf(registrants)
+            ));
+        }
+
+        // 9. Sort by date then startTime
+        result.sort(Comparator.comparing(ClassSessionRosterView::sessionDate)
+                .thenComparing(ClassSessionRosterView::startTime));
+
+        return result;
     }
 
     private void enforceScope(String role, UUID userId, UUID tenantId,
@@ -150,5 +172,7 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
         }
     }
 
-    private record SessionKey(LocalDate date, LocalTime startTime, LocalTime endTime) {}
+    private String sessionKey(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        return date + "|" + startTime + "|" + endTime;
+    }
 }

@@ -61,11 +61,6 @@ klasio:
     brevo:
       api-key: ${BREVO_API_KEY:}
       api-base-url: https://api.brevo.com/v3
-      template-ids:
-        membership-activated: ${BREVO_TEMPLATE_MEMBERSHIP_ACTIVATED:0}
-        membership-expiry-warning: ${BREVO_TEMPLATE_MEMBERSHIP_EXPIRY:0}
-        membership-depleted: ${BREVO_TEMPLATE_MEMBERSHIP_DEPLETED:0}
-        class-session-change: ${BREVO_TEMPLATE_CLASS_SESSION_CHANGE:0}
   s3:
     bucket: ${AWS_S3_BUCKET:klasio-logos-dev}
     region: ${AWS_REGION:us-east-1}

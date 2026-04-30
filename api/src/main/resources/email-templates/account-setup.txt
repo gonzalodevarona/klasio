@@ -1,12 +1,11 @@
-Set up your account at [(${tenantName})]
+[(#{accountSetup.subject(${tenantName})})]
 
-Hi [(${recipientName})],
+[(#{accountSetup.hi})] [(${recipientName})],
 
-Your [(${role})] account on [(${tenantName})] is ready.
+[(#{accountSetup.body(${role}, ${tenantName})})]
 
-Click the link below to create your password:
 [(${setupUrl})]
 
-This link expires at [(${expiresAt})]. If it expires, use the "Resend link" option on the login page.
+[(#{accountSetup.expiry(${expiresAt})})]
 
 Klasio

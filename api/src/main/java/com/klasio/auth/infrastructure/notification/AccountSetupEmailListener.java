@@ -46,7 +46,7 @@ public class AccountSetupEmailListener {
         params.put("recipientName", event.recipientName());
         params.put("role", event.role().toLowerCase());
         params.put("setupUrl", setupUrl);
-        params.put("expiresAt", event.expiresAt().toString());
+        params.put("expiresAt", event.expiresAt());
         // tenantName is injected automatically by EmailDispatcherService via TenantContext
 
         emailService.send(

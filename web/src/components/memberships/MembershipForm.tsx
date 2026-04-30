@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Select, Button } from "@/components/ui";
 import { CreateMembershipRequest } from "@/lib/types/membership";
 import { ProgramPlanSummary } from "@/lib/types/program";
 
@@ -19,6 +20,7 @@ export default function MembershipForm({
   onCancel,
 }: MembershipFormProps) {
   const t = useTranslations("memberships");
+  const tMembership = useTranslations("membership");
   const tCommon = useTranslations("common");
 
   const today = new Date();
@@ -57,39 +59,52 @@ export default function MembershipForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t("formPlanLabel")}</label>
-        <select
+        <Select
+          label={t("formPlanLabel")}
           value={planId}
           onChange={(e) => setPlanId(e.target.value)}
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">{t("formPlanSelectPlaceholder")}</option>
-          {plans.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} — {p.hours} hours
-            </option>
-          ))}
-        </select>
+          {plans.map((p) => {
+            const hoursLabel =
+              p.modality === "UNLIMITED"
+                ? tMembership("modality.unlimited")
+                : `${p.hours} hours`;
+            return (
+              <option key={p.id} value={p.id}>
+                {p.name} — {hoursLabel}
+              </option>
+            );
+          })}
+        </Select>
         {selectedPlan && (
-          <div className="mt-2 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 space-y-1.5">
-            <p className="text-sm font-semibold text-blue-900">{selectedPlan.name}</p>
+          <div className="mt-2 rounded-lg border border-k-border bg-k-surface px-4 py-3 space-y-1.5">
+            <p className="text-sm font-semibold text-k-ink">{selectedPlan.name}</p>
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
               <div>
-                <span className="text-blue-600 font-medium">{t("formModalityLabel")}</span>
-                <span className="text-blue-800">
-                  {selectedPlan.modality === "HOURS_BASED" ? t("formModalityHoursBased") : t("formModalityClassesPerWeek")}
+                <span className="text-k-volt font-medium">{t("formModalityLabel")}</span>
+                <span className="text-k-subtle">
+                  {selectedPlan.modality === "HOURS_BASED"
+                    ? t("formModalityHoursBased")
+                    : selectedPlan.modality === "UNLIMITED"
+                    ? tMembership("modality.unlimited")
+                    : t("formModalityClassesPerWeek")}
                 </span>
               </div>
-              {selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null && (
+              {selectedPlan.modality === "UNLIMITED" ? (
                 <div>
-                  <span className="text-blue-600 font-medium">{t("formHoursLabel")}</span>
-                  <span className="text-blue-800">{selectedPlan.hours}h / month</span>
+                  <span className="text-k-subtle">{tMembership("unlimited.label")}</span>
                 </div>
-              )}
+              ) : selectedPlan.modality === "HOURS_BASED" && selectedPlan.hours != null ? (
+                <div>
+                  <span className="text-k-volt font-medium">{t("formHoursLabel")}</span>
+                  <span className="text-k-subtle">{selectedPlan.hours}h / month</span>
+                </div>
+              ) : null}
               <div>
-                <span className="text-blue-600 font-medium">{t("formCostLabel")}</span>
-                <span className="text-blue-800">${Number(selectedPlan.cost).toLocaleString()}</span>
+                <span className="text-k-volt font-medium">{t("formCostLabel")}</span>
+                <span className="text-k-subtle">${Number(selectedPlan.cost).toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -97,21 +112,23 @@ export default function MembershipForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-k-subtle mb-1">
           {t("formStartDateLabel")}
         </label>
+        {/* TODO: no primitive for type="date" */}
         <input
           type="date"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
           required
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-k-surface border border-k-border rounded-k-sm px-3 py-2 text-sm focus:border-k-volt focus:outline-none"
         />
-        <p className="mt-1 text-xs text-gray-500">{t("formExpiresHint")}</p>
+        <p className="mt-1 text-xs text-k-muted">{t("formExpiresHint")}</p>
       </div>
 
       <div className="space-y-2">
-        <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+        <label className="flex items-center gap-3 text-sm text-k-subtle cursor-pointer">
+          {/* TODO: no primitive for type="checkbox" */}
           <input
             type="checkbox"
             checked={paymentValidated}
@@ -119,18 +136,19 @@ export default function MembershipForm({
               setPaymentValidated(e.target.checked);
               if (!e.target.checked) setActivateDirectly(false);
             }}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600"
+            className="h-4 w-4 rounded border-k-border accent-k-volt focus:ring-k-volt"
           />
           {t("formPaymentValidated")}
         </label>
 
         {paymentValidated && (
-          <label className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer ml-7">
+          <label className="flex items-center gap-3 text-sm text-k-subtle cursor-pointer ml-7">
+            {/* TODO: no primitive for type="checkbox" */}
             <input
               type="checkbox"
               checked={activateDirectly}
               onChange={(e) => setActivateDirectly(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600"
+              className="h-4 w-4 rounded border-k-border accent-k-volt focus:ring-k-volt"
             />
             {t("formActivateDirectly")}
           </label>
@@ -144,21 +162,12 @@ export default function MembershipForm({
       )}
 
       <div className="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={submitting}
-          className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-        >
+        <Button variant="outline" type="button" onClick={onCancel} disabled={submitting}>
           {tCommon("cancel")}
-        </button>
-        <button
-          type="submit"
-          disabled={!isValid || submitting}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
-        >
+        </Button>
+        <Button variant="volt" type="submit" disabled={!isValid || submitting}>
           {submitting ? t("formCreatingBtn") : t("formCreateBtn")}
-        </button>
+        </Button>
       </div>
     </form>
   );

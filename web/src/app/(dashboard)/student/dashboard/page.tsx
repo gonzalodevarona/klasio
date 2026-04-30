@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@/hooks/useAuth";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import HourBalance from "@/components/memberships/HourBalance";
+import { UnlimitedBadge } from "@/components/memberships/UnlimitedBadge";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
+import { Badge, Button, Card } from "@/components/ui";
+import { ClassLevel } from "@/lib/types/programClass";
+import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import { todayInTenantZone, formatSessionDate } from "@/lib/attendanceConstants";
 
 function formatDate(iso: string | null): string {
@@ -20,7 +23,6 @@ export default function StudentDashboard() {
   const t = useTranslations("studentDashboard");
   const today = todayInTenantZone();
 
-  const { user } = useAuth();
   const { memberships, loading: membershipsLoading } = useMyMemberships();
   const { enrollments, loading: enrollmentsLoading } = useMyEnrollments();
   const { registrations, loading: registrationsLoading } = useMyRegistrations({
@@ -40,156 +42,137 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
+        <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
           {t("subtitle")}
         </p>
       </div>
 
-      {/* Active membership card */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+      <Card padding="md">
+        <h2 className="text-base font-semibold text-k-dark mb-4">
           {t("activeMembership")}
         </h2>
         {membershipsLoading ? (
-          <p className="text-sm text-gray-400">{t("loading")}</p>
+          <p className="text-sm text-k-muted">{t("loading")}</p>
         ) : activeMembership ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-k-dark">
                 {activeMembership.planName}
               </span>
               <MembershipStatusBadge status={activeMembership.status} />
             </div>
-            <HourBalance
-              available={activeMembership.availableHours}
-              purchased={activeMembership.purchasedHours}
-            />
-            <p className="text-xs text-gray-400">
-              {t("membershipExpires", { date: formatDate(activeMembership.expirationDate) })}
+            {activeMembership.modality === "UNLIMITED" ? (
+              <UnlimitedBadge expiresAt={new Date(activeMembership.expirationDate)} />
+            ) : (
+              <HourBalance
+                available={activeMembership.availableHours ?? 0}
+                purchased={activeMembership.purchasedHours ?? 0}
+                data-testid="hour-balance"
+              />
+            )}
+            <p className="text-xs text-k-muted font-mono">
+              {t("membershipPeriod")} {formatDate(activeMembership.startDate)} → {formatDate(activeMembership.expirationDate)}
             </p>
             <Link
               href={`/student/memberships/${activeMembership.id}`}
-              className="inline-block text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+              className="inline-block text-sm text-k-subtle hover:text-k-dark font-medium"
             >
               {t("viewDetails")}
             </Link>
           </div>
         ) : (
-          <p className="text-sm text-gray-400">{t("noMembership")}</p>
+          <p className="text-sm text-k-muted">{t("noMembership")}</p>
         )}
-      </div>
+      </Card>
 
-      {/* Enrollments summary */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+      <Card padding="md">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-k-dark">
             {t("enrollmentsTitle")}
           </h2>
           <Link
             href="/student/enrollments"
-            className="text-xs text-indigo-600 hover:text-indigo-800"
+            className="text-xs text-k-subtle hover:text-k-dark font-medium"
           >
             {t("viewAll")}
           </Link>
         </div>
         {enrollmentsLoading ? (
-          <p className="text-sm text-gray-400">{t("loading")}</p>
+          <p className="text-sm text-k-muted">{t("loading")}</p>
         ) : enrollments.length === 0 ? (
-          <p className="text-sm text-gray-400">{t("noEnrollments")}</p>
+          <p className="text-sm text-k-muted">{t("noEnrollments")}</p>
         ) : (
           <ul className="space-y-2">
             {enrollments.slice(0, 3).map((e) => (
               <li key={e.id} className="flex items-center justify-between text-sm">
-                <span className="text-gray-900">{e.programName}</span>
+                <span className="text-k-dark">{e.programName}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">{e.level}</span>
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                      e.status === "ACTIVE"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {e.status}
-                  </span>
+                  <span className="text-xs text-k-muted">{e.level}</span>
+                  <Badge
+                    variant={e.status === "ACTIVE" ? "active" : "inactive"}
+                    label={e.status}
+                    small
+                  />
                 </div>
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </Card>
 
-      {/* Upcoming registrations */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+      <Card padding="md">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-k-dark">
             {t("upcomingRegistrations")}
           </h2>
           <Link
-            href="/student/registrations"
-            className="text-xs text-indigo-600 hover:text-indigo-800"
+            href="/student/classes"
+            className="text-xs text-k-subtle hover:text-k-dark font-medium"
           >
             {t("viewAll")}
           </Link>
         </div>
         {registrationsLoading ? (
-          <p className="text-sm text-gray-400">{t("loading")}</p>
+          <p className="text-sm text-k-muted">{t("loading")}</p>
         ) : upcomingRegistrations.length === 0 ? (
-          <p className="text-sm text-gray-400">{t("noRegistrations")}</p>
+          <p className="text-sm text-k-muted">{t("noRegistrations")}</p>
         ) : (
           <ul className="space-y-2">
             {upcomingRegistrations.map((r) => (
               <li key={r.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-900">
+                  <span className="text-k-dark">
                     {formatSessionDate(r.sessionDate)}
                   </span>
-                  <span className="text-gray-400">
+                  <span className="text-k-muted">
                     {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}
                   </span>
                   {r.sessionStatus === "ALERTED" && (
                     <span
                       title={r.sessionAlertReason ?? t("alertTooltip")}
-                      className="inline-flex text-amber-600"
+                      className="inline-flex text-k-warn-text"
                     >
                       <AlertTriangle className="w-4 h-4" />
                     </span>
                   )}
                 </div>
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                    r.level === "BEGINNER"
-                      ? "bg-blue-100 text-blue-700"
-                      : r.level === "INTERMEDIATE"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : r.level === "ADVANCED"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {r.level}
-                </span>
+                <ClassLevelBadge level={r.level as ClassLevel} />
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </Card>
 
-      {/* Quick links */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: t("quickLinksMemberships"), href: "/student/memberships" },
           { label: t("quickLinksEnrollments"), href: "/student/enrollments" },
           { label: t("quickLinksClasses"), href: "/student/classes" },
         ].map(({ label, href }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            {label}
-          </Link>
+          <Button key={href} variant="outline" asChild>
+            <Link href={href}>{label}</Link>
+          </Button>
         ))}
       </div>
     </div>

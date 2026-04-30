@@ -42,6 +42,20 @@ public class DeductHoursService implements DeductHoursUseCase {
                 .orElseThrow(() -> new MembershipNotFoundException(
                         "Membership not found: " + command.membershipId()));
 
+        if (membership.isUnlimited()) {
+            // UNLIMITED: write a delta=0 audit row for traceability — no balance change
+            HourTransaction tx = HourTransaction.createForUnlimited(
+                    membership.getTenantId(),
+                    membership.getId().value(),
+                    HourTransactionType.ATTENDANCE_DEDUCTION,
+                    "Attendance (UNLIMITED plan)",
+                    command.actorId(),
+                    command.actorRole()
+            );
+            hourTransactionRepository.save(tx);
+            return membership;
+        }
+
         membership.deductHours(command.hours(), command.actorId(), command.actorRole());
 
         HourTransaction tx = HourTransaction.create(

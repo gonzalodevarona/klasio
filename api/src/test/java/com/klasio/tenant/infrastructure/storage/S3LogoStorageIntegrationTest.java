@@ -50,7 +50,6 @@ class S3LogoStorageIntegrationTest {
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
                         .build())
-                .forcePathStyle(true)
                 .build();
 
         S3Presigner presigner = S3Presigner.builder()

@@ -12,7 +12,7 @@ public record ProofQueueItemDto(
         String studentIdentityNumber,
         String planName,
         String programName,
-        int purchasedHours,
+        Integer purchasedHours,
         BigDecimal planCost,
         Instant uploadedAt,
         String contentType

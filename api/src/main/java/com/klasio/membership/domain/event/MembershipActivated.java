@@ -12,7 +12,7 @@ public record MembershipActivated(
         UUID programId,
         UUID actorId,
         String planName,
-        int totalHours,
+        Integer totalHours,
         LocalDate expirationDate,
         Instant occurredAt
 ) implements DomainEvent {}

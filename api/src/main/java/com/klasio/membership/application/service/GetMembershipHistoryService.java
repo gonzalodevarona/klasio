@@ -30,8 +30,9 @@ public class GetMembershipHistoryService implements GetMembershipHistoryUseCase 
         return memberships.stream()
                 .map(m -> new MembershipHistoryEntryDto(
                         m.getId().value(),
+                        m.getModality().name(),
                         m.getPurchasedHours(),
-                        m.getPurchasedHours() - m.getAvailableHours(),
+                        m.isUnlimited() ? null : m.getPurchasedHours() - m.getAvailableHours(),
                         m.getAvailableHours(),
                         m.getStartDate(),
                         m.getExpirationDate(),
@@ -47,13 +48,14 @@ public class GetMembershipHistoryService implements GetMembershipHistoryUseCase 
         List<MembershipHistoryEntryDto> history = execute(tenantId, studentId, programId);
 
         StringBuilder csv = new StringBuilder();
-        csv.append("id,purchasedHours,consumedHours,availableHours,startDate,expirationDate,status,activatedAt\n");
+        csv.append("id,modality,purchasedHours,consumedHours,availableHours,startDate,expirationDate,status,activatedAt\n");
 
         for (MembershipHistoryEntryDto entry : history) {
             csv.append(entry.id()).append(',')
-               .append(entry.purchasedHours()).append(',')
-               .append(entry.consumedHours()).append(',')
-               .append(entry.availableHours()).append(',')
+               .append(entry.modality()).append(',')
+               .append(entry.purchasedHours() != null ? entry.purchasedHours() : "—").append(',')
+               .append(entry.consumedHours() != null ? entry.consumedHours() : "—").append(',')
+               .append(entry.availableHours() != null ? entry.availableHours() : "—").append(',')
                .append(entry.startDate()).append(',')
                .append(entry.expirationDate()).append(',')
                .append(entry.status()).append(',')

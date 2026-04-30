@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Button } from "@/components/ui";
 import ClassList from "@/components/classes/ClassList";
 
 export async function generateMetadata() {
@@ -7,34 +8,29 @@ export async function generateMetadata() {
   return { title: `${t("classesPageTitle")} - Klasio` };
 }
 
-export default async function ClassesPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ClassesPage({ params }: { params: Promise<{ id: string }> }) {
   const t = await getTranslations("programs");
+  const tCommon = await getTranslations("common");
   const { id } = await params;
 
   return (
     <div>
-      <nav className="mb-6 text-sm text-gray-500">
-        <Link href="/programs" className="hover:text-gray-700 hover:underline">
-          {t("detailBreadcrumb")}
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900">{t("classesPageBreadcrumb")}</span>
-      </nav>
-
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t("classesPageTitle")}</h1>
-        <Link
-          href={`/programs/${id}/classes/new`}
-          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          {t("classesAddButton")}
-        </Link>
+      <div className="mb-6">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={`/programs/${id}`}>← {tCommon("back")}</Link>
+        </Button>
+        <nav className="mt-2 font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted">
+          <Link href="/programs" className="hover:text-k-subtle">{t("detailBreadcrumb")}</Link>
+          <span className="mx-2">/</span>
+          <span className="text-k-subtle">{t("classesPageBreadcrumb")}</span>
+        </nav>
       </div>
-
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("classesPageTitle")}</h1>
+        <Button variant="volt" asChild>
+          <Link href={`/programs/${id}/classes/new`}>+ {t("classesAddButton")}</Link>
+        </Button>
+      </div>
       <ClassList programId={id} />
     </div>
   );

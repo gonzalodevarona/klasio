@@ -28,8 +28,8 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +57,7 @@ class GetAvailableSessionsServiceTest {
 
     // A Monday far enough in the future (> 2h cutoff)
     private static final LocalDate FUTURE_MONDAY =
-            LocalDate.now(BOGOTA).plusDays(7)
+            LocalDate.now(BOGOTA).plusDays(3)
                      .with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
 
     private static final LocalTime START = LocalTime.of(9, 0);
@@ -70,7 +70,7 @@ class GetAvailableSessionsServiceTest {
     void setUp() {
         enrollment  = new EnrollmentView(UUID.randomUUID(), "BEGINNER");
         activeClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "RECURRING",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
                 List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START, END))
         );
@@ -81,30 +81,29 @@ class GetAvailableSessionsServiceTest {
     // ------------------------------------------------------------------
 
     @Test
-    @DisplayName("window > 30 days throws IllegalArgumentException")
+    @DisplayName("window > 7 days throws IllegalArgumentException")
     void windowExceedsMax_throwsIllegalArgument() {
         LocalDate from = LocalDate.now(BOGOTA);
-        LocalDate to   = from.plusDays(31);
+        LocalDate to   = from.plusDays(8);
 
         assertThatThrownBy(() -> service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("30");
+                .hasMessageContaining("7");
 
         verifyNoInteractions(enrollmentLookupPort, classDetailsPort, classSessionRepository, registrationRepository);
     }
 
     @Test
-    @DisplayName("window exactly 30 days does not throw on the window check")
-    void windowExactly30Days_doesNotThrowWindowError() {
+    @DisplayName("window exactly 7 days does not throw on the window check")
+    void windowExactly7Days_doesNotThrowWindowError() {
         LocalDate from = LocalDate.now(BOGOTA);
-        LocalDate to   = from.plusDays(30);
+        LocalDate to   = from.plusDays(7);
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of());
 
-        // No exception from the window guard — service returns empty list
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
         assertThat(result).isEmpty();
     }
@@ -139,7 +138,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
@@ -161,19 +160,19 @@ class GetAvailableSessionsServiceTest {
         LocalDate to   = yesterday;
 
         ClassRegistrationView oneTimeClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "ONE_TIME",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Past Class",
                 List.of(new ScheduleEntryView(null, yesterday, LocalTime.of(9, 0), LocalTime.of(10, 0)))
         );
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(oneTimeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -200,12 +199,12 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(cancelled));
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -213,12 +212,45 @@ class GetAvailableSessionsServiceTest {
     }
 
     // ------------------------------------------------------------------
-    // Already-registered sessions excluded
+    // Already-registered sessions shown with inline registration state
     // ------------------------------------------------------------------
 
     @Test
-    @DisplayName("session where student is already registered is excluded")
-    void alreadyRegistered_excluded() {
+    @DisplayName("already-registered session appears in results with registrationId and registrationStatus REGISTERED")
+    void alreadyRegistered_shownWithRegistrationState() {
+        LocalDate from = FUTURE_MONDAY;
+        LocalDate to   = from.plusDays(6);
+
+        UUID sessionId      = UUID.randomUUID();
+        UUID registrationId = UUID.randomUUID();
+
+        ClassSession scheduled = ClassSession.reconstitute(
+                ClassSessionId.of(sessionId), TENANT_ID, CLASS_ID,
+                FUTURE_MONDAY, START, END,
+                1, ClassSessionStatus.SCHEDULED,
+                null, null, null, null, null, null,
+                Instant.now(), UUID.randomUUID(), null, null
+        );
+
+        when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
+                .thenReturn(Optional.of(enrollment));
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
+                .thenReturn(List.of(activeClass));
+        when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
+                .thenReturn(List.of(scheduled));
+        when(registrationRepository.findActiveRegistrationsBySessionId(eq(TENANT_ID), eq(STUDENT_ID), eq(from), eq(to)))
+                .thenReturn(Map.of(sessionId, new AttendanceRegistrationRepository.RegistrationInfo(registrationId, "REGISTERED")));
+
+        List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).registrationId()).isEqualTo(registrationId);
+        assertThat(result.get(0).registrationStatus()).isEqualTo("REGISTERED");
+    }
+
+    @Test
+    @DisplayName("unregistered session has null registrationId and registrationStatus")
+    void unregistered_hasNullRegistrationFields() {
         LocalDate from = FUTURE_MONDAY;
         LocalDate to   = from.plusDays(6);
 
@@ -233,16 +265,18 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(scheduled));
-        when(registrationRepository.findRegisteredSessionIds(eq(TENANT_ID), eq(STUDENT_ID), any()))
-                .thenReturn(Set.of(sessionId));
+        when(registrationRepository.findActiveRegistrationsBySessionId(eq(TENANT_ID), eq(STUDENT_ID), eq(from), eq(to)))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
-        assertThat(result).isEmpty();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).registrationId()).isNull();
+        assertThat(result.get(0).registrationStatus()).isNull();
     }
 
     // ------------------------------------------------------------------
@@ -257,12 +291,12 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -294,7 +328,7 @@ class GetAvailableSessionsServiceTest {
         LocalTime soonEnd   = soonStart.plusHours(1);
 
         ClassRegistrationView soonClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "ONE_TIME",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Soon Class",
                 List.of(new ScheduleEntryView(null, today, soonStart, soonEnd))
         );
@@ -304,12 +338,12 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(soonClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -327,7 +361,7 @@ class GetAvailableSessionsServiceTest {
         LocalTime pastEnd   = pastStart.plusHours(1);
 
         ClassRegistrationView pastClass = new ClassRegistrationView(
-                CLASS_ID, PROGRAM_ID, "BEGINNER", "ACTIVE", "ONE_TIME",
+                CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Past Class",
                 List.of(new ScheduleEntryView(null, today, pastStart, pastEnd))
         );
@@ -337,12 +371,12 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(pastClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
 
@@ -366,12 +400,12 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(full));
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> excluded = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
         assertThat(excluded).isEmpty();
@@ -379,12 +413,12 @@ class GetAvailableSessionsServiceTest {
         // Reset mock for second call
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(full));
-        when(registrationRepository.findRegisteredSessionIds(any(), any(), any()))
-                .thenReturn(Set.of());
+        when(registrationRepository.findActiveRegistrationsBySessionId(any(), any(), any(), any()))
+                .thenReturn(Map.of());
 
         List<AvailableSessionView> included = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, true);
         assertThat(included).hasSize(1);

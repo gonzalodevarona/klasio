@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -57,19 +59,26 @@ public class MeClassesController {
         Page<EnrollmentSummary> enrollments =
                 listEnrollmentsUseCase.byStudent(tenantId, studentId, 0, 100, "ACTIVE");
 
-        // Collect classes matching each enrollment's program+level
+        // Collect classes matching each enrollment's program+level, plus OPEN-level classes.
+        // Use a seen-set to dedup: a student with two enrollments in the same program would
+        // otherwise receive the same OPEN class twice.
         List<ClassResponseDto.ClassSummaryResponse> classes = new ArrayList<>();
+        Set<UUID> seenClassIds = new HashSet<>();
         for (EnrollmentSummary enrollment : enrollments.getContent()) {
-            ClassLevel level = ClassLevel.valueOf(enrollment.level());
-            Page<ClassSummary> programClasses = listClassesUseCase.execute(
-                    tenantId,
-                    enrollment.programId(),
-                    level,
-                    ClassStatus.ACTIVE,
-                    PageRequest.of(0, 100));
-            programClasses.getContent().stream()
-                    .map(ClassResponseDto.ClassSummaryResponse::fromSummary)
-                    .forEach(classes::add);
+            ClassLevel enrollmentLevel = ClassLevel.valueOf(enrollment.level());
+            for (ClassLevel level : new ClassLevel[]{enrollmentLevel, ClassLevel.OPEN}) {
+                Page<ClassSummary> programClasses = listClassesUseCase.execute(
+                        tenantId,
+                        enrollment.programId(),
+                        level,
+                        ClassStatus.ACTIVE,
+                        PageRequest.of(0, 100));
+                for (ClassSummary summary : programClasses.getContent()) {
+                    if (seenClassIds.add(summary.id())) {
+                        classes.add(ClassResponseDto.ClassSummaryResponse.fromSummary(summary));
+                    }
+                }
+            }
         }
 
         return ResponseEntity.ok(classes);

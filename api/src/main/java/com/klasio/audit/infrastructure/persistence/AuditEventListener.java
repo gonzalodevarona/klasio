@@ -49,6 +49,7 @@ import com.klasio.attendance.domain.event.AttendanceMarkedPresentNoHours;
 import com.klasio.attendance.domain.event.AttendanceCorrected;
 import com.klasio.attendance.domain.event.RegistrationCancelled;
 import com.klasio.attendance.domain.event.RegistrationCancelledBySession;
+import com.klasio.attendance.domain.event.RegistrationCancelledByLevelChange;
 import com.klasio.attendance.domain.event.SessionAlertRaised;
 import com.klasio.attendance.domain.event.SessionAlertUpdated;
 import com.klasio.attendance.domain.event.SessionCancelled;
@@ -1273,6 +1274,32 @@ public class AuditEventListener {
         AuditLogEntry entry = new AuditLogEntry(
                 UUID.randomUUID(),
                 "ATTENDANCE_REGISTRATION_CANCELLED_BY_SESSION",
+                e.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                e.registrationId(),
+                e.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onRegistrationCancelledByLevelChange(RegistrationCancelledByLevelChange e) {
+        log.info("Recording audit log for registration cancelled by level change: registrationId={}, studentId={}, {} -> {}",
+                e.registrationId(), e.studentId(), e.previousClassLevel(), e.newClassLevel());
+
+        String details = toJson(Map.of(
+                "sessionId", e.sessionId().toString(),
+                "classId", e.classId().toString(),
+                "studentId", e.studentId().toString(),
+                "previousClassLevel", e.previousClassLevel(),
+                "newClassLevel", e.newClassLevel()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "ATTENDANCE_REGISTRATION_CANCELLED_BY_LEVEL_CHANGE",
                 e.actorId(),
                 "ATTENDANCE_REGISTRATION",
                 e.registrationId(),

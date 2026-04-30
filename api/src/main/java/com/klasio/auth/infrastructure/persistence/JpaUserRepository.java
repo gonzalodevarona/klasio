@@ -8,7 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -60,5 +62,15 @@ public class JpaUserRepository implements UserRepository {
     public Page<User> findByRole(Role role, UUID tenantId, UserStatus status, Pageable pageable) {
         return springDataRepo.findByRoleAndOptionalTenantAndStatus(role, tenantId, status, pageable)
                 .map(UserJpaEntity::toDomain);
+    }
+
+    @Override
+    public List<User> findAllByIds(UUID tenantId, Set<UUID> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        return springDataRepo.findByTenantIdAndIdIn(tenantId, userIds).stream()
+                .map(UserJpaEntity::toDomain)
+                .toList();
     }
 }

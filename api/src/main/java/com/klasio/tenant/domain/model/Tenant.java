@@ -5,6 +5,7 @@ import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +19,7 @@ public class Tenant {
     private final String name;
     private final String discipline;
     private final String language;
+    private final String timezone;
     private final String logoKey;
     private final ContactInfo contactInfo;
     private TenantStatus status;
@@ -29,7 +31,7 @@ public class Tenant {
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     private Tenant(TenantId id, TenantSlug slug, String name, String discipline,
-                   String language, String logoKey, ContactInfo contactInfo,
+                   String language, String timezone, String logoKey, ContactInfo contactInfo,
                    TenantStatus status, Instant createdAt, UUID createdBy,
                    Instant deactivatedAt, UUID deactivatedBy) {
         this.id = id;
@@ -37,6 +39,7 @@ public class Tenant {
         this.name = name;
         this.discipline = discipline;
         this.language = language;
+        this.timezone = timezone;
         this.logoKey = logoKey;
         this.contactInfo = contactInfo;
         this.status = status;
@@ -47,16 +50,22 @@ public class Tenant {
     }
 
     public static Tenant create(String name, String discipline, String language,
-                                TenantSlug slug, ContactInfo contactInfo,
+                                String timezone, TenantSlug slug, ContactInfo contactInfo,
                                 UUID createdBy, String logoKey) {
         Objects.requireNonNull(contactInfo, "Contact info must not be null");
         validateNotBlank(name, "Name");
         validateNotBlank(discipline, "Discipline");
+        validateNotBlank(timezone, "Timezone");
+        try {
+            ZoneId.of(timezone);
+        } catch (java.time.DateTimeException e) {
+            throw new IllegalArgumentException("Invalid timezone identifier: " + timezone, e);
+        }
 
         Instant now = Instant.now();
         TenantId id = TenantId.generate();
 
-        Tenant tenant = new Tenant(id, slug, name, discipline, language, logoKey,
+        Tenant tenant = new Tenant(id, slug, name, discipline, language, timezone, logoKey,
                 contactInfo, TenantStatus.ACTIVE, now, createdBy, null, null);
 
         tenant.domainEvents.add(new TenantCreated(id.value(), slug.value(), name, createdBy, now));
@@ -64,11 +73,11 @@ public class Tenant {
     }
 
     public static Tenant reconstitute(TenantId id, TenantSlug slug, String name,
-                                      String discipline, String language, String logoKey,
-                                      ContactInfo contactInfo, TenantStatus status,
-                                      Instant createdAt, UUID createdBy,
+                                      String discipline, String language, String timezone,
+                                      String logoKey, ContactInfo contactInfo,
+                                      TenantStatus status, Instant createdAt, UUID createdBy,
                                       Instant deactivatedAt, UUID deactivatedBy) {
-        return new Tenant(id, slug, name, discipline, language, logoKey, contactInfo,
+        return new Tenant(id, slug, name, discipline, language, timezone, logoKey, contactInfo,
                 status, createdAt, createdBy, deactivatedAt, deactivatedBy);
     }
 
@@ -90,6 +99,7 @@ public class Tenant {
     public String getName() { return name; }
     public String getDiscipline() { return discipline; }
     public String getLanguage() { return language; }
+    public String getTimezone() { return timezone; }
     public String getLogoKey() { return logoKey; }
     public ContactInfo getContactInfo() { return contactInfo; }
     public TenantStatus getStatus() { return status; }

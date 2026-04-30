@@ -238,6 +238,16 @@ describe("ClassForm (create mode)", () => {
     expect(screen.queryByText("Day of Week")).not.toBeInTheDocument();
   });
 
+  it("renders level dropdown with OPEN option", () => {
+    render(<ClassForm programId={PROGRAM_ID} />);
+
+    const select = screen.getByLabelText(/Level/) as HTMLSelectElement;
+    const optionValues = Array.from(select.querySelectorAll("option")).map((o) => o.value);
+
+    expect(optionValues).toContain("OPEN");
+    expect(select.querySelector('option[value="OPEN"]')?.textContent).toBe("Open (any level)");
+  });
+
   it("validates schedule entry for one-time class requires date", async () => {
     render(<ClassForm programId={PROGRAM_ID} />);
 
@@ -270,5 +280,99 @@ describe("ClassForm (create mode)", () => {
     });
 
     expect(api.post).not.toHaveBeenCalled();
+  });
+});
+
+// Fixture for an existing OPEN class (edit mode)
+const PROFESSOR_ID = "pppppppp-pppp-pppp-pppp-pppppppppppp";
+const OPEN_CLASS: import("@/lib/types/programClass").ProgramClassDetail = {
+  id: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+  programId: PROGRAM_ID,
+  tenantId: "tttttttt-tttt-tttt-tttt-tttttttttttt",
+  name: "Open Fitness",
+  level: "OPEN",
+  type: "RECURRING",
+  maxStudents: 20,
+  status: "ACTIVE",
+  professorId: PROFESSOR_ID,
+  scheduleEntries: [{ dayOfWeek: "MONDAY", startTime: "10:00", endTime: "11:00" }],
+  createdAt: "2026-01-01T00:00:00Z",
+  createdBy: "admin",
+};
+
+describe("ClassForm (edit mode – OPEN cascade confirmation)", () => {
+  it("shows confirmation modal when changing OPEN → BEGINNER and clicking Save", async () => {
+    render(<ClassForm programId={PROGRAM_ID} programClass={OPEN_CLASS} />);
+
+    // Change level from OPEN to BEGINNER
+    fireEvent.change(screen.getByLabelText(/Level/), { target: { value: "BEGINNER" } });
+
+    // Click Save
+    fireEvent.click(screen.getByText("Save Changes"));
+
+    // Confirmation modal must appear
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    // API must NOT have been called yet
+    expect(api.put).not.toHaveBeenCalled();
+  });
+
+  it("proceeds with save after confirming the cascade modal", async () => {
+    (api.put as jest.Mock).mockResolvedValue(OPEN_CLASS);
+
+    render(<ClassForm programId={PROGRAM_ID} programClass={OPEN_CLASS} />);
+
+    fireEvent.change(screen.getByLabelText(/Level/), { target: { value: "INTERMEDIATE" } });
+    fireEvent.click(screen.getByText("Save Changes"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    // Click Confirm in the modal
+    fireEvent.click(screen.getByText("Confirm"));
+
+    await waitFor(() => {
+      expect(api.put).toHaveBeenCalledWith(
+        `/programs/${PROGRAM_ID}/classes/${OPEN_CLASS.id}`,
+        expect.objectContaining({ level: "INTERMEDIATE" })
+      );
+    });
+  });
+
+  it("cancels the save when dismissing the cascade modal", async () => {
+    render(<ClassForm programId={PROGRAM_ID} programClass={OPEN_CLASS} />);
+
+    fireEvent.change(screen.getByLabelText(/Level/), { target: { value: "ADVANCED" } });
+    fireEvent.click(screen.getByText("Save Changes"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    // Close the modal without confirming
+    fireEvent.click(screen.getByText("Cancel"));
+
+    expect(api.put).not.toHaveBeenCalled();
+  });
+
+  it("does NOT show confirmation modal when changing BEGINNER → OPEN (reverse direction)", async () => {
+    const beginnerClass: import("@/lib/types/programClass").ProgramClassDetail = {
+      ...OPEN_CLASS,
+      level: "BEGINNER",
+    };
+    (api.put as jest.Mock).mockResolvedValue(beginnerClass);
+
+    render(<ClassForm programId={PROGRAM_ID} programClass={beginnerClass} />);
+
+    fireEvent.change(screen.getByLabelText(/Level/), { target: { value: "OPEN" } });
+    fireEvent.click(screen.getByText("Save Changes"));
+
+    // No dialog should appear
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
   });
 });

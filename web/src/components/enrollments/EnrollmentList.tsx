@@ -6,6 +6,7 @@ import { EnrollmentDetail, Level } from "@/lib/types/enrollment";
 import { useStudentEnrollments } from "@/hooks/useStudentEnrollments";
 import LevelBadge from "./LevelBadge";
 import LevelHistoryList from "./LevelHistoryList";
+import { Table, Thead, Th, Tr, Td, Select, Button } from "@/components/ui";
 
 interface EnrollmentListProps {
   studentId: string;
@@ -119,30 +120,20 @@ export default function EnrollmentList({
         <h3 className="text-lg font-semibold text-gray-900">Enrollments</h3>
         <div className="flex items-center gap-3">
           {/* Status filter */}
-          <div className="flex items-center gap-2">
-            <label htmlFor="enrollmentStatusFilter" className="text-sm text-gray-600 whitespace-nowrap">
-              Status:
-            </label>
-            <select
-              id="enrollmentStatusFilter"
-              value={statusFilter}
-              onChange={(e) => handleStatusFilterChange(e.target.value)}
-              className="rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="button"
-            onClick={onEnrollClick}
-            className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          <Select
+            label="Status:"
+            value={statusFilter}
+            onChange={(e) => handleStatusFilterChange(e.target.value)}
           >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </Select>
+          <Button variant="primary" size="sm" onClick={onEnrollClick}>
             Enroll in Program
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -163,87 +154,68 @@ export default function EnrollmentList({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Program
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Level
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Enrollment Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {enrollments.map((enrollment) => (
-                <React.Fragment key={enrollment.id}>
-                  <tr
-                    onClick={() => toggleExpand(enrollment.id)}
-                    className="hover:bg-gray-50 cursor-pointer"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {enrollment.programName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <LevelBadge level={enrollment.level as Level} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(enrollment.enrollmentDate)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                        enrollment.status === "ACTIVE"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>
-                        {enrollment.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm" onClick={(e) => e.stopPropagation()}>
-                      {enrollment.status === "ACTIVE" && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            disabled={processing === enrollment.id}
-                            onClick={(e) => openPromoteModal(enrollment.id, enrollment.level as Level, e)}
-                            className="rounded px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 disabled:opacity-50"
-                          >
-                            Promote
-                          </button>
-                          <button
-                            type="button"
-                            disabled={processing === enrollment.id}
-                            onClick={(e) => handleUnenroll(enrollment.id, e)}
-                            className="rounded px-2 py-1 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50"
-                          >
-                            {processing === enrollment.id ? "..." : "Unenroll"}
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                  {expandedId === enrollment.id && (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-4 bg-gray-50">
-                        <LevelHistoryList enrollmentId={enrollment.id} />
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <Thead>
+            <tr>
+              <Th>Program</Th>
+              <Th>Level</Th>
+              <Th>Enrollment Date</Th>
+              <Th>Status</Th>
+              <Th right>Actions</Th>
+            </tr>
+          </Thead>
+          <tbody>
+            {enrollments.map((enrollment) => (
+              <React.Fragment key={enrollment.id}>
+                <Tr onClick={() => toggleExpand(enrollment.id)}>
+                  <Td bold>{enrollment.programName}</Td>
+                  <Td>
+                    <LevelBadge level={enrollment.level as Level} />
+                  </Td>
+                  <Td muted>{formatDate(enrollment.enrollmentDate)}</Td>
+                  <Td>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                      enrollment.status === "ACTIVE"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-600"
+                    }`}>
+                      {enrollment.status}
+                    </span>
+                  </Td>
+                  <Td right onClick={(e) => e.stopPropagation()}>
+                    {enrollment.status === "ACTIVE" && (
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={processing === enrollment.id}
+                          onClick={(e) => openPromoteModal(enrollment.id, enrollment.level as Level, e)}
+                        >
+                          Promote
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={processing === enrollment.id}
+                          onClick={(e) => handleUnenroll(enrollment.id, e)}
+                        >
+                          {processing === enrollment.id ? "..." : "Unenroll"}
+                        </Button>
+                      </div>
+                    )}
+                  </Td>
+                </Tr>
+                {expandedId === enrollment.id && (
+                  <Tr className="bg-k-bg">
+                    <Td colSpan={5}>
+                      <LevelHistoryList enrollmentId={enrollment.id} />
+                    </Td>
+                  </Tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </Table>
       )}
 
       {/* Promote modal */}

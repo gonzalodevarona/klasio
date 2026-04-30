@@ -11,6 +11,6 @@ public record MembershipExpiryWarning(
         UUID studentId,
         UUID programId,
         LocalDate expirationDate,
-        int remainingHours,
+        Integer remainingHours,
         Instant occurredAt
 ) implements DomainEvent {}

@@ -16,6 +16,10 @@ public record TenantRequestDto(
         @Size(max = 10, message = "Language code must be at most 10 characters")
         String language,
 
+        @NotBlank(message = "Timezone is required")
+        @Size(max = 50, message = "Timezone must be at most 50 characters")
+        String timezone,
+
         @Size(max = 60, message = "Slug must be at most 60 characters")
         String slug,
 

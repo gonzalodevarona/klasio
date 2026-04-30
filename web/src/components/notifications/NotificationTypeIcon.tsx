@@ -1,17 +1,20 @@
 "use client";
 
-import { AlertTriangle, Bell } from "lucide-react";
-
 interface NotificationTypeIconProps {
   type: string;
 }
 
+function getEmoji(type: string): string {
+  if (type === "CLASS_SESSION_ALERTED") return "⚠️";
+  if (type === "CLASS_SESSION_CANCELLED") return "🚫";
+  if (type === "CLASS_LEVEL_CHANGED") return "↕️";
+  return "🔔";
+}
+
 export default function NotificationTypeIcon({ type }: NotificationTypeIconProps) {
-  if (type === "CLASS_SESSION_ALERTED") {
-    return <AlertTriangle className="w-5 h-5 text-amber-500" />;
-  }
-  if (type === "CLASS_SESSION_CANCELLED") {
-    return <Bell className="w-5 h-5 text-red-500" />;
-  }
-  return <Bell className="w-5 h-5 text-gray-400" />;
+  return (
+    <span role="img" aria-label={type} className="text-base leading-none select-none">
+      {getEmoji(type)}
+    </span>
+  );
 }

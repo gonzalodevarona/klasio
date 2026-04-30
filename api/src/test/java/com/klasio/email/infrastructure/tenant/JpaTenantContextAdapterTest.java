@@ -18,18 +18,20 @@ class JpaTenantContextAdapterTest {
     private final JpaTenantContextAdapter adapter = new JpaTenantContextAdapter(em);
 
     @Test
-    void findById_returnsTenantContext() {
+    void findById_returnsTenantContextWithLanguage() {
         UUID id = UUID.randomUUID();
         Query query = mock(Query.class);
         when(em.createQuery(anyString())).thenReturn(query);
         when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of(new Object[]{id, "test-slug", "Test League"}));
+        when(query.getResultList()).thenReturn(List.of(new Object[]{id, "test-slug", "Test League", "en", "America/Bogota"}));
 
         TenantContext ctx = adapter.findById(id);
 
         assertThat(ctx.id()).isEqualTo(id);
         assertThat(ctx.slug()).isEqualTo("test-slug");
         assertThat(ctx.name()).isEqualTo("Test League");
+        assertThat(ctx.language()).isEqualTo("en");
+        assertThat(ctx.timezone()).isEqualTo("America/Bogota");
     }
 
     @Test

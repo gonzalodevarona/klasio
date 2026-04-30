@@ -6,17 +6,24 @@ import static org.assertj.core.api.Assertions.*;
 class EmailTypeTest {
 
     @Test
-    void inRepoTypesHaveTemplateRefWithoutPrefix() {
-        assertThat(EmailType.ACCOUNT_SETUP.source()).isEqualTo(EmailType.Source.IN_REPO);
+    void accountSetupHasCorrectTemplateRefAndRequiredKeys() {
         assertThat(EmailType.ACCOUNT_SETUP.templateRef()).isEqualTo("account-setup");
         assertThat(EmailType.ACCOUNT_SETUP.requiredKeys())
                 .containsExactlyInAnyOrder("recipientName", "role", "setupUrl", "expiresAt");
     }
 
     @Test
-    void brevoHostedTypesHaveShortTemplateRef() {
-        assertThat(EmailType.MEMBERSHIP_ACTIVATED.source()).isEqualTo(EmailType.Source.BREVO_HOSTED);
+    void membershipActivatedIsInRepoWithCorrectRequiredKeys() {
         assertThat(EmailType.MEMBERSHIP_ACTIVATED.templateRef()).isEqualTo("membership-activated");
+        assertThat(EmailType.MEMBERSHIP_ACTIVATED.requiredKeys())
+                .containsExactlyInAnyOrder("studentName", "programName", "planName", "totalHours", "expiresAt");
+    }
+
+    @Test
+    void classSessionChangeHasCorrectRequiredKeys() {
+        assertThat(EmailType.CLASS_SESSION_CHANGE.templateRef()).isEqualTo("class-session-change");
+        assertThat(EmailType.CLASS_SESSION_CHANGE.requiredKeys())
+                .containsExactlyInAnyOrder("studentName", "className", "startsAt", "changeKind", "reason");
     }
 
     @Test

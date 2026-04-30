@@ -58,6 +58,7 @@ class JpaTenantRepositoryIntegrationTest {
                 "Liga Bogota",
                 "Football",
                 "es",
+                "America/Bogota",
                 TenantSlug.fromName("Liga Bogota"),
                 contact("contact@liga.com"),
                 UUID.randomUUID(),
@@ -72,6 +73,7 @@ class JpaTenantRepositoryIntegrationTest {
         assertThat(found.get().getName()).isEqualTo("Liga Bogota");
         assertThat(found.get().getDiscipline()).isEqualTo("Football");
         assertThat(found.get().getContactInfo().email()).isEqualTo("contact@liga.com");
+        assertThat(found.get().getTimezone()).isEqualTo("America/Bogota");
     }
 
     @Test
@@ -81,6 +83,7 @@ class JpaTenantRepositoryIntegrationTest {
                 "Liga Cali",
                 "Basketball",
                 "es",
+                "America/Bogota",
                 TenantSlug.fromName("Liga Cali"),
                 contact("cali@liga.com"),
                 UUID.randomUUID(),
@@ -106,6 +109,7 @@ class JpaTenantRepositoryIntegrationTest {
                 "Liga Medellin",
                 "Tennis",
                 "es",
+                "America/Bogota",
                 TenantSlug.fromName("Liga Medellin"),
                 contact("medellin@liga.com"),
                 UUID.randomUUID(),
@@ -118,6 +122,7 @@ class JpaTenantRepositoryIntegrationTest {
                 "Liga Medellin Duplicate",
                 "Swimming",
                 "es",
+                "America/Bogota",
                 new TenantSlug("liga-medellin"),
                 contact("dup@liga.com"),
                 UUID.randomUUID(),

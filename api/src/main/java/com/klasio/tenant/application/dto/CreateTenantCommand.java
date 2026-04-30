@@ -7,6 +7,7 @@ public record CreateTenantCommand(
         String name,
         String discipline,
         String language,
+        String timezone,
         String slug,
         String contactEmail,
         String contactPhone,

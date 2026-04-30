@@ -3,11 +3,13 @@ import { createContext, useContext, useCallback, useEffect, useRef, useState, Re
 
 interface NotificationCountContextValue {
   count: number;
+  hasCancellation: boolean;
   refreshCount: () => void;
 }
 
 const NotificationCountContext = createContext<NotificationCountContextValue>({
   count: 0,
+  hasCancellation: false,
   refreshCount: () => {},
 });
 
@@ -42,7 +44,7 @@ export function NotificationCountProvider({ children }: { children: ReactNode })
   }, [fetchCount]);
 
   return (
-    <NotificationCountContext.Provider value={{ count, refreshCount: fetchCount }}>
+    <NotificationCountContext.Provider value={{ count, hasCancellation: false, refreshCount: fetchCount }}>
       {children}
     </NotificationCountContext.Provider>
   );

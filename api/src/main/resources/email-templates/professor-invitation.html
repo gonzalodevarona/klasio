@@ -1,23 +1,62 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
-  <th:block th:fragment="subject" th:text="|You have been invited to join ${tenantName} as a professor|"></th:block>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <th:block th:fragment="subject" th:text="#{professorInvitation.subject(${tenantName})}"></th:block>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
-<body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:20px">
-  <div style="max-width:600px;margin:0 auto;background:white;padding:30px;border-radius:8px">
-    <h2 th:text="${tenantName}" style="color:#2563eb">League</h2>
-    <p>Hi <strong th:text="${professorName}">Professor</strong>,</p>
-    <p>You have been invited to join <span th:text="${tenantName}"></span> as a professor on Klasio.</p>
-    <p style="margin:24px 0">
-      <a th:href="${activationUrl}"
-         style="background:#2563eb;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block">
-        Accept Invitation
-      </a>
-    </p>
-    <p style="color:#6b7280;font-size:14px">This invitation expires at <span th:text="${expiresAt}"></span>.</p>
-    <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb">
-    <p style="color:#9ca3af;font-size:12px">Sent by <span th:text="${tenantName}"></span> via Klasio.</p>
-  </div>
+<body style="margin:0;padding:0;background:#F4F4F2;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F4F2;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 2px 24px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background:#0A0A0A;padding:28px 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="display:inline-table;">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <div style="width:32px;height:32px;background:#CAFF4D;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 2L15.5 6V12L9 16L2.5 12V6L9 2Z" fill="#0A0A0A"/></svg>
+                    </div>
+                  </td>
+                  <td style="vertical-align:middle;padding-left:10px;">
+                    <span style="color:#FFFFFF;font-family:'DM Sans',-apple-system,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;">Klasio</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="height:3px;background:linear-gradient(90deg,#CAFF4D 0%,rgba(202,255,77,0.5) 60%,transparent 100%);font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="padding:32px 40px;">
+              <p style="margin:0 0 12px;font-size:16px;color:#1A1A1A;line-height:1.6;font-family:'DM Sans',-apple-system,sans-serif;">
+                <span th:text="#{professorInvitation.hi}">Hi</span>,
+                <strong style="color:#0A0A0A;" th:text="${professorName}">Professor</strong>
+              </p>
+              <p style="margin:0 0 20px;font-size:15px;color:#3A3A38;line-height:1.7;font-family:'DM Sans',-apple-system,sans-serif;"
+                 th:text="#{professorInvitation.body(${tenantName})}">You have been invited.</p>
+              <div style="margin:28px 0;">
+                <a th:href="${activationUrl}"
+                   style="display:inline-block;background:#0A0A0A;color:#CAFF4D;padding:13px 28px;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;font-family:'DM Sans',-apple-system,sans-serif;letter-spacing:0.01em;"
+                   th:text="#{professorInvitation.cta}">Accept Invitation</a>
+              </div>
+              <p style="margin:12px 0 0;font-size:13px;color:#8A8A88;line-height:1.6;font-family:'DM Sans',-apple-system,sans-serif;"
+                 th:text="#{professorInvitation.expiry(${expiresAt})}">This invitation expires soon.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="border-top:1px solid #F0F0EE;padding:20px 40px 28px;">
+              <p style="margin:0 0 4px;font-family:'DM Sans',-apple-system,sans-serif;font-size:12px;color:#AAAAAA;line-height:1.6;"
+                 th:text="#{layout.footer(${tenantName})}">Sent by Academy via Klasio.</p>
+              <p style="margin:0;font-family:'DM Mono',monospace;font-size:11px;color:#C8C8C6;">© 2026 Klasio · All rights reserved</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

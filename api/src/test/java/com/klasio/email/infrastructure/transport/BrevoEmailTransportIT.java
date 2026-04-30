@@ -13,8 +13,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.*;
@@ -28,13 +26,12 @@ class BrevoEmailTransportIT {
     @BeforeEach void reset()       { wireMock.resetAll(); }
 
     private BrevoEmailTransport transport() {
-        BrevoProperties props = new BrevoProperties(
-                "test-api-key", "http://localhost:9877", Map.of());
+        BrevoProperties props = new BrevoProperties("test-api-key", "http://localhost:9877");
         return new BrevoEmailTransport(props);
     }
 
     @Test
-    void inRepoEmail_sendsHtmlContentAndSubjectWithIdempotencyKey() {
+    void sendsHtmlContentSubjectAndIdempotencyKey() {
         stubFor(post(urlEqualTo("/smtp/email"))
                 .willReturn(aResponse().withStatus(201)
                         .withHeader("Content-Type", "application/json")
@@ -45,7 +42,7 @@ class BrevoEmailTransportIT {
                 new EmailRecipient("user@example.com", "Juan"),
                 new EmailSender("noreply@klasio.app", "Test League via Klasio"),
                 "Set up your account", "<html>body</html>", "plain text",
-                null, null, "idem-key-123"));
+                "idem-key-123"));
 
         verify(postRequestedFor(urlEqualTo("/smtp/email"))
                 .withHeader("api-key", equalTo("test-api-key"))
@@ -57,30 +54,8 @@ class BrevoEmailTransportIT {
                 .withRequestBody(matchingJsonPath("$.htmlContent"))
                 .withRequestBody(matchingJsonPath("$.textContent")));
 
-        // Brevo-hosted fields must NOT be present for in-repo emails
         verify(postRequestedFor(urlEqualTo("/smtp/email"))
                 .withRequestBody(notMatching(".*\"templateId\".*")));
-    }
-
-    @Test
-    void brevoHostedEmail_sendsTemplateIdAndParamsNoHtmlContent() {
-        stubFor(post(urlEqualTo("/smtp/email"))
-                .willReturn(aResponse().withStatus(201)
-                        .withBody("{\"messageId\":\"<fake2@brevo.com>\"}")));
-
-        transport().send(new OutboundEmail(
-                EmailType.MEMBERSHIP_ACTIVATED,
-                new EmailRecipient("student@example.com", "Ana"),
-                new EmailSender("noreply@klasio.app", "Tennis Club via Klasio"),
-                null, null, null,
-                42L, Map.of("studentName", "Ana", "tenantName", "Tennis Club"),
-                "idem-key-456"));
-
-        verify(postRequestedFor(urlEqualTo("/smtp/email"))
-                .withHeader("Idempotency-Key", equalTo("idem-key-456"))
-                .withRequestBody(matchingJsonPath("$.templateId", equalTo("42")))
-                .withRequestBody(matchingJsonPath("$.params.studentName", equalTo("Ana")))
-                .withRequestBody(notMatching(".*\"htmlContent\".*")));
     }
 
     @Test
@@ -98,7 +73,7 @@ class BrevoEmailTransportIT {
                 EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("u@x.com", "U"),
                 new EmailSender("from@x.com", "League via Klasio"),
-                "subj", "<h/>", "t", null, null, "idem")))
+                "subj", "<h/>", "t", "idem")))
                 .doesNotThrowAnyException();
 
         verify(2, postRequestedFor(urlEqualTo("/smtp/email")));
@@ -113,7 +88,7 @@ class BrevoEmailTransportIT {
                 EmailType.ACCOUNT_SETUP,
                 new EmailRecipient("u@x.com", "U"),
                 new EmailSender("from@x.com", "L via Klasio"),
-                "s", "<h/>", "t", null, null, "idem")))
+                "s", "<h/>", "t", "idem")))
                 .doesNotThrowAnyException();
     }
 }

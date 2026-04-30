@@ -122,10 +122,15 @@ public class CorrectMarkService implements CorrectMarkUseCase {
             Optional<MembershipHoursPort.ActiveMembershipView> membershipOpt =
                     membershipHoursPort.findActiveForStudentInProgram(tenantId, reg.getStudentId(), programId);
 
-            boolean canDeduct = membershipOpt.isPresent() &&
+            boolean hasActiveMembership = membershipOpt.isPresent();
+            boolean isUnlimited = hasActiveMembership && membershipOpt.get().unlimited();
+            boolean canDeduct = hasActiveMembership && !isUnlimited &&
                     membershipOpt.get().availableHours() >= reg.getIntendedHours();
 
-            if (canDeduct) {
+            if (isUnlimited) {
+                // UNLIMITED: no hour deduction needed
+                reg.correctToPresent(actorId, now, reason);
+            } else if (canDeduct) {
                 deductHoursUseCase.execute(new DeductHoursCommand(
                         tenantId,
                         membershipOpt.get().membershipId(),

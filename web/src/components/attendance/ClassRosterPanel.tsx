@@ -8,9 +8,15 @@ import RegistrationStatusBadge from "./RegistrationStatusBadge";
 import AttendanceMarkingPanel from "./AttendanceMarkingPanel";
 import SessionStatusBadge from "./SessionStatusBadge";
 import SessionActionsPanel from "./SessionActionsPanel";
+import { WalkInButton } from "./WalkInButton";
+import { RegistrarBadge } from "./RegistrarBadge";
+import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
+import { ClassLevel } from "@/lib/types/programClass";
 
 interface ClassRosterPanelProps {
   classId: string;
+  /** Level of the class (BEGINNER, INTERMEDIATE, ADVANCED, OPEN). Used to decide whether to show the level filter in the walk-in modal. */
+  classLevel?: string;
   /** When provided, enables interactive marking for the given role (PROFESSOR, MANAGER, ADMIN, SUPERADMIN). */
   userRole?: string;
   /** Program the class belongs to — used for manager scope check. */
@@ -58,21 +64,22 @@ function formatTime(timeStr: string, locale: string): string {
   }).format(new Date(2000, 0, 1, h, m));
 }
 
-const LEVEL_STYLES: Record<string, string> = {
-  BEGINNER:     "bg-green-100 text-green-700",
-  INTERMEDIATE: "bg-yellow-100 text-yellow-700",
-  ADVANCED:     "bg-red-100 text-red-700",
-};
+function computeDurationMinutes(start: string, end: string): number {
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm);
+}
+
 
 export default function ClassRosterPanel({
   classId,
+  classLevel = "OPEN",
   userRole,
   programId,
   managedProgramIds,
   professorClassIds,
 }: ClassRosterPanelProps) {
   const t = useTranslations("classes");
-  const tBadges = useTranslations("badges.classLevel");
   const locale = useLocale();
 
   const [monday, setMonday] = useState<Date>(() => weekStart(new Date()));
@@ -169,6 +176,17 @@ export default function ClassRosterPanel({
                   canManage={canManage}
                   onActionCompleted={refetch}
                 />
+                {canManage && sessionStatus !== "CANCELLED" && (
+                  <WalkInButton
+                    classId={classId}
+                    sessionDate={session.sessionDate}
+                    startTime={session.startTime}
+                    endTime={session.endTime}
+                    durationMinutes={computeDurationMinutes(session.startTime, session.endTime)}
+                    classLevel={classLevel}
+                    onRegistered={refetch}
+                  />
+                )}
                 <span className="text-xs font-medium text-blue-600 ml-auto">
                   {t("rosterRegistrantCount", { count: session.registrantCount })}
                 </span>
@@ -199,13 +217,14 @@ export default function ClassRosterPanel({
                   <tbody className="divide-y divide-gray-50">
                     {session.registrants.map((r) => (
                       <tr key={r.registrationId} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 text-gray-900 font-medium">{r.studentName}</td>
+                        <td className="px-4 py-2 text-gray-900 font-medium">
+                          {r.studentName}
+                          {r.createdBy && ["ADMIN", "SUPERADMIN", "MANAGER"].includes((userRole ?? "").toUpperCase()) && (
+                            <RegistrarBadge createdBy={r.createdBy} />
+                          )}
+                        </td>
                         <td className="px-4 py-2">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL_STYLES[r.level] ?? "bg-gray-100 text-gray-600"}`}
-                          >
-                            {tBadges(r.level)}
-                          </span>
+                          <ClassLevelBadge level={r.level as ClassLevel} />
                         </td>
                         <td className="px-4 py-2 text-gray-600">{r.intendedHours}h</td>
                         <td className="px-4 py-2">

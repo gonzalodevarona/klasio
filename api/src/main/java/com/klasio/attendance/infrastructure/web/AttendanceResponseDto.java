@@ -1,6 +1,7 @@
 package com.klasio.attendance.infrastructure.web;
 
 import com.klasio.attendance.application.dto.AttendanceRegistrationView;
+import com.klasio.attendance.application.dto.AttendanceStatsView;
 import com.klasio.attendance.application.dto.AvailableSessionView;
 
 import java.time.Instant;
@@ -46,6 +47,26 @@ public class AttendanceResponseDto {
         }
     }
 
+    public record AttendanceStatsResponse(
+            long attended,
+            long cancelledByStudent,
+            long cancelledBySystem,
+            long absent,
+            long totalHoursConsumed,
+            int attendanceRatePercent
+    ) {
+        public static AttendanceStatsResponse from(AttendanceStatsView view) {
+            return new AttendanceStatsResponse(
+                    view.attended(),
+                    view.cancelledByStudent(),
+                    view.cancelledBySystem(),
+                    view.absent(),
+                    view.totalHoursConsumed(),
+                    view.attendanceRatePercent()
+            );
+        }
+    }
+
     public record AvailableSessionResponse(
             UUID classId,
             String className,
@@ -59,7 +80,9 @@ public class AttendanceResponseDto {
             int maxStudents,
             String status,
             boolean registrationOpen,
-            String alertReason
+            String alertReason,
+            UUID registrationId,
+            String registrationStatus
     ) {
         public static AvailableSessionResponse from(AvailableSessionView view) {
             return new AvailableSessionResponse(
@@ -75,7 +98,9 @@ public class AttendanceResponseDto {
                     view.maxStudents(),
                     view.status(),
                     view.registrationOpen(),
-                    view.alertReason()
+                    view.alertReason(),
+                    view.registrationId(),
+                    view.registrationStatus()
             );
         }
     }

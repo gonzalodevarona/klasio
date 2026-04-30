@@ -44,7 +44,7 @@ public class PasswordResetEmailListener {
 
         Map<String, Object> params = new HashMap<>();
         params.put("resetUrl", resetUrl);
-        params.put("expiresAt", event.expiresAt().toString());
+        params.put("expiresAt", event.expiresAt());
         // tenantName is injected automatically by EmailDispatcherService via TenantContext
 
         emailService.send(

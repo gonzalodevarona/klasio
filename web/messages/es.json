@@ -182,7 +182,6 @@
   },
   "layout": {
     "brand": "Klasio",
-    "brandSubtitle": "Gestión de Liga",
     "signOut": "Cerrar sesión",
     "openNav": "Abrir navegación",
     "closeNav": "Cerrar navegación",
@@ -199,11 +198,11 @@
     "navPrograms": "Programas",
     "navPlans": "Planes",
     "navClasses": "Clases",
-    "navPaymentProofs": "Comprobantes de Pago",
+    "navPaymentProofs": "Pruebas de Pago",
     "navMyMemberships": "Mis Membresías",
     "navMyEnrollments": "Mis Inscripciones",
     "navMyClasses": "Mis Clases",
-    "navMyRegistrations": "Mis Registros"
+    "navAttendance": "Asistencia"
   },
   "badges": {
     "membershipStatus": {
@@ -237,7 +236,8 @@
     "classLevel": {
       "BEGINNER": "Principiante",
       "INTERMEDIATE": "Intermedio",
-      "ADVANCED": "Avanzado"
+      "ADVANCED": "Avanzado",
+      "OPEN": "Abierto"
     },
     "classType": {
       "RECURRING": "Recurrente",
@@ -278,7 +278,7 @@
   },
   "students": {
     "pageTitle": "Estudiantes",
-    "addButton": "Agregar estudiante",
+    "addButton": "Nuevo estudiante",
     "filterStatusLabel": "Estado:",
     "filterSearchPlaceholder": "Buscar por nombre, correo o documento...",
     "listLoading": "Cargando estudiantes...",
@@ -364,12 +364,13 @@
   },
   "professors": {
     "pageTitle": "Profesores",
+    "filterStatusLabel": "Estado:",
     "filterAll": "Todos",
     "filterActive": "Activos",
     "filterDeactivated": "Desactivados",
     "listLoading": "Cargando profesores...",
     "listEmpty": "No hay profesores que coincidan con el filtro.",
-    "addButton": "Agregar profesor",
+    "addButton": "Nuevo profesor",
     "colName": "Nombre",
     "colEmail": "Correo",
     "colPhone": "Teléfono",
@@ -398,6 +399,7 @@
     "formDocTypeLabel": "Tipo de doc. *",
     "formIdNumberLabel": "Número de ID *",
     "formIdNumberPlaceholder": "Número de documento",
+    "formAccountSetupNote": "Se enviará un correo de configuración de cuenta a esta dirección. El profesor deberá seguir el enlace para crear su contraseña antes de poder iniciar sesión.",
     "formCancelButton": "Cancelar",
     "formSaveButton": "Guardar cambios",
     "formCreateButton": "Crear profesor",
@@ -427,6 +429,7 @@
   },
   "managers": {
     "pageTitle": "Coordinadores",
+    "filterStatusLabel": "Estado:",
     "filterAll": "Todos",
     "filterActive": "Activos",
     "filterInactive": "Inactivos",
@@ -434,7 +437,7 @@
     "filterAllTenants": "Todas las ligas",
     "listLoading": "Cargando coordinadores...",
     "listEmpty": "No hay coordinadores que coincidan con el filtro.",
-    "createButton": "Crear coordinador",
+    "createButton": "Nuevo coordinador",
     "colName": "Nombre",
     "colEmail": "Correo",
     "colTenant": "Liga",
@@ -448,7 +451,7 @@
     "modalCancelButton": "Cancelar",
     "modalDeactivateButton": "Desactivar",
     "modalDeactivatingButton": "Desactivando...",
-    "formTitle": "Crear coordinador",
+    "formTitle": "Agregar coordinador",
     "editTitle": "Editar coordinador",
     "formTenantLabel": "Liga *",
     "formTenantPlaceholder": "Selecciona una liga...",
@@ -465,9 +468,9 @@
     "formDocTypeLabel": "Tipo de doc. *",
     "formIdNumberLabel": "Número de doc. *",
     "formIdNumberPlaceholder": "Número de documento",
-    "formTempPasswordNote": "Se generará una contraseña temporal automáticamente. El coordinador puede establecer la propia a través de \"Olvidé mi contraseña\".",
+    "formTempPasswordNote": "Se enviará un correo de configuración de cuenta a esta dirección. El coordinador deberá seguir el enlace para crear su contraseña antes de poder iniciar sesión.",
     "formCancelButton": "Cancelar",
-    "formCreateButton": "Crear coordinador",
+    "formCreateButton": "Agregar coordinador",
     "formCreatingButton": "Creando...",
     "formSaveButton": "Guardar cambios",
     "formSavingButton": "Guardando..."
@@ -509,11 +512,10 @@
     "formEmailPlaceholder": "admin@ejemplo.com",
     "formPhoneLabel": "Teléfono *",
     "formPhonePlaceholder": "3001234567",
-    "formPasswordLabel": "Contraseña *",
-    "formPasswordPlaceholder": "Mín. 8 caracteres",
     "formDocTypeLabel": "Tipo de doc. *",
     "formIdNumberLabel": "Número de doc. *",
     "formIdNumberPlaceholder": "Número de documento",
+    "formSetupEmailNote": "Se enviará un correo de configuración de cuenta a esta dirección. El administrador deberá seguir el enlace para crear su contraseña antes de poder iniciar sesión.",
     "formCancelButton": "Cancelar",
     "formCreateButton": "Crear administrador",
     "formCreatingButton": "Creando...",
@@ -567,9 +569,11 @@
     "plansView": "Ver",
     "modalityHoursBased": "Por horas",
     "modalityClassesPerWeek": "Clases por semana",
+    "modalityUnlimited": "Ilimitado",
     "formNameLabel": "Nombre",
     "formNamePlaceholderHours": "ej., 4 horas",
     "formNamePlaceholderSchedule": "ej., Lun/Mié/Jue noche",
+    "formNamePlaceholderUnlimited": "ej., Mensual Ilimitado",
     "formModalityLabel": "Modalidad",
     "formModalityCannotChange": "La modalidad no se puede cambiar después de la creación.",
     "formCostLabel": "Costo (COP)",
@@ -674,6 +678,7 @@
     "filterBeginnerOption": "Principiante",
     "filterIntermediateOption": "Intermedio",
     "filterAdvancedOption": "Avanzado",
+    "filterOpenOption": "Abierto",
     "detailName": "Nombre",
     "detailLevel": "Nivel",
     "detailType": "Tipo",
@@ -723,6 +728,7 @@
     "formScheduleStartLabel": "Hora de inicio",
     "formScheduleEndLabel": "Hora de fin",
     "formScheduleRemoveButton": "Eliminar",
+    "formScheduleDuplicateButton": "Duplicar",
     "formScheduleAddEntry": "+ Agregar entrada de horario",
     "formSaveButton": "Guardar cambios",
     "formSavingButton": "Guardando...",
@@ -740,6 +746,21 @@
     "formScheduleDayRequired": "Las clases recurrentes requieren un día de la semana en cada entrada.",
     "formScheduleDateRequired": "Las clases únicas requieren una fecha específica.",
     "formScheduleOneTimeMax": "Las clases únicas solo pueden tener una entrada de horario.",
+    "dayMonday": "Lunes",
+    "dayTuesday": "Martes",
+    "dayWednesday": "Miércoles",
+    "dayThursday": "Jueves",
+    "dayFriday": "Viernes",
+    "daySaturday": "Sábado",
+    "daySunday": "Domingo",
+    "classLevel": {
+      "BEGINNER": "Principiante",
+      "INTERMEDIATE": "Intermedio",
+      "ADVANCED": "Avanzado",
+      "OPEN": "Abierto"
+    },
+    "formLevelOpen": "Abierto (todos los niveles)",
+    "editLevelCascadeConfirm": "Cambiar esta clase a {newLevel} cancelará las inscripciones futuras de estudiantes cuyo nivel no coincida. ¿Continuar?",
     "professorAssignmentTitle": "Asignación de profesor",
     "professorCurrentLabel": "Profesor actual",
     "professorIdLabel": "ID del profesor",
@@ -846,6 +867,7 @@
     "formPlanSelectPlaceholder": "— Selecciona un plan —",
     "formModalityHoursBased": "Por horas",
     "formModalityClassesPerWeek": "Clases por semana",
+    "formModalityUnlimited": "Ilimitado",
     "formModalityLabel": "Modalidad: ",
     "formHoursLabel": "Horas: ",
     "formCostLabel": "Costo: ",
@@ -862,7 +884,11 @@
     "newLoadingStudent": "Cargando estudiante…",
     "newNoEnrollments": "Este estudiante no tiene inscripciones activas. Inscríbelo en un programa primero.",
     "newLoadingPlans": "Cargando planes…",
-    "newNoPlans": "No se encontraron planes HOURS_BASED activos para este programa."
+    "newNoPlans": "No se encontraron planes activos para este programa.",
+    "hourBalanceTotalSuffix": "/ {purchased}h",
+    "hourBalanceRemaining": "horas restantes",
+    "hourBalanceConsumed": "Consumido: {hours}h",
+    "hourBalancePercentUsed": "{pct}% usado"
   },
   "paymentProofs": {
     "pageTitle": "Cola de comprobantes",
@@ -926,7 +952,10 @@
     "tabUnreadOnly": "Solo no leídas",
     "markAllAsRead": "Marcar todo como leído",
     "listEmpty": "No se encontraron notificaciones.",
-    "pageTitle": "Notificaciones"
+    "pageTitle": "Notificaciones",
+    "session": {
+      "registrationCancelledLevelChange": "Tu inscripción a {className} el {date} fue cancelada porque el nivel de la clase cambió a {newLevel}."
+    }
   },
   "tenants": {
     "pageTitle": "Ligas",
@@ -980,6 +1009,8 @@
       "languagePlaceholder": "Seleccionar idioma...",
       "languageSpanish": "Español",
       "languageEnglish": "Inglés",
+      "labelTimezone": "Zona horaria",
+      "errorTimezoneRequired": "La zona horaria es obligatoria.",
       "submitButton": "Crear liga",
       "submitting": "Creando...",
       "errorNameRequired": "El nombre es obligatorio.",
@@ -999,8 +1030,30 @@
     }
   },
   "loginPage": {
-    "title": "Klasio",
-    "subtitle": "Gestión de Liga Deportiva"
+    "title": "Iniciar sesión",
+    "subtitle": "Ingresa tus credenciales para continuar",
+    "tagline": "Gestión deportiva",
+    "heroLine1": "Administra tu",
+    "heroAccent": "liga",
+    "heroLine2": "con",
+    "heroLine3": "precisión.",
+    "heroBody": "Control de asistencia, membresías, pagos y programas en una sola plataforma.",
+    "tag1": "Membresías",
+    "tag2": "Asistencia",
+    "tag3": "Pagos"
+  },
+  "forgotPasswordPage": {
+    "title": "¿Olvidaste tu contraseña?",
+    "subtitle": "Ingresa tu correo y te enviaremos un enlace para restablecer.",
+    "loading": "Cargando…"
+  },
+  "resetPasswordPage": {
+    "title": "Restablece tu contraseña",
+    "subtitle": "Ingresa tu nueva contraseña a continuación.",
+    "invalidTitle": "Enlace inválido",
+    "invalidBody": "Este enlace para restablecer la contraseña no es válido. Por favor solicita uno nuevo.",
+    "requestNew": "Solicitar nuevo enlace",
+    "loading": "Cargando…"
   },
   "registerPage": {
     "title": "Crea tu cuenta",
@@ -1012,6 +1065,7 @@
     "activeMembership": "Membresía activa",
     "loading": "Cargando…",
     "membershipExpires": "Vence: {date}",
+    "membershipPeriod": "Período:",
     "viewDetails": "Ver detalles →",
     "noMembership": "Sin membresía activa.",
     "enrollmentsTitle": "Inscripciones",
@@ -1022,7 +1076,10 @@
     "alertTooltip": "Se emitió una alerta para esta sesión",
     "quickLinksMemberships": "Membresías",
     "quickLinksEnrollments": "Inscripciones",
-    "quickLinksClasses": "Clases"
+    "quickLinksClasses": "Clases",
+    "quickLinksMembershipsSub": "membresías",
+    "quickLinksEnrollmentsSub": "clases activas",
+    "quickLinksClassesSub": "próximas sesiones"
   },
   "studentMembershipsPage": {
     "title": "Mis membresías",
@@ -1030,6 +1087,7 @@
     "newButton": "+ Nueva membresía",
     "loading": "Cargando…",
     "empty": "No tienes membresías aún.",
+    "period": "Período:",
     "expires": "Vence:",
     "paymentLabel": "Pago:",
     "paymentValidated": "Validado",
@@ -1048,5 +1106,193 @@
     "colLevel": "Nivel",
     "colStatus": "Estado",
     "colEnrolled": "Inscrito"
+  },
+  "adminDashboard": {
+    "title": "Dashboard",
+    "subtitle": "Período actual",
+    "actionValidatePayment": "Validar pago",
+    "actionRegisterClass": "Registrar clase",
+    "actionViewStudents": "Ver estudiantes",
+    "actionPrograms": "Programas",
+    "kpiStudents": "Estudiantes",
+    "kpiNewThisMonth": "↑ {count} nuevos este mes",
+    "kpiActiveMemberships": "Membresías activas",
+    "kpiActiveMembershipsSub": "En este momento",
+    "kpiPendingPayments": "Pagos pendientes",
+    "kpiPendingAction": "Requieren acción",
+    "kpiUpToDate": "Al día",
+    "kpiHoursConsumed": "Horas consumidas",
+    "kpiHoursConsumedSub": "Este mes",
+    "kpiActivePrograms": "Programas activos",
+    "attendanceTitle": "Control de asistencia",
+    "attendanceStartClass": "Iniciar clase",
+    "attendanceEmpty": "No hay estudiantes con este estado.",
+    "filterAll": "Todos",
+    "filterActive": "Activo",
+    "filterExpiring": "Por vencer",
+    "filterInactive": "Inactivo",
+    "filterExpired": "Vencida",
+    "filterNew": "Nuevo",
+    "tableStudent": "Estudiante",
+    "tableProgram": "Programa",
+    "tableHours": "Horas",
+    "tableStatus": "Estado",
+    "statusActive": "Activo",
+    "statusExpiring": "Por vencer",
+    "statusInactive": "Inactivo",
+    "statusExpired": "Vencida",
+    "statusNew": "Nuevo",
+    "error": "Error al cargar el dashboard."
+  },
+  "managerDashboard": {
+    "title": "Panel de Coordinador",
+    "subtitle": "Resumen del programa",
+    "statClassesThisWeek": "Clases esta semana",
+    "statStudentsInProgram": "Estudiantes en el programa",
+    "statPendingActivations": "Activaciones pendientes",
+    "statHoursLogged": "Horas registradas",
+    "membershipsHeading": "Membresías pendientes de activación"
+  },
+  "professorDashboard": {
+    "title": "Panel del Profesor",
+    "subtitle": "Resumen de hoy",
+    "statClassesToday": "Clases hoy",
+    "statStudentsPresent": "Estudiantes presentes",
+    "statSessionsThisMonth": "Sesiones este mes",
+    "statHoursTaught": "Horas impartidas"
+  },
+  "superadminDashboard": {
+    "title": "Panel de Superadmin",
+    "subtitle": "Resumen de la plataforma",
+    "statTenants": "Tenants",
+    "statTotalStudents": "Total estudiantes",
+    "statActiveMemberships": "Membresías activas",
+    "statMonthlyRevenue": "Ingresos mensuales"
+  },
+  "studentAttendance": {
+    "title": "Asistencia",
+    "subtitle": "Tu historial completo de sesiones.",
+    "filterAll": "Todos",
+    "filterAttended": "Asistidas",
+    "filterRegistered": "Registradas",
+    "filterCancelled": "Canceladas",
+    "filterAbsent": "Ausentes",
+    "emptyAll": "No hay registros de asistencia.",
+    "emptyAttended": "Aún no has asistido a ninguna sesión.",
+    "emptyRegistered": "No tienes próximas inscripciones.",
+    "emptyCancelled": "No tienes inscripciones canceladas.",
+    "emptyAbsent": "No tienes sesiones ausentes.",
+    "emptyFilter": "No se encontraron registros para el filtro seleccionado.",
+    "statsAttended": "Asistidas",
+    "statsCancelled": "Canceladas",
+    "statsAbsent": "Ausentes",
+    "statsHours": "Horas consumidas",
+    "loading": "Cargando…",
+    "colDate": "Fecha",
+    "colTime": "Hora",
+    "colClass": "Clase",
+    "colLevel": "Nivel",
+    "colHours": "Horas",
+    "colStatus": "Estado",
+    "colActions": "Acciones",
+    "cancelButton": "Cancelar",
+    "sessionStarted": "La sesión ya comenzó",
+    "cancelCutoffClosed": "Ventana de cancelación cerrada ({minutes} min antes de clase)",
+    "reason": "Motivo:",
+    "modalTitle": "¿Cancelar inscripción?",
+    "modalBody": "¿Cancelar tu inscripción a <b>{className}</b> el <b>{date}</b> a las {time}? Tu lugar quedará disponible.",
+    "modalKeep": "Conservar",
+    "modalConfirm": "Sí, cancelar",
+    "modalConfirming": "Cancelando…",
+    "successMessage": "Inscripción a \"{className}\" del {date} cancelada."
+  },
+  "attendance": {
+    "walkIn": {
+      "buttonLabel": "Registrar walk-in",
+      "modalTitle": "Registrar walk-in",
+      "sessionLabel": "Sesión",
+      "studentLabel": "Estudiante",
+      "searchPlaceholder": "Buscar por nombre o documento",
+      "noResults": "No hay estudiantes elegibles.",
+      "fetchError": "No se pudieron cargar los estudiantes elegibles. Intenta de nuevo.",
+      "hoursLabel": "Horas a cobrar",
+      "submitButton": "Registrar y marcar presente",
+      "cancelButton": "Cancelar",
+      "successToast": "Walk-in registrado.",
+      "registeredBy": "Registrado por {name} ({role})",
+      "outsideWindowTooltip": "La ventana de marcación está cerrada.",
+      "levelFilterLabel": "Nivel",
+      "levelFilterAll": "Todos los niveles",
+      "selectAll": "Seleccionar todos",
+      "selectionCount": "{count, plural, one {# seleccionado} other {# seleccionados}}",
+      "studentCount": "{count} estudiantes",
+      "bulkSubmitButton": "Registrar {count, plural, one {# walk-in} other {# walk-ins}}",
+      "resultsSucceeded": "{count} registrados exitosamente",
+      "resultsFailed": "{count, plural, one {# fallido} other {# fallidos}}",
+      "retryFailed": "Reintentar fallidos",
+      "done": "Listo",
+      "noFilterResults": "Ningún estudiante coincide. Ajusta los filtros.",
+      "errors": {
+        "classNotFound": "La clase ya no existe.",
+        "classInactive": "La clase no está activa.",
+        "forbidden": "No tienes permiso para registrar walk-ins en esta clase.",
+        "invalidDate": "La fecha no corresponde a una sesión válida.",
+        "outsideWindow": "El walk-in solo se permite dentro de la ventana de marcación.",
+        "sessionCancelled": "La sesión fue cancelada.",
+        "notEnrolled": "El estudiante no está matriculado en este programa.",
+        "levelMismatch": "El nivel del estudiante no coincide con esta clase.",
+        "noActiveMembership": "El estudiante no tiene una mensualidad activa para este programa.",
+        "insufficientHours": "El estudiante no tiene suficientes horas disponibles.",
+        "invalidHours": "El número de horas no es válido para esta clase.",
+        "sessionFull": "La sesión está llena.",
+        "alreadyMarked": "El estudiante ya está marcado. Usa el flujo de corrección."
+      }
+    }
+  },
+  "studentClasses": {
+    "title": "Mis Clases",
+    "subtitle": "Clases disponibles según tu nivel de inscripción.",
+    "loading": "Cargando…",
+    "empty": "No se encontraron clases. Asegúrate de tener una inscripción activa.",
+    "colClass": "Clase",
+    "colProgram": "Programa",
+    "colLevel": "Nivel",
+    "colCapacity": "Capacidad",
+    "sessionsLabel": "Sesiones próximas — próximos 7 días",
+    "sessionsLoading": "Cargando sesiones…",
+    "sessionsEmpty": "No hay sesiones próximas en los siguientes 7 días.",
+    "colDate": "Fecha",
+    "colTime": "Hora",
+    "registeredBadge": "Inscrito",
+    "cancelButton": "Cancelar",
+    "cancelWindowClosed": "Ventana de cancelación cerrada",
+    "registerFullTooltip": "Esta sesión está llena",
+    "registerClosesTooltip": "El registro cierra {minutes} min antes de la clase",
+    "registerFull": "Llena",
+    "registerClosed": "Cerrado",
+    "registerButton": "Inscribirse",
+    "alertDefault": "Alerta emitida para esta sesión",
+    "registerError": "No se pudo inscribir. Inténtalo de nuevo.",
+    "cancelError": "No se pudo cancelar. Inténtalo de nuevo."
+  },
+  "membership": {
+    "modality": {
+      "unlimited": "Ilimitado"
+    },
+    "unlimited": {
+      "label": "Horas ilimitadas",
+      "badge": "Ilimitado",
+      "daysRemaining": "Vence en {days} días"
+    }
+  },
+  "plan": {
+    "modality": {
+      "unlimited": "Ilimitado"
+    }
+  },
+  "csv": {
+    "hours": {
+      "notApplicable": "—"
+    }
   }
 }

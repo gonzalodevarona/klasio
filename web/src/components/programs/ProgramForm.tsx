@@ -9,6 +9,7 @@ import {
   CreateProgramRequest,
   UpdateProgramRequest,
 } from "@/lib/types/program";
+import { Input, Button } from "@/components/ui";
 
 interface FieldErrors {
   name?: string;
@@ -100,35 +101,19 @@ export default function ProgramForm({ program }: ProgramFormProps) {
       )}
 
       {/* Name */}
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("formNameProgramLabel")} <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            fieldErrors.name ? "border-red-500" : "border-gray-300"
-          }`}
-          placeholder={t("formNameProgramPlaceholder")}
-        />
-        {fieldErrors.name && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
-        )}
-      </div>
+      <Input
+        label={t("formNameProgramLabel")}
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        placeholder={t("formNameProgramPlaceholder")}
+        error={fieldErrors.name}
+      />
 
       {/* Submit */}
       <div className="pt-2">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <Button variant="volt" type="submit" disabled={submitting}>
           {submitting
             ? isEdit
               ? t("formSavingButton")
@@ -136,7 +121,7 @@ export default function ProgramForm({ program }: ProgramFormProps) {
             : isEdit
               ? t("formSaveButton")
               : t("formCreateProgramButton")}
-        </button>
+        </Button>
       </div>
     </form>
   );

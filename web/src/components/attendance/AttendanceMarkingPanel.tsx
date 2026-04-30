@@ -11,6 +11,8 @@ import {
 } from "@/lib/types/attendance";
 import { useMarkAttendance } from "@/hooks/useMarkAttendance";
 import RegistrationStatusBadge from "./RegistrationStatusBadge";
+import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
+import { ClassLevel } from "@/lib/types/programClass";
 import CorrectMarkModal from "./CorrectMarkModal";
 import { isWithinMarkingWindow, msUntilWindowOpen } from "@/lib/attendanceTimeWindow";
 import { AttendanceTimeConstants } from "@/lib/attendanceConstants";
@@ -24,11 +26,6 @@ interface AttendanceMarkingPanelProps {
 
 type LocalMark = "PRESENT" | "ABSENT" | null;
 
-const LEVEL_STYLES: Record<string, string> = {
-  BEGINNER:     "bg-green-100 text-green-700",
-  INTERMEDIATE: "bg-yellow-100 text-yellow-700",
-  ADVANCED:     "bg-red-100 text-red-700",
-};
 
 const CAN_MARK_ROLES = ["PROFESSOR", "ADMIN", "SUPERADMIN", "MANAGER"];
 
@@ -39,7 +36,6 @@ export default function AttendanceMarkingPanel({
   onMarked,
 }: AttendanceMarkingPanelProps) {
   const t = useTranslations("classes");
-  const tBadges = useTranslations("badges.classLevel");
   const { markAttendance, loading } = useMarkAttendance();
 
   // Re-evaluate the window every 30 s so the UI unlocks automatically when the time comes.
@@ -189,11 +185,7 @@ export default function AttendanceMarkingPanel({
               <tr key={r.registrationId} className="hover:bg-gray-50">
                 <td className="px-4 py-2 text-gray-900 font-medium">{r.studentName}</td>
                 <td className="px-4 py-2">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL_STYLES[r.level] ?? "bg-gray-100 text-gray-600"}`}
-                  >
-                    {tBadges(r.level)}
-                  </span>
+                  <ClassLevelBadge level={r.level as ClassLevel} />
                 </td>
                 <td className="px-4 py-2 text-gray-600">{r.intendedHours}h</td>
                 <td className="px-4 py-2">

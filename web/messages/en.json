@@ -182,7 +182,6 @@
   },
   "layout": {
     "brand": "Klasio",
-    "brandSubtitle": "League Management",
     "signOut": "Sign out",
     "openNav": "Open navigation",
     "closeNav": "Close navigation",
@@ -203,7 +202,7 @@
     "navMyMemberships": "My Memberships",
     "navMyEnrollments": "My Enrollments",
     "navMyClasses": "My Classes",
-    "navMyRegistrations": "My Registrations"
+    "navAttendance": "Attendance"
   },
   "badges": {
     "membershipStatus": {
@@ -237,7 +236,8 @@
     "classLevel": {
       "BEGINNER": "Beginner",
       "INTERMEDIATE": "Intermediate",
-      "ADVANCED": "Advanced"
+      "ADVANCED": "Advanced",
+      "OPEN": "Open"
     },
     "classType": {
       "RECURRING": "Recurring",
@@ -364,6 +364,7 @@
   },
   "professors": {
     "pageTitle": "Professors",
+    "filterStatusLabel": "Status:",
     "filterAll": "All",
     "filterActive": "Active",
     "filterDeactivated": "Deactivated",
@@ -398,6 +399,7 @@
     "formDocTypeLabel": "Doc. Type *",
     "formIdNumberLabel": "ID Number *",
     "formIdNumberPlaceholder": "Document number",
+    "formAccountSetupNote": "An account setup email will be sent to this address. The professor must follow the link to create their password before they can log in.",
     "formCancelButton": "Cancel",
     "formSaveButton": "Save Changes",
     "formCreateButton": "Create Professor",
@@ -427,6 +429,7 @@
   },
   "managers": {
     "pageTitle": "Managers",
+    "filterStatusLabel": "Status:",
     "filterAll": "All",
     "filterActive": "Active",
     "filterInactive": "Inactive",
@@ -465,7 +468,7 @@
     "formDocTypeLabel": "Doc. Type *",
     "formIdNumberLabel": "ID Number *",
     "formIdNumberPlaceholder": "Document number",
-    "formTempPasswordNote": "A temporary password will be generated automatically. The manager can set their own via \"Forgot password\".",
+    "formTempPasswordNote": "An account setup email will be sent to this address. The manager must follow the link to create their password before they can log in.",
     "formCancelButton": "Cancel",
     "formCreateButton": "Create Manager",
     "formCreatingButton": "Creating...",
@@ -509,11 +512,10 @@
     "formEmailPlaceholder": "admin@example.com",
     "formPhoneLabel": "Phone *",
     "formPhonePlaceholder": "3001234567",
-    "formPasswordLabel": "Password *",
-    "formPasswordPlaceholder": "Min. 8 characters",
     "formDocTypeLabel": "Doc. Type *",
     "formIdNumberLabel": "ID Number *",
     "formIdNumberPlaceholder": "Document number",
+    "formSetupEmailNote": "An account setup email will be sent to this address. The admin must follow the link to create their password before they can log in.",
     "formCancelButton": "Cancel",
     "formCreateButton": "Create Admin",
     "formCreatingButton": "Creating...",
@@ -567,9 +569,11 @@
     "plansView": "View",
     "modalityHoursBased": "Hours Based",
     "modalityClassesPerWeek": "Classes per Week",
+    "modalityUnlimited": "Unlimited",
     "formNameLabel": "Name",
     "formNamePlaceholderHours": "e.g., 4 Hours",
     "formNamePlaceholderSchedule": "e.g., Mon/Wed/Thu Evening",
+    "formNamePlaceholderUnlimited": "e.g., Unlimited Monthly",
     "formModalityLabel": "Modality",
     "formModalityCannotChange": "Modality cannot be changed after creation.",
     "formCostLabel": "Cost (COP)",
@@ -674,6 +678,7 @@
     "filterBeginnerOption": "Beginner",
     "filterIntermediateOption": "Intermediate",
     "filterAdvancedOption": "Advanced",
+    "filterOpenOption": "Open",
     "detailName": "Name",
     "detailLevel": "Level",
     "detailType": "Type",
@@ -723,6 +728,7 @@
     "formScheduleStartLabel": "Start Time",
     "formScheduleEndLabel": "End Time",
     "formScheduleRemoveButton": "Remove",
+    "formScheduleDuplicateButton": "Duplicate",
     "formScheduleAddEntry": "+ Add Schedule Entry",
     "formSaveButton": "Save Changes",
     "formSavingButton": "Saving...",
@@ -740,6 +746,21 @@
     "formScheduleDayRequired": "Recurring classes require a day of the week for each entry.",
     "formScheduleDateRequired": "One-time classes require a specific date.",
     "formScheduleOneTimeMax": "One-time classes can only have one schedule entry.",
+    "dayMonday": "Monday",
+    "dayTuesday": "Tuesday",
+    "dayWednesday": "Wednesday",
+    "dayThursday": "Thursday",
+    "dayFriday": "Friday",
+    "daySaturday": "Saturday",
+    "daySunday": "Sunday",
+    "classLevel": {
+      "BEGINNER": "Beginner",
+      "INTERMEDIATE": "Intermediate",
+      "ADVANCED": "Advanced",
+      "OPEN": "Open"
+    },
+    "formLevelOpen": "Open (any level)",
+    "editLevelCascadeConfirm": "Changing this class to {newLevel} will cancel future registrations of students whose enrollment level doesn't match. Proceed?",
     "professorAssignmentTitle": "Professor Assignment",
     "professorCurrentLabel": "Current Professor",
     "professorIdLabel": "Professor ID",
@@ -846,6 +867,7 @@
     "formPlanSelectPlaceholder": "— Select a plan —",
     "formModalityHoursBased": "Hours-based",
     "formModalityClassesPerWeek": "Classes per week",
+    "formModalityUnlimited": "Unlimited",
     "formModalityLabel": "Modality: ",
     "formHoursLabel": "Hours: ",
     "formCostLabel": "Cost: ",
@@ -862,7 +884,11 @@
     "newLoadingStudent": "Loading student…",
     "newNoEnrollments": "This student has no active program enrollments. Enroll them in a program first.",
     "newLoadingPlans": "Loading plans…",
-    "newNoPlans": "No active HOURS_BASED plans found for this program."
+    "newNoPlans": "No active plans found for this program.",
+    "hourBalanceTotalSuffix": "/ {purchased}h",
+    "hourBalanceRemaining": "hours remaining",
+    "hourBalanceConsumed": "Consumed: {hours}h",
+    "hourBalancePercentUsed": "{pct}% used"
   },
   "paymentProofs": {
     "pageTitle": "Payment Proof Queue",
@@ -926,7 +952,10 @@
     "tabUnreadOnly": "Unread only",
     "markAllAsRead": "Mark all as read",
     "listEmpty": "No notifications found.",
-    "pageTitle": "Notifications"
+    "pageTitle": "Notifications",
+    "session": {
+      "registrationCancelledLevelChange": "Your registration for {className} on {date} was cancelled because the class level changed to {newLevel}."
+    }
   },
   "tenants": {
     "pageTitle": "Tenants",
@@ -980,6 +1009,8 @@
       "languagePlaceholder": "Select language...",
       "languageSpanish": "Spanish",
       "languageEnglish": "English",
+      "labelTimezone": "Timezone",
+      "errorTimezoneRequired": "Timezone is required.",
       "submitButton": "Create Tenant",
       "submitting": "Creating...",
       "errorNameRequired": "Name is required.",
@@ -999,8 +1030,30 @@
     }
   },
   "loginPage": {
-    "title": "Klasio",
-    "subtitle": "Sports League Management"
+    "title": "Sign in",
+    "subtitle": "Enter your credentials to continue",
+    "tagline": "Sports management",
+    "heroLine1": "Manage your",
+    "heroAccent": "league",
+    "heroLine2": "with",
+    "heroLine3": "precision.",
+    "heroBody": "Attendance, memberships, payments and programs — all in one platform.",
+    "tag1": "Memberships",
+    "tag2": "Attendance",
+    "tag3": "Payments"
+  },
+  "forgotPasswordPage": {
+    "title": "Forgot your password?",
+    "subtitle": "Enter your email and we'll send you a reset link.",
+    "loading": "Loading…"
+  },
+  "resetPasswordPage": {
+    "title": "Reset your password",
+    "subtitle": "Enter your new password below.",
+    "invalidTitle": "Invalid Link",
+    "invalidBody": "This password reset link is invalid. Please request a new one.",
+    "requestNew": "Request New Link",
+    "loading": "Loading…"
   },
   "registerPage": {
     "title": "Create your account",
@@ -1012,6 +1065,7 @@
     "activeMembership": "Active Membership",
     "loading": "Loading…",
     "membershipExpires": "Expires: {date}",
+    "membershipPeriod": "Period:",
     "viewDetails": "View details →",
     "noMembership": "No active membership.",
     "enrollmentsTitle": "Enrollments",
@@ -1022,7 +1076,10 @@
     "alertTooltip": "Alert issued for this session",
     "quickLinksMemberships": "Memberships",
     "quickLinksEnrollments": "Enrollments",
-    "quickLinksClasses": "Classes"
+    "quickLinksClasses": "Classes",
+    "quickLinksMembershipsSub": "memberships",
+    "quickLinksEnrollmentsSub": "active classes",
+    "quickLinksClassesSub": "upcoming sessions"
   },
   "studentMembershipsPage": {
     "title": "My Memberships",
@@ -1030,6 +1087,7 @@
     "newButton": "+ New Membership",
     "loading": "Loading…",
     "empty": "You have no memberships yet.",
+    "period": "Period:",
     "expires": "Expires:",
     "paymentLabel": "Payment:",
     "paymentValidated": "Validated",
@@ -1048,5 +1106,193 @@
     "colLevel": "Level",
     "colStatus": "Status",
     "colEnrolled": "Enrolled"
+  },
+  "adminDashboard": {
+    "title": "Dashboard",
+    "subtitle": "Current period",
+    "actionValidatePayment": "Validate payment",
+    "actionRegisterClass": "Register class",
+    "actionViewStudents": "View students",
+    "actionPrograms": "Programs",
+    "kpiStudents": "Students",
+    "kpiNewThisMonth": "↑ {count} new this month",
+    "kpiActiveMemberships": "Active memberships",
+    "kpiActiveMembershipsSub": "Right now",
+    "kpiPendingPayments": "Pending payments",
+    "kpiPendingAction": "Action required",
+    "kpiUpToDate": "Up to date",
+    "kpiHoursConsumed": "Hours consumed",
+    "kpiHoursConsumedSub": "This month",
+    "kpiActivePrograms": "Active programs",
+    "attendanceTitle": "Attendance control",
+    "attendanceStartClass": "Start class",
+    "attendanceEmpty": "No students with this status.",
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterExpiring": "Expiring soon",
+    "filterInactive": "Inactive",
+    "filterExpired": "Expired",
+    "filterNew": "New",
+    "tableStudent": "Student",
+    "tableProgram": "Program",
+    "tableHours": "Hours",
+    "tableStatus": "Status",
+    "statusActive": "Active",
+    "statusExpiring": "Expiring soon",
+    "statusInactive": "Inactive",
+    "statusExpired": "Expired",
+    "statusNew": "New",
+    "error": "Failed to load dashboard data."
+  },
+  "managerDashboard": {
+    "title": "Manager Dashboard",
+    "subtitle": "Program overview",
+    "statClassesThisWeek": "Classes this week",
+    "statStudentsInProgram": "Students in program",
+    "statPendingActivations": "Pending activations",
+    "statHoursLogged": "Hours logged",
+    "membershipsHeading": "Memberships awaiting activation"
+  },
+  "professorDashboard": {
+    "title": "Professor Dashboard",
+    "subtitle": "Today's overview",
+    "statClassesToday": "Classes today",
+    "statStudentsPresent": "Students present",
+    "statSessionsThisMonth": "Sessions this month",
+    "statHoursTaught": "Hours taught"
+  },
+  "superadminDashboard": {
+    "title": "Superadmin Dashboard",
+    "subtitle": "Platform overview",
+    "statTenants": "Tenants",
+    "statTotalStudents": "Total students",
+    "statActiveMemberships": "Active memberships",
+    "statMonthlyRevenue": "Monthly revenue"
+  },
+  "studentAttendance": {
+    "title": "Attendance",
+    "subtitle": "Your complete class session history.",
+    "filterAll": "All",
+    "filterAttended": "Attended",
+    "filterRegistered": "Registered",
+    "filterCancelled": "Cancelled",
+    "filterAbsent": "Absent",
+    "emptyAll": "No attendance records found.",
+    "emptyAttended": "No attended sessions yet.",
+    "emptyRegistered": "No upcoming registrations.",
+    "emptyCancelled": "No cancelled registrations.",
+    "emptyAbsent": "No absent sessions.",
+    "emptyFilter": "No records found for the selected filter.",
+    "statsAttended": "Attended",
+    "statsCancelled": "Cancelled",
+    "statsAbsent": "Absent",
+    "statsHours": "Hours consumed",
+    "loading": "Loading…",
+    "colDate": "Date",
+    "colTime": "Time",
+    "colClass": "Class",
+    "colLevel": "Level",
+    "colHours": "Hours",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "cancelButton": "Cancel",
+    "sessionStarted": "Session has already started",
+    "cancelCutoffClosed": "Cancellation window closed ({minutes} min before class)",
+    "reason": "Reason:",
+    "modalTitle": "Cancel registration?",
+    "modalBody": "Cancel your registration for <b>{className}</b> on <b>{date}</b> at {time}? Your spot will be released.",
+    "modalKeep": "Keep",
+    "modalConfirm": "Yes, cancel",
+    "modalConfirming": "Cancelling…",
+    "successMessage": "Registration for \"{className}\" on {date} cancelled."
+  },
+  "attendance": {
+    "walkIn": {
+      "buttonLabel": "Register walk-in",
+      "modalTitle": "Register walk-in",
+      "sessionLabel": "Session",
+      "studentLabel": "Student",
+      "searchPlaceholder": "Search by name or ID document",
+      "noResults": "No eligible students found.",
+      "fetchError": "Could not load eligible students. Please try again.",
+      "hoursLabel": "Hours to charge",
+      "submitButton": "Register and mark present",
+      "cancelButton": "Cancel",
+      "successToast": "Walk-in registered.",
+      "registeredBy": "Registered by {name} ({role})",
+      "outsideWindowTooltip": "The marking window is closed.",
+      "levelFilterLabel": "Level",
+      "levelFilterAll": "All levels",
+      "selectAll": "Select all",
+      "selectionCount": "{count, plural, one {# selected} other {# selected}}",
+      "studentCount": "{count} students",
+      "bulkSubmitButton": "Register {count, plural, one {# walk-in} other {# walk-ins}}",
+      "resultsSucceeded": "{count} registered successfully",
+      "resultsFailed": "{count, plural, one {# failed} other {# failed}}",
+      "retryFailed": "Retry failed",
+      "done": "Done",
+      "noFilterResults": "No students match. Adjust filters.",
+      "errors": {
+        "classNotFound": "This class no longer exists.",
+        "classInactive": "This class is not active.",
+        "forbidden": "You are not allowed to register walk-ins for this class.",
+        "invalidDate": "The selected date is not a valid session for this class.",
+        "outsideWindow": "Walk-in is only allowed inside the marking window.",
+        "sessionCancelled": "This session has been cancelled.",
+        "notEnrolled": "Student is not enrolled in this program.",
+        "levelMismatch": "Student's level does not match this class.",
+        "noActiveMembership": "Student does not have an active membership for this program.",
+        "insufficientHours": "Student does not have enough available hours.",
+        "invalidHours": "Hours to charge is invalid for this class duration.",
+        "sessionFull": "The session is full.",
+        "alreadyMarked": "Student is already marked. Use the correction flow."
+      }
+    }
+  },
+  "studentClasses": {
+    "title": "My Classes",
+    "subtitle": "Classes available to you based on your enrollment level.",
+    "loading": "Loading…",
+    "empty": "No classes found. Make sure you have an active enrollment.",
+    "colClass": "Class",
+    "colProgram": "Program",
+    "colLevel": "Level",
+    "colCapacity": "Capacity",
+    "sessionsLabel": "Upcoming Sessions — next 7 days",
+    "sessionsLoading": "Loading sessions…",
+    "sessionsEmpty": "No upcoming sessions in the next 7 days.",
+    "colDate": "Date",
+    "colTime": "Time",
+    "registeredBadge": "Registered",
+    "cancelButton": "Cancel",
+    "cancelWindowClosed": "Cancellation window closed",
+    "registerFullTooltip": "This session is full",
+    "registerClosesTooltip": "Registration closes {minutes} min before class",
+    "registerFull": "Full",
+    "registerClosed": "Closed",
+    "registerButton": "Register",
+    "alertDefault": "Alert issued for this session",
+    "registerError": "Failed to register. Please try again.",
+    "cancelError": "Failed to cancel. Please try again."
+  },
+  "membership": {
+    "modality": {
+      "unlimited": "Unlimited"
+    },
+    "unlimited": {
+      "label": "Unlimited hours",
+      "badge": "Unlimited",
+      "daysRemaining": "Expires in {days} days"
+    }
+  },
+  "plan": {
+    "modality": {
+      "unlimited": "Unlimited"
+    }
+  },
+  "csv": {
+    "hours": {
+      "notApplicable": "—"
+    }
   }
 }

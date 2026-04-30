@@ -11,6 +11,8 @@ import {
 import { ProfessorSummary } from "@/lib/types/professor";
 import CreateProfessorModal from "./CreateProfessorModal";
 import EditProfessorModal from "./EditProfessorModal";
+import ProfessorStatusBadge from "./ProfessorStatusBadge";
+import { Table, Thead, Th, Tr, Td, Button, Select } from "@/components/ui";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -25,8 +27,8 @@ function Toggle({ checked, disabled, onChange }: {
     <button
       type="button" role="switch" aria-checked={checked} disabled={disabled} onClick={onChange}
       className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent
-        transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
-        disabled:opacity-40 disabled:cursor-not-allowed ${checked ? "bg-green-500" : "bg-gray-300"}`}
+        transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-k-volt focus:ring-offset-1
+        disabled:opacity-40 disabled:cursor-not-allowed ${checked ? "bg-k-volt" : "bg-k-border"}`}
     >
       <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0
         transition duration-200 ease-in-out ${checked ? "translate-x-4" : "translate-x-0"}`} />
@@ -34,22 +36,6 @@ function Toggle({ checked, disabled, onChange }: {
   );
 }
 
-// ── Status badge ──────────────────────────────────────────────────────────────
-
-const STATUS_COLORS: Record<string, string> = {
-  ACTIVE:      "bg-green-100 text-green-700",
-  INVITED:     "bg-yellow-100 text-yellow-700",
-  DEACTIVATED: "bg-gray-100 text-gray-500",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const t = useTranslations("badges.professorStatus");
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"}`}>
-      {t(status)}
-    </span>
-  );
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -71,7 +57,7 @@ function DeactivateModal({ professor, loading, error, onConfirm, onCancel }: {
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
         <h2 className="text-base font-semibold text-gray-900 mb-2">{t("modalDeactivateTitle")}</h2>
         <p className="text-sm text-gray-600 mb-1">
-          {t("modalDeactivateConfirm", { name: <span className="font-medium text-gray-900">{name}</span> })}
+          {t("modalDeactivateConfirm", { name })}
         </p>
         <p className="text-xs text-gray-500 mb-6">
           {t("modalDeactivateHint")}
@@ -157,42 +143,28 @@ export default function ProfessorList() {
     }
   }
 
-  const STATUS_TABS: { label: string; value: StatusFilter }[] = [
-    { label: t("filterActive"),      value: "ACTIVE" },
-    { label: t("filterDeactivated"), value: "DEACTIVATED" },
-    { label: t("filterAll"),         value: "" },
-  ];
-
-  const COLUMNS = [
-    { key: "colName",     label: t("colName") },
-    { key: "colEmail",    label: t("colEmail") },
-    { key: "colPhone",    label: t("colPhone") },
-    { key: "colDocument", label: t("colDocument") },
-    { key: "colStatus",   label: t("colStatus") },
-    { key: "colCreated",  label: t("colCreated") },
-    { key: "colActions",  label: t("colActions") },
-  ];
-
   return (
     <div className="space-y-4">
-      {/* Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-md border border-gray-300 overflow-hidden shadow-sm">
-          {STATUS_TABS.map((tab, i) => (
-            <button key={tab.value} type="button" onClick={() => handleStatusFilter(tab.value)}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors
-                ${i < STATUS_TABS.length - 1 ? "border-r border-gray-300" : ""}
-                ${statusFilter === tab.value ? "bg-blue-600 text-white" : "bg-white text-gray-700 hover:bg-gray-50"}`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <button onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-          <Plus className="h-4 w-4" />
+      {/* Page header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("pageTitle")}</h1>
+        <Button variant="volt" onClick={() => setShowCreateModal(true)}>
+          <Plus className="h-4 w-4 mr-1" />
           {t("addButton")}
-        </button>
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Select
+          label={t("filterStatusLabel")}
+          value={statusFilter}
+          onChange={(e) => handleStatusFilter(e.target.value as StatusFilter)}
+        >
+          <option value="">{t("filterAll")}</option>
+          <option value="ACTIVE">{t("filterActive")}</option>
+          <option value="DEACTIVATED">{t("filterDeactivated")}</option>
+        </Select>
       </div>
 
       {(error || actionError) && (
@@ -207,64 +179,76 @@ export default function ProfessorList() {
         <div className="text-center py-10 text-sm text-gray-500">{t("listEmpty")}</div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {COLUMNS.map((col) => (
-                    <th key={col.key} className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${col.key === "colActions" ? "text-right" : "text-left"}`}>
-                      {col.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {professors.map((p: ProfessorSummary) => (
-                  <tr key={p.id} className={`hover:bg-gray-50 ${p.status === "DEACTIVATED" ? "opacity-60" : ""}`}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {p.firstName} {p.lastName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{p.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {p.phoneNumber ?? <span className="text-gray-300 italic">—</span>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className="font-mono">{p.identityDocumentType}</span>{" "}{p.identityNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={p.status} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(p.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-3">
-                        <button onClick={() => { setActionError(null); setEditTarget(p); }} title="Edit"
-                          className="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors">
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <Toggle
-                          checked={p.status === "ACTIVE" || p.status === "INVITED"}
-                          disabled={togglingId === p.id}
-                          onChange={() => handleToggleClick(p)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <Thead>
+              <tr>
+                <Th>{t("colName")}</Th>
+                <Th>{t("colEmail")}</Th>
+                <Th>{t("colPhone")}</Th>
+                <Th>{t("colDocument")}</Th>
+                <Th>{t("colStatus")}</Th>
+                <Th>{t("colCreated")}</Th>
+                <Th right>{t("colActions")}</Th>
+              </tr>
+            </Thead>
+            <tbody>
+              {professors.map((p: ProfessorSummary) => (
+                <Tr key={p.id} className={p.status === "DEACTIVATED" ? "opacity-60" : ""}>
+                  <Td bold>{p.firstName} {p.lastName}</Td>
+                  <Td>{p.email}</Td>
+                  <Td muted>
+                    {p.phoneNumber ?? <span className="text-gray-300 italic">—</span>}
+                  </Td>
+                  <Td muted>
+                    <span className="font-[var(--font-mono)]">{p.identityDocumentType}</span>{" "}{p.identityNumber}
+                  </Td>
+                  <Td>
+                    <ProfessorStatusBadge status={p.status} />
+                  </Td>
+                  <Td muted>{formatDate(p.createdAt)}</Td>
+                  <Td right>
+                    <div className="flex items-center justify-end gap-3">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setActionError(null); setEditTarget(p); }}
+                        title="Edit"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Toggle
+                        checked={p.status === "ACTIVE" || p.status === "INVITED"}
+                        disabled={togglingId === p.id}
+                        onChange={() => handleToggleClick(p)}
+                      />
+                    </div>
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
 
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-700">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
+          <div className="flex items-center justify-between border-t border-k-line pt-4">
+            <p className="text-sm text-k-subtle">{tPagination("summary", { current: page + 1, total: totalPages, count: totalElements })}</p>
             <div className="flex gap-2">
-              <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+              >
                 {tPagination("previous")}
-              </button>
-              <button type="button" onClick={() => setPage((p) => p + 1)} disabled={page >= totalPages - 1}
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= totalPages - 1}
+              >
                 {tPagination("next")}
-              </button>
+              </Button>
             </div>
           </div>
         </>

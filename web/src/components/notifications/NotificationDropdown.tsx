@@ -16,15 +16,15 @@ interface NotificationDropdownProps {
 
 export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {
   const t = useTranslations("notifications");
-  const { notifications, isLoading, refresh } = useNotifications(0, false);
+  const { notifications, isLoading, refresh, markReadOptimistic } = useNotifications(0, false);
   const { markRead } = useMarkNotificationRead();
   const { markAllRead } = useMarkAllNotificationsRead();
   const { refreshCount } = useNotificationCount();
 
   async function handleRead(id: string) {
-    await markRead(id);
-    refresh();
+    markReadOptimistic(id);
     refreshCount();
+    await markRead(id);
   }
 
   async function handleMarkAll() {
@@ -62,10 +62,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
             <NotificationItem
               key={n.id}
               notification={n}
-              onRead={(id) => {
-                handleRead(id);
-                onClose();
-              }}
+              onRead={handleRead}
             />
           ))}
       </div>

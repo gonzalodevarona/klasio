@@ -17,6 +17,7 @@ class TenantTest {
     private static final String NAME = "Liga de Fútbol Bogotá";
     private static final String DISCIPLINE = "Football";
     private static final String LANGUAGE = "es";
+    private static final String TIMEZONE = "America/Bogota";
     private static final TenantSlug SLUG = new TenantSlug("liga-futbol-bogota");
     private static final ContactInfo CONTACT = new ContactInfo(
             "admin@liga.com", "3001234567", "57",
@@ -32,14 +33,14 @@ class TenantTest {
         @Test
         @DisplayName("should create tenant with ACTIVE status")
         void shouldCreateWithActiveStatus() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertEquals(TenantStatus.ACTIVE, tenant.getStatus());
         }
 
         @Test
         @DisplayName("should generate a non-null id")
         void shouldGenerateId() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertNotNull(tenant.getId());
             assertNotNull(tenant.getId().value());
         }
@@ -47,17 +48,18 @@ class TenantTest {
         @Test
         @DisplayName("should set createdAt to a non-null instant")
         void shouldSetCreatedAt() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertNotNull(tenant.getCreatedAt());
         }
 
         @Test
         @DisplayName("should store all provided fields")
         void shouldStoreAllFields() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertEquals(NAME, tenant.getName());
             assertEquals(DISCIPLINE, tenant.getDiscipline());
             assertEquals(LANGUAGE, tenant.getLanguage());
+            assertEquals(TIMEZONE, tenant.getTimezone());
             assertEquals(SLUG, tenant.getSlug());
             assertEquals(CONTACT, tenant.getContactInfo());
             assertEquals(CREATED_BY, tenant.getCreatedBy());
@@ -69,7 +71,7 @@ class TenantTest {
         @Test
         @DisplayName("should publish TenantCreated domain event")
         void shouldPublishTenantCreatedEvent() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             List<DomainEvent> events = tenant.getDomainEvents();
             assertEquals(1, events.size());
 
@@ -84,7 +86,7 @@ class TenantTest {
         @Test
         @DisplayName("should allow null logo key")
         void shouldAllowNullLogoKey() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, null);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, null);
             assertNull(tenant.getLogoKey());
         }
     }
@@ -97,35 +99,51 @@ class TenantTest {
         @DisplayName("should reject blank name")
         void shouldRejectBlankName() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create("  ", DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create("  ", DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
         @DisplayName("should reject null name")
         void shouldRejectNullName() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create(null, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(null, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
         @DisplayName("should reject blank discipline")
         void shouldRejectBlankDiscipline() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create(NAME, "  ", LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(NAME, "  ", LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
         @DisplayName("should reject null discipline")
         void shouldRejectNullDiscipline() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Tenant.create(NAME, null, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(NAME, null, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
 
         @Test
         @DisplayName("should reject null contact info")
         void shouldRejectNullContactInfo() {
             assertThrows(NullPointerException.class,
-                    () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, null, CREATED_BY, LOGO_KEY));
+                    () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, null, CREATED_BY, LOGO_KEY));
+        }
+
+        @Test
+        @DisplayName("should reject invalid timezone identifier")
+        void create_withInvalidTimezone_throwsIllegalArgument() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, "Not/AReal/Zone",
+                            SLUG, CONTACT, CREATED_BY, LOGO_KEY));
+        }
+
+        @Test
+        @DisplayName("should reject blank timezone")
+        void create_withBlankTimezone_throwsIllegalArgument() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Tenant.create(NAME, DISCIPLINE, LANGUAGE, "  ",
+                            SLUG, CONTACT, CREATED_BY, LOGO_KEY));
         }
     }
 
@@ -134,7 +152,7 @@ class TenantTest {
     class DeactivateTests {
 
         private Tenant createActiveTenant() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             tenant.clearDomainEvents();
             return tenant;
         }
@@ -178,7 +196,7 @@ class TenantTest {
         @Test
         @DisplayName("should return TenantCreated after create")
         void shouldReturnEventsAfterCreate() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertEquals(1, tenant.getDomainEvents().size());
             assertInstanceOf(TenantCreated.class, tenant.getDomainEvents().get(0));
         }
@@ -186,14 +204,14 @@ class TenantTest {
         @Test
         @DisplayName("should return unmodifiable list")
         void shouldReturnUnmodifiableList() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             assertThrows(UnsupportedOperationException.class, () -> tenant.getDomainEvents().clear());
         }
 
         @Test
         @DisplayName("should clear all domain events")
         void shouldClearDomainEvents() {
-            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
+            Tenant tenant = Tenant.create(NAME, DISCIPLINE, LANGUAGE, TIMEZONE, SLUG, CONTACT, CREATED_BY, LOGO_KEY);
             tenant.clearDomainEvents();
             assertTrue(tenant.getDomainEvents().isEmpty());
         }

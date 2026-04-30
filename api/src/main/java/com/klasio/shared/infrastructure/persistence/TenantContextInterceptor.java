@@ -71,6 +71,28 @@ public class TenantContextInterceptor implements HandlerInterceptor {
         return CURRENT_TENANT.get();
     }
 
+    /**
+     * Sets the tenant context ThreadLocal for the current thread.
+     *
+     * <p>Use this in non-servlet contexts (e.g., {@code @TransactionalEventListener(AFTER_COMMIT)}
+     * handlers that run after the HTTP request lifecycle ends and the ThreadLocal has been cleared)
+     * so that {@link TenantScopedRepository#applyTenantContext()} can still set the correct
+     * PostgreSQL RLS parameter when it executes in a new transaction.
+     *
+     * <p>Callers are responsible for clearing the ThreadLocal after use via
+     * {@link #clearCurrentTenant()}.
+     */
+    public static void setCurrentTenant(String tenantId) {
+        if (tenantId != null) {
+            CURRENT_TENANT.set(tenantId);
+        }
+    }
+
+    /** Clears the current-tenant ThreadLocal. Use after {@link #setCurrentTenant}. */
+    public static void clearCurrentTenant() {
+        CURRENT_TENANT.remove();
+    }
+
     private void setTenantContext(String tenantId) {
         try (Connection connection = dataSource.getConnection()) {
             try (var stmt = connection.prepareStatement("SELECT set_config('app.current_tenant', ?, false)")) {

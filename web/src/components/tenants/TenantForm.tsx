@@ -13,6 +13,7 @@ interface FieldErrors {
   name?: string;
   discipline?: string;
   language?: string;
+  timezone?: string;
   slug?: string;
   contactEmail?: string;
   contactPhone?: string;
@@ -47,6 +48,7 @@ export default function TenantForm() {
   const [name, setName] = useState("");
   const [discipline, setDiscipline] = useState("");
   const [language, setLanguage] = useState("");
+  const [timezone, setTimezone] = useState("America/Bogota");
   const [slug, setSlug] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -68,6 +70,7 @@ export default function TenantForm() {
     if (!name.trim()) errors.name = t("errorNameRequired");
     if (!discipline.trim()) errors.discipline = t("errorDisciplineRequired");
     if (!language) errors.language = t("errorLanguageRequired");
+    if (!timezone) errors.timezone = t("errorTimezoneRequired");
     if (!slugPreview.trim()) errors.slug = t("errorSlugRequired");
 
     if (!contactEmail.trim()) {
@@ -111,6 +114,7 @@ export default function TenantForm() {
       formData.append("name", name.trim());
       formData.append("discipline", discipline.trim());
       formData.append("language", language);
+      formData.append("timezone", timezone);
       formData.append("slug", slugPreview.trim());
       formData.append("contactEmail", contactEmail.trim());
       formData.append("contactPhone", contactPhone.trim());
@@ -199,6 +203,31 @@ export default function TenantForm() {
           <option value="en">{t("languageEnglish")}</option>
         </select>
         {fieldErrors.language && <p className="mt-1 text-sm text-red-600">{fieldErrors.language}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-1">
+          {t("labelTimezone")} <span className="text-red-500">*</span>
+        </label>
+        <select
+          id="timezone"
+          value={timezone}
+          onChange={(e) => setTimezone(e.target.value)}
+          className={inputClass(fieldErrors.timezone)}
+        >
+          <option value="America/Bogota">America/Bogota (COT, UTC-5)</option>
+          <option value="America/New_York">America/New_York (EST/EDT)</option>
+          <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+          <option value="America/Mexico_City">America/Mexico_City (CST/CDT)</option>
+          <option value="America/Lima">America/Lima (PET, UTC-5)</option>
+          <option value="America/Santiago">America/Santiago (CLT/CLST)</option>
+          <option value="America/Argentina/Buenos_Aires">America/Argentina/Buenos_Aires (ART, UTC-3)</option>
+          <option value="America/Sao_Paulo">America/Sao_Paulo (BRT/BRST)</option>
+          <option value="America/Caracas">America/Caracas (VET, UTC-4)</option>
+          <option value="America/Guayaquil">America/Guayaquil (ECT, UTC-5)</option>
+          <option value="UTC">UTC</option>
+        </select>
+        {fieldErrors.timezone && <p className="mt-1 text-sm text-red-600">{fieldErrors.timezone}</p>}
       </div>
 
       <div>

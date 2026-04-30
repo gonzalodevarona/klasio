@@ -1,35 +1,26 @@
-"use client";
-
-import { useAuth } from "@/hooks/useAuth";
+import { getTranslations } from "next-intl/server";
+import { StatCard } from "@/components/ui";
 import { DelegatedMembershipList } from "@/components/payment-proofs/DelegatedMembershipList";
 
-export default function ManagerDashboard() {
-  const { user, logout } = useAuth();
+export const metadata = { title: "Manager Dashboard - Klasio" };
 
+export default async function ManagerDashboard() {
+  const t = await getTranslations("managerDashboard");
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Program Overview</p>
-        </div>
-        <button
-          onClick={logout}
-          className="px-4 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
-        >
-          Sign Out
-        </button>
+      <div className="mb-8">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
+        <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">{t("subtitle")}</p>
       </div>
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600 mb-6">
-          Welcome, Manager. Manage your program from the sidebar.
-        </p>
-        <div>
-          <h2 className="text-base font-semibold text-gray-800 mb-3">
-            Memberships Awaiting Activation
-          </h2>
-          <DelegatedMembershipList />
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label={t("statClassesThisWeek")} value="—" dark />
+        <StatCard label={t("statStudentsInProgram")} value="—" />
+        <StatCard label={t("statPendingActivations")} value="—" />
+        <StatCard label={t("statHoursLogged")} value="—" />
+      </div>
+      <div className="mt-8">
+        <h2 className="text-base font-semibold text-k-dark mb-4">{t("membershipsHeading")}</h2>
+        <DelegatedMembershipList />
       </div>
     </div>
   );
