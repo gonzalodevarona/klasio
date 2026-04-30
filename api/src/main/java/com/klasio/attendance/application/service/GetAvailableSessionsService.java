@@ -3,12 +3,13 @@ package com.klasio.attendance.application.service;
 import com.klasio.attendance.AttendanceTimeConstants;
 import com.klasio.attendance.application.dto.AvailableSessionView;
 import com.klasio.attendance.application.port.input.GetAvailableSessionsUseCase;
+import com.klasio.attendance.application.util.ClassScheduleExpander;
+import com.klasio.attendance.application.util.ClassScheduleExpander.SessionTuple;
 import com.klasio.attendance.domain.model.ClassSession;
 import com.klasio.attendance.domain.model.ClassSessionStatus;
 import com.klasio.attendance.domain.port.AttendanceRegistrationRepository;
 import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassRegistrationView;
-import com.klasio.attendance.domain.port.ClassDetailsPort.ScheduleEntryView;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
 import com.klasio.attendance.domain.port.EnrollmentLookupPort;
 import com.klasio.attendance.domain.port.EnrollmentLookupPort.EnrollmentView;
@@ -66,14 +67,15 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
 
         String level = programEnrollment.level();
 
-        // 3. Fetch active classes in program at student's level
-        List<ClassRegistrationView> classes = classDetailsPort.findActiveByProgramAndLevel(tenantId, programId, level);
+        // 3. Fetch active classes in program at student's level + OPEN (any student can attend OPEN classes)
+        List<String> levels = "OPEN".equals(level) ? List.of("OPEN") : List.of(level, "OPEN");
+        List<ClassRegistrationView> classes = classDetailsPort.findActiveByProgramAndLevels(tenantId, programId, levels);
         if (classes.isEmpty()) {
             return List.of();
         }
 
         // 4. Expand schedule entries into concrete (classId, date, startTime, endTime) tuples
-        List<SessionTuple> tuples = expandSchedules(classes, from, to);
+        List<SessionTuple> tuples = ClassScheduleExpander.expand(classes, from, to);
         if (tuples.isEmpty()) {
             return List.of();
         }
@@ -173,34 +175,7 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
         return result;
     }
 
-    private List<SessionTuple> expandSchedules(List<ClassRegistrationView> classes,
-                                               LocalDate from, LocalDate to) {
-        List<SessionTuple> tuples = new ArrayList<>();
-        for (ClassRegistrationView cls : classes) {
-            for (ScheduleEntryView entry : cls.scheduleEntries()) {
-                if ("ONE_TIME".equals(cls.type())) {
-                    LocalDate specificDate = entry.specificDate();
-                    if (specificDate != null && !specificDate.isBefore(from) && !specificDate.isAfter(to)) {
-                        tuples.add(new SessionTuple(cls.id(), specificDate, entry.startTime(), entry.endTime()));
-                    }
-                } else {
-                    // RECURRING: walk days in window matching dayOfWeek
-                    LocalDate cursor = from;
-                    while (!cursor.isAfter(to)) {
-                        if (entry.dayOfWeek() != null && cursor.getDayOfWeek().equals(entry.dayOfWeek())) {
-                            tuples.add(new SessionTuple(cls.id(), cursor, entry.startTime(), entry.endTime()));
-                        }
-                        cursor = cursor.plusDays(1);
-                    }
-                }
-            }
-        }
-        return tuples;
-    }
-
     private String sessionKey(UUID classId, LocalDate date, LocalTime startTime) {
         return classId + "|" + date + "|" + startTime;
     }
-
-    private record SessionTuple(UUID classId, LocalDate sessionDate, LocalTime startTime, LocalTime endTime) {}
 }

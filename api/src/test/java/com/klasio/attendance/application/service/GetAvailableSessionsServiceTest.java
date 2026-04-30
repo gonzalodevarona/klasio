@@ -101,7 +101,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
@@ -138,7 +138,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of());
 
         List<AvailableSessionView> result = service.execute(TENANT_ID, STUDENT_ID, PROGRAM_ID, from, to, false);
@@ -167,7 +167,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(oneTimeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
@@ -199,7 +199,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(cancelled));
@@ -234,7 +234,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(scheduled));
@@ -265,7 +265,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(scheduled));
@@ -291,7 +291,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
@@ -338,7 +338,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(soonClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
@@ -371,7 +371,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(pastClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of());
@@ -400,7 +400,7 @@ class GetAvailableSessionsServiceTest {
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(full));
@@ -413,7 +413,7 @@ class GetAvailableSessionsServiceTest {
         // Reset mock for second call
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
                 .thenReturn(Optional.of(enrollment));
-        when(classDetailsPort.findActiveByProgramAndLevel(TENANT_ID, PROGRAM_ID, "BEGINNER"))
+        when(classDetailsPort.findActiveByProgramAndLevels(TENANT_ID, PROGRAM_ID, List.of("BEGINNER", "OPEN")))
                 .thenReturn(List.of(activeClass));
         when(classSessionRepository.findByClassIdsAndDateRange(eq(TENANT_ID), any(), eq(from), eq(to)))
                 .thenReturn(List.of(full));
