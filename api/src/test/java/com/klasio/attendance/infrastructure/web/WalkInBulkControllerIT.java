@@ -185,4 +185,24 @@ class WalkInBulkControllerIT {
                         "ADMIN"))
                 .andExpect(status().isBadRequest());
     }
+
+    // ------------------------------------------------------------------
+    // POST /bulk with invalid startTime → 400
+    // ------------------------------------------------------------------
+
+    @Test
+    @DisplayName("POST /bulk with invalid startTime returns 400")
+    void postBulk_invalidStartTime_returns400() throws Exception {
+        var body = new HashMap<String, Object>();
+        body.put("startTime", "99:99:99");
+        body.put("studentIds", List.of(UUID.randomUUID().toString()));
+        body.put("hoursToCharge", 1);
+
+        mockMvc.perform(withAuth(
+                        post(BULK_URL, CLASS_ID, SESSION_DATE)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)),
+                        "ADMIN"))
+                .andExpect(status().isBadRequest());
+    }
 }

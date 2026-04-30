@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,11 +48,18 @@ public class WalkInBulkController {
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate sessionDate,
             @Valid @RequestBody BulkRequest body) {
 
+        LocalTime parsedStartTime;
+        try {
+            parsedStartTime = LocalTime.parse(body.startTime());
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Invalid startTime format: " + body.startTime());
+        }
+
         RegisterWalkInBulkCommand command = new RegisterWalkInBulkCommand(
                 extractTenantId(),
                 classId,
                 sessionDate,
-                LocalTime.parse(body.startTime()),
+                parsedStartTime,
                 body.studentIds(),
                 body.hoursToCharge(),
                 extractUserId(),
