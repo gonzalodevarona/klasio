@@ -118,6 +118,24 @@ describe("WalkInModal", () => {
     });
   });
 
+  it("shows success banner after all-succeed submit", async () => {
+    const mutate = jest.fn().mockResolvedValue({
+      results: [{ studentId: "s1", outcome: "SUCCESS", registrationId: "r1", status: "PRESENT", intendedHours: 1 }],
+      summary: { total: 1, succeeded: 1, failed: 0 },
+    });
+    (bulkHook.useWalkInBulkRegistration as jest.Mock).mockReturnValue({ mutate, isPending: false, error: null });
+    wrap(<WalkInModal {...defaultProps} durationMinutes={60} />);
+
+    await userEvent.click(screen.getByText("Juan Perez"));
+    await userEvent.click(screen.getByRole("button", { name: /register .*walk-in/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/1 registered successfully/i)).toBeInTheDocument();
+    });
+    // Done button visible
+    expect(screen.getByRole("button", { name: /^done$/i })).toBeInTheDocument();
+  });
+
   it("retry-failed pre-checks failed students and returns to list view", async () => {
     const mutate = jest.fn().mockResolvedValue({
       results: [

@@ -86,9 +86,6 @@ export function WalkInModal({
         hoursToCharge,
       });
       setResults(result);
-      if (result.summary.failed === 0) {
-        onSuccess();
-      }
     } catch {
       // submitError captured by hook
     }
@@ -194,7 +191,10 @@ export function WalkInModal({
                 <select
                   aria-label={t("levelFilterLabel")}
                   value={levelFilter ?? ""}
-                  onChange={(e) => setLevelFilter(e.target.value || null)}
+                  onChange={(e) => {
+                    setLevelFilter(e.target.value || null);
+                    setSelectedIds(new Set());
+                  }}
                   className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
                   <option value="">{t("levelFilterAll")}</option>
