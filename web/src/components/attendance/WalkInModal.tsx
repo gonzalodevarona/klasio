@@ -51,10 +51,19 @@ export function WalkInModal({
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [hoursToCharge, setHoursToCharge] = useState<number>(maxHours);
 
-  const { students, isLoading, error: eligibleError } = useWalkInEligibleStudents(classId, sessionDate, startTime, q);
+  const { students: allStudents, isLoading, error: eligibleError } = useWalkInEligibleStudents(classId, sessionDate, startTime, null);
   const { mutate, isPending, error } = useWalkInRegistration(classId, sessionDate);
 
-  const showSearch = students.length >= 50 || q.length > 0;
+  const qLower = q.toLowerCase();
+  const students = qLower
+    ? allStudents.filter(
+        (s) =>
+          s.fullName.toLowerCase().includes(qLower) ||
+          s.idDocument.toLowerCase().includes(qLower)
+      )
+    : allStudents;
+
+  const showSearch = allStudents.length >= 50 || q.length > 0;
 
   const hourOptions = Array.from({ length: maxHours }, (_, i) => i + 1);
 

@@ -10,13 +10,14 @@ export type EligibleStudent = {
   enrollmentId: string;
   membershipId: string;
   availableHours: number;
+  level: string;
 };
 
 export function useWalkInEligibleStudents(
   classId: string,
   sessionDate: string,
   startTime: string,
-  q: string
+  level: string | null
 ) {
   const [students, setStudents] = useState<EligibleStudent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,24 +25,21 @@ export function useWalkInEligibleStudents(
 
   useEffect(() => {
     let aborted = false;
-    const delay = q && q.trim().length > 0 ? 300 : 0;
-    const handle = setTimeout(() => {
-      const params = new URLSearchParams({ startTime });
-      if (q && q.trim().length > 0) params.set("q", q.trim());
-      const url = `${API_BASE}/classes/${classId}/sessions/${sessionDate}/walk-in/eligible-students?${params.toString()}`;
-      setIsLoading(true);
-      setError(null);
-      fetch(url, { credentials: "include" })
-        .then(async (r) => {
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          return r.json();
-        })
-        .then((data: EligibleStudent[]) => { if (!aborted) setStudents(data); })
-        .catch((e) => { if (!aborted) setError(e as Error); })
-        .finally(() => { if (!aborted) setIsLoading(false); });
-    }, delay);
-    return () => { aborted = true; clearTimeout(handle); };
-  }, [classId, sessionDate, startTime, q]);
+    const params = new URLSearchParams({ startTime });
+    if (level) params.set("level", level);
+    const url = `${API_BASE}/classes/${classId}/sessions/${sessionDate}/walk-in/eligible-students?${params.toString()}`;
+    setIsLoading(true);
+    setError(null);
+    fetch(url, { credentials: "include" })
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data: EligibleStudent[]) => { if (!aborted) setStudents(data); })
+      .catch((e) => { if (!aborted) setError(e as Error); })
+      .finally(() => { if (!aborted) setIsLoading(false); });
+    return () => { aborted = true; };
+  }, [classId, sessionDate, startTime, level]);
 
   return { students, isLoading, error };
 }
