@@ -72,7 +72,9 @@ class S3LogoStorageIntegrationTest {
         S3Properties s3Properties = new S3Properties(
                 localStack.getEndpointOverride(LocalStackContainer.Service.S3).toString(),
                 localStack.getRegion(),
-                BUCKET_NAME
+                BUCKET_NAME,
+                localStack.getAccessKey(),
+                localStack.getSecretKey()
         );
         logoStorage = new S3LogoStorage(s3Client, presigner, s3Properties);
     }

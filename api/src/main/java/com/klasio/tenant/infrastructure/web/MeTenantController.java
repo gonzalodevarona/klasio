@@ -1,6 +1,8 @@
 package com.klasio.tenant.infrastructure.web;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.klasio.tenant.domain.model.Tenant;
+import com.klasio.tenant.domain.port.LogoStorage;
 import com.klasio.tenant.domain.port.TenantRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,20 +17,29 @@ import java.util.UUID;
 
 /**
  * Exposes GET /api/v1/me/tenant for all tenant-scoped roles.
- * Returns the current user's tenant name and sport discipline so
- * the UI can display contextual league information without a
- * separate tenant-list query (which is SUPERADMIN-only).
+ * Returns the current user's tenant identity (id, name, discipline, language, logoUrl)
+ * so the UI can render contextual league branding without a separate
+ * tenant-list query (which is SUPERADMIN-only).
  */
 @RestController
 @RequestMapping("/api/v1/me/tenant")
 public class MeTenantController {
 
-    record TenantInfoResponse(UUID id, String name, String discipline, String language) {}
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    record TenantInfoResponse(
+            UUID id,
+            String name,
+            String discipline,
+            String language,
+            String logoUrl
+    ) {}
 
     private final TenantRepository tenantRepository;
+    private final LogoStorage logoStorage;
 
-    public MeTenantController(TenantRepository tenantRepository) {
+    public MeTenantController(TenantRepository tenantRepository, LogoStorage logoStorage) {
         this.tenantRepository = tenantRepository;
+        this.logoStorage = logoStorage;
     }
 
     @GetMapping
@@ -38,9 +49,17 @@ public class MeTenantController {
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new IllegalStateException("Tenant not found: " + tenantId));
 
-        return ResponseEntity.ok(
-                new TenantInfoResponse(tenant.getId().value(), tenant.getName(), tenant.getDiscipline(), tenant.getLanguage())
-        );
+        String logoUrl = tenant.getLogoKey() != null
+                ? logoStorage.generatePresignedUrl(tenant.getLogoKey())
+                : null;
+
+        return ResponseEntity.ok(new TenantInfoResponse(
+                tenant.getId().value(),
+                tenant.getName(),
+                tenant.getDiscipline(),
+                tenant.getLanguage(),
+                logoUrl
+        ));
     }
 
     @SuppressWarnings("unchecked")
