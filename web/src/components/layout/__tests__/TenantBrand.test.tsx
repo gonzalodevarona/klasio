@@ -21,6 +21,7 @@ describe("TenantBrand", () => {
     expect(screen.getByText("Acme League")).toBeInTheDocument();
     const img = screen.getByRole("img");
     expect(img).toHaveAttribute("src", "https://s3/acme.png");
+    expect(img).toHaveAttribute("alt", "Acme League");
   });
 
   it("renders name only when logoUrl is null", () => {
