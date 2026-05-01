@@ -64,6 +64,9 @@ klasio:
   s3:
     bucket: ${AWS_S3_BUCKET:klasio-logos-dev}
     region: ${AWS_REGION:us-east-1}
+    endpoint: ${AWS_S3_ENDPOINT:}
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
 
 management:
   endpoints:

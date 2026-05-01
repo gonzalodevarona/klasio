@@ -1,4 +1,8 @@
 spring:
+  config:
+    # Auto-imports gitignored R2 credentials when present.
+    # Optional: app still starts (with empty creds) if file is missing.
+    import: optional:classpath:application-local-secrets.yml
   datasource:
     url: jdbc:postgresql://localhost:5432/klasio
     username: klasio_app
@@ -21,10 +25,8 @@ klasio:
     max-failed-login-attempts: 5
     lockout-duration-minutes: 15
     from-email: noreply@klasio.local
-  s3:
-    endpoint: http://localhost:4566
-    bucket: klasio-logos-dev
-    region: us-east-1
+  # s3.* values come from gitignored application-local-secrets.yml.
+  # If you want LocalStack instead, set those values in that file.
 
 logging:
   level:

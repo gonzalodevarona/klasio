@@ -3,6 +3,8 @@ package com.klasio.shared.infrastructure.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
@@ -16,6 +18,9 @@ import java.net.URI;
 @Configuration
 public class S3Config {
 
+    private static final String LOCALSTACK_ACCESS_KEY = "test";
+    private static final String LOCALSTACK_SECRET_KEY = "test";
+
     private final S3Properties s3Properties;
 
     public S3Config(S3Properties s3Properties) {
@@ -26,13 +31,12 @@ public class S3Config {
     public S3Client s3Client() {
         S3ClientBuilder builder = S3Client.builder()
                 .region(Region.of(s3Properties.region()))
-                .httpClient(UrlConnectionHttpClient.create());
+                .httpClient(UrlConnectionHttpClient.create())
+                .credentialsProvider(resolveCredentials());
 
-        if (s3Properties.endpoint() != null && !s3Properties.endpoint().isBlank()) {
+        if (hasEndpointOverride()) {
             builder.endpointOverride(URI.create(s3Properties.endpoint()))
-                    .forcePathStyle(true)
-                    .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create("test", "test")));
+                    .forcePathStyle(true);
         }
 
         return builder.build();
@@ -41,17 +45,43 @@ public class S3Config {
     @Bean
     public S3Presigner s3Presigner() {
         S3Presigner.Builder builder = S3Presigner.builder()
-                .region(Region.of(s3Properties.region()));
+                .region(Region.of(s3Properties.region()))
+                .credentialsProvider(resolveCredentials());
 
-        if (s3Properties.endpoint() != null && !s3Properties.endpoint().isBlank()) {
+        if (hasEndpointOverride()) {
             builder.endpointOverride(URI.create(s3Properties.endpoint()))
-                    .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create("test", "test")))
                     .serviceConfiguration(S3Configuration.builder()
                             .pathStyleAccessEnabled(true)
                             .build());
         }
 
         return builder.build();
+    }
+
+    /**
+     * Credential resolution order:
+     *   1. Explicit klasio.s3.access-key / secret-key  (R2, MinIO, prod with static creds)
+     *   2. Endpoint override but no explicit creds      (assume LocalStack: test/test)
+     *   3. No endpoint override                          (real AWS: default credential chain)
+     */
+    private AwsCredentialsProvider resolveCredentials() {
+        if (hasExplicitCredentials()) {
+            return StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(s3Properties.accessKey(), s3Properties.secretKey()));
+        }
+        if (hasEndpointOverride()) {
+            return StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(LOCALSTACK_ACCESS_KEY, LOCALSTACK_SECRET_KEY));
+        }
+        return DefaultCredentialsProvider.create();
+    }
+
+    private boolean hasEndpointOverride() {
+        return s3Properties.endpoint() != null && !s3Properties.endpoint().isBlank();
+    }
+
+    private boolean hasExplicitCredentials() {
+        return s3Properties.accessKey() != null && !s3Properties.accessKey().isBlank()
+                && s3Properties.secretKey() != null && !s3Properties.secretKey().isBlank();
     }
 }

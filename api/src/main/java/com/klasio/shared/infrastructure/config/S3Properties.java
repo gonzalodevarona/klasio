@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record S3Properties(
         String endpoint,
         String region,
-        String bucket
+        String bucket,
+        String accessKey,
+        String secretKey
 ) {
 }
