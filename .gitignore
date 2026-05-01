@@ -25,6 +25,10 @@ web/out/
 .env.*
 !.env.example
 
+# Local-only Spring secrets (auto-imported by application-local.yml)
+api/src/main/resources/application-local-secrets.yml
+api/src/main/resources/application-prodtest.yml
+
 # Logs
 *.log
 
@@ -34,3 +38,9 @@ web/out/
 
 # Git worktrees
 .worktrees/
+
+# Superpowers brainstorm scratch
+.superpowers/
+
+# Local Spring Boot dev artifacts (email previews, generated files)
+api/local/
