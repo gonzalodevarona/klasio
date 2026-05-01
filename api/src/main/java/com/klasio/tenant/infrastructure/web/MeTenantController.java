@@ -25,13 +25,12 @@ import java.util.UUID;
 @RequestMapping("/api/v1/me/tenant")
 public class MeTenantController {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     record TenantInfoResponse(
             UUID id,
             String name,
             String discipline,
             String language,
-            String logoUrl
+            @JsonInclude(JsonInclude.Include.NON_NULL) String logoUrl
     ) {}
 
     private final TenantRepository tenantRepository;
