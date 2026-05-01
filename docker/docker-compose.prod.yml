@@ -1,0 +1,92 @@
+# Production compose for Oracle ARM VM (or any single-host deploy).
+# Intended layout on VM:
+#   /opt/klasio/
+#     ├── klasio/                  (git clone of this repo)
+#     │   ├── api/                 (Spring Boot source)
+#     │   └── docker/              (this file lives here)
+#     └── .env                     (copy of docker/.env.example, filled in)
+#
+# Run from /opt/klasio/klasio:
+#   docker compose -f docker/docker-compose.prod.yml --env-file ../.env up -d --build
+
+name: klasio
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: klasio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-klasio}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      KLASIO_APP_PASSWORD: ${KLASIO_APP_PASSWORD:?KLASIO_APP_PASSWORD is required}
+    # No ports published to host -> Postgres only reachable from compose network.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.prod.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-klasio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    networks:
+      - klasio-net
+
+  api:
+    build:
+      context: ../api
+      dockerfile: Dockerfile.prod
+    image: klasio-api:latest
+    container_name: klasio-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-klasio}
+      SPRING_DATASOURCE_USERNAME: klasio_app
+      SPRING_DATASOURCE_PASSWORD: ${KLASIO_APP_PASSWORD:?KLASIO_APP_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-28800000}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
+      KLASIO_FRONTEND_URL_TEMPLATE: ${KLASIO_FRONTEND_URL_TEMPLATE}
+      KLASIO_EMAIL_TRANSPORT: ${KLASIO_EMAIL_TRANSPORT:-brevo}
+      KLASIO_EMAIL_FROM_ADDRESS: ${KLASIO_EMAIL_FROM_ADDRESS:-noreply@klasio.app}
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      AUTH_FROM_EMAIL: ${AUTH_FROM_EMAIL:-noreply@klasio.app}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_REGION: ${AWS_REGION:-auto}
+      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      JAVA_OPTS: "-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError"
+    # Bind to loopback only on the host. Caddy (running on host or another
+    # container) will reverse-proxy 443 -> 127.0.0.1:8080.
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '\"UP\"' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+    networks:
+      - klasio-net
+
+volumes:
+  postgres_data:
+
+networks:
+  klasio-net:
+    driver: bridge

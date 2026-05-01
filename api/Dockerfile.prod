@@ -1,0 +1,40 @@
+# Multi-stage build: produces ARM64-native image suitable for Oracle Ampere.
+# Build context must be the api/ directory.
+
+# ---------- Stage 1: build with Maven ----------
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
+
+WORKDIR /build
+
+# Cache dependencies separately from source for faster rebuilds.
+COPY pom.xml ./
+RUN mvn -B -ntp dependency:go-offline
+
+COPY src ./src
+RUN mvn -B -ntp clean package -DskipTests \
+    && cp target/klasio-api-*.jar /build/app.jar
+
+# ---------- Stage 2: minimal runtime ----------
+FROM eclipse-temurin:21-jre-alpine AS runtime
+
+# Non-root user for defense in depth.
+RUN addgroup -S klasio && adduser -S -G klasio klasio
+
+WORKDIR /app
+COPY --from=builder --chown=klasio:klasio /build/app.jar app.jar
+
+# wget used by HEALTHCHECK below (alpine does not ship curl).
+RUN apk add --no-cache wget
+
+USER klasio
+
+EXPOSE 8080
+
+# Container-aware JVM flags. MaxRAMPercentage lets the JVM grow with the
+# container limit instead of guessing from host RAM.
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError"
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '"UP"' || exit 1
+
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
