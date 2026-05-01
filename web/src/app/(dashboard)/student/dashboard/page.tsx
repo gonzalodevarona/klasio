@@ -7,11 +7,8 @@ import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import HourBalance from "@/components/memberships/HourBalance";
-import { UnlimitedBadge } from "@/components/memberships/UnlimitedBadge";
 import MembershipStatusBadge from "@/components/memberships/MembershipStatusBadge";
-import { Badge, Button, Card } from "@/components/ui";
-import { ClassLevel } from "@/lib/types/programClass";
-import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
+import { Badge } from "@/components/ui";
 import { todayInTenantZone, formatSessionDate } from "@/lib/attendanceConstants";
 
 function formatDate(iso: string | null): string {
@@ -24,7 +21,7 @@ export default function StudentDashboard() {
   const today = todayInTenantZone();
 
   const { memberships, loading: membershipsLoading } = useMyMemberships();
-  const { enrollments, loading: enrollmentsLoading } = useMyEnrollments();
+  const { enrollments } = useMyEnrollments();
   const { registrations, loading: registrationsLoading } = useMyRegistrations({
     status: "REGISTERED",
     from: today,
@@ -40,139 +37,205 @@ export default function StudentDashboard() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Page heading */}
       <div>
-        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
-        <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">
+          {t("title")}
+        </h1>
+        <p
+          className="text-xs text-k-muted mt-1"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
           {t("subtitle")}
         </p>
       </div>
 
-      <Card padding="md">
-        <h2 className="text-base font-semibold text-k-dark mb-4">
+      {/* ── Membership hero card (dark) ── */}
+      <div
+        className="relative overflow-hidden rounded-[20px] px-8 py-7"
+        style={{ background: "#0A0A0A" }}
+      >
+        {/* Decorative circle */}
+        <div
+          className="pointer-events-none absolute -top-10 -right-10 w-44 h-44 rounded-full"
+          style={{ background: "rgba(202,255,77,0.04)" }}
+        />
+
+        {/* Status badge top-right */}
+        <div className="absolute top-5 right-6">
+          {activeMembership && (
+            <MembershipStatusBadge status={activeMembership.status} />
+          )}
+        </div>
+
+        {/* Label */}
+        <p
+          className="text-[10px] uppercase tracking-[0.12em] mb-2"
+          style={{ fontFamily: "var(--font-mono)", color: "#4A4A48" }}
+        >
           {t("activeMembership")}
-        </h2>
+        </p>
+
         {membershipsLoading ? (
-          <p className="text-sm text-k-muted">{t("loading")}</p>
+          <p className="text-sm" style={{ color: "#4A4A48" }}>
+            {t("loading")}
+          </p>
         ) : activeMembership ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-k-dark">
-                {activeMembership.planName}
-              </span>
-              <MembershipStatusBadge status={activeMembership.status} />
-            </div>
-            {activeMembership.modality === "UNLIMITED" ? (
-              <UnlimitedBadge expiresAt={new Date(activeMembership.expirationDate)} />
-            ) : (
+          <>
+            <h2
+              className="text-[22px] font-extrabold tracking-[-0.02em] mb-1"
+              style={{ color: "#FAFAF8" }}
+            >
+              {activeMembership.planName}
+            </h2>
+
+            {/* HourBalance renders the big volt number + progress bar */}
+            <div className="mt-5">
               <HourBalance
                 available={activeMembership.availableHours ?? 0}
                 purchased={activeMembership.purchasedHours ?? 0}
-                data-testid="hour-balance"
               />
-            )}
-            <p className="text-xs text-k-muted font-mono">
-              {t("membershipPeriod")} {formatDate(activeMembership.startDate)} → {formatDate(activeMembership.expirationDate)}
+            </div>
+
+            <p
+              className="text-[11px] mt-3"
+              style={{ fontFamily: "var(--font-mono)", color: "#4A4A48" }}
+            >
+              {t("membershipPeriod")}{" "}
+              {formatDate(activeMembership.startDate)} →{" "}
+              {formatDate(activeMembership.expirationDate)}
             </p>
+
             <Link
               href={`/student/memberships/${activeMembership.id}`}
-              className="inline-block text-sm text-k-subtle hover:text-k-dark font-medium"
+              className="inline-block mt-3 text-xs font-semibold transition-colors"
+              style={{ color: "#CAFF4D" }}
             >
-              {t("viewDetails")}
+              {t("viewDetails")} →
             </Link>
-          </div>
+          </>
         ) : (
-          <p className="text-sm text-k-muted">{t("noMembership")}</p>
+          <p className="text-sm" style={{ color: "#4A4A48" }}>
+            {t("noMembership")}
+          </p>
         )}
-      </Card>
+      </div>
 
-      <Card padding="md">
+      {/* ── Upcoming registrations card ── */}
+      <div className="rounded-k-lg border border-k-border bg-k-surface px-6 py-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-k-dark">
-            {t("enrollmentsTitle")}
-          </h2>
-          <Link
-            href="/student/enrollments"
-            className="text-xs text-k-subtle hover:text-k-dark font-medium"
+          <p
+            className="text-[10px] uppercase tracking-[0.1em] text-k-muted"
+            style={{ fontFamily: "var(--font-mono)" }}
           >
-            {t("viewAll")}
-          </Link>
-        </div>
-        {enrollmentsLoading ? (
-          <p className="text-sm text-k-muted">{t("loading")}</p>
-        ) : enrollments.length === 0 ? (
-          <p className="text-sm text-k-muted">{t("noEnrollments")}</p>
-        ) : (
-          <ul className="space-y-2">
-            {enrollments.slice(0, 3).map((e) => (
-              <li key={e.id} className="flex items-center justify-between text-sm">
-                <span className="text-k-dark">{e.programName}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-k-muted">{e.level}</span>
-                  <Badge
-                    variant={e.status === "ACTIVE" ? "active" : "inactive"}
-                    label={e.status}
-                    small
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-
-      <Card padding="md">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-k-dark">
             {t("upcomingRegistrations")}
-          </h2>
+          </p>
           <Link
             href="/student/classes"
-            className="text-xs text-k-subtle hover:text-k-dark font-medium"
+            className="text-xs font-semibold text-k-subtle hover:text-k-dark transition-colors"
           >
-            {t("viewAll")}
+            {t("viewAll")} →
           </Link>
         </div>
+
         {registrationsLoading ? (
           <p className="text-sm text-k-muted">{t("loading")}</p>
         ) : upcomingRegistrations.length === 0 ? (
           <p className="text-sm text-k-muted">{t("noRegistrations")}</p>
         ) : (
-          <ul className="space-y-2">
+          <div className="flex flex-col gap-2.5">
             {upcomingRegistrations.map((r) => (
-              <li key={r.id} className="flex items-center justify-between text-sm">
+              <div
+                key={r.id}
+                className="flex items-center justify-between"
+              >
+                {/* Date badge + time */}
                 <div className="flex items-center gap-3">
-                  <span className="text-k-dark">
-                    {formatSessionDate(r.sessionDate)}
-                  </span>
-                  <span className="text-k-muted">
-                    {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}
-                  </span>
-                  {r.sessionStatus === "ALERTED" && (
+                  <div className="w-11 h-11 rounded-[10px] bg-k-bg flex flex-col items-center justify-center shrink-0">
                     <span
-                      title={r.sessionAlertReason ?? t("alertTooltip")}
-                      className="inline-flex text-k-warn-text"
+                      className="text-[9px] uppercase tracking-[0.06em] text-k-muted"
+                      style={{ fontFamily: "var(--font-mono)" }}
                     >
-                      <AlertTriangle className="w-4 h-4" />
+                      {formatSessionDate(r.sessionDate).split(" ")[0]}
                     </span>
-                  )}
+                    <span className="text-base font-extrabold text-k-dark leading-none">
+                      {formatSessionDate(r.sessionDate).split(" ")[1]}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-k-dark">
+                      {r.sessionStartTime.slice(0, 5)} –{" "}
+                      {r.sessionEndTime.slice(0, 5)}
+                    </div>
+                    {r.sessionStatus === "ALERTED" && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <AlertTriangle className="w-3 h-3 text-k-warn-text" />
+                        <span className="text-[10px] text-k-warn-text">
+                          {r.sessionAlertReason ?? t("alertTooltip")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <ClassLevelBadge level={r.level as ClassLevel} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
 
+                <Badge
+                  variant={
+                    r.level === "BEGINNER"
+                      ? "beginner"
+                      : r.level === "INTERMEDIATE"
+                      ? "intermediate"
+                      : r.level === "ADVANCED"
+                      ? "advanced"
+                      : "inactive"
+                  }
+                  label={r.level}
+                  small
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Quick stats row ── */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: t("quickLinksMemberships"), href: "/student/memberships" },
-          { label: t("quickLinksEnrollments"), href: "/student/enrollments" },
-          { label: t("quickLinksClasses"), href: "/student/classes" },
-        ].map(({ label, href }) => (
-          <Button key={href} variant="outline" asChild>
-            <Link href={href}>{label}</Link>
-          </Button>
+          {
+            label: t("quickLinksMemberships"),
+            href: "/student/memberships",
+            value: memberships.length,
+            sub: "membresías",
+          },
+          {
+            label: t("quickLinksEnrollments"),
+            href: "/student/enrollments",
+            value: enrollments.filter((e) => e.status === "ACTIVE").length,
+            sub: "clases activas",
+          },
+          {
+            label: t("quickLinksClasses"),
+            href: "/student/classes",
+            value: upcomingRegistrations.length,
+            sub: "próximas sesiones",
+          },
+        ].map(({ label, href, value, sub }) => (
+          <Link
+            key={href}
+            href={href}
+            className="rounded-k-lg border border-k-border bg-k-surface px-5 py-4 hover:border-k-volt transition-colors group block"
+          >
+            <p
+              className="text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {label}
+            </p>
+            <p className="text-[32px] font-extrabold tracking-[-0.03em] leading-none text-k-dark mb-1">
+              {value}
+            </p>
+            <p className="text-xs text-k-muted">{sub}</p>
+          </Link>
         ))}
       </div>
     </div>

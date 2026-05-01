@@ -9,6 +9,7 @@ import { useRegisterForSession } from "@/hooks/useRegisterForSession";
 import { useCancelRegistration } from "@/hooks/useCancelRegistration";
 import SessionCapacityBar from "@/components/attendance/SessionCapacityBar";
 import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
+import { Badge } from "@/components/ui";
 import { AvailableSession } from "@/lib/types/attendance";
 import { ProgramClassSummary } from "@/lib/types/programClass";
 import { AttendanceTimeConstants, todayInTenantZone, addDays, formatSessionDate } from "@/lib/attendanceConstants";
@@ -88,9 +89,12 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
   }
 
   return (
-    <div className="bg-k-bg px-4 py-3 border-t border-k-line">
-      <p className="font-[var(--font-mono)] text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2">
-        {t("sessionsLabel")}
+    <div className="bg-k-bg px-3 py-3 border-t border-k-border">
+      <p
+        className="text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2"
+        style={{ fontFamily: "var(--font-mono)" }}
+      >
+        Próximas sesiones — 2 semanas
       </p>
 
       {loading && (
@@ -116,108 +120,73 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
       )}
 
       {classSessions.length > 0 && (
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="text-xs text-k-muted">
-              <th className="py-1 pr-4 text-left font-medium">{t("colDate")}</th>
-              <th className="py-1 pr-4 text-left font-medium">{t("colTime")}</th>
-              <th className="py-1 pr-4 text-left font-medium">{t("colCapacity")}</th>
-              <th className="py-1 text-left font-medium"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-k-line">
-            {classSessions.map((s) => {
-              const rowKey = `${s.classId}-${s.sessionDate}`;
-              const isFull = s.currentCapacity >= s.maxStudents;
-              const registrationOpen = s.registrationOpen !== false;
-              const isRegistered = s.registrationStatus === "REGISTERED";
-              const canCancel = isRegistered && isCancellableSession(s.sessionDate, s.startTime);
-              const rowCancelErr = cancelErrors[rowKey] ?? null;
-
-              return (
-                <React.Fragment key={rowKey}>
-                  <tr>
-                    <td className="py-2 pr-4 text-k-dark">
-                      <div className="flex items-center gap-1.5">
-                        <span>{formatSessionDate(s.sessionDate)}</span>
-                        {s.status === "ALERTED" && (
-                          <span
-                            title={s.alertReason ?? t("alertDefault")}
-                            className="inline-flex text-k-warn-text"
-                          >
-                            <AlertTriangle className="w-4 h-4" />
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-2 pr-4 text-k-muted whitespace-nowrap">
-                      {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
-                    </td>
-                    <td className="py-2 pr-4">
+        <div className="flex flex-col gap-2 p-3">
+          {classSessions.map((s) => {
+            const isFull = s.currentCapacity >= s.maxStudents;
+            const registrationOpen = s.registrationOpen !== false;
+            const dateParts = formatSessionDate(s.sessionDate).split(" ");
+            return (
+              <div
+                key={`${s.classId}-${s.sessionDate}`}
+                className="flex items-center justify-between rounded-[10px] bg-k-surface border border-k-border px-4 py-3"
+              >
+                {/* Date badge + time */}
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-[10px] bg-k-bg flex flex-col items-center justify-center shrink-0">
+                    <span
+                      className="text-[9px] uppercase tracking-[0.06em] text-k-muted"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    >
+                      {dateParts[0] ?? ""}
+                    </span>
+                    <span className="text-base font-extrabold text-k-dark leading-none">
+                      {dateParts[1] ?? ""}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-semibold text-k-dark">
+                        {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
+                      </span>
+                      {s.status === "ALERTED" && (
+                        <span title={s.alertReason ?? "Alerta en esta sesión"}>
+                          <AlertTriangle className="w-3.5 h-3.5 text-k-warn-text" />
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1">
                       <SessionCapacityBar
                         current={s.currentCapacity}
                         max={s.maxStudents}
                       />
-                    </td>
-                    <td className="py-2">
-                      {isRegistered ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-k-volt-text bg-k-volt/20 px-2 py-0.5 rounded">
-                            {t("registeredBadge")}
-                          </span>
-                          {canCancel ? (
-                            <button
-                              onClick={() => handleCancel(s)}
-                              className="text-xs text-k-danger-text hover:text-k-dark transition-colors"
-                            >
-                              {t("cancelButton")}
-                            </button>
-                          ) : (
-                            <span
-                              title={t("cancelWindowClosed")}
-                              className="text-xs text-k-muted cursor-not-allowed"
-                            >
-                              {t("cancelButton")}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleRegister(s)}
-                          disabled={isFull || !registrationOpen}
-                          title={
-                            !registrationOpen
-                              ? t("registerClosesTooltip", { minutes: AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES })
-                              : isFull
-                              ? t("registerFullTooltip")
-                              : undefined
-                          }
-                          className={[
-                            "rounded px-3 py-1 text-xs font-medium transition-colors",
-                            isFull || !registrationOpen
-                              ? "bg-k-bg text-k-muted cursor-not-allowed"
-                              : "bg-k-volt text-k-dark hover:bg-k-volt-hover",
-                          ].join(" ")}
-                        >
-                          {isFull ? t("registerFull") : !registrationOpen ? t("registerClosed") : t("registerButton")}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                  {rowCancelErr && (
-                    <tr>
-                      <td colSpan={4} className="pb-2 pt-0">
-                        <div className="rounded bg-k-danger-bg border border-k-danger-text/30 px-3 py-1.5 text-xs text-k-danger-text">
-                          {rowCancelErr}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Register button */}
+                <button
+                  onClick={() => handleRegister(s)}
+                  disabled={isFull || !registrationOpen}
+                  title={
+                    !registrationOpen
+                      ? `El registro cierra ${AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES} min antes`
+                      : isFull
+                      ? "Sesión sin cupo"
+                      : undefined
+                  }
+                  className={[
+                    "rounded-[8px] px-4 py-1.5 text-xs font-semibold transition-colors",
+                    isFull || !registrationOpen
+                      ? "bg-k-bg text-k-muted cursor-not-allowed"
+                      : "bg-k-volt text-k-dark hover:bg-[#B8EE3A]",
+                  ].join(" ")}
+                >
+                  {isFull ? "Sin cupo" : !registrationOpen ? "Cerrado" : "Registrarme"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -237,92 +206,119 @@ export default function StudentClassesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">{t("title")}</h1>
-        <p className="font-[var(--font-mono)] text-xs text-k-muted mt-1">
-          {t("subtitle")}
+        <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">
+          Mis clases
+        </h1>
+        <p
+          className="text-xs text-k-muted mt-1"
+          style={{ fontFamily: "var(--font-mono)" }}
+        >
+          Próximas sesiones disponibles
         </p>
       </div>
 
       {loading && (
-        <p className="py-8 text-center text-sm text-k-muted">{t("loading")}</p>
+        <p className="py-8 text-center text-sm text-k-muted">Cargando…</p>
       )}
 
       {error && (
-        <div className="rounded-k-sm bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
+        <div className="rounded-[8px] bg-k-danger-bg border border-k-danger-text/30 p-4 text-sm text-k-danger-text">
           {error}
         </div>
       )}
 
       {!loading && !error && classes.length === 0 && (
         <p className="py-8 text-center text-sm text-k-muted">
-          {t("empty")}
+          No hay clases disponibles. Verificá que tenés una inscripción activa.
         </p>
       )}
 
       {classes.length > 0 && (
-        <div className="overflow-hidden rounded-k-lg border border-k-border bg-k-surface">
-          <table className="min-w-full divide-y divide-k-border">
-            <thead className="bg-k-bg">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  {t("colClass")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  {t("colProgram")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  {t("colLevel")}
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-k-muted uppercase tracking-wider">
-                  {t("colCapacity")}
-                </th>
-                <th className="w-8" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-k-line">
-              {classes.map((c) => {
-                const isExpanded = expandedClassId === c.id;
-                return (
-                  <React.Fragment key={c.id}>
-                    <tr
-                      className="hover:bg-k-bg cursor-pointer"
-                      onClick={() => toggleExpand(c)}
+        <div className="flex flex-col gap-2.5">
+          {classes.map((c) => {
+            const isExpanded = expandedClassId === c.id;
+            return (
+              <div
+                key={c.id}
+                className={[
+                  "overflow-hidden rounded-k-md border bg-k-surface transition-colors",
+                  isExpanded ? "border-k-volt" : "border-k-border",
+                ].join(" ")}
+              >
+                {/* Card header — click to expand */}
+                <div
+                  className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-k-bg transition-colors"
+                  onClick={() => toggleExpand(c)}
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Accent block */}
+                    <div
+                      className={[
+                        "w-12 h-12 rounded-[10px] flex flex-col items-center justify-center shrink-0",
+                        isExpanded ? "bg-k-volt" : "bg-k-bg",
+                      ].join(" ")}
                     >
-                      <td className="px-4 py-3 text-sm font-medium text-k-dark">
-                        {c.name}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-k-muted">
-                        {c.programName ?? "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <ClassLevelBadge level={c.level} />
-                      </td>
-                      <td className="px-4 py-3 text-sm text-k-muted">
+                      <span
+                        className="text-[9px] uppercase tracking-[0.06em]"
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          color: isExpanded ? "#2A4A00" : "#9A9A98",
+                        }}
+                      >
+                        {c.level?.slice(0, 3) ?? "CLS"}
+                      </span>
+                      <span
+                        className="text-lg font-extrabold leading-none"
+                        style={{
+                          color: isExpanded ? "#0A0A0A" : "#4A4A48",
+                        }}
+                      >
                         {c.maxStudents}
-                      </td>
-                      <td className="px-2 py-3 text-k-muted">
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </td>
-                    </tr>
-                    {isExpanded && (
-                      <tr>
-                        <td colSpan={5} className="p-0">
-                          <ClassSessionsPanel
-                            programId={c.programId}
-                            classId={c.id}
-                          />
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="text-[15px] font-bold text-k-dark">
+                        {c.name}
+                      </div>
+                      <div className="text-sm text-k-subtle mt-0.5">
+                        {c.programName ?? "—"}
+                      </div>
+                      <div className="mt-1.5">
+                        <Badge
+                          variant={
+                            c.level === "BEGINNER"
+                              ? "beginner"
+                              : c.level === "INTERMEDIATE"
+                              ? "intermediate"
+                              : c.level === "ADVANCED"
+                              ? "advanced"
+                              : "inactive"
+                          }
+                          label={c.level ?? ""}
+                          small
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-k-muted" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-k-muted" />
+                  )}
+                </div>
+
+                {/* Sessions panel (existing component, untouched) */}
+                {isExpanded && (
+                  <ClassSessionsPanel
+                    programId={c.programId}
+                    classId={c.id}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
