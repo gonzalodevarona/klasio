@@ -8,6 +8,7 @@ interface TenantInfo {
   name: string;
   discipline: string;
   language: string;
+  logoUrl: string | null;
 }
 
 interface PersonInfo {
@@ -19,6 +20,8 @@ interface PersonInfo {
 
 export interface SidebarIdentity {
   tenantName: string | null;
+  tenantLogoUrl: string | null;
+  tenantFetchFailed: boolean;
   displayName: string | null;
   identityDocumentType: string | null;
   identityNumber: string | null;
@@ -36,7 +39,7 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
 
 /**
  * Fetches the contextual identity data shown in the sidebar footer:
- * - Tenant name (for all tenant-scoped roles)
+ * - Tenant name + logo (for all tenant-scoped roles)
  * - Full name + document info (for ALL roles that have it)
  *
  * Fetch strategy by role:
@@ -47,24 +50,41 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
  *   SUPERADMIN→ /api/me/user-profile       (no tenant, but shows name+document)
  *
  * Failures degrade gracefully to null — they never block navigation.
+ * tenantFetchFailed is set to true when /me/tenant returns non-OK or rejects,
+ * allowing callers to fall back to Klasio brand defaults.
  */
 export function useSidebarIdentity(
   role: Role | undefined,
   tenantId: string | null | undefined
 ): SidebarIdentity {
   const [tenantName, setTenantName] = useState<string | null>(null);
+  const [tenantLogoUrl, setTenantLogoUrl] = useState<string | null>(null);
+  const [tenantFetchFailed, setTenantFetchFailed] = useState<boolean>(false);
   const [personInfo, setPersonInfo] = useState<PersonInfo | null>(null);
 
-  // Fetch tenant name for all tenant-scoped roles.
+  // Tenant identity (name + logo) — skipped for SUPERADMIN.
   useEffect(() => {
     if (!tenantId || role === "SUPERADMIN") return;
 
+    let cancelled = false;
     fetch("/api/me/tenant", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: TenantInfo | null) => {
+      .then(async (r) => {
+        if (cancelled) return;
+        if (!r.ok) {
+          setTenantFetchFailed(true);
+          return;
+        }
+        const data: TenantInfo | null = await r.json().catch(() => null);
+        if (cancelled) return;
         if (data?.name) setTenantName(data.name);
+        if (data?.logoUrl) setTenantLogoUrl(data.logoUrl);
       })
-      .catch(() => {/* degrade gracefully */});
+      .catch(() => {
+        if (!cancelled) setTenantFetchFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [tenantId, role]);
 
   // Fetch full name + document for STUDENT.
@@ -115,6 +135,8 @@ export function useSidebarIdentity(
 
   return {
     tenantName,
+    tenantLogoUrl,
+    tenantFetchFailed,
     displayName,
     identityDocumentType: docTypeLabel,
     identityNumber: personInfo?.identityNumber ?? null,
