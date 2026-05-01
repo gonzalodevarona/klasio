@@ -39,8 +39,10 @@ api/src/main/resources/application-prodtest.yml
 # Git worktrees
 .worktrees/
 
-# Superpowers brainstorm scratch
+# AI tool scratch dirs (superpowers, claire, specify)
 .superpowers/
+.claire/
+.specify/
 
 # Local Spring Boot dev artifacts (email previews, generated files)
 api/local/
