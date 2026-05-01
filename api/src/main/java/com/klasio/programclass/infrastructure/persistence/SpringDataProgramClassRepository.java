@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +25,9 @@ public interface SpringDataProgramClassRepository extends JpaRepository<ProgramC
 
     Page<ProgramClassJpaEntity> findByTenantIdAndProgramIdAndLevelAndStatusOrderByCreatedAtDesc(
             UUID tenantId, UUID programId, String level, String status, Pageable pageable);
+
+    Page<ProgramClassJpaEntity> findByTenantIdAndProgramIdAndLevelInAndStatusOrderByCreatedAtDesc(
+            UUID tenantId, UUID programId, List<String> levels, String status, Pageable pageable);
 
     // Tenant-wide query with JOIN to programs for programName + optional filters
     @Query("SELECT new com.klasio.programclass.infrastructure.persistence.ProgramClassWithProgramName(" +

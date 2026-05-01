@@ -28,10 +28,13 @@ public class ClassDetailsAdapter implements ClassDetailsPort {
     }
 
     @Override
-    public List<ClassRegistrationView> findActiveByProgramAndLevel(UUID tenantId, UUID programId, String level) {
+    public List<ClassRegistrationView> findActiveByProgramAndLevels(UUID tenantId, UUID programId, List<String> levels) {
+        if (levels == null || levels.isEmpty()) {
+            return List.of();
+        }
         return programClassRepository
-                .findByTenantIdAndProgramIdAndLevelAndStatusOrderByCreatedAtDesc(
-                        tenantId, programId, level, "ACTIVE", PageRequest.of(0, 500))
+                .findByTenantIdAndProgramIdAndLevelInAndStatusOrderByCreatedAtDesc(
+                        tenantId, programId, levels, "ACTIVE", PageRequest.of(0, 500))
                 .getContent()
                 .stream()
                 .map(this::toView)

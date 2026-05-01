@@ -14,7 +14,7 @@ public interface ClassDetailsPort {
 
     Optional<ClassRegistrationView> findForRegistration(UUID tenantId, UUID classId);
 
-    List<ClassRegistrationView> findActiveByProgramAndLevel(UUID tenantId, UUID programId, String level);
+    List<ClassRegistrationView> findActiveByProgramAndLevels(UUID tenantId, UUID programId, List<String> levels);
 
     /**
      * Lightweight lookup used by the roster service to perform RBAC scope checks.
