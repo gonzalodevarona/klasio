@@ -1,14 +1,16 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { useSidebarIdentity } from "../useSidebarIdentity";
 
+global.fetch = jest.fn();
+
 function mockFetchByPath(handlers: Record<string, () => Response | Promise<Response>>) {
-  global.fetch = jest.fn((input: RequestInfo | URL) => {
+  (global.fetch as jest.Mock).mockImplementation((input: RequestInfo | URL) => {
     const url = typeof input === "string" ? input : input.toString();
     for (const [path, handler] of Object.entries(handlers)) {
       if (url.includes(path)) return Promise.resolve(handler());
     }
     return Promise.reject(new Error(`Unmocked URL: ${url}`));
-  }) as unknown as typeof fetch;
+  });
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -19,7 +21,7 @@ function jsonResponse(body: unknown, status = 200): Response {
   } as Response;
 }
 
-afterEach(() => jest.restoreAllMocks());
+beforeEach(() => (global.fetch as jest.Mock).mockReset());
 
 describe("useSidebarIdentity", () => {
   it("does not fetch /me/tenant for SUPERADMIN", async () => {
@@ -94,7 +96,7 @@ describe("useSidebarIdentity", () => {
   });
 
   it("flips tenantFetchFailed when /me/tenant rejects", async () => {
-    global.fetch = jest.fn((input: RequestInfo | URL) => {
+    (global.fetch as jest.Mock).mockImplementation((input: RequestInfo | URL) => {
       const url = typeof input === "string" ? input : input.toString();
       if (url.includes("/api/me/tenant")) return Promise.reject(new Error("net"));
       return Promise.resolve(
@@ -105,7 +107,7 @@ describe("useSidebarIdentity", () => {
           identityNumber: "1",
         })
       );
-    }) as unknown as typeof fetch;
+    });
 
     const { result } = renderHook(() => useSidebarIdentity("ADMIN", "t1"));
 
