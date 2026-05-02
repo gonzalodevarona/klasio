@@ -163,26 +163,53 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                   </div>
                 </div>
 
-                {/* Register button */}
-                <button
-                  onClick={() => handleRegister(s)}
-                  disabled={isFull || !registrationOpen}
-                  title={
-                    !registrationOpen
-                      ? `El registro cierra ${AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES} min antes`
-                      : isFull
-                      ? "Sesión sin cupo"
-                      : undefined
-                  }
-                  className={[
-                    "rounded-[8px] px-4 py-1.5 text-xs font-semibold transition-colors",
-                    isFull || !registrationOpen
-                      ? "bg-k-bg text-k-muted cursor-not-allowed"
-                      : "bg-k-volt text-k-dark hover:bg-[#B8EE3A]",
-                  ].join(" ")}
-                >
-                  {isFull ? "Sin cupo" : !registrationOpen ? "Cerrado" : "Registrarme"}
-                </button>
+                {/* Cancel / Register button */}
+                {s.registrationId && s.registrationStatus === "REGISTERED" ? (
+                  (() => {
+                    const rowKey = `${s.classId}-${s.sessionDate}`;
+                    const cancellable = isCancellableSession(s.sessionDate, s.startTime);
+                    return (
+                      <div className="flex flex-col items-end gap-1">
+                        <button
+                          onClick={() => handleCancel(s)}
+                          disabled={!cancellable}
+                          title={!cancellable ? `El plazo de cancelación ya cerró` : undefined}
+                          className={[
+                            "rounded-[8px] px-4 py-1.5 text-xs font-semibold transition-colors",
+                            cancellable
+                              ? "bg-k-danger-bg text-k-danger-text hover:bg-red-100 border border-k-danger-text/30"
+                              : "bg-k-bg text-k-muted cursor-not-allowed",
+                          ].join(" ")}
+                        >
+                          {cancellable ? "Cancelar" : "Plazo cerrado"}
+                        </button>
+                        {cancelErrors[rowKey] && (
+                          <span className="text-[10px] text-k-danger-text">{cancelErrors[rowKey]}</span>
+                        )}
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <button
+                    onClick={() => handleRegister(s)}
+                    disabled={isFull || !registrationOpen}
+                    title={
+                      !registrationOpen
+                        ? `El registro cierra ${AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES} min antes`
+                        : isFull
+                        ? "Sesión sin cupo"
+                        : undefined
+                    }
+                    className={[
+                      "rounded-[8px] px-4 py-1.5 text-xs font-semibold transition-colors",
+                      isFull || !registrationOpen
+                        ? "bg-k-bg text-k-muted cursor-not-allowed"
+                        : "bg-k-volt text-k-dark hover:bg-[#B8EE3A]",
+                    ].join(" ")}
+                  >
+                    {isFull ? "Sin cupo" : !registrationOpen ? "Cerrado" : "Registrarme"}
+                  </button>
+                )}
               </div>
             );
           })}
