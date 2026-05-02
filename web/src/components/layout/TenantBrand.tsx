@@ -28,8 +28,8 @@ export default function TenantBrand({
         <img
           src={tenantLogoUrl}
           alt={tenantName ?? ""}
-          width={18}
-          height={18}
+          width={24}
+          height={24}
           className="shrink-0 rounded-sm object-contain"
           onError={(e) => { e.currentTarget.style.display = "none"; }}
         />
