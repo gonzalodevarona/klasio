@@ -206,7 +206,7 @@
     "roleLabel": {
       "SUPERADMIN": "Superadmin",
       "ADMIN": "Admin",
-      "MANAGER": "Manager",
+      "MANAGER": "Coordinador",
       "PROFESSOR": "Profesor",
       "STUDENT": "Estudiante"
     }
