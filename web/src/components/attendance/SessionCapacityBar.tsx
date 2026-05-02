@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface SessionCapacityBarProps {
   current: number;
   max: number;
@@ -7,6 +9,7 @@ interface SessionCapacityBarProps {
 }
 
 export default function SessionCapacityBar({ current, max, className }: SessionCapacityBarProps) {
+  const t = useTranslations("common");
   const pct = max > 0 ? (current / max) * 100 : 0;
 
   const barColor =
@@ -18,7 +21,7 @@ export default function SessionCapacityBar({ current, max, className }: SessionC
   return (
     <div className={`flex flex-col gap-1 min-w-[100px] ${className ?? ""}`}>
       <div className={`text-xs font-medium ${textColor}`}>
-        {current}/{max} registered
+        {current}/{max} {t("registered")}
       </div>
       <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
         <div
