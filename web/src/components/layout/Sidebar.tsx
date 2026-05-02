@@ -9,6 +9,7 @@ import { useSidebarIdentity } from "@/hooks/useSidebarIdentity";
 import { usePendingProofsCount } from "@/hooks/usePaymentProofs";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import KLogo from "@/components/layout/KLogo";
+import TenantBrand from "@/components/layout/TenantBrand";
 import type { Role } from "@/lib/types/auth";
 import { primaryRole } from "@/lib/types/auth";
 import {
@@ -177,22 +178,36 @@ function NavLinks({
 
 // Brand block shown in the sidebar header (desktop expanded only).
 function Brand({
-  tenantName,
   role,
+  tenantName,
+  tenantLogoUrl,
+  tenantFetchFailed,
   collapsed,
 }: {
-  tenantName: string | null;
   role: Role | undefined;
+  tenantName: string | null;
+  tenantLogoUrl: string | null;
+  tenantFetchFailed: boolean;
   collapsed: boolean;
 }) {
   if (collapsed) return null;
+
+  const useTenantBrand =
+    role !== undefined && role !== "SUPERADMIN" && !tenantFetchFailed;
+  const loading = useTenantBrand && tenantName === null;
+
   return (
     <div className="overflow-hidden min-w-0">
-      <KLogo />
-      <hr className="border-k-sidebar-active my-2" />
-      {tenantName && (
-        <p className="text-xs font-medium text-white truncate">{tenantName}</p>
+      {useTenantBrand ? (
+        <TenantBrand
+          tenantName={tenantName}
+          tenantLogoUrl={tenantLogoUrl}
+          loading={loading}
+        />
+      ) : (
+        <KLogo />
       )}
+      <hr className="border-k-sidebar-active my-2" />
       {role && (
         <p className="text-[11px] text-k-subtle truncate">{role}</p>
       )}
@@ -203,7 +218,6 @@ function Brand({
 // User identity block shown at the bottom of the sidebar.
 // `forceExpanded` lets the mobile drawer reuse this component without honoring `collapsed`.
 function UserFooter({
-  role,
   displayName,
   identityDocumentType,
   identityNumber,
@@ -212,7 +226,6 @@ function UserFooter({
   onLogout,
   signOut,
 }: {
-  role: Role;
   displayName: string | null;
   identityDocumentType: string | null;
   identityNumber: string | null;
@@ -224,14 +237,13 @@ function UserFooter({
   const expanded = forceExpanded || !collapsed;
   return (
     <div className="px-2 py-4 border-t border-k-sidebar-active shrink-0">
-      {expanded && (
+      {expanded && (displayName || (identityDocumentType && identityNumber)) && (
         <div className="px-3 mb-2 space-y-0.5">
           {displayName && (
             <p className="text-xs font-medium text-white truncate">
               {displayName}
             </p>
           )}
-          <p className="text-xs text-k-subtle truncate">{role}</p>
           {identityDocumentType && identityNumber && (
             <p className="text-xs text-k-subtle truncate">
               {identityDocumentType} {identityNumber}
@@ -263,8 +275,14 @@ export default function Sidebar() {
   const t = useTranslations("layout");
 
   const primaryUserRole = user ? primaryRole(user.roles) : undefined;
-  const { tenantName, displayName, identityDocumentType, identityNumber } =
-    useSidebarIdentity(primaryUserRole, user?.tenantId);
+  const {
+    tenantName,
+    tenantLogoUrl,
+    tenantFetchFailed,
+    displayName,
+    identityDocumentType,
+    identityNumber,
+  } = useSidebarIdentity(primaryUserRole, user?.tenantId);
 
   const canSeeProofQueue =
     user?.roles.includes("ADMIN") ||
@@ -323,11 +341,14 @@ export default function Sidebar() {
           <Menu className="h-6 w-6" />
         </button>
         <div className="min-w-0 flex-1">
-          <KLogo />
-          {tenantName && (
-            <span className="ml-2 text-xs text-k-subtle truncate hidden sm:inline">
-              {tenantName}
-            </span>
+          {primaryUserRole && primaryUserRole !== "SUPERADMIN" && !tenantFetchFailed ? (
+            <TenantBrand
+              tenantName={tenantName}
+              tenantLogoUrl={tenantLogoUrl}
+              loading={tenantName === null}
+            />
+          ) : (
+            <KLogo />
           )}
         </div>
         <NotificationBell />
@@ -346,11 +367,16 @@ export default function Sidebar() {
             {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
               <div className="min-w-0 flex-1">
-                <KLogo />
-                <hr className="border-k-sidebar-active my-2" />
-                {tenantName && (
-                  <p className="text-xs font-medium text-white truncate">{tenantName}</p>
+                {primaryUserRole && primaryUserRole !== "SUPERADMIN" && !tenantFetchFailed ? (
+                  <TenantBrand
+                    tenantName={tenantName}
+                    tenantLogoUrl={tenantLogoUrl}
+                    loading={tenantName === null}
+                  />
+                ) : (
+                  <KLogo />
                 )}
+                <hr className="border-k-sidebar-active my-2" />
                 {primaryUserRole && (
                   <p className="text-[11px] text-k-subtle truncate">{primaryUserRole}</p>
                 )}
@@ -379,7 +405,6 @@ export default function Sidebar() {
             {/* Drawer footer */}
             {user && (
               <UserFooter
-                role={primaryUserRole!}
                 displayName={displayName}
                 identityDocumentType={identityDocumentType}
                 identityNumber={identityNumber}
@@ -408,7 +433,13 @@ export default function Sidebar() {
             collapsed ? "justify-center" : "justify-between",
           ].join(" ")}
         >
-          <Brand tenantName={tenantName} role={primaryUserRole} collapsed={collapsed} />
+          <Brand
+            role={primaryUserRole}
+            tenantName={tenantName}
+            tenantLogoUrl={tenantLogoUrl}
+            tenantFetchFailed={tenantFetchFailed}
+            collapsed={collapsed}
+          />
           <div className="flex items-center gap-1 shrink-0">
             {!collapsed && <NotificationBell />}
             <button
@@ -439,7 +470,6 @@ export default function Sidebar() {
         {/* Sidebar footer */}
         {user && (
           <UserFooter
-            role={primaryUserRole!}
             displayName={displayName}
             identityDocumentType={identityDocumentType}
             identityNumber={identityNumber}
