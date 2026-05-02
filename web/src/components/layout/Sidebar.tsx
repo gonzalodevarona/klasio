@@ -34,6 +34,14 @@ import {
   type LucideProps,
 } from "lucide-react";
 
+const ROLE_LABEL_KEYS = {
+  SUPERADMIN: "roleLabel.SUPERADMIN",
+  ADMIN:      "roleLabel.ADMIN",
+  MANAGER:    "roleLabel.MANAGER",
+  PROFESSOR:  "roleLabel.PROFESSOR",
+  STUDENT:    "roleLabel.STUDENT",
+} as const satisfies Record<Role, string>;
+
 type IconComponent = React.ComponentType<LucideProps>;
 
 interface NavItem {
@@ -190,26 +198,29 @@ function Brand({
   tenantFetchFailed: boolean;
   collapsed: boolean;
 }) {
+  const t = useTranslations("layout");
   if (collapsed) return null;
 
-  const useTenantBrand =
+  const showTenantBrand =
     role !== undefined && role !== "SUPERADMIN" && !tenantFetchFailed;
-  const loading = useTenantBrand && tenantName === null;
+  const tenantLoading = showTenantBrand && tenantName === null;
 
   return (
-    <div className="overflow-hidden min-w-0">
-      {useTenantBrand ? (
-        <TenantBrand
-          tenantName={tenantName}
-          tenantLogoUrl={tenantLogoUrl}
-          loading={loading}
-        />
-      ) : (
-        <KLogo />
+    <div className="overflow-hidden min-w-0 flex flex-col gap-0">
+      <KLogo size={28} />
+      {showTenantBrand && (
+        <div className="mt-3">
+          <TenantBrand
+            tenantName={tenantName}
+            tenantLogoUrl={tenantLogoUrl}
+            loading={tenantLoading}
+          />
+        </div>
       )}
-      <hr className="border-k-sidebar-active my-2" />
       {role && (
-        <p className="text-[11px] text-k-subtle truncate">{role}</p>
+        <span className="mt-2 self-start bg-k-volt-muted text-k-volt font-k-mono text-[9px] uppercase tracking-[0.12em] px-2 py-[3px] rounded-[4px]">
+          {t(ROLE_LABEL_KEYS[role] as Parameters<typeof t>[0])}
+        </span>
       )}
     </div>
   );
@@ -370,19 +381,21 @@ export default function Sidebar() {
           <aside className="relative flex flex-col w-64 h-full bg-k-dark shadow-2xl">
             {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
-              <div className="min-w-0 flex-1">
-                {tenantBrandActive ? (
-                  <TenantBrand
-                    tenantName={tenantName}
-                    tenantLogoUrl={tenantLogoUrl}
-                    loading={tenantBrandLoading}
-                  />
-                ) : (
-                  <KLogo />
+              <div className="overflow-hidden min-w-0 flex-1 flex flex-col gap-0">
+                <KLogo size={28} />
+                {tenantBrandActive && (
+                  <div className="mt-3">
+                    <TenantBrand
+                      tenantName={tenantName}
+                      tenantLogoUrl={tenantLogoUrl}
+                      loading={tenantBrandLoading}
+                    />
+                  </div>
                 )}
-                <hr className="border-k-sidebar-active my-2" />
                 {primaryUserRole && (
-                  <p className="text-[11px] text-k-subtle truncate">{primaryUserRole}</p>
+                  <span className="mt-2 self-start bg-k-volt-muted text-k-volt font-k-mono text-[9px] uppercase tracking-[0.12em] px-2 py-[3px] rounded-[4px]">
+                    {t(ROLE_LABEL_KEYS[primaryUserRole] as Parameters<typeof t>[0])}
+                  </span>
                 )}
               </div>
               <button
