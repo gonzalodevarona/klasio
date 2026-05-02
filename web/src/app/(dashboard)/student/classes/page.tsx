@@ -95,7 +95,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
         className="text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2"
         style={{ fontFamily: "var(--font-mono)" }}
       >
-        Próximas sesiones — 1 semana
+        {t("sessionsLabel")}
       </p>
 
       {loading && (
@@ -149,10 +149,10 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-semibold text-k-dark capitalize">
-                        {weekday} {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
+                        {weekday}: {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
                       </span>
                       {s.status === "ALERTED" && (
-                        <span title={s.alertReason ?? "Alerta en esta sesión"}>
+                        <span title={s.alertReason ?? t("alertDefault")}>
                           <AlertTriangle className="w-3.5 h-3.5 text-k-warn-text" />
                         </span>
                       )}
@@ -176,7 +176,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                         <button
                           onClick={() => handleCancel(s)}
                           disabled={!cancellable}
-                          title={!cancellable ? `El plazo de cancelación ya cerró` : undefined}
+                          title={!cancellable ? t("cancelWindowClosed") : undefined}
                           className={[
                             "rounded-[8px] px-4 py-1.5 text-xs font-semibold transition-colors",
                             cancellable
@@ -184,7 +184,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                               : "bg-k-bg text-k-muted cursor-not-allowed",
                           ].join(" ")}
                         >
-                          {cancellable ? "Cancelar" : "Plazo cerrado"}
+                          {cancellable ? t("cancelButton") : t("cancelWindowClosed")}
                         </button>
                         {cancelErrors[rowKey] && (
                           <span className="text-[10px] text-k-danger-text">{cancelErrors[rowKey]}</span>
@@ -198,9 +198,9 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                     disabled={isFull || !registrationOpen}
                     title={
                       !registrationOpen
-                        ? `El registro cierra ${AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES} min antes`
+                        ? t("registerClosesTooltip", { minutes: AttendanceTimeConstants.REGISTRATION_CUTOFF_MINUTES })
                         : isFull
-                        ? "Sesión sin cupo"
+                        ? t("registerFullTooltip")
                         : undefined
                     }
                     className={[
@@ -210,7 +210,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                         : "bg-k-volt text-k-dark hover:bg-[#B8EE3A]",
                     ].join(" ")}
                   >
-                    {isFull ? "Sin cupo" : !registrationOpen ? "Cerrado" : "Registrarme"}
+                    {isFull ? t("registerFull") : !registrationOpen ? t("registerClosed") : t("registerButton")}
                   </button>
                 )}
               </div>
@@ -237,18 +237,18 @@ export default function StudentClassesPage() {
     <div>
       <div className="mb-6">
         <h1 className="text-[26px] font-extrabold tracking-[-0.02em] text-k-dark">
-          Mis clases
+          {t("title")}
         </h1>
         <p
           className="text-xs text-k-muted mt-1"
           style={{ fontFamily: "var(--font-mono)" }}
         >
-          Próximas sesiones disponibles
+          {t("subtitle")}
         </p>
       </div>
 
       {loading && (
-        <p className="py-8 text-center text-sm text-k-muted">Cargando…</p>
+        <p className="py-8 text-center text-sm text-k-muted">{t("loading")}</p>
       )}
 
       {error && (
@@ -259,7 +259,7 @@ export default function StudentClassesPage() {
 
       {!loading && !error && classes.length === 0 && (
         <p className="py-8 text-center text-sm text-k-muted">
-          No hay clases disponibles. Verificá que tenés una inscripción activa.
+          {t("empty")}
         </p>
       )}
 
