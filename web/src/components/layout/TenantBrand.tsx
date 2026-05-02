@@ -16,7 +16,7 @@ export default function TenantBrand({
   if (loading) {
     return (
       <div
-        className={cn("h-6 w-32 bg-k-sidebar-active rounded animate-pulse", className)}
+        className={cn("h-4 w-28 bg-k-sidebar-active rounded animate-pulse", className)}
         aria-hidden="true"
       />
     );
@@ -28,12 +28,12 @@ export default function TenantBrand({
         <img
           src={tenantLogoUrl}
           alt={tenantName ?? ""}
-          width={24}
-          height={24}
+          width={18}
+          height={18}
           className="shrink-0 rounded-sm object-contain"
         />
       )}
-      <span className="text-[18px] font-extrabold text-white tracking-[-0.03em] leading-none truncate">
+      <span className="text-[13px] font-semibold text-white leading-none truncate">
         {tenantName}
       </span>
     </div>

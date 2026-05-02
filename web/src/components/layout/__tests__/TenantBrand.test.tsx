@@ -6,7 +6,9 @@ describe("TenantBrand", () => {
     const { container } = render(
       <TenantBrand tenantName={null} tenantLogoUrl={null} loading />
     );
-    expect(container.querySelector(".animate-pulse")).not.toBeNull();
+    const skeleton = container.querySelector(".animate-pulse");
+    expect(skeleton).not.toBeNull();
+    expect(skeleton).toHaveClass("h-4", "w-28");
     expect(screen.queryByRole("img")).toBeNull();
   });
 
