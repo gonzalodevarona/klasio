@@ -206,7 +206,7 @@ function Brand({
   const tenantLoading = showTenantBrand && tenantName === null;
 
   return (
-    <div className="overflow-hidden min-w-0 flex flex-col gap-0">
+    <div className="overflow-hidden min-w-0 flex flex-col">
       <KLogo size={28} />
       {showTenantBrand && (
         <div className="mt-3">
@@ -381,7 +381,7 @@ export default function Sidebar() {
           <aside className="relative flex flex-col w-64 h-full bg-k-dark shadow-2xl">
             {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
-              <div className="overflow-hidden min-w-0 flex-1 flex flex-col gap-0">
+              <div className="overflow-hidden min-w-0 flex-1 flex flex-col">
                 <KLogo size={28} />
                 {tenantBrandActive && (
                   <div className="mt-3">
