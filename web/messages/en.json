@@ -202,7 +202,14 @@
     "navMyMemberships": "My Memberships",
     "navMyEnrollments": "My Enrollments",
     "navMyClasses": "My Classes",
-    "navAttendance": "Attendance"
+    "navAttendance": "Attendance",
+    "roleLabel": {
+      "SUPERADMIN": "Superadmin",
+      "ADMIN": "Admin",
+      "MANAGER": "Manager",
+      "PROFESSOR": "Professor",
+      "STUDENT": "Student"
+    }
   },
   "badges": {
     "membershipStatus": {
