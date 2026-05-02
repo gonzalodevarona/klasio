@@ -207,20 +207,22 @@ function Brand({
 
   return (
     <div className="overflow-hidden min-w-0 flex flex-col">
-      <KLogo size={28} />
-      {showTenantBrand && (
-        <div className="mt-3">
-          <TenantBrand
-            tenantName={tenantName}
-            tenantLogoUrl={tenantLogoUrl}
-            loading={tenantLoading}
-          />
-        </div>
+      {showTenantBrand ? (
+        <TenantBrand
+          tenantName={tenantName}
+          tenantLogoUrl={tenantLogoUrl}
+          loading={tenantLoading}
+        />
+      ) : (
+        <KLogo size={28} />
       )}
       {role && (
-        <span className="mt-2 self-start bg-k-volt-muted text-k-volt font-k-mono text-[9px] uppercase tracking-[0.12em] px-2 py-[3px] rounded-[4px]">
-          {t(ROLE_LABEL_KEYS[role] as Parameters<typeof t>[0])}
-        </span>
+        <>
+          <hr className="border-k-sidebar-active my-2" />
+          <span className="self-start bg-k-volt-muted text-k-volt font-k-mono text-[9px] uppercase tracking-[0.12em] px-2 py-[3px] rounded-[4px]">
+            {t(ROLE_LABEL_KEYS[role] as Parameters<typeof t>[0])}
+          </span>
+        </>
       )}
     </div>
   );
@@ -382,20 +384,22 @@ export default function Sidebar() {
             {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
               <div className="overflow-hidden min-w-0 flex-1 flex flex-col">
-                <KLogo size={28} />
-                {tenantBrandActive && (
-                  <div className="mt-3">
-                    <TenantBrand
-                      tenantName={tenantName}
-                      tenantLogoUrl={tenantLogoUrl}
-                      loading={tenantBrandLoading}
-                    />
-                  </div>
+                {tenantBrandActive ? (
+                  <TenantBrand
+                    tenantName={tenantName}
+                    tenantLogoUrl={tenantLogoUrl}
+                    loading={tenantBrandLoading}
+                  />
+                ) : (
+                  <KLogo size={28} />
                 )}
                 {primaryUserRole && (
-                  <span className="mt-2 self-start bg-k-volt-muted text-k-volt font-k-mono text-[9px] uppercase tracking-[0.12em] px-2 py-[3px] rounded-[4px]">
-                    {t(ROLE_LABEL_KEYS[primaryUserRole] as Parameters<typeof t>[0])}
-                  </span>
+                  <>
+                    <hr className="border-k-sidebar-active my-2" />
+                    <span className="self-start bg-k-volt-muted text-k-volt font-k-mono text-[9px] uppercase tracking-[0.12em] px-2 py-[3px] rounded-[4px]">
+                      {t(ROLE_LABEL_KEYS[primaryUserRole] as Parameters<typeof t>[0])}
+                    </span>
+                  </>
                 )}
               </div>
               <button
