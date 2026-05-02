@@ -31,6 +31,7 @@ export default function TenantBrand({
           width={18}
           height={18}
           className="shrink-0 rounded-sm object-contain"
+          onError={(e) => { e.currentTarget.style.display = "none"; }}
         />
       )}
       <span className="text-[13px] font-semibold text-white leading-none truncate">

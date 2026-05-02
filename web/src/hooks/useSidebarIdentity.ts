@@ -77,7 +77,7 @@ export function useSidebarIdentity(
         const data: TenantInfo | null = await r.json().catch(() => null);
         if (cancelled) return;
         if (data?.name) setTenantName(data.name);
-        if (data?.logoUrl != null) setTenantLogoUrl(data.logoUrl);
+        if (data?.logoUrl != null) setTenantLogoUrl("/api/me/tenant/logo");
       })
       .catch(() => {
         if (!cancelled) setTenantFetchFailed(true);
