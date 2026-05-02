@@ -36,10 +36,10 @@ import {
 
 const ROLE_LABEL_KEYS = {
   SUPERADMIN: "roleLabel.SUPERADMIN",
-  ADMIN:      "roleLabel.ADMIN",
-  MANAGER:    "roleLabel.MANAGER",
-  PROFESSOR:  "roleLabel.PROFESSOR",
-  STUDENT:    "roleLabel.STUDENT",
+  ADMIN: "roleLabel.ADMIN",
+  MANAGER: "roleLabel.MANAGER",
+  PROFESSOR: "roleLabel.PROFESSOR",
+  STUDENT: "roleLabel.STUDENT",
 } as const satisfies Record<Role, string>;
 
 type IconComponent = React.ComponentType<LucideProps>;
