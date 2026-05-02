@@ -34,7 +34,7 @@ export default function TenantBrand({
           onError={(e) => { e.currentTarget.style.display = "none"; }}
         />
       )}
-      <span className="text-[15px] font-semibold text-white leading-snug break-words">
+      <span className="text-[16px] font-semibold text-white leading-snug break-words">
         {tenantName}
       </span>
     </div>

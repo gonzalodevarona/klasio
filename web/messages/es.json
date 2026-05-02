@@ -16,7 +16,7 @@
     "search": "Buscar",
     "clear": "Limpiar",
     "actions": "Acciones",
-    "registered": "inscritos",
+    "registered": "registrados",
     "confirm": "Confirmar",
     "back": "Volver",
     "close": "Cerrar",
@@ -1278,7 +1278,7 @@
     "registerClosesTooltip": "El registro cierra {minutes} min antes de la clase",
     "registerFull": "Llena",
     "registerClosed": "Cerrado",
-    "registerButton": "Inscribirse",
+    "registerButton": "Registrarse",
     "alertDefault": "Alerta emitida para esta sesión",
     "registerError": "No se pudo inscribir. Inténtalo de nuevo.",
     "cancelError": "No se pudo cancelar. Inténtalo de nuevo."
