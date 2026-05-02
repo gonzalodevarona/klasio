@@ -329,6 +329,10 @@ export default function Sidebar() {
   const navItemsByRole = makeNavItemsByRole(t);
   const navItems = user ? computeNavItems(user.roles, navItemsByRole) : [];
 
+  const tenantBrandActive =
+    !!primaryUserRole && primaryUserRole !== "SUPERADMIN" && !tenantFetchFailed;
+  const tenantBrandLoading = tenantBrandActive && tenantName === null;
+
   return (
     <>
       {/* ── Mobile: top bar ─────────────────────────────────────── */}
@@ -341,11 +345,11 @@ export default function Sidebar() {
           <Menu className="h-6 w-6" />
         </button>
         <div className="min-w-0 flex-1">
-          {primaryUserRole && primaryUserRole !== "SUPERADMIN" && !tenantFetchFailed ? (
+          {tenantBrandActive ? (
             <TenantBrand
               tenantName={tenantName}
               tenantLogoUrl={tenantLogoUrl}
-              loading={tenantName === null}
+              loading={tenantBrandLoading}
             />
           ) : (
             <KLogo />
@@ -367,11 +371,11 @@ export default function Sidebar() {
             {/* Drawer header */}
             <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-k-sidebar-active">
               <div className="min-w-0 flex-1">
-                {primaryUserRole && primaryUserRole !== "SUPERADMIN" && !tenantFetchFailed ? (
+                {tenantBrandActive ? (
                   <TenantBrand
                     tenantName={tenantName}
                     tenantLogoUrl={tenantLogoUrl}
-                    loading={tenantName === null}
+                    loading={tenantBrandLoading}
                   />
                 ) : (
                   <KLogo />
