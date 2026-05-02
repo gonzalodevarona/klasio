@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useMyMemberships } from "@/hooks/useMemberships";
 import { useMyEnrollments } from "@/hooks/useMyEnrollments";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
@@ -18,6 +18,7 @@ function formatDate(iso: string | null): string {
 
 export default function StudentDashboard() {
   const t = useTranslations("studentDashboard");
+  const locale = useLocale();
   const today = todayInTenantZone();
 
   const { memberships, loading: membershipsLoading } = useMyMemberships();
@@ -157,10 +158,10 @@ export default function StudentDashboard() {
                       className="text-[9px] uppercase tracking-[0.06em] text-k-muted"
                       style={{ fontFamily: "var(--font-mono)" }}
                     >
-                      {formatSessionDate(r.sessionDate).split(" ")[0]}
+                      {formatSessionDate(r.sessionDate, locale).split(" ")[0]}
                     </span>
                     <span className="text-base font-extrabold text-k-dark leading-none">
-                      {formatSessionDate(r.sessionDate).split(" ")[1]}
+                      {formatSessionDate(r.sessionDate, locale).split(" ")[1]}
                     </span>
                   </div>
                   <div>

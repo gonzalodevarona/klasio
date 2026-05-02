@@ -36,9 +36,9 @@ export function addDays(dateStr: string, days: number): string {
  * new Date("2026-04-20") parses as UTC midnight and shifts back one day in GMT-5.
  * This function avoids that by splitting the string directly.
  */
-export function formatSessionDate(dateStr: string): string {
+export function formatSessionDate(dateStr: string, locale?: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(y, m - 1, d);
-  const month = date.toLocaleDateString(undefined, { month: "short" });
+  const month = date.toLocaleDateString(locale, { month: "short" });
   return `${month} ${d}`;
 }

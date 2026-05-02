@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
 import { useMyClasses } from "@/hooks/useMyClasses";
 import { useAvailableSessions } from "@/hooks/useAvailableSessions";
@@ -40,6 +40,7 @@ interface ClassSessionsPanelProps {
 
 function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
   const t = useTranslations("studentClasses");
+  const locale = useLocale();
   const today = todayInTenantZone();
   const oneWeekOut = addDays(today, 7);
 
@@ -94,7 +95,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
         className="text-[10px] uppercase tracking-[0.1em] text-k-muted mb-2"
         style={{ fontFamily: "var(--font-mono)" }}
       >
-        Próximas sesiones — 2 semanas
+        Próximas sesiones — 1 semana
       </p>
 
       {loading && (
@@ -124,7 +125,9 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
           {classSessions.map((s) => {
             const isFull = s.currentCapacity >= s.maxStudents;
             const registrationOpen = s.registrationOpen !== false;
-            const dateParts = formatSessionDate(s.sessionDate).split(" ");
+            const dateParts = formatSessionDate(s.sessionDate, locale).split(" ");
+            const [sy, sm, sd] = s.sessionDate.split("-").map(Number);
+            const weekday = new Date(sy, sm - 1, sd).toLocaleDateString(locale, { weekday: "long" });
             return (
               <div
                 key={`${s.classId}-${s.sessionDate}`}
@@ -134,7 +137,7 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-[10px] bg-k-bg flex flex-col items-center justify-center shrink-0">
                     <span
-                      className="text-[9px] uppercase tracking-[0.06em] text-k-muted"
+                      className="text-[9px] uppercase tracking-[0.06em]"
                       style={{ fontFamily: "var(--font-mono)" }}
                     >
                       {dateParts[0] ?? ""}
@@ -145,8 +148,8 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-semibold text-k-dark">
-                        {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
+                      <span className="text-sm font-semibold text-k-dark capitalize">
+                        {weekday} {s.startTime.slice(0, 5)} – {s.endTime.slice(0, 5)}
                       </span>
                       {s.status === "ALERTED" && (
                         <span title={s.alertReason ?? "Alerta en esta sesión"}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useMyRegistrations } from "@/hooks/useMyRegistrations";
 import { useCancelRegistration } from "@/hooks/useCancelRegistration";
 import { useAttendanceStats } from "@/hooks/useAttendanceStats";
@@ -44,6 +44,7 @@ const FILTER_DEFS: FilterOption[] = [
 
 export default function StudentAttendancePage() {
   const t = useTranslations("studentAttendance");
+  const locale = useLocale();
   const [activeFilter, setActiveFilter] = useState<FilterOption>(FILTER_DEFS[0]);
 
   const { registrations, loading, error, refetch } = useMyRegistrations(
@@ -68,7 +69,7 @@ export default function StudentAttendancePage() {
       setSuccessMessage(
         t("successMessage", {
           className: confirmTarget.className,
-          date: formatSessionDate(confirmTarget.sessionDate),
+          date: formatSessionDate(confirmTarget.sessionDate, locale),
         })
       );
       setConfirmTarget(null);
@@ -168,7 +169,7 @@ export default function StudentAttendancePage() {
                 return (
                   <tr key={r.id} className="hover:bg-k-bg">
                     <td className="px-4 py-3 text-sm text-k-dark">
-                      {formatSessionDate(r.sessionDate)}
+                      {formatSessionDate(r.sessionDate, locale)}
                     </td>
                     <td className="px-4 py-3 text-sm text-k-muted whitespace-nowrap">
                       {r.sessionStartTime.slice(0, 5)} – {r.sessionEndTime.slice(0, 5)}
@@ -230,7 +231,7 @@ export default function StudentAttendancePage() {
             <p className="text-sm text-k-muted mb-4">
               {t.rich("modalBody", {
                 className: confirmTarget.className,
-                date: formatSessionDate(confirmTarget.sessionDate),
+                date: formatSessionDate(confirmTarget.sessionDate, locale),
                 time: confirmTarget.sessionStartTime.slice(0, 5),
                 b: (chunks) => <span className="font-medium text-k-dark">{chunks}</span>,
               })}
