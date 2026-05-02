@@ -28,13 +28,13 @@ export default function TenantBrand({
         <img
           src={tenantLogoUrl}
           alt={tenantName ?? ""}
-          width={24}
-          height={24}
+          width={34}
+          height={34}
           className="shrink-0 rounded-sm object-contain"
           onError={(e) => { e.currentTarget.style.display = "none"; }}
         />
       )}
-      <span className="text-[13px] font-semibold text-white leading-none truncate">
+      <span className="text-[15px] font-semibold text-white leading-snug break-words">
         {tenantName}
       </span>
     </div>
