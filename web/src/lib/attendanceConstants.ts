@@ -38,5 +38,7 @@ export function addDays(dateStr: string, days: number): string {
  */
 export function formatSessionDate(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString();
+  const date = new Date(y, m - 1, d);
+  const month = date.toLocaleDateString(undefined, { month: "short" });
+  return `${month} ${d}`;
 }
