@@ -1,0 +1,50 @@
+# Production profile overrides. Activated by SPRING_PROFILES_ACTIVE=prod
+# (set in docker/docker-compose.prod.yml).
+#
+# Anything not overridden here inherits from application.yml.
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    validate-on-migrate: true
+
+server:
+  forward-headers-strategy: framework  # honor X-Forwarded-* from Caddy
+
+logging:
+  level:
+    root: INFO
+    com.klasio: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.flywaydb: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+klasio:
+  cors:
+    # Comma-separated. Patterns supported (Spring AllowedOriginPatterns).
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://klasio.club,https://*.klasio.club}
+  cookie:
+    secure: ${COOKIE_SECURE:true}
+    # Leading dot lets cookies be shared across all subdomains of klasio.club.
+    domain: ${COOKIE_DOMAIN:.klasio.club}
+    same-site: ${COOKIE_SAME_SITE:Lax}

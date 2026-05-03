@@ -18,11 +18,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,6 +43,15 @@ public class AuthController {
     private final ResendSetupEmailService resendSetupEmailService;
     private final JwtProperties jwtProperties;
     private final UserRepository userRepository;
+
+    @Value("${klasio.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${klasio.cookie.domain:}")
+    private String cookieDomain;
+
+    @Value("${klasio.cookie.same-site:Lax}")
+    private String cookieSameSite;
 
     public AuthController(LoginService loginService,
                           LogoutService logoutService,
@@ -185,21 +198,32 @@ public class AuthController {
     }
 
     private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // false for local dev; true in production
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
+        // ResponseCookie supports SameSite (the legacy Cookie API does not).
+        // Domain is only set in production so subdomains share the cookie
+        // (e.g. liga-tennis.klasio.club + admin.klasio.club).
+        ResponseCookie.ResponseCookieBuilder b = ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(Duration.ofSeconds(maxAge))
+                .sameSite(cookieSameSite);
+        if (cookieDomain != null && !cookieDomain.isBlank()) {
+            b.domain(cookieDomain);
+        }
+        response.addHeader(HttpHeaders.SET_COOKIE, b.build().toString());
     }
 
     private void clearCookie(HttpServletResponse response, String name) {
-        Cookie cookie = new Cookie(name, "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie.ResponseCookieBuilder b = ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0)
+                .sameSite(cookieSameSite);
+        if (cookieDomain != null && !cookieDomain.isBlank()) {
+            b.domain(cookieDomain);
+        }
+        response.addHeader(HttpHeaders.SET_COOKIE, b.build().toString());
     }
 
     private String extractCookieValue(HttpServletRequest request, String name) {
