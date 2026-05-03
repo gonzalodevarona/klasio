@@ -111,9 +111,10 @@ services:
       NODE_ENV: production
       PORT: "3000"
       HOSTNAME: "0.0.0.0"
-      # Server-side fetches from Next.js API proxy routes use the in-network host.
-      # Falls back to the public URL if not set.
-      INTERNAL_API_URL: ${INTERNAL_API_URL:-http://api:8080}
+      # Server-side base URL used by Next.js API proxy routes (/src/app/api/**).
+      # Must include the /api/v1 path because the routes append /auth/login etc.
+      # directly. Stays inside the docker network -- bypasses Caddy + TLS.
+      BACKEND_URL: ${BACKEND_URL:-http://api:8080/api/v1}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
       # Required by middleware.ts to verify access tokens. Must match the
       # backend JWT_SECRET so the same HS256 signature validates on both sides.
