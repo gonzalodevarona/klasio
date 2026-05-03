@@ -232,6 +232,81 @@
       .nav-actions .btn-outline { padding: 8px 14px; font-size: 12px; }
       .nav-actions .btn-volt { padding: 9px 16px; font-size: 12px; }
     }
+
+    /* === Hero === */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      padding: 120px 32px 80px;
+      overflow: hidden;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      max-width: 1120px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    .hero h1 {
+      font-size: clamp(42px, 5.5vw, 72px);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.0;
+      margin: 28px 0 24px;
+      color: var(--text);
+    }
+    .hero h1 .line { display: block; }
+    .hero-subtitle {
+      font-size: 17px;
+      color: var(--subtle);
+      line-height: 1.7;
+      max-width: 520px;
+      margin-bottom: 40px;
+    }
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 52px;
+      flex-wrap: wrap;
+    }
+    .hero-stats {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .hero-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1;
+    }
+    .hero-stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hero-stat-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--border2);
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero { padding: 100px 24px 60px; }
+    }
   </style>
 </head>
 <body>
@@ -255,6 +330,42 @@
       <a href="#" class="btn btn-volt" data-wa-msg="nav_demo" data-i18n="nav.demo">See demo →</a>
     </div>
   </nav>
+
+  <section id="hero" class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="tag fade-up" data-i18n="hero.tag">Professional sports management</span>
+        <h1 class="fade-up d1">
+          <span class="line" data-i18n="hero.h1.line1">Your club,</span>
+          <span class="line" data-i18n="hero.h1.line2">managed</span>
+          <span class="line" data-i18n-html="hero.h1.line3">with <span class="volt-text">precision.</span></span>
+        </h1>
+        <p class="hero-subtitle fade-up d2" data-i18n="hero.subtitle">Klasio is the all-in-one platform for sports clubs. Manage memberships, attendance, payments and programs from a single place — no spreadsheets, no chaos.</p>
+        <div class="hero-actions fade-up d3">
+          <a href="#" class="btn btn-volt" data-wa-msg="hero_primary" data-i18n="hero.cta.primary">Request free demo →</a>
+          <a href="#funcionalidades" class="btn btn-ghost" data-i18n="hero.cta.secondary">See features ↓</a>
+        </div>
+        <div class="hero-stats fade-up d4">
+          <div class="hero-stat">
+            <span class="hero-stat-value" data-i18n="hero.stat1.value">100%</span>
+            <span class="hero-stat-label" data-i18n="hero.stat1.label">Digital</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value" data-i18n="hero.stat2.value">5</span>
+            <span class="hero-stat-label" data-i18n="hero.stat2.label">User roles</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-value" data-i18n="hero.stat3.value">∞</span>
+            <span class="hero-stat-label" data-i18n="hero.stat3.label">Students</span>
+          </div>
+        </div>
+      </div>
+      <!-- Right column: dashboard mockup — added in Task 5 -->
+      <div class="hero-mockup-placeholder" aria-hidden="true"></div>
+    </div>
+  </section>
 
   <noscript>
     <style>
