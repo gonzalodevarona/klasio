@@ -105,7 +105,7 @@ class EmailDispatcherServiceTest {
         assertThat(model).containsKey("tenantName");
         assertThat(model).containsKey("tenantSlug");
         assertThat(model).containsKey("loginUrl");
-        assertThat(model.get("loginUrl")).isEqualTo("http://localhost:3000");
+        assertThat(model.get("loginUrl")).isEqualTo("http://localhost:3000/login");
     }
 
     @Test
