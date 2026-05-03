@@ -1,0 +1,63 @@
+# Klasio production reverse proxy.
+#
+# Three hostnames terminate here:
+#   - klasio.club            -> frontend (landing / marketing)
+#   - *.klasio.club          -> frontend (per-tenant subdomains)
+#   - api.klasio.club        -> backend API
+#
+# TLS is obtained automatically via Let's Encrypt. The wildcard cert requires
+# the DNS-01 challenge, which uses the Cloudflare API token in CLOUDFLARE_API_TOKEN.
+
+{
+    email {$ACME_EMAIL}
+    # Use Let's Encrypt production by default. To debug, switch to staging:
+    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# ---------- Frontend (root + wildcard) ----------
+klasio.club, *.klasio.club {
+    tls {
+        dns cloudflare {$CLOUDFLARE_API_TOKEN}
+    }
+
+    encode zstd gzip
+
+    # Pass the original Host so Next.js middleware can read the tenant subdomain.
+    reverse_proxy web:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Basic security headers. HSTS is added once you've confirmed everything works.
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        # Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
+}
+
+# ---------- Backend API ----------
+api.klasio.club {
+    tls {
+        dns cloudflare {$CLOUDFLARE_API_TOKEN}
+    }
+
+    encode zstd gzip
+
+    reverse_proxy api:8080 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+}

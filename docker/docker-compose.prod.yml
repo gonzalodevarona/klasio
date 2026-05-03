@@ -3,11 +3,17 @@
 #   /opt/klasio/
 #     ├── klasio/                  (git clone of this repo)
 #     │   ├── api/                 (Spring Boot source)
+#     │   ├── web/                 (Next.js source)
 #     │   └── docker/              (this file lives here)
 #     └── .env                     (copy of docker/.env.example, filled in)
 #
 # Run from /opt/klasio/klasio:
 #   docker compose -f docker/docker-compose.prod.yml --env-file ../.env up -d --build
+#
+# Topology:
+#   Internet :443 ─► caddy ──► web:3000   (klasio.club, *.klasio.club)
+#                       └──► api:8080     (api.klasio.club)
+#   Only caddy publishes ports on the host. api/web/postgres are network-internal.
 
 name: klasio
 
@@ -56,21 +62,24 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-28800000}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://klasio.club,https://*.klasio.club}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-.klasio.club}
+      COOKIE_SAME_SITE: ${COOKIE_SAME_SITE:-Lax}
       KLASIO_FRONTEND_URL_TEMPLATE: ${KLASIO_FRONTEND_URL_TEMPLATE}
       KLASIO_EMAIL_TRANSPORT: ${KLASIO_EMAIL_TRANSPORT:-brevo}
-      KLASIO_EMAIL_FROM_ADDRESS: ${KLASIO_EMAIL_FROM_ADDRESS:-noreply@klasio.app}
+      KLASIO_EMAIL_FROM_ADDRESS: ${KLASIO_EMAIL_FROM_ADDRESS:-noreply@klasio.club}
       BREVO_API_KEY: ${BREVO_API_KEY}
-      AUTH_FROM_EMAIL: ${AUTH_FROM_EMAIL:-noreply@klasio.app}
+      AUTH_FROM_EMAIL: ${AUTH_FROM_EMAIL:-noreply@klasio.club}
       AWS_S3_BUCKET: ${AWS_S3_BUCKET}
       AWS_REGION: ${AWS_REGION:-auto}
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       JAVA_OPTS: "-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError"
-    # Bind to loopback only on the host. Caddy (running on host or another
-    # container) will reverse-proxy 443 -> 127.0.0.1:8080.
-    ports:
-      - "127.0.0.1:8080:8080"
+    # Internal-only: reachable from the compose network as `api:8080`.
+    expose:
+      - "8080"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/actuator/health | grep -q '\"UP\"' || exit 1"]
       interval: 30s
@@ -84,8 +93,78 @@ services:
     networks:
       - klasio-net
 
+  web:
+    build:
+      context: ../web
+      dockerfile: Dockerfile.prod
+      args:
+        # Public env baked into the bundle at build time. Must be the
+        # browser-facing API URL, not the in-network one.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL is required}
+    image: klasio-web:latest
+    container_name: klasio-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+      # Server-side fetches from Next.js API proxy routes use the in-network host.
+      # Falls back to the public URL if not set.
+      INTERNAL_API_URL: ${INTERNAL_API_URL:-http://api:8080}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      # Required by middleware.ts to verify access tokens. Must match the
+      # backend JWT_SECRET so the same HS256 signature validates on both sides.
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    networks:
+      - klasio-net
+
+  caddy:
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile
+    image: klasio-caddy:latest
+    container_name: klasio-caddy
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    environment:
+      # Cloudflare API token with Zone:DNS:Edit on klasio.club. Used for the
+      # DNS-01 challenge required to issue the *.klasio.club wildcard cert.
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:?CLOUDFLARE_API_TOKEN is required}
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL is required}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data       # certs + ACME state (must persist)
+      - caddy_config:/config
+    networks:
+      - klasio-net
+
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:
 
 networks:
   klasio-net:
