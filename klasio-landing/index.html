@@ -51,6 +51,138 @@
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 99px; }
+
+    /* === Component primitives === */
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-volt {
+      background: var(--volt);
+      color: var(--dark);
+      padding: 13px 28px;
+    }
+    .btn-volt:hover {
+      background: #B8EE3A;
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1.5px solid var(--border2);
+      padding: 12px 24px;
+    }
+    .btn-outline:hover {
+      border-color: var(--volt);
+      color: var(--volt);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--subtle);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .btn-ghost:hover { color: var(--text); }
+
+    /* Tag pill */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--volt);
+      background: rgba(202,255,77,0.08);
+      border: 1px solid rgba(202,255,77,0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+    .tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--volt);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+    .tag.no-dot::before { display: none; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Section titles */
+    .section-title {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--subtle);
+      line-height: 1.7;
+      max-width: 640px;
+    }
+    .section-header { margin-bottom: 64px; }
+
+    /* Layout container */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Logo lockup */
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo .wordmark {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    /* Volt accent text */
+    .volt-text { color: var(--volt); }
+
+    /* Fade-up animation base */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .fade-up.d1 { transition-delay: 0.1s; }
+    .fade-up.d2 { transition-delay: 0.2s; }
+    .fade-up.d3 { transition-delay: 0.3s; }
+    .fade-up.d4 { transition-delay: 0.4s; }
   </style>
 </head>
 <body>
