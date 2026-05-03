@@ -307,6 +307,183 @@
       .hero-grid { grid-template-columns: 1fr; }
       .hero { padding: 100px 24px 60px; }
     }
+
+    /* === Hero dashboard mockup === */
+    .hero-mockup {
+      position: relative;
+      background: #111;
+      border-radius: 20px;
+      border: 1px solid var(--border2);
+      box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+      overflow: hidden;
+      min-height: 420px;
+    }
+    .hero-mockup::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(202,255,77,0.4), transparent);
+    }
+    .mockup-sidebar {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 52px;
+      background: #0A0A0A;
+      border-right: 1px solid var(--border);
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .mockup-sidebar .mockup-logo { margin-bottom: 8px; }
+    .mockup-nav-item {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .mockup-nav-item .dot {
+      width: 16px;
+      height: 4px;
+      background: #2A2A2A;
+      border-radius: 2px;
+    }
+    .mockup-nav-item.active {
+      background: #1A1A1A;
+    }
+    .mockup-nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: -7px;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background: var(--volt);
+      border-radius: 0 2px 2px 0;
+    }
+    .mockup-nav-item.active .dot {
+      background: rgba(202,255,77,0.7);
+    }
+    .mockup-content {
+      margin-left: 52px;
+      padding: 20px 18px;
+    }
+    .mockup-header { margin-bottom: 16px; }
+    .mockup-header .title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #FAFAF8;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .mockup-header .subtitle {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: #4A4A48;
+      letter-spacing: 0.08em;
+    }
+    .mockup-kpis {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .mockup-kpi {
+      flex: 1;
+      background: #0A0A0A;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .mockup-kpi .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: #4A4A48;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .mockup-kpi .value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .mockup-kpi .sub {
+      font-size: 9px;
+      color: #2A8A00;
+      margin-top: 4px;
+    }
+    .mockup-attendance .att-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .mockup-attendance .att-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #FAFAF8;
+    }
+    .mockup-attendance .att-cta {
+      font-size: 9px;
+      font-weight: 700;
+      background: var(--volt);
+      color: var(--dark);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .mockup-table {
+      border-radius: 8px;
+      border: 1px solid #1E1E1E;
+      overflow: hidden;
+    }
+    .mockup-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px solid #151515;
+    }
+    .mockup-row:nth-child(odd) { background: #0D0D0D; }
+    .mockup-row:nth-child(even) { background: #111111; }
+    .mockup-row:last-child { border-bottom: none; }
+    .mockup-row .name {
+      flex: 1;
+      font-size: 10px;
+      font-weight: 600;
+      color: #FAFAF8;
+    }
+    .mockup-row .program {
+      flex: 1.2;
+      font-size: 9px;
+      color: #4A4A48;
+    }
+    .mockup-bar-wrap {
+      flex: 1;
+      height: 3px;
+      background: #1E1E1E;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .mockup-bar {
+      height: 100%;
+      border-radius: 99px;
+    }
+    .mockup-badge {
+      font-size: 8px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 900px) {
+      .hero-mockup { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -362,8 +539,76 @@
           </div>
         </div>
       </div>
-      <!-- Right column: dashboard mockup — added in Task 5 -->
-      <div class="hero-mockup-placeholder" aria-hidden="true"></div>
+      <div class="hero-mockup fade-up d2" aria-hidden="true">
+        <aside class="mockup-sidebar">
+          <svg class="mockup-logo" width="26" height="26" viewBox="0 0 40 40" fill="none">
+            <rect x="6" y="6" width="6" height="28" fill="#CAFF4D"/>
+            <polygon points="14,6 40,6 40,14 20,22 14,22" fill="#CAFF4D" opacity="0.9"/>
+            <polygon points="20,22 40,30 40,38 14,22" fill="#CAFF4D" opacity="0.6"/>
+          </svg>
+          <div class="mockup-nav-item active"><span class="dot"></span></div>
+          <div class="mockup-nav-item"><span class="dot"></span></div>
+          <div class="mockup-nav-item"><span class="dot"></span></div>
+          <div class="mockup-nav-item"><span class="dot"></span></div>
+          <div class="mockup-nav-item"><span class="dot"></span></div>
+        </aside>
+
+        <div class="mockup-content">
+          <div class="mockup-header">
+            <div class="title" data-i18n="mock.dashboard">Dashboard</div>
+            <div class="subtitle" data-i18n="mock.subtitle">NORTH LEAGUE · CURRENT PERIOD</div>
+          </div>
+
+          <div class="mockup-kpis">
+            <div class="mockup-kpi">
+              <div class="label" data-i18n="mock.kpi1.label">STUDENTS</div>
+              <div class="value" style="color:#FAFAF8">248</div>
+              <div class="sub" data-i18n="mock.kpi1.sub">↑ 12 this month</div>
+            </div>
+            <div class="mockup-kpi">
+              <div class="label" data-i18n="mock.kpi2.label">HOURS USED</div>
+              <div class="value" style="color:var(--volt)">1,840</div>
+            </div>
+            <div class="mockup-kpi">
+              <div class="label" data-i18n="mock.kpi3.label">PENDING PAYMENTS</div>
+              <div class="value" style="color:#FFC107">14</div>
+            </div>
+          </div>
+
+          <div class="mockup-attendance">
+            <div class="att-header">
+              <div class="att-title" data-i18n="mock.attendance.title">Attendance control</div>
+              <div class="att-cta" data-i18n="mock.attendance.cta">Start class</div>
+            </div>
+            <div class="mockup-table">
+              <div class="mockup-row">
+                <div class="name">Carlos Rodríguez</div>
+                <div class="program" data-i18n="mock.row1.program">Advanced Swimming</div>
+                <div class="mockup-bar-wrap"><div class="mockup-bar" style="width:100%; background:var(--volt);"></div></div>
+                <div class="mockup-badge" style="background:var(--volt); color:var(--volt-dark);" data-i18n="mock.row1.status">Active</div>
+              </div>
+              <div class="mockup-row">
+                <div class="name">Ana Martínez</div>
+                <div class="program" data-i18n="mock.row2.program">Youth Karate</div>
+                <div class="mockup-bar-wrap"><div class="mockup-bar" style="width:66%; background:#FFC107;"></div></div>
+                <div class="mockup-badge" style="background:#FFF0C2; color:#8A5A00;" data-i18n="mock.row2.status">Expiring</div>
+              </div>
+              <div class="mockup-row">
+                <div class="name">Sofía Torres</div>
+                <div class="program" data-i18n="mock.row3.program">Basketball</div>
+                <div class="mockup-bar-wrap"><div class="mockup-bar" style="width:80%; background:var(--volt);"></div></div>
+                <div class="mockup-badge" style="background:var(--volt); color:var(--volt-dark);" data-i18n="mock.row3.status">Active</div>
+              </div>
+              <div class="mockup-row">
+                <div class="name">Miguel Herrera</div>
+                <div class="program" data-i18n="mock.row4.program">Track & Field</div>
+                <div class="mockup-bar-wrap"><div class="mockup-bar" style="width:30%; background:#CC2200;"></div></div>
+                <div class="mockup-badge" style="background:#1E1E1E; color:#4A4A48;" data-i18n="mock.row4.status">Inactive</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
