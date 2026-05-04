@@ -33,8 +33,7 @@ public class JpaTenantContextAdapter implements TenantContextPort {
         if (rows.isEmpty()) {
             throw new IllegalArgumentException("Tenant not found: " + tenantId);
         }
-        Object first = rows.get(0);
-        Object[] r = (first instanceof Object[]) ? (Object[]) first : rows.toArray();
+        Object[] r = (Object[]) rows.get(0);
         String logoKey = (String) r[5];
         String logoUrl = logoStorage.getPublicUrl(logoKey);
         return new TenantContext(

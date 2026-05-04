@@ -326,41 +326,44 @@ class ThymeleafTemplateRendererTest {
 
     @Test
     void allTemplates_haveNoBareTextNodeInHeadOutsideTitle() {
-        java.util.Map<String, java.util.Map<String, Object>> samples = java.util.Map.of(
-            "account-setup", java.util.Map.of(
+        java.util.Map<String, java.util.Map<String, Object>> samples = new java.util.LinkedHashMap<>();
+        samples.put("account-setup", java.util.Map.of(
                 "recipientName", "X", "role", "student",
                 "setupUrl", "http://e", "expiresAt", "x",
-                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"),
-            "professor-invitation", java.util.Map.of(
+                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("professor-invitation", java.util.Map.of(
                 "professorName", "X", "activationUrl", "http://e",
                 "expiresAt", "x", "tenantName", "T",
-                "tenantSlug", "t", "loginUrl", "http://e"),
-            "password-recovery", java.util.Map.of(
+                "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("password-recovery", java.util.Map.of(
                 "resetUrl", "http://e", "expiresAt", "x",
-                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"),
-            "payment-proof-uploaded", java.util.Map.of(
+                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("payment-proof-uploaded", java.util.Map.of(
                 "studentName", "X", "programName", "P",
                 "reviewUrl", "http://e", "tenantName", "T",
-                "tenantSlug", "t", "loginUrl", "http://e"),
-            "payment-rejected", java.util.Map.of(
+                "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("payment-rejected", java.util.Map.of(
                 "studentName", "X", "programName", "P", "reason", "r",
                 "retryUrl", "http://e", "tenantName", "T",
-                "tenantSlug", "t", "loginUrl", "http://e"),
-            "membership-activated", java.util.Map.of(
+                "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("membership-activated", java.util.Map.of(
                 "studentName", "X", "programName", "P", "planName", "PL",
                 "totalHours", 1, "expiresAt", "2026-05-31",
-                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"),
-            "membership-expiry-warning", java.util.Map.of(
+                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("membership-expiry-warning", java.util.Map.of(
                 "studentName", "X", "programName", "P", "remainingHours", 1,
                 "expiresAt", "2026-05-31", "tenantName", "T",
-                "tenantSlug", "t", "loginUrl", "http://e"),
-            "membership-depleted", java.util.Map.of(
+                "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("membership-depleted", java.util.Map.of(
                 "studentName", "X", "programName", "P", "tenantName", "T",
-                "tenantSlug", "t", "loginUrl", "http://e"),
-            "class-session-change", java.util.Map.of(
+                "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("class-session-change", java.util.Map.of(
                 "studentName", "X", "className", "C", "startsAt", "x",
                 "changeKind", "ALERTED", "reason", "r",
                 "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"));
+        samples.put("missing-template-fallback", java.util.Map.of(
+                "tenantName", "T", "emailTypeName", "SOME_TYPE",
+                "tenantSlug", "t", "loginUrl", "http://e"));
 
         samples.forEach((tpl, model) -> {
             RenderedTemplate r = renderer.render(tpl, Locale.ENGLISH, model);

@@ -6,7 +6,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +26,7 @@ class JpaTenantContextAdapterTest {
         Query query = mock(Query.class);
         when(em.createQuery(anyString())).thenReturn(query);
         when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of(new Object[]{
+        when(query.getResultList()).thenReturn(java.util.Collections.singletonList(new Object[]{
                 id, "test-slug", "Test League", "en",
                 "America/Bogota", "logos/abc/img.png"}));
         when(logoStorage.getPublicUrl("logos/abc/img.png"))
@@ -50,7 +49,7 @@ class JpaTenantContextAdapterTest {
         Query query = mock(Query.class);
         when(em.createQuery(anyString())).thenReturn(query);
         when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(Arrays.asList(new Object[]{
+        when(query.getResultList()).thenReturn(java.util.Collections.singletonList(new Object[]{
                 id, "test-slug", "Test League", "en", "America/Bogota", null}));
         when(logoStorage.getPublicUrl(null)).thenReturn(null);
 
