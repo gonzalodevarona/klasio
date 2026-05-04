@@ -1627,6 +1627,30 @@
       applyTranslations(lang);
       wireWhatsApp(lang);
     });
+
+    // === Scroll-triggered fade-up ===
+    document.addEventListener('DOMContentLoaded', () => {
+      const heroFades = document.querySelectorAll('#hero .fade-up');
+      // Hero elements unblock immediately
+      setTimeout(() => heroFades.forEach(el => el.classList.add('visible')), 100);
+
+      // Everything else: IntersectionObserver
+      const restFades = document.querySelectorAll('.fade-up:not(#hero .fade-up)');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        restFades.forEach(el => io.observe(el));
+      } else {
+        // Fallback: reveal everything immediately
+        restFades.forEach(el => el.classList.add('visible'));
+      }
+    });
   </script>
 </body>
 </html>
