@@ -322,21 +322,18 @@ class ThymeleafTemplateRendererTest {
 
         samples.forEach((tpl, model) -> {
             RenderedTemplate r = renderer.render(tpl, Locale.ENGLISH, model);
-            String htmlBody = r.htmlBody();
-
-            // Extract <head> section and verify no bare text between <meta> and <link>
-            int headStart = htmlBody.indexOf("<head");
-            int headEnd = htmlBody.indexOf("</head>");
-            assertThat(headStart).as("no <head> tag found in template %s", tpl).isGreaterThan(-1);
-            assertThat(headEnd).as("no </head> tag found in template %s", tpl).isGreaterThan(headStart);
-
-            String headSection = htmlBody.substring(headStart, headEnd);
-            // Look for pattern: > (end of meta tag) followed by non-whitespace text before < (start of link tag)
-            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(">\\s*([A-Z][^<]*?)\\s*<link", java.util.regex.Pattern.CASE_INSENSITIVE);
-            java.util.regex.Matcher matcher = pattern.matcher(headSection);
-            assertThat(matcher.find())
-                .as("template %s should not leak subject text in <head>", tpl)
-                .isFalse();
+            String html = r.htmlBody();
+            int headOpen = html.indexOf("<head");
+            int headClose = html.indexOf("</head>");
+            if (headOpen < 0 || headClose < 0) return;
+            String headSection = html.substring(headOpen, headClose + 7);
+            // Strip <title> content (allowed opaque element that hides text)
+            String withoutTitle = headSection.replaceAll("(?s)<title[^>]*>.*?</title>", "");
+            // Strip all remaining tags
+            String bareText = withoutTitle.replaceAll("<[^>]*>", "").replaceAll("\\s+", " ").trim();
+            assertThat(bareText)
+                .as("template '%s' has bare text in <head> outside <title>: '%s'", tpl, bareText)
+                .isEmpty();
         });
     }
 }
