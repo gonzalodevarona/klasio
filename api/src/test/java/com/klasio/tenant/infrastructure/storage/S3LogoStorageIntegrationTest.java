@@ -143,6 +143,31 @@ class S3LogoStorageIntegrationTest {
         assertThat(url).contains(key);
     }
 
+    @Test
+    @DisplayName("getPublicUrl returns stable URL containing bucket and key for an existing logo")
+    void getPublicUrl_existingKey_returnsStableUrl() {
+        byte[] pngHeader = createMinimalPng();
+        InputStream data = new ByteArrayInputStream(pngHeader);
+        UUID tenantId = UUID.randomUUID();
+
+        String key = logoStorage.upload(tenantId, data, "image/png", pngHeader.length);
+
+        String url = logoStorage.getPublicUrl(key);
+
+        assertThat(url).isNotBlank();
+        assertThat(url).contains(BUCKET_NAME);
+        assertThat(url).contains(key);
+        // Stable URL must not carry signed-request query params.
+        assertThat(url).doesNotContain("X-Amz-Signature");
+        assertThat(url).doesNotContain("X-Amz-Credential");
+    }
+
+    @Test
+    @DisplayName("getPublicUrl returns null when logo key is null")
+    void getPublicUrl_nullKey_returnsNull() {
+        assertThat(logoStorage.getPublicUrl(null)).isNull();
+    }
+
     private byte[] createMinimalPng() {
         // Minimal valid PNG: 8-byte signature + IHDR chunk + IEND chunk
         return new byte[]{

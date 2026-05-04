@@ -9,6 +9,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
@@ -99,6 +100,17 @@ public class S3LogoStorage implements LogoStorage {
                 .build();
 
         return s3Presigner.presignGetObject(presignRequest).url().toString();
+    }
+
+    @Override
+    public String getPublicUrl(String logoKey) {
+        if (logoKey == null) {
+            return null;
+        }
+        return s3Client.utilities().getUrl(GetUrlRequest.builder()
+                .bucket(bucket)
+                .key(logoKey)
+                .build()).toString();
     }
 
     private String detectMimeType(byte[] data, String contentType) {
