@@ -14,7 +14,7 @@
     # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 }
 
-# ---------- Landing page (root domain only) ----------
+# ---------- Root domain: landing at /, app for everything else ----------
 klasio.club {
     tls {
         dns cloudflare {$CLOUDFLARE_API_TOKEN}
@@ -22,8 +22,22 @@ klasio.club {
 
     encode zstd gzip
 
-    root * /srv/landing
-    file_server
+    # Landing page static assets
+    @landing path / /logo.svg
+    handle @landing {
+        root * /srv/landing
+        file_server
+    }
+
+    # All other paths (login, dashboard, etc.) go to Next.js
+    handle {
+        reverse_proxy web:3000 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
 
     header {
         X-Content-Type-Options nosniff
