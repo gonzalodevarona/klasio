@@ -1649,12 +1649,11 @@
     });
 
     // === Scroll-triggered fade-up ===
-    document.addEventListener('DOMContentLoaded', () => {
+    // Script is at end of body — DOM already available, no DOMContentLoaded needed
+    (function initFadeUp() {
       const heroFades = document.querySelectorAll('#hero .fade-up');
-      // Hero elements unblock immediately
       setTimeout(() => heroFades.forEach(el => el.classList.add('visible')), 100);
 
-      // Everything else: IntersectionObserver
       const restFades = document.querySelectorAll('.fade-up:not(#hero .fade-up)');
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
@@ -1667,10 +1666,9 @@
         }, { threshold: 0.12 });
         restFades.forEach(el => io.observe(el));
       } else {
-        // Fallback: reveal everything immediately
         restFades.forEach(el => el.classList.add('visible'));
       }
-    });
+    })();
   </script>
 </body>
 </html>
