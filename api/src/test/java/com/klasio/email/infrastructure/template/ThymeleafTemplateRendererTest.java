@@ -281,4 +281,62 @@ class ThymeleafTemplateRendererTest {
         assertThat(result.htmlBody()).contains("Test League");
         assertThat(result.htmlBody()).contains("SOME_UNREGISTERED_TYPE");
     }
+
+    @Test
+    void allTemplates_haveNoBareTextNodeInHeadOutsideTitle() {
+        java.util.Map<String, java.util.Map<String, Object>> samples = java.util.Map.of(
+            "account-setup", java.util.Map.of(
+                "recipientName", "X", "role", "student",
+                "setupUrl", "http://e", "expiresAt", "x",
+                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"),
+            "professor-invitation", java.util.Map.of(
+                "professorName", "X", "activationUrl", "http://e",
+                "expiresAt", "x", "tenantName", "T",
+                "tenantSlug", "t", "loginUrl", "http://e"),
+            "password-recovery", java.util.Map.of(
+                "resetUrl", "http://e", "expiresAt", "x",
+                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"),
+            "payment-proof-uploaded", java.util.Map.of(
+                "studentName", "X", "programName", "P",
+                "reviewUrl", "http://e", "tenantName", "T",
+                "tenantSlug", "t", "loginUrl", "http://e"),
+            "payment-rejected", java.util.Map.of(
+                "studentName", "X", "programName", "P", "reason", "r",
+                "retryUrl", "http://e", "tenantName", "T",
+                "tenantSlug", "t", "loginUrl", "http://e"),
+            "membership-activated", java.util.Map.of(
+                "studentName", "X", "programName", "P", "planName", "PL",
+                "totalHours", 1, "expiresAt", "2026-05-31",
+                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"),
+            "membership-expiry-warning", java.util.Map.of(
+                "studentName", "X", "programName", "P", "remainingHours", 1,
+                "expiresAt", "2026-05-31", "tenantName", "T",
+                "tenantSlug", "t", "loginUrl", "http://e"),
+            "membership-depleted", java.util.Map.of(
+                "studentName", "X", "programName", "P", "tenantName", "T",
+                "tenantSlug", "t", "loginUrl", "http://e"),
+            "class-session-change", java.util.Map.of(
+                "studentName", "X", "className", "C", "startsAt", "x",
+                "changeKind", "ALERTED", "reason", "r",
+                "tenantName", "T", "tenantSlug", "t", "loginUrl", "http://e"));
+
+        samples.forEach((tpl, model) -> {
+            RenderedTemplate r = renderer.render(tpl, Locale.ENGLISH, model);
+            String htmlBody = r.htmlBody();
+
+            // Extract <head> section and verify no bare text between <meta> and <link>
+            int headStart = htmlBody.indexOf("<head");
+            int headEnd = htmlBody.indexOf("</head>");
+            assertThat(headStart).as("no <head> tag found in template %s", tpl).isGreaterThan(-1);
+            assertThat(headEnd).as("no </head> tag found in template %s", tpl).isGreaterThan(headStart);
+
+            String headSection = htmlBody.substring(headStart, headEnd);
+            // Look for pattern: > (end of meta tag) followed by non-whitespace text before < (start of link tag)
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(">\\s*([A-Z][^<]*?)\\s*<link", java.util.regex.Pattern.CASE_INSENSITIVE);
+            java.util.regex.Matcher matcher = pattern.matcher(headSection);
+            assertThat(matcher.find())
+                .as("template %s should not leak subject text in <head>", tpl)
+                .isFalse();
+        });
+    }
 }
