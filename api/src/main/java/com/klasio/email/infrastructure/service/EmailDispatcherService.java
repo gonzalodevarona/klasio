@@ -71,6 +71,7 @@ public class EmailDispatcherService implements EmailService {
             Map<String, Object> model = formatTemporalParams(params, zone, locale);
             model.put("tenantName", tenant.name());
             model.put("tenantSlug", tenant.slug());
+            model.put("tenantLogoUrl", tenant.logoUrl());
             // Resolve the {tenantSlug} placeholder so emails contain the real
             // per-tenant URL instead of the unsubstituted template.
             String urlTemplate = frontendProps.urlTemplate();

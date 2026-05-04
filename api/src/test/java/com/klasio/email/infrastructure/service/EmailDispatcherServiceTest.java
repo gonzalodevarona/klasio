@@ -219,4 +219,50 @@ class EmailDispatcherServiceTest {
         verify(renderer).render(anyString(), any(Locale.class), captor.capture());
         assertThat(captor.getValue().get("expiresAt")).isEqualTo("27/04/2026 6:43 PM");
     }
+
+    @Test
+    void send_putsTenantLogoUrlInModel() {
+        String logoUrl = "https://klasio.s3.us-east-1.amazonaws.com/logos/abc/img.png";
+        TenantContext tenantWithLogo = new TenantContext(tenantId, "test-league", "Test League", "en", "America/Bogota", logoUrl);
+        when(tenantContextPort.findById(tenantId)).thenReturn(tenantWithLogo);
+        service = new EmailDispatcherService(transport, renderer, tenantContextPort, props, frontendProps);
+
+        when(renderer.render(anyString(), any(Locale.class), anyMap()))
+                .thenReturn(new RenderedTemplate("s", "<h/>", "t"));
+
+        service.send(EmailType.PASSWORD_RECOVERY,
+                new EmailRecipient("u@x.com", "U"),
+                tenantId,
+                Map.of("recipientName", "U", "resetUrl", "https://x.com/reset", "expiresAt", "2026-05-01"));
+
+        @SuppressWarnings("unchecked")
+        org.mockito.ArgumentCaptor<Map<String, Object>> captor =
+                (org.mockito.ArgumentCaptor<Map<String, Object>>) (org.mockito.ArgumentCaptor<?>)
+                org.mockito.ArgumentCaptor.forClass(Map.class);
+        verify(renderer).render(anyString(), any(Locale.class), captor.capture());
+        assertThat(captor.getValue()).containsEntry("tenantLogoUrl", logoUrl);
+    }
+
+    @Test
+    void send_putsNullTenantLogoUrlInModel_whenTenantHasNoLogo() {
+        TenantContext tenantNoLogo = new TenantContext(tenantId, "test-league", "Test League", "en", "America/Bogota", null);
+        when(tenantContextPort.findById(tenantId)).thenReturn(tenantNoLogo);
+        service = new EmailDispatcherService(transport, renderer, tenantContextPort, props, frontendProps);
+
+        when(renderer.render(anyString(), any(Locale.class), anyMap()))
+                .thenReturn(new RenderedTemplate("s", "<h/>", "t"));
+
+        service.send(EmailType.PASSWORD_RECOVERY,
+                new EmailRecipient("u@x.com", "U"),
+                tenantId,
+                Map.of("recipientName", "U", "resetUrl", "https://x.com/reset", "expiresAt", "2026-05-01"));
+
+        @SuppressWarnings("unchecked")
+        org.mockito.ArgumentCaptor<Map<String, Object>> captor =
+                (org.mockito.ArgumentCaptor<Map<String, Object>>) (org.mockito.ArgumentCaptor<?>)
+                org.mockito.ArgumentCaptor.forClass(Map.class);
+        verify(renderer).render(anyString(), any(Locale.class), captor.capture());
+        assertThat(captor.getValue()).containsKey("tenantLogoUrl");
+        assertThat(captor.getValue().get("tenantLogoUrl")).isNull();
+    }
 }
