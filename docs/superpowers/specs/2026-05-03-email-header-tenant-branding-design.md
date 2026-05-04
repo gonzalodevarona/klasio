@@ -155,13 +155,20 @@ Returns `null` when `logoKey` is `null`. Returns the stable public S3 URL otherw
 
 #### `S3LogoStorage`
 
-Implements `getPublicUrl(...)` as:
+Implements `getPublicUrl(...)` using AWS SDK's `S3Utilities.getUrl(GetUrlRequest)`. The SDK auto-builds the correct URL for the configured endpoint (production AWS or LocalStack), so the same code works in dev and prod:
 
-```
-https://<bucket>.s3.<region>.amazonaws.com/<logoKey>
+```java
+@Override
+public String getPublicUrl(String logoKey) {
+    if (logoKey == null) return null;
+    return s3Client.utilities().getUrl(GetUrlRequest.builder()
+            .bucket(bucket)
+            .key(logoKey)
+            .build()).toString();
+}
 ```
 
-Does not generate a signed URL.
+Does not generate a signed URL — relies on the bucket policy granting public read on the `logos/*` prefix.
 
 #### `JpaTenantContextAdapter`
 
@@ -186,7 +193,7 @@ Grant public read on the tenant-logos bucket prefix only:
   "Effect": "Allow",
   "Principal": "*",
   "Action": "s3:GetObject",
-  "Resource": "arn:aws:s3:::<bucket>/tenant-logos/*"
+  "Resource": "arn:aws:s3:::<bucket>/logos/*"
 }
 ```
 
@@ -242,17 +249,17 @@ For each: replace `<th:block th:fragment="subject">` with `<title th:fragment="s
 ## Rollout
 
 - Single PR, no feature flag required (purely visual + template fix; no behavior change beyond what users already expect).
-- After merge, ops applies bucket policy update for `tenant-logos/*` public-read.
+- After merge, ops applies bucket policy update for `logos/*` public-read.
 - Until bucket policy applies, tenant logos render as broken images. Coordinate merge timing with ops, or merge bucket policy first.
 
 ## Risks
 
-- **Public bucket policy scope mistake** — granting public read on a wider prefix could leak payment proofs. Mitigation: explicit `tenant-logos/*` prefix in `Resource`; review policy diff before applying.
+- **Public bucket policy scope mistake** — granting public read on a wider prefix could leak payment proofs. Mitigation: explicit `logos/*` prefix in `Resource`; review policy diff before applying.
 - **Image hotlinking** — public URLs allow third parties to embed tenant logos. Acceptable: logos are brand assets meant for public display.
 - **Template render regressions in less-used clients** — Outlook desktop notoriously quirky with `object-fit`. Fallback: image still renders, may not crop. Acceptable for v1.
 
 ## Future work (out of scope)
 
-- CloudFront in front of `tenant-logos/*` for cache + custom domain. Email code unchanged.
+- CloudFront in front of `logos/*` for cache + custom domain. Email code unchanged.
 - `EmailService.send(EmailType, EmailRecipient, Map)` overload (no `tenantId`) when first system email type is added. At that time, the footer i18n key `layout.footer` also needs a tenant-less variant, since the current key takes `${tenantName}` and would render `"Sent by  via Klasio"` with a null tenant.
 - Logo upload pipeline: validate dimensions / produce square thumbnail at upload time so `object-fit: cover` never crops awkwardly.
