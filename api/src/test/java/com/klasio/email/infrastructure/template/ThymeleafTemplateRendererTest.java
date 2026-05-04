@@ -245,7 +245,8 @@ class ThymeleafTemplateRendererTest {
 
         assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
         assertThat(result.htmlBody()).contains("DM Sans");
-        assertThat(result.htmlBody()).contains("CANCELLED");
+        assertThat(result.htmlBody()).contains("Cancelled");
+        assertThat(result.htmlBody()).doesNotContain("CANCELLED");
         assertThat(result.htmlBody()).contains("Professor is ill.");
         assertThat(result.htmlBody()).contains("Change type");
         assertThat(result.htmlBody()).contains("Reason");
@@ -264,7 +265,8 @@ class ThymeleafTemplateRendererTest {
                 "loginUrl", "http://localhost:3000"));
 
         assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
-        assertThat(result.htmlBody()).contains("ALERTED");
+        assertThat(result.htmlBody()).contains("Alert");
+        assertThat(result.htmlBody()).doesNotContain("ALERTED");
         assertThat(result.htmlBody()).doesNotContain("Reason");
     }
 
