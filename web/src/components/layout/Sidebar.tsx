@@ -64,6 +64,7 @@ type LayoutT = ReturnType<typeof useTranslations<"layout">>;
 function makeNavItemsByRole(t: LayoutT): Record<Role, NavItem[]> {
   return {
     SUPERADMIN: [
+      { label: t("navDashboard"),     href: "/superadmin/dashboard", icon: LayoutDashboard },
       { label: t("navTenants"),       href: "/tenants",        icon: Building2 },
       { label: t("navAdmins"),        href: "/admins",         icon: ShieldCheck },
       { label: t("navManagers"),      href: "/managers",       icon: UserCog },
@@ -75,6 +76,7 @@ function makeNavItemsByRole(t: LayoutT): Record<Role, NavItem[]> {
       { label: t("navPaymentProofs"), href: "/payment-proofs", icon: FileCheck },
     ],
     ADMIN: [
+      { label: t("navDashboard"),     href: "/admin/dashboard",      icon: LayoutDashboard },
       { label: t("navManagers"),      href: "/managers",       icon: UserCog },
       { label: t("navProfessors"),    href: "/professors",     icon: GraduationCap },
       { label: t("navStudents"),      href: "/students",       icon: Users },
@@ -84,13 +86,15 @@ function makeNavItemsByRole(t: LayoutT): Record<Role, NavItem[]> {
       { label: t("navPaymentProofs"), href: "/payment-proofs", icon: FileCheck },
     ],
     MANAGER: [
+      { label: t("navDashboard"),  href: "/manager/dashboard",    icon: LayoutDashboard },
       { label: t("navProfessors"), href: "/professors", icon: GraduationCap },
       { label: t("navStudents"),   href: "/students",   icon: Users },
       { label: t("navPrograms"),   href: "/programs",   icon: BookOpen },
       { label: t("navClasses"),    href: "/classes",    icon: CalendarDays },
     ],
     PROFESSOR: [
-      { label: t("navClasses"), href: "/classes", icon: CalendarDays },
+      { label: t("navDashboard"), href: "/professor/dashboard",  icon: LayoutDashboard },
+      { label: t("navClasses"),   href: "/classes",              icon: CalendarDays },
     ],
     STUDENT: [
       { label: t("navDashboard"),       href: "/student/dashboard",     icon: LayoutDashboard },
