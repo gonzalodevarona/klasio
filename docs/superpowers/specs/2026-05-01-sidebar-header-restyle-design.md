@@ -55,7 +55,11 @@ Added under the `"layout"` namespace in both locale files.
 }
 ```
 
-Usage: `t("roleLabel.SUPERADMIN")` via existing `t = useTranslations("layout")`.
+Usage: `t(\`roleLabel.${role}\`)` via existing `t = useTranslations("layout")`.
+next-intl's type checker requires a literal key path; use a type assertion
+`t(\`roleLabel.${role}\` as Parameters<typeof t>[0])` or a small lookup object
+`const ROLE_LABEL_KEYS = { SUPERADMIN: "roleLabel.SUPERADMIN", ... } as const`
+to preserve type safety. Implementer chooses whichever satisfies `tsc --noEmit`.
 
 ## 3. TenantBrand.tsx — sizing changes only
 
