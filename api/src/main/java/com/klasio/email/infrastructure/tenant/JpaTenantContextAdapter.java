@@ -2,6 +2,7 @@ package com.klasio.email.infrastructure.tenant;
 
 import com.klasio.email.domain.model.TenantContext;
 import com.klasio.email.domain.port.TenantContextPort;
+import com.klasio.tenant.domain.port.LogoStorage;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +14,11 @@ import java.util.UUID;
 public class JpaTenantContextAdapter implements TenantContextPort {
 
     private final EntityManager em;
+    private final LogoStorage logoStorage;
 
-    public JpaTenantContextAdapter(EntityManager em) {
+    public JpaTenantContextAdapter(EntityManager em, LogoStorage logoStorage) {
         this.em = em;
+        this.logoStorage = logoStorage;
     }
 
     @Override
@@ -23,7 +26,8 @@ public class JpaTenantContextAdapter implements TenantContextPort {
     public TenantContext findById(UUID tenantId) {
         @SuppressWarnings("unchecked")
         List<Object> rows = em.createQuery(
-                        "SELECT t.id, t.slug, t.name, t.language, t.timezone FROM TenantJpaEntity t WHERE t.id = :id")
+                        "SELECT t.id, t.slug, t.name, t.language, t.timezone, t.logoKey " +
+                                "FROM TenantJpaEntity t WHERE t.id = :id")
                 .setParameter("id", tenantId)
                 .getResultList();
         if (rows.isEmpty()) {
@@ -31,6 +35,15 @@ public class JpaTenantContextAdapter implements TenantContextPort {
         }
         Object first = rows.get(0);
         Object[] r = (first instanceof Object[]) ? (Object[]) first : rows.toArray();
-        return new TenantContext((UUID) r[0], (String) r[1], (String) r[2], (String) r[3], (String) r[4]);
+        String logoKey = (String) r[5];
+        String logoUrl = logoStorage.getPublicUrl(logoKey);
+        return new TenantContext(
+                (UUID) r[0],
+                (String) r[1],
+                (String) r[2],
+                (String) r[3],
+                (String) r[4],
+                logoUrl
+        );
     }
 }
