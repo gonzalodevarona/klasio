@@ -283,6 +283,48 @@ class ThymeleafTemplateRendererTest {
     }
 
     @Test
+    void header_state1_tenantWithLogo_rendersImgWithLogoUrl() {
+        RenderedTemplate r = renderer.render("password-recovery", Locale.ENGLISH, Map.of(
+                "resetUrl", "http://e", "expiresAt", "x",
+                "tenantName", "Acme League", "tenantSlug", "acme",
+                "tenantLogoUrl", "https://cdn.example.com/logos/acme.png",
+                "loginUrl", "http://e"));
+
+        org.jsoup.nodes.Document doc = org.jsoup.Jsoup.parse(r.htmlBody());
+        org.jsoup.select.Elements imgs = doc.select(
+                "img[src='https://cdn.example.com/logos/acme.png']");
+        assertThat(imgs).as("expected tenant logo <img>").isNotEmpty();
+        assertThat(r.htmlBody()).contains("Acme League");
+    }
+
+    @Test
+    void header_state2_tenantWithoutLogo_rendersKlasioBadgeAndTenantName() {
+        RenderedTemplate r = renderer.render("password-recovery", Locale.ENGLISH, Map.of(
+                "resetUrl", "http://e", "expiresAt", "x",
+                "tenantName", "Acme League", "tenantSlug", "acme",
+                "loginUrl", "http://e"));
+        // tenantLogoUrl intentionally absent (treated as null by Thymeleaf).
+
+        assertThat(r.htmlBody())
+                .as("Klasio badge SVG path must be present")
+                .contains("M9 2L15.5 6V12L9 16L2.5 12V6L9 2Z");
+        assertThat(r.htmlBody()).contains("Acme League");
+        assertThat(r.htmlBody()).doesNotContain(">Klasio<");
+    }
+
+    @Test
+    void header_state3_noTenant_rendersKlasioBadgeAndKlasioWordmark() {
+        RenderedTemplate r = renderer.render("password-recovery", Locale.ENGLISH, Map.of(
+                "resetUrl", "http://e", "expiresAt", "x",
+                "tenantSlug", "system",
+                "loginUrl", "http://e"));
+        // Both tenantName and tenantLogoUrl absent.
+
+        assertThat(r.htmlBody()).contains("M9 2L15.5 6V12L9 16L2.5 12V6L9 2Z");
+        assertThat(r.htmlBody()).contains(">Klasio<");
+    }
+
+    @Test
     void allTemplates_haveNoBareTextNodeInHeadOutsideTitle() {
         java.util.Map<String, java.util.Map<String, Object>> samples = java.util.Map.of(
             "account-setup", java.util.Map.of(
