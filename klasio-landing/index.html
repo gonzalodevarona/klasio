@@ -1617,7 +1617,7 @@
         const msg = (WA_MESSAGES[key] && WA_MESSAGES[key][lang]) || (WA_MESSAGES[key] && WA_MESSAGES[key].en) || '';
         el.href = `https://wa.me/${KLASIO_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
         el.target = '_blank';
-        el.rel = 'noopener';
+        el.rel = 'noopener noreferrer';
       });
     }
 
