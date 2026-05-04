@@ -1345,7 +1345,288 @@
   </noscript>
 
   <script>
-    // populated in later tasks
+    // === Klasio Landing — Runtime Config ===
+    // Override at deploy time (Cloudflare Pages / Netlify) by injecting:
+    //   <script>window.KLASIO_CONFIG = { whatsappNumber: '...' }</script>
+    // BEFORE this script runs. Otherwise edit the default below.
+    window.KLASIO_CONFIG = window.KLASIO_CONFIG || {};
+    const KLASIO_WHATSAPP_NUMBER = window.KLASIO_CONFIG.whatsappNumber || '573127061833';
+
+    // === i18n dictionary ===
+    const I18N = {
+      en: {
+        'meta.title': 'Klasio — Sports club management software',
+        'meta.description': 'All-in-one platform to manage memberships, attendance, payments and programs for your sports club. No spreadsheets, no chaos.',
+        'meta.og.title': 'Klasio — Sports club management software',
+        'meta.og.description': 'The professional way to run your sports club.',
+
+        'nav.benefits': 'Benefits',
+        'nav.features': 'Features',
+        'nav.how': 'How it works',
+        'nav.contact': 'Contact',
+        'nav.demo': 'See demo →',
+
+        'hero.tag': 'Professional sports management',
+        'hero.h1.line1': 'Your club,',
+        'hero.h1.line2': 'managed',
+        'hero.h1.line3': 'with <span class="volt-text">precision.</span>',
+        'hero.subtitle': 'Klasio is the all-in-one platform for sports clubs. Manage memberships, attendance, payments and programs from a single place — no spreadsheets, no chaos.',
+        'hero.cta.primary': 'Request free demo →',
+        'hero.cta.secondary': 'See features ↓',
+        'hero.stat1.value': '100%', 'hero.stat1.label': 'Digital',
+        'hero.stat2.value': '5',    'hero.stat2.label': 'User roles',
+        'hero.stat3.value': '∞',    'hero.stat3.label': 'Students',
+
+        'mock.dashboard': 'Dashboard',
+        'mock.subtitle': 'NORTH LEAGUE · CURRENT PERIOD',
+        'mock.kpi1.label': 'STUDENTS',  'mock.kpi1.sub': '↑ 12 this month',
+        'mock.kpi2.label': 'HOURS USED',
+        'mock.kpi3.label': 'PENDING PAYMENTS',
+        'mock.attendance.title': 'Attendance control',
+        'mock.attendance.cta': 'Start class',
+        'mock.row1.program': 'Advanced Swimming', 'mock.row1.status': 'Active',
+        'mock.row2.program': 'Youth Karate',      'mock.row2.status': 'Expiring',
+        'mock.row3.program': 'Basketball',        'mock.row3.status': 'Active',
+        'mock.row4.program': 'Track & Field',     'mock.row4.status': 'Inactive',
+
+        'value.tag': 'Why Klasio',
+        'value.title': 'Stop running your club on spreadsheets.',
+        'value.sub': 'Club owners lose hours every week on tasks Klasio handles in seconds.',
+        'value.01.title': 'Real-time attendance control',
+        'value.01.body': 'Mark attendance straight from the app. Know who showed up, who skipped, and how many hours each student has left — no Excel sheets.',
+        'value.02.title': 'Memberships and payments under control',
+        'value.02.body': 'Manage plans, expirations, and payment proofs in one place. Get automatic alerts before a membership expires.',
+        'value.03.title': 'Your students, organized',
+        'value.03.body': "Every student's full record in a single profile: enrollments, level, class history, and hour movements. Accessible in seconds.",
+        'value.04.title': 'Decisions backed by data',
+        'value.04.body': 'Dashboard with key metrics: hours consumed, attendance rate, pending payments, active programs. The whole club at a glance.',
+
+        'feat.tag': 'Features',
+        'feat.title': 'Everything your club needs.',
+        'feat.sub': 'A complete platform without unnecessary complexity.',
+        'feat.featured.badge': 'Featured',
+        'feat.1.title': 'Admin dashboard',
+        'feat.1.body': '360° view of your club. Active students, hours consumed, pending payments, and attendance control with status filters.',
+        'feat.2.title': 'Student management',
+        'feat.2.body': 'Sign-up, deactivation, full profile, membership history, class enrollments, and per-program level tracking.',
+        'feat.3.title': 'Attendance control',
+        'feat.3.body': 'Mark presence or absence per session. The system auto-deducts hours and keeps the full history.',
+        'feat.4.title': 'Memberships and plans',
+        'feat.4.body': 'Build custom plans per program. Hour allocation, expiry dates, and automatic alerts included.',
+        'feat.5.title': 'Payment proofs',
+        'feat.5.body': 'Students upload their payment proof from the app. The admin approves or rejects directly — no more WhatsApp back-and-forth.',
+        'feat.6.title': 'Smart notifications',
+        'feat.6.body': 'Alerts for expiring memberships, cancelled classes, new payments, and more. Always informed, no manual checking.',
+        'feat.7.title': 'Programs and classes',
+        'feat.7.body': 'Organize your offering into programs with multiple classes. Set schedules, capacity limits, and required levels.',
+        'feat.8.title': 'Coach management',
+        'feat.8.body': 'Assign coaches to classes, manage their profiles, and give them their own access to mark attendance.',
+        'feat.9.title': 'Student app',
+        'feat.9.body': 'Your students see available classes, register for sessions, check remaining hours, and upload payment proofs — all from their phone.',
+
+        'how.tag': 'How it works',
+        'how.title': 'Up and running in less than a day.',
+        'how.sub': 'No installs, no complex setup. Your club operating digitally starting today.',
+        'how.1.title': 'We create your club in Klasio',
+        'how.1.body': "We give you admin access and configure your tenant with your club's data.",
+        'how.2.title': 'You load your programs and plans',
+        'how.2.body': 'Define your disciplines, classes, schedules, and membership plans. Quick and uncomplicated.',
+        'how.3.title': 'Invite your team and students',
+        'how.3.body': 'Coaches and students get their access. Each role sees exactly what they need.',
+        'how.4.title': 'Run your club with precision',
+        'how.4.body': 'Attendance, payments, reports, notifications — everything centralized, everything under control.',
+        'how.cta': 'Get started →',
+        'roles.title': 'Roles in Klasio',
+        'roles.admin.name': 'Administrator', 'roles.admin.desc': 'Full control: students, payments, reports, config', 'roles.admin.badge': 'Admin',
+        'roles.coach.name': 'Coach',         'roles.coach.desc': 'Marks attendance, sees their class roster',       'roles.coach.badge': 'Coach',
+        'roles.student.name': 'Student',     'roles.student.desc': 'Checks classes, hours, uploads proofs',         'roles.student.badge': 'Student',
+        'roles.manager.name': 'Manager',     'roles.manager.desc': 'Operational control without config access',     'roles.manager.badge': 'Manager',
+
+        'metrics.tag': 'Results',
+        'metrics.title': 'The impact of digitizing your club.',
+        'metrics.cta': 'Request demo →',
+        'metrics.1.label': 'Less time on admin',
+        'metrics.2.label': 'Spreadsheets needed',
+        'metrics.3.label': 'Students supported',
+        'metrics.4.label': 'Access from anywhere',
+
+        'cta.tag': 'Ready to get started?',
+        'cta.title': 'Your club deserves <span class="volt-text">professional</span> tools.',
+        'cta.sub': "Let's chat on WhatsApp. We'll show you Klasio in action and configure it for your club the same day.",
+        'cta.button': 'Contact via WhatsApp',
+        'cta.note': 'No commitments · Reply in under 1 hour',
+
+        'footer.benefits': 'Benefits',
+        'footer.features': 'Features',
+        'footer.contact': 'Contact',
+        'footer.copy': '© 2026 klasio.club · All rights reserved'
+      },
+      es: {
+        'meta.title': 'Klasio — Software de gestión para clubes deportivos',
+        'meta.description': 'Plataforma todo-en-uno para gestionar membresías, asistencias, pagos y programas de tu club deportivo. Sin planillas, sin caos.',
+        'meta.og.title': 'Klasio — Software de gestión para clubes deportivos',
+        'meta.og.description': 'La forma profesional de administrar tu club deportivo.',
+
+        'nav.benefits': 'Beneficios',
+        'nav.features': 'Funcionalidades',
+        'nav.how': 'Cómo funciona',
+        'nav.contact': 'Contactar',
+        'nav.demo': 'Ver demo →',
+
+        'hero.tag': 'Gestión deportiva profesional',
+        'hero.h1.line1': 'Tu club,',
+        'hero.h1.line2': 'administrado',
+        'hero.h1.line3': 'con <span class="volt-text">precisión.</span>',
+        'hero.subtitle': 'Klasio es la plataforma todo-en-uno para clubes deportivos. Controla membresías, asistencias, pagos y programas desde un solo lugar — sin planillas, sin caos.',
+        'hero.cta.primary': 'Solicitar demo gratuita →',
+        'hero.cta.secondary': 'Ver funcionalidades ↓',
+        'hero.stat1.value': '100%', 'hero.stat1.label': 'Digital',
+        'hero.stat2.value': '5',    'hero.stat2.label': 'Roles de usuario',
+        'hero.stat3.value': '∞',    'hero.stat3.label': 'Estudiantes',
+
+        'mock.dashboard': 'Dashboard',
+        'mock.subtitle': 'LIGA NORTE · PERÍODO ACTUAL',
+        'mock.kpi1.label': 'ESTUDIANTES',  'mock.kpi1.sub': '↑ 12 este mes',
+        'mock.kpi2.label': 'HORAS CONSUMIDAS',
+        'mock.kpi3.label': 'PAGOS PENDIENTES',
+        'mock.attendance.title': 'Control de asistencia',
+        'mock.attendance.cta': 'Iniciar clase',
+        'mock.row1.program': 'Natación Avanzado', 'mock.row1.status': 'Activo',
+        'mock.row2.program': 'Karate Juvenil',    'mock.row2.status': 'Por vencer',
+        'mock.row3.program': 'Basketball',        'mock.row3.status': 'Activo',
+        'mock.row4.program': 'Atletismo Base',    'mock.row4.status': 'Inactivo',
+
+        'value.tag': 'Por qué Klasio',
+        'value.title': 'Deja de administrar con planillas.',
+        'value.sub': 'Los dueños de clubes pierden horas cada semana en tareas que Klasio resuelve en segundos.',
+        'value.01.title': 'Control de asistencia en tiempo real',
+        'value.01.body': 'Marcá la asistencia directamente desde la app. Sabé quién vino, quién faltó y cuántas horas le quedan a cada estudiante — sin planillas Excel.',
+        'value.02.title': 'Membresías y pagos bajo control',
+        'value.02.body': 'Gestioná planes, vencimientos y comprobantes de pago en un solo lugar. Recibí alertas automáticas antes de que una membresía venza.',
+        'value.03.title': 'Tus estudiantes, organizados',
+        'value.03.body': 'Toda la información de cada alumno en un perfil: inscripciones, nivel, historial de clases y movimientos de horas. Accesible en segundos.',
+        'value.04.title': 'Decisiones basadas en datos',
+        'value.04.body': 'Dashboard con métricas clave: horas consumidas, tasa de asistencia, pagos pendientes, programas activos. Toda la foto del club de un vistazo.',
+
+        'feat.tag': 'Funcionalidades',
+        'feat.title': 'Todo lo que tu club necesita.',
+        'feat.sub': 'Una plataforma completa, sin complejidad innecesaria.',
+        'feat.featured.badge': 'Destacado',
+        'feat.1.title': 'Dashboard de administración',
+        'feat.1.body': 'Vista 360° del club. Estudiantes activos, horas consumidas, pagos pendientes y control de asistencia con filtros por estado.',
+        'feat.2.title': 'Gestión de estudiantes',
+        'feat.2.body': 'Alta, baja, perfil completo, historial de membresías, inscripciones a clases y seguimiento de nivel por programa.',
+        'feat.3.title': 'Control de asistencia',
+        'feat.3.body': 'Marcá presencia o ausencia por sesión. El sistema descuenta horas automáticamente y registra todo el historial.',
+        'feat.4.title': 'Membresías y planes',
+        'feat.4.body': 'Creá planes personalizados por programa. Asignación de horas, fechas de vencimiento y alertas automáticas incluidas.',
+        'feat.5.title': 'Comprobantes de pago',
+        'feat.5.body': 'Los estudiantes suben su comprobante desde la app. El admin aprueba o rechaza directamente, sin idas y vueltas por WhatsApp.',
+        'feat.6.title': 'Notificaciones inteligentes',
+        'feat.6.body': 'Alertas de membresías por vencer, clases canceladas, pagos nuevos y más. Siempre informado, sin revisar manualmente.',
+        'feat.7.title': 'Programas y clases',
+        'feat.7.body': 'Organizá tu oferta deportiva en programas con múltiples clases. Definí horarios, cupos máximos y nivel requerido.',
+        'feat.8.title': 'Gestión de profesores',
+        'feat.8.body': 'Asigná profesores a clases, gestioná su perfil y dales acceso propio para que marquen asistencia.',
+        'feat.9.title': 'App para estudiantes',
+        'feat.9.body': 'Tus alumnos ven sus clases disponibles, se registran a sesiones, consultan horas restantes y suben comprobantes — todo desde el celular.',
+
+        'how.tag': 'Cómo funciona',
+        'how.title': 'En marcha en menos de un día.',
+        'how.sub': 'Sin instalaciones, sin configuraciones complejas. Tu club operando digitalmente desde hoy.',
+        'how.1.title': 'Creamos tu club en Klasio',
+        'how.1.body': 'Te damos acceso como administrador y configuramos tu tenant con los datos de tu club.',
+        'how.2.title': 'Cargás tus programas y planes',
+        'how.2.body': 'Definís tus disciplinas, clases, horarios y planes de membresía. Rápido y sin complicaciones.',
+        'how.3.title': 'Invitás a tu equipo y estudiantes',
+        'how.3.body': 'Profesores y alumnos reciben su acceso. Cada rol ve exactamente lo que necesita.',
+        'how.4.title': 'Operás tu club con precisión',
+        'how.4.body': 'Asistencias, pagos, reportes, notificaciones — todo centralizado, todo bajo control.',
+        'how.cta': 'Empezar ahora →',
+        'roles.title': 'Roles en Klasio',
+        'roles.admin.name': 'Administrador', 'roles.admin.desc': 'Control total: estudiantes, pagos, reportes, config', 'roles.admin.badge': 'Admin',
+        'roles.coach.name': 'Profesor',      'roles.coach.desc': 'Marca asistencia, ve el roster de sus clases',     'roles.coach.badge': 'Profesor',
+        'roles.student.name': 'Estudiante',  'roles.student.desc': 'Consulta clases, horas, sube comprobantes',      'roles.student.badge': 'Estudiante',
+        'roles.manager.name': 'Manager',     'roles.manager.desc': 'Gestión operativa sin acceso a configuración',   'roles.manager.badge': 'Manager',
+
+        'metrics.tag': 'Resultados',
+        'metrics.title': 'El impacto de digitalizar tu club.',
+        'metrics.cta': 'Solicitar demo →',
+        'metrics.1.label': 'Menos tiempo en admin',
+        'metrics.2.label': 'Planillas necesarias',
+        'metrics.3.label': 'Estudiantes soportados',
+        'metrics.4.label': 'Acceso desde cualquier lugar',
+
+        'cta.tag': '¿Listo para empezar?',
+        'cta.title': 'Tu club merece herramientas <span class="volt-text">profesionales.</span>',
+        'cta.sub': 'Hablemos por WhatsApp. Te mostramos Klasio en acción y lo configuramos para tu club en el mismo día.',
+        'cta.button': 'Contactar por WhatsApp',
+        'cta.note': 'Sin compromisos · Respuesta en menos de 1 hora',
+
+        'footer.benefits': 'Beneficios',
+        'footer.features': 'Funcionalidades',
+        'footer.contact': 'Contacto',
+        'footer.copy': '© 2026 klasio.club · Todos los derechos reservados'
+      }
+    };
+
+    // === WhatsApp prefilled messages ===
+    const WA_MESSAGES = {
+      nav_contact:  { en: 'Hi, I want to learn more about Klasio',     es: 'Hola, quiero saber más sobre Klasio' },
+      nav_demo:     { en: 'Hi, I want a demo of Klasio',               es: 'Hola, quiero una demo de Klasio' },
+      hero_primary: { en: 'Hi, I want a free demo of Klasio',          es: 'Hola, quiero una demo gratuita de Klasio' },
+      how_setup:    { en: 'Hi, I want to set up my club on Klasio',    es: 'Hola, quiero configurar mi club en Klasio' },
+      fab:          { en: 'Hi, I want to learn more about Klasio',     es: 'Hola, quiero saber más sobre Klasio' }
+    };
+
+    // === Detect language ===
+    function detectLang() {
+      const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      return nav.startsWith('es') ? 'es' : 'en';
+    }
+
+    // === Apply translations ===
+    function applyTranslations(lang) {
+      const dict = I18N[lang] || I18N.en;
+      document.documentElement.lang = lang;
+
+      // Text-only swaps
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (dict[key] != null) el.textContent = dict[key];
+      });
+      // HTML swaps (for elements containing inner spans like volt-text)
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const key = el.dataset.i18nHtml;
+        if (dict[key] != null) el.innerHTML = dict[key];
+      });
+      // Document metadata
+      if (dict['meta.title']) document.title = dict['meta.title'];
+      const descMeta = document.querySelector('meta[name="description"]');
+      if (descMeta && dict['meta.description']) descMeta.setAttribute('content', dict['meta.description']);
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle && dict['meta.og.title']) ogTitle.setAttribute('content', dict['meta.og.title']);
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc && dict['meta.og.description']) ogDesc.setAttribute('content', dict['meta.og.description']);
+    }
+
+    // === Wire WhatsApp anchors ===
+    function wireWhatsApp(lang) {
+      document.querySelectorAll('[data-wa-msg]').forEach(el => {
+        const key = el.dataset.waMsg;
+        const msg = (WA_MESSAGES[key] && WA_MESSAGES[key][lang]) || (WA_MESSAGES[key] && WA_MESSAGES[key].en) || '';
+        el.href = `https://wa.me/${KLASIO_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+        el.target = '_blank';
+        el.rel = 'noopener';
+      });
+    }
+
+    // === Init on DOM ready ===
+    document.addEventListener('DOMContentLoaded', () => {
+      const lang = detectLang();
+      applyTranslations(lang);
+      wireWhatsApp(lang);
+    });
   </script>
 </body>
 </html>
