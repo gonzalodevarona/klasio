@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<table th:fragment="header" role="presentation" cellpadding="0" cellspacing="0" width="100%" style="width:100%;">
+  <tr>
+    <td style="background:#0A0A0A;padding:28px 40px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="display:inline-table;">
+        <tr>
+          <td th:if="${tenantLogoUrl}" style="vertical-align:middle;">
+            <img th:src="${tenantLogoUrl}" width="32" height="32"
+                 style="display:block;width:32px;height:32px;border-radius:8px;object-fit:cover;"
+                 alt=""/>
+          </td>
+          <td th:unless="${tenantLogoUrl}" style="vertical-align:middle;">
+            <div style="width:32px;height:32px;background:#CAFF4D;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 2L15.5 6V12L9 16L2.5 12V6L9 2Z" fill="#0A0A0A"/>
+              </svg>
+            </div>
+          </td>
+          <td style="vertical-align:middle;padding-left:10px;">
+            <span th:text="${tenantName != null ? tenantName : 'Klasio'}"
+                  style="color:#FFFFFF;font-family:'DM Sans',-apple-system,sans-serif;font-size:18px;font-weight:700;letter-spacing:-0.02em;">Klasio</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
