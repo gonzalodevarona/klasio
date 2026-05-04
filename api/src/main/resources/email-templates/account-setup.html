@@ -26,7 +26,7 @@
                 <strong style="color:#0A0A0A;" th:text="${recipientName}">User</strong>
               </p>
               <p style="margin:0 0 20px;font-size:15px;color:#3A3A38;line-height:1.7;font-family:'DM Sans',-apple-system,sans-serif;"
-                 th:text="#{accountSetup.body(${role}, ${tenantName})}">Your account is ready.</p>
+                 th:text="#{accountSetup.body(${#messages.msgOrNull('role.' + role) ?: role}, ${tenantName})}">Your account is ready.</p>
               <div style="margin:28px 0;">
                 <a th:href="${setupUrl}"
                    style="display:inline-block;background:#0A0A0A;color:#CAFF4D;padding:13px 28px;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;font-family:'DM Sans',-apple-system,sans-serif;letter-spacing:0.01em;"

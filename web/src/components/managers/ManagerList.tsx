@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Plus, Pencil } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "@/lib/utils";
 import { useManagers, useDeactivateManager, useActivateManager, useManagerTenantOptions } from "@/hooks/useManagers";
 import { useAuth } from "@/hooks/useAuth";
 import { ManagerSummary } from "@/lib/types/manager";
@@ -36,9 +37,6 @@ const MANAGER_STATUS_VARIANT: Record<string, BadgeVariant> = {
   INACTIVE: "inactive",
 };
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-}
 
 // ── Deactivate confirmation modal ─────────────────────────────────────────────
 
@@ -83,6 +81,7 @@ export default function ManagerList() {
   const t = useTranslations("managers");
   const tPagination = useTranslations("pagination");
   const tBadge = useTranslations("badges.managerStatus");
+  const locale = useLocale();
   const { user } = useAuth();
   // ADMIN users are always scoped to their own tenant — they cannot select another tenant.
   const isAdmin = user?.roles.includes("ADMIN") ?? false;
@@ -236,7 +235,7 @@ export default function ManagerList() {
                     <span className="font-mono">{m.identityDocumentType}</span>{" "}{m.identityNumber}
                   </Td>
                   <Td><Badge variant={MANAGER_STATUS_VARIANT[m.status] ?? "inactive"} label={tBadge(m.status)} /></Td>
-                  <Td muted>{formatDate(m.createdAt)}</Td>
+                  <Td muted>{formatDate(m.createdAt, locale)}</Td>
                   <Td right>
                     <div className="flex items-center justify-end gap-3">
                       <Button

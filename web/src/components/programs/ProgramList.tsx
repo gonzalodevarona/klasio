@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "@/lib/utils";
 import { ProgramStatus } from "@/lib/types/program";
 import { usePrograms } from "@/hooks/usePrograms";
 import ProgramStatusBadge from "./ProgramStatusBadge";
@@ -11,6 +12,7 @@ import { Table, Thead, Th, Tr, Td, Select, Button } from "@/components/ui";
 export default function ProgramList() {
   const t = useTranslations("programs");
   const tPagination = useTranslations("pagination");
+  const locale = useLocale();
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<ProgramStatus | undefined>(
     undefined
@@ -28,13 +30,6 @@ export default function ProgramList() {
     setPage(0);
   }
 
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
 
   if (error) {
     return (
@@ -94,7 +89,7 @@ export default function ProgramList() {
                   <Td>
                     <ProgramStatusBadge status={program.status} />
                   </Td>
-                  <Td muted>{formatDate(program.createdAt)}</Td>
+                  <Td muted>{formatDate(program.createdAt, locale)}</Td>
                 </Tr>
               ))}
             </tbody>

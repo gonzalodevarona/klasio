@@ -28,11 +28,9 @@ export default function NewMembershipPage({ params }: Props) {
   const activeEnrollments = student?.enrollments?.filter((e) => e.status === "ACTIVE") ?? [];
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
 
-  // Scope plans to the selected program instead of fetching all tenant plans
-  const { plans, loading: plansLoading } = useProgramPlansByProgram(
-    selectedProgramId || null,
-    "HOURS_BASED"
-  );
+  // Scope plans to the selected program; exclude CLASSES_PER_WEEK (backend rejects them for memberships)
+  const { plans: rawPlans, loading: plansLoading } = useProgramPlansByProgram(selectedProgramId || null);
+  const plans = rawPlans.filter((p) => p.modality !== "CLASSES_PER_WEEK");
 
   async function handleSubmit(data: CreateMembershipRequest) {
     await createMembership(data);

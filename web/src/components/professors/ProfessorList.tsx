@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Plus, Pencil } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "@/lib/utils";
 import {
   useProfessors,
   useDeactivateProfessor,
@@ -37,11 +38,6 @@ function Toggle({ checked, disabled, onChange }: {
 }
 
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric", month: "short", day: "numeric",
-  });
-}
 
 // ── Deactivate confirmation modal ─────────────────────────────────────────────
 
@@ -85,6 +81,7 @@ function DeactivateModal({ professor, loading, error, onConfirm, onCancel }: {
 export default function ProfessorList() {
   const t = useTranslations("professors");
   const tPagination = useTranslations("pagination");
+  const locale = useLocale();
 
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ACTIVE");
@@ -205,7 +202,7 @@ export default function ProfessorList() {
                   <Td>
                     <ProfessorStatusBadge status={p.status} />
                   </Td>
-                  <Td muted>{formatDate(p.createdAt)}</Td>
+                  <Td muted>{formatDate(p.createdAt, locale)}</Td>
                   <Td right>
                     <div className="flex items-center justify-end gap-3">
                       <Button

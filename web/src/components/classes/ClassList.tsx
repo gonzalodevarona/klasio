@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDate } from "@/lib/utils";
 import { ClassLevel, ClassStatus } from "@/lib/types/programClass";
 import { useProgramClasses } from "@/hooks/useProgramClasses";
 import ClassLevelBadge from "./ClassLevelBadge";
@@ -17,6 +18,7 @@ interface ClassListProps {
 export default function ClassList({ programId }: ClassListProps) {
   const t = useTranslations("classes");
   const tPagination = useTranslations("pagination");
+  const locale = useLocale();
   const [page, setPage] = useState(0);
   const [levelFilter, setLevelFilter] = useState<ClassLevel | undefined>(
     undefined
@@ -44,13 +46,6 @@ export default function ClassList({ programId }: ClassListProps) {
     setPage(0);
   }
 
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
 
   if (error) {
     return (
@@ -137,7 +132,7 @@ export default function ClassList({ programId }: ClassListProps) {
                   <Td>
                     <ClassStatusBadge status={c.status} />
                   </Td>
-                  <Td muted>{formatDate(c.createdAt)}</Td>
+                  <Td muted>{formatDate(c.createdAt, locale)}</Td>
                 </Tr>
               ))}
             </tbody>

@@ -31,12 +31,12 @@
                 <div th:if="${reason == null or reason.isEmpty()}"
                      style="display:flex;gap:8px;padding:10px 18px;font-size:14px;font-family:'DM Sans',-apple-system,sans-serif;">
                   <span style="color:#8A8A88;min-width:130px;" th:text="#{label.changeType}">Change type</span>
-                  <span style="color:#1A1A1A;font-weight:500;" th:text="${changeKind}">CANCELLED</span>
+                  <span style="color:#1A1A1A;font-weight:500;" th:text="${#messages.msgOrNull('changeKind.' + #strings.toLowerCase(changeKind)) ?: changeKind}">Cancelled</span>
                 </div>
                 <div th:if="${reason != null and !reason.isEmpty()}"
                      style="display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid #F0F0EE;font-size:14px;font-family:'DM Sans',-apple-system,sans-serif;">
                   <span style="color:#8A8A88;min-width:130px;" th:text="#{label.changeType}">Change type</span>
-                  <span style="color:#1A1A1A;font-weight:500;" th:text="${changeKind}">CANCELLED</span>
+                  <span style="color:#1A1A1A;font-weight:500;" th:text="${#messages.msgOrNull('changeKind.' + #strings.toLowerCase(changeKind)) ?: changeKind}">Cancelled</span>
                 </div>
                 <div th:if="${reason != null and !reason.isEmpty()}"
                      style="display:flex;gap:8px;padding:10px 18px;font-size:14px;font-family:'DM Sans',-apple-system,sans-serif;">

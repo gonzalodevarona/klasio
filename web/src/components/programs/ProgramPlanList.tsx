@@ -107,7 +107,7 @@ export default function ProgramPlanList({
                   ? t("modalityHoursBased")
                   : plan.modality === "CLASSES_PER_WEEK"
                   ? t("modalityClassesPerWeek")
-                  : plan.modality}
+                  : t("modalityUnlimited")}
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                 {formatCost(plan.cost)}

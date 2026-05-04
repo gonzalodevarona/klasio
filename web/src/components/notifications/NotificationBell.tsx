@@ -19,10 +19,14 @@ export default function NotificationBell() {
   useEffect(() => {
     if (!open || !buttonRef.current) return;
     const rect = buttonRef.current.getBoundingClientRect();
+    const dropdownWidth = 320; // w-80
+    const overflowsRight = rect.left + dropdownWidth > window.innerWidth;
     setDropdownStyle({
       position: "fixed",
       top: rect.bottom + 8,
-      left: rect.left,
+      ...(overflowsRight
+        ? { right: window.innerWidth - rect.right }
+        : { left: rect.left }),
       zIndex: 9999,
     });
   }, [open]);
