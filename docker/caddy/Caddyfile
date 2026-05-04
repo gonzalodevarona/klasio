@@ -14,8 +14,28 @@
     # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 }
 
-# ---------- Frontend (root + wildcard) ----------
-klasio.club, *.klasio.club {
+# ---------- Landing page (root domain only) ----------
+klasio.club {
+    tls {
+        dns cloudflare {$CLOUDFLARE_API_TOKEN}
+    }
+
+    encode zstd gzip
+
+    root * /srv/landing
+    file_server
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        # Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
+}
+
+# ---------- App (per-tenant subdomains) ----------
+*.klasio.club {
     tls {
         dns cloudflare {$CLOUDFLARE_API_TOKEN}
     }
@@ -30,7 +50,6 @@ klasio.club, *.klasio.club {
         header_up X-Forwarded-Proto {scheme}
     }
 
-    # Basic security headers. HSTS is added once you've confirmed everything works.
     header {
         X-Content-Type-Options nosniff
         X-Frame-Options DENY
