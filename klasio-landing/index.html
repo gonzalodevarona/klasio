@@ -1367,7 +1367,7 @@
   <script>
     // === Klasio Landing — Runtime Config ===
     // Override at deploy time (Cloudflare Pages / Netlify) by injecting:
-    //   <script>window.KLASIO_CONFIG = { whatsappNumber: '...' }</script>
+    //   window.KLASIO_CONFIG = { whatsappNumber: '...' }
     // BEFORE this script runs. Otherwise edit the default below.
     window.KLASIO_CONFIG = window.KLASIO_CONFIG || {};
     const KLASIO_WHATSAPP_NUMBER = window.KLASIO_CONFIG.whatsappNumber || '573127061833';
