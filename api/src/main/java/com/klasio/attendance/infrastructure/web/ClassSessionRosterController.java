@@ -64,7 +64,7 @@ public class ClassSessionRosterController {
                 String studentId,
                 String studentName,
                 String level,
-                int intendedHours,
+                Integer intendedHours,
                 String status,
                 String createdBy    // null for PROFESSOR viewers; UUID string for ADMIN/SUPERADMIN/MANAGER
         ) {}

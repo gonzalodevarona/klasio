@@ -23,7 +23,7 @@ public record ClassSessionRosterView(
             UUID studentId,
             String studentName,
             String level,
-            int intendedHours,
+            Integer intendedHours,
             String status,
             UUID createdBy    // null when viewer is PROFESSOR; non-null for ADMIN/SUPERADMIN/MANAGER
     ) {}

@@ -27,10 +27,10 @@ CREATE TABLE drop_in_attendees (
     CONSTRAINT chk_dropin_visit_dates         CHECK (first_visit_at IS NULL OR last_visit_at IS NULL OR first_visit_at <= last_visit_at)
 );
 
-CREATE INDEX ix_dropin_tenant_phone
+CREATE INDEX idx_dropin_tenant_phone
     ON drop_in_attendees(tenant_id, phone);
 
-CREATE INDEX ix_dropin_converted_student
+CREATE INDEX idx_dropin_converted_student
     ON drop_in_attendees(converted_to_student_id)
     WHERE converted_to_student_id IS NOT NULL;
 
@@ -38,7 +38,7 @@ ALTER TABLE drop_in_attendees ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY drop_in_attendees_tenant_isolation
     ON drop_in_attendees
-    USING (tenant_id = current_setting('app.tenant_id')::uuid);
+    USING (tenant_id = current_setting('app.current_tenant')::uuid);
 
 
 -- ── 2. drop_in_payments ───────────────────────────────────────────────────────
@@ -58,17 +58,17 @@ CREATE TABLE drop_in_payments (
     CONSTRAINT uq_dropin_payment_per_session UNIQUE (drop_in_attendee_id, class_session_id)
 );
 
-CREATE INDEX ix_dropin_payment_attendee_paid_at
+CREATE INDEX idx_dropin_payment_attendee_paid_at
     ON drop_in_payments(drop_in_attendee_id, paid_at DESC);
 
-CREATE INDEX ix_dropin_payment_session
+CREATE INDEX idx_dropin_payment_session
     ON drop_in_payments(class_session_id);
 
 ALTER TABLE drop_in_payments ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY drop_in_payments_tenant_isolation
     ON drop_in_payments
-    USING (tenant_id = current_setting('app.tenant_id')::uuid);
+    USING (tenant_id = current_setting('app.current_tenant')::uuid);
 
 
 -- ── 3. Generalize attendance_registrations ────────────────────────────────────
