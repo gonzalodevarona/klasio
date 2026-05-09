@@ -105,4 +105,7 @@ public interface AttendanceRegistrationRepository {
      * level changes from OPEN to a specific level.
      */
     List<AttendanceRegistration> findFutureRegisteredForClass(UUID tenantId, UUID classId, Instant now);
+
+    /** Returns the registration created for a drop-in payment, if any. */
+    Optional<AttendanceRegistration> findByDropInPaymentId(UUID tenantId, UUID paymentId);
 }

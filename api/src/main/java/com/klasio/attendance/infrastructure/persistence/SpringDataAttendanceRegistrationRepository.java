@@ -164,4 +164,13 @@ public interface SpringDataAttendanceRegistrationRepository
             @Param("tenantId") UUID tenantId,
             @Param("classId")  UUID classId,
             @Param("now")      Instant now);
+
+    @Query("""
+        select r from AttendanceRegistrationJpaEntity r
+        where r.tenantId = :tenantId
+          and r.dropInPaymentId = :paymentId
+        """)
+    Optional<AttendanceRegistrationJpaEntity> findByTenantIdAndDropInPaymentId(
+            @Param("tenantId")  UUID tenantId,
+            @Param("paymentId") UUID paymentId);
 }
