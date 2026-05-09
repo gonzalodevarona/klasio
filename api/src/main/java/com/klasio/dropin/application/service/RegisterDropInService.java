@@ -16,6 +16,7 @@ import com.klasio.dropin.domain.port.DropInAttendancePort;
 import com.klasio.dropin.domain.port.DropInAttendeeRepository;
 import com.klasio.dropin.domain.port.DropInPaymentRepository;
 import com.klasio.dropin.domain.port.DropInPriceLookupPort;
+import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
 import com.klasio.shared.infrastructure.exception.DropInAttendeeNotFoundException;
 import com.klasio.shared.infrastructure.exception.DropInNotAvailableException;
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -115,6 +117,7 @@ public class RegisterDropInService {
                 cmd.actorUserId());
 
         // 7. Resolve attendee
+        Instant nowInstant = Instant.now();
         boolean attendeeWasNew = false;
         DropInAttendee attendee;
         if (cmd.existingAttendeeId() != null) {
@@ -132,7 +135,7 @@ public class RegisterDropInService {
             }
             attendee = DropInAttendee.create(
                     cmd.tenantId(), cmd.newAttendeeFullName(), cmd.newAttendeePhone(),
-                    cmd.actorUserId(), Instant.now());
+                    cmd.actorUserId(), nowInstant);
             attendeeWasNew = true;
         }
 
@@ -149,17 +152,16 @@ public class RegisterDropInService {
         }
 
         // 9. Create payment
-        Instant nowInstant = Instant.now();
         DropInPayment payment = DropInPayment.create(
                 cmd.tenantId(), attendee.getId().value(), session.getId().value(),
                 classView.programId(), cmd.amount(), cmd.paymentMethod(), dropInPrice,
                 cmd.actorUserId(), nowInstant);
 
-        // 10. Save payment
+        // 10. Save payment and publish events
+        List<DomainEvent> paymentEvents = List.copyOf(payment.getDomainEvents());
         DropInPayment savedPayment = paymentRepository.save(payment);
-
-        // Publish payment domain events
-        savedPayment.getDomainEvents().forEach(eventPublisher::publishEvent);
+        payment.clearDomainEvents();
+        paymentEvents.forEach(eventPublisher::publishEvent);
 
         // 11. Record attendance (capacity check inside port adapter)
         UUID registrationId = attendancePort.recordPresent(
@@ -171,14 +173,14 @@ public class RegisterDropInService {
 
         // 12. recordVisit + persist attendee (single save covers both new-attendee creation and visit update)
         attendee.recordVisit(cmd.actorUserId(), nowInstant);
-        DropInAttendee updatedAttendee = attendeeRepository.save(attendee);
-
-        // Publish attendee domain events
-        updatedAttendee.getDomainEvents().forEach(eventPublisher::publishEvent);
+        List<DomainEvent> attendeeEvents = List.copyOf(attendee.getDomainEvents());
+        attendeeRepository.save(attendee);
+        attendee.clearDomainEvents();
+        attendeeEvents.forEach(eventPublisher::publishEvent);
 
         return new RegisterDropInResult(
-                registrationId, updatedAttendee.getId().value(), savedPayment.getId().value(),
-                attendeeWasNew, updatedAttendee.getTotalVisits());
+                registrationId, attendee.getId().value(), savedPayment.getId().value(),
+                attendeeWasNew, attendee.getTotalVisits());
     }
 
     private ScheduleEntryView resolveScheduleEntry(ClassRegistrationView classView, java.time.LocalDate sessionDate) {
