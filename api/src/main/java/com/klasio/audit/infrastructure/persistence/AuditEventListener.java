@@ -53,6 +53,9 @@ import com.klasio.attendance.domain.event.RegistrationCancelledByLevelChange;
 import com.klasio.attendance.domain.event.SessionAlertRaised;
 import com.klasio.attendance.domain.event.SessionAlertUpdated;
 import com.klasio.attendance.domain.event.SessionCancelled;
+import com.klasio.attendance.domain.event.DropInAttendanceMarked;
+import com.klasio.dropin.domain.event.DropInAttendeeRegistered;
+import com.klasio.dropin.domain.event.DropInPaymentRecorded;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -1304,6 +1307,82 @@ public class AuditEventListener {
                 "ATTENDANCE_REGISTRATION",
                 e.registrationId(),
                 e.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onDropInAttendeeRegistered(DropInAttendeeRegistered event) {
+        log.info("Recording audit log for drop-in attendee registration: attendeeId={}, fullName={}",
+                event.attendeeId(), event.fullName());
+
+        String details = toJson(Map.of(
+                "fullName", event.fullName(),
+                "phone", event.phone()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "DROP_IN_ATTENDEE_REGISTERED",
+                event.actorId(),
+                "DROP_IN_ATTENDEE",
+                event.attendeeId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onDropInPaymentRecorded(DropInPaymentRecorded event) {
+        log.info("Recording audit log for drop-in payment: paymentId={}, amount={}",
+                event.paymentId(), event.amount());
+
+        String details = toJson(Map.of(
+                "attendeeId", event.attendeeId().toString(),
+                "sessionId", event.sessionId().toString(),
+                "programId", event.programId().toString(),
+                "amount", event.amount().toPlainString(),
+                "programDropInPrice", event.programDropInPrice().toPlainString(),
+                "paymentMethod", event.paymentMethod().name()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "DROP_IN_PAYMENT_RECORDED",
+                event.actorId(),
+                "DROP_IN_PAYMENT",
+                event.paymentId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onDropInAttendanceMarked(DropInAttendanceMarked event) {
+        log.info("Recording audit log for drop-in attendance: registrationId={}, attendeeId={}",
+                event.registrationId(), event.attendeeId());
+
+        String details = toJson(Map.of(
+                "sessionId", event.sessionId().toString(),
+                "classId", event.classId().toString(),
+                "attendeeId", event.attendeeId().toString(),
+                "paymentId", event.paymentId().toString(),
+                "sessionDate", event.sessionDate().toString()
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "DROP_IN_ATTENDANCE_MARKED",
+                event.actorId(),
+                "ATTENDANCE_REGISTRATION",
+                event.registrationId(),
+                event.occurredAt(),
                 details
         );
 
