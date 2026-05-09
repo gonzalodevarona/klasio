@@ -106,7 +106,7 @@ class RegisterDropInServiceTest {
         RegisterDropInResult result = service.execute(newCmd(null, "Ana García", "3001234567"));
 
         assertThat(result.attendeeWasNew()).isTrue();
-        verify(attendeeRepo).save(any());
+        verify(attendeeRepo, times(2)).save(any()); // early FK-safe persist + post-visit update
         verify(paymentRepo).save(any());
         verify(attendancePort).recordPresent(any());
     }
