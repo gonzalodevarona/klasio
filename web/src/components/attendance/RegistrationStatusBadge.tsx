@@ -23,3 +23,8 @@ export default function RegistrationStatusBadge({ status }: RegistrationStatusBa
   const variant = STATUS_VARIANT[status] ?? "inactive";
   return <Badge variant={variant} label={t(status)} />;
 }
+
+export function DropInTag() {
+  const t = useTranslations("attendance.dropIn");
+  return <Badge variant="dropIn" label={t("rosterTag")} small />;
+}
