@@ -94,7 +94,8 @@ public class DropInAttendee {
      * Records a visit: increments totalVisits, sets lastVisitAt,
      * and sets firstVisitAt only on the first visit (sticky).
      */
-    public void recordVisit(Instant now) {
+    public void recordVisit(UUID actorId, Instant now) {
+        Objects.requireNonNull(actorId, "actorId must not be null");
         Objects.requireNonNull(now, "now must not be null");
         this.totalVisits++;
         if (this.firstVisitAt == null) {
@@ -102,6 +103,7 @@ public class DropInAttendee {
         }
         this.lastVisitAt = now;
         this.updatedAt = now;
+        this.updatedBy = actorId;
     }
 
     /**
@@ -109,8 +111,9 @@ public class DropInAttendee {
      *
      * @throws IllegalStateException if already converted
      */
-    public void convertToStudent(UUID studentId, Instant now) {
+    public void convertToStudent(UUID studentId, UUID actorId, Instant now) {
         Objects.requireNonNull(studentId, "studentId must not be null");
+        Objects.requireNonNull(actorId, "actorId must not be null");
         Objects.requireNonNull(now, "now must not be null");
         if (this.convertedToStudentId != null) {
             throw new IllegalStateException(
@@ -119,6 +122,7 @@ public class DropInAttendee {
         this.convertedToStudentId = studentId;
         this.convertedAt = now;
         this.updatedAt = now;
+        this.updatedBy = actorId;
     }
 
     public List<DomainEvent> getDomainEvents() {

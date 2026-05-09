@@ -59,11 +59,12 @@ class DropInAttendeeTest {
         DropInAttendee attendee = createDefault();
         Instant visitTime = Instant.now();
 
-        attendee.recordVisit(visitTime);
+        attendee.recordVisit(ACTOR_ID, visitTime);
 
         assertThat(attendee.getTotalVisits()).isEqualTo(1);
         assertThat(attendee.getFirstVisitAt()).isEqualTo(visitTime);
         assertThat(attendee.getLastVisitAt()).isEqualTo(visitTime);
+        assertThat(attendee.getUpdatedBy()).isEqualTo(ACTOR_ID);
     }
 
     @Test
@@ -72,8 +73,8 @@ class DropInAttendeeTest {
         Instant first = Instant.now();
         Instant second = first.plusSeconds(3600);
 
-        attendee.recordVisit(first);
-        attendee.recordVisit(second);
+        attendee.recordVisit(ACTOR_ID, first);
+        attendee.recordVisit(ACTOR_ID, second);
 
         assertThat(attendee.getTotalVisits()).isEqualTo(2);
         assertThat(attendee.getFirstVisitAt()).isEqualTo(first);
@@ -86,10 +87,11 @@ class DropInAttendeeTest {
         UUID studentId = UUID.randomUUID();
         Instant convertedAt = Instant.now();
 
-        attendee.convertToStudent(studentId, convertedAt);
+        attendee.convertToStudent(studentId, ACTOR_ID, convertedAt);
 
         assertThat(attendee.getConvertedToStudentId()).isEqualTo(studentId);
         assertThat(attendee.getConvertedAt()).isEqualTo(convertedAt);
+        assertThat(attendee.getUpdatedBy()).isEqualTo(ACTOR_ID);
     }
 
     @Test
@@ -98,9 +100,9 @@ class DropInAttendeeTest {
         UUID studentId = UUID.randomUUID();
         Instant now = Instant.now();
 
-        attendee.convertToStudent(studentId, now);
+        attendee.convertToStudent(studentId, ACTOR_ID, now);
 
-        assertThatThrownBy(() -> attendee.convertToStudent(UUID.randomUUID(), Instant.now()))
+        assertThatThrownBy(() -> attendee.convertToStudent(UUID.randomUUID(), ACTOR_ID, Instant.now()))
                 .isInstanceOf(IllegalStateException.class);
     }
 }
