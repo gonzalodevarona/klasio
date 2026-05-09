@@ -13,6 +13,7 @@ import com.klasio.attendance.domain.port.ClassDetailsPort.ClassRegistrationView;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ScheduleEntryView;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassSummaryView;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
+import com.klasio.attendance.domain.port.DropInAttendeeLookupPort;
 import com.klasio.attendance.domain.port.ProfessorIdLookupPort;
 import com.klasio.membership.domain.port.StudentNamePort;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
@@ -31,6 +32,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,6 +52,7 @@ class ListClassSessionRosterServiceTest {
     @Mock ClassSessionRepository sessionRepository;
     @Mock StudentNamePort studentNamePort;
     @Mock ProfessorIdLookupPort professorIdLookupPort;
+    @Mock DropInAttendeeLookupPort dropInLookupPort;
 
     @InjectMocks ListClassSessionRosterService service;
 
@@ -84,6 +87,9 @@ class ListClassSessionRosterServiceTest {
         // No registrations by default
         when(registrationRepository.findByClassAndDateRange(any(), any(), any(), any()))
                 .thenReturn(List.of());
+        // Drop-in lookups return empty maps by default (no drop-in attendees in most tests)
+        when(dropInLookupPort.findByAttendeeIds(any(), any())).thenReturn(Map.of());
+        when(dropInLookupPort.findAmountsByPaymentIds(any(), any())).thenReturn(Map.of());
     }
 
     // ── Window validation ────────────────────────────────────────────────────

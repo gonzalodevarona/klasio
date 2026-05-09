@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.springframework.data.domain.Persistable;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -34,6 +35,9 @@ public class ProgramJpaEntity implements Persistable<UUID> {
 
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
+
+    @Column(name = "drop_in_price", precision = 15, scale = 2)
+    private BigDecimal dropInPrice;
 
     @Column(name = "updated_at")
     private Instant updatedAt;
@@ -90,6 +94,14 @@ public class ProgramJpaEntity implements Persistable<UUID> {
 
     public void setCreatedBy(UUID createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public BigDecimal getDropInPrice() {
+        return dropInPrice;
+    }
+
+    public void setDropInPrice(BigDecimal dropInPrice) {
+        this.dropInPrice = dropInPrice;
     }
 
     public Instant getUpdatedAt() {

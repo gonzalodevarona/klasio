@@ -4,6 +4,7 @@ import com.klasio.program.application.dto.ProgramDetail;
 import com.klasio.program.application.dto.ProgramSummary;
 import com.klasio.program.domain.model.Program;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ public final class ProgramResponseDto {
             UUID tenantId,
             String name,
             String status,
+            BigDecimal dropInPrice,
             Instant createdAt,
             String createdBy,
             Instant updatedAt,
@@ -31,6 +33,7 @@ public final class ProgramResponseDto {
                     program.getTenantId(),
                     program.getName(),
                     program.getStatus().name(),
+                    program.getDropInPrice(),
                     program.getCreatedAt(),
                     createdBy,
                     program.getUpdatedAt(),
@@ -44,6 +47,7 @@ public final class ProgramResponseDto {
                     detail.tenantId(),
                     detail.name(),
                     detail.status(),
+                    detail.dropInPrice(),
                     detail.createdAt(),
                     detail.createdBy(),
                     detail.updatedAt(),

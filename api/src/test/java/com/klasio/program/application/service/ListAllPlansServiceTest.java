@@ -49,7 +49,7 @@ class ListAllPlansServiceTest {
         ProgramPlan plan = ProgramPlan.create(PROGRAM_ID, TENANT_ID, "4 Hours",
                 ProgramModality.HOURS_BASED, new BigDecimal("90000"), 4, List.of(), MANAGER_ID, UUID.randomUUID());
         Program program = Program.reconstitute(new ProgramId(PROGRAM_ID), TENANT_ID, "Kids Soccer",
-                ProgramStatus.ACTIVE, Instant.now(), UUID.randomUUID(), null, null);
+                ProgramStatus.ACTIVE, null, Instant.now(), UUID.randomUUID(), null, null);
 
         when(planRepository.findAllByTenant(TENANT_ID, null)).thenReturn(List.of(plan));
         when(programRepository.findById(TENANT_ID, PROGRAM_ID)).thenReturn(Optional.of(program));
