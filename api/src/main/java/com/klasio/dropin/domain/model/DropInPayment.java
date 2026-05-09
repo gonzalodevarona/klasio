@@ -47,6 +47,22 @@ public class DropInPayment {
     }
 
     /**
+     * Factory: reconstitutes a DropInPayment from persistent storage.
+     * Does NOT emit domain events — for JPA hydration only.
+     * programDropInPrice is an event-only snapshot and is NOT persisted; it is set to null here.
+     */
+    public static DropInPayment reconstitute(UUID id, UUID tenantId, UUID attendeeId, UUID sessionId,
+            UUID programId, BigDecimal amount, PaymentMethod paymentMethod,
+            Instant paidAt, UUID registeredBy, Instant createdAt, UUID createdBy) {
+        return new DropInPayment(
+                DropInPaymentId.of(id), tenantId, attendeeId, sessionId,
+                programId, amount, paymentMethod,
+                null,          // programDropInPrice — not persisted
+                registeredBy,  // actorId = registeredBy
+                createdAt);
+    }
+
+    /**
      * Factory: records a drop-in payment.
      *
      * @throws IllegalArgumentException if amount is not positive or paymentMethod is null

@@ -58,6 +58,21 @@ public class DropInAttendee {
     }
 
     /**
+     * Factory: reconstitutes a DropInAttendee from persistent storage.
+     * Does NOT emit domain events — for JPA hydration only.
+     */
+    public static DropInAttendee reconstitute(UUID id, UUID tenantId, String fullName, String phone,
+            int totalVisits, Instant firstVisitAt, Instant lastVisitAt,
+            UUID convertedToStudentId, Instant convertedAt,
+            Instant createdAt, UUID createdBy, Instant updatedAt, UUID updatedBy) {
+        return new DropInAttendee(
+                DropInAttendeeId.of(id), tenantId, fullName, phone,
+                totalVisits, firstVisitAt, lastVisitAt,
+                convertedToStudentId, convertedAt,
+                createdAt, createdBy, updatedAt, updatedBy);
+    }
+
+    /**
      * Factory: registers a new drop-in attendee.
      *
      * @throws IllegalArgumentException if fullName or phone are blank
