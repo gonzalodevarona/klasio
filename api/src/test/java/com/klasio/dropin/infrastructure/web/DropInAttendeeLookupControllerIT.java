@@ -160,7 +160,9 @@ class DropInAttendeeLookupControllerIT {
                                 .accept(MediaType.APPLICATION_JSON),
                         "PROFESSOR"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(attendeeId.toString()));
+                .andExpect(jsonPath("$.id").value(attendeeId.toString()))
+                .andExpect(jsonPath("$.fullName").value("John Smith"))
+                .andExpect(jsonPath("$.totalVisits").value(2));
     }
 
     // ------------------------------------------------------------------

@@ -42,15 +42,7 @@ public class DropInRegistrationController {
         UUID programIdFromJwt = details.containsKey("programId") && details.get("programId") != null
                 ? UUID.fromString((String) details.get("programId")) : null;
 
-        var cmd = new RegisterDropInCommand(
-                tenantId, classId, sessionDate,
-                LocalTime.parse(request.startTime()),
-                request.attendee().existingId(),
-                request.attendee().newAttendee() != null ? request.attendee().newAttendee().fullName() : null,
-                request.attendee().newAttendee() != null ? request.attendee().newAttendee().phone() : null,
-                request.amount(), request.paymentMethod(),
-                actorId, role, programIdFromJwt);
-
+        var cmd = toCommand(tenantId, classId, sessionDate, request, actorId, role, programIdFromJwt);
         var result = service.execute(cmd);
         var response = new RegisterDropInResponse(
                 result.registrationId(), result.attendeeId(), result.paymentId(),
@@ -58,5 +50,18 @@ public class DropInRegistrationController {
 
         int statusCode = result.attendeeWasNew() ? 201 : 200;
         return ResponseEntity.status(statusCode).body(response);
+    }
+
+    private static RegisterDropInCommand toCommand(UUID tenantId, UUID classId, LocalDate sessionDate,
+            RegisterDropInRequest request, UUID actorId, String role, UUID programIdFromJwt) {
+        var newAttendee = request.attendee().newAttendee();
+        return new RegisterDropInCommand(
+                tenantId, classId, sessionDate,
+                LocalTime.parse(request.startTime()),
+                request.attendee().existingId(),
+                newAttendee != null ? newAttendee.fullName() : null,
+                newAttendee != null ? newAttendee.phone() : null,
+                request.amount(), request.paymentMethod(),
+                actorId, role, programIdFromJwt);
     }
 }
