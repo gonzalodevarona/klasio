@@ -66,7 +66,8 @@ class CancelRegistrationServiceTest {
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
                 Instant.now(), ACTOR_ID,
-                null, null
+                null, null,
+                null, null          // drop-in fields
         );
     }
 
@@ -148,7 +149,8 @@ class CancelRegistrationServiceTest {
                 Instant.now(), ACTOR_ID, null,  // cancelledAt, cancelledBy, cancellationReason
                 null, null,                     // markedAt, markedBy
                 null, null, null,               // correctedAt, correctedBy, correctionReason
-                Instant.now(), ACTOR_ID, Instant.now(), ACTOR_ID
+                Instant.now(), ACTOR_ID, Instant.now(), ACTOR_ID,
+                null, null                      // drop-in fields
         );
         when(registrationRepository.findById(TENANT_ID, regId)).thenReturn(Optional.of(reg));
 
@@ -179,7 +181,8 @@ class CancelRegistrationServiceTest {
                 null, null, null,   // cancelledAt, cancelledBy, cancellationReason
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
-                Instant.now(), ACTOR_ID, null, null
+                Instant.now(), ACTOR_ID, null, null,
+                null, null          // drop-in fields
         );
         when(registrationRepository.findById(TENANT_ID, regId)).thenReturn(Optional.of(reg));
 
@@ -215,7 +218,8 @@ class CancelRegistrationServiceTest {
                 null, null, null,   // cancelledAt, cancelledBy, cancellationReason
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
-                Instant.now(), ACTOR_ID, null, null
+                Instant.now(), ACTOR_ID, null, null,
+                null, null          // drop-in fields
         );
         when(registrationRepository.findById(TENANT_ID, regId)).thenReturn(Optional.of(reg));
 

@@ -158,7 +158,8 @@ class MeRegistrationControllerTest {
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
                 Instant.now(), USER_ID,
-                null, null
+                null, null,
+                null, null          // drop-in fields
         );
     }
 

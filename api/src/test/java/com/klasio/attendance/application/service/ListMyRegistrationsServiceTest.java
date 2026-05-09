@@ -69,7 +69,8 @@ class ListMyRegistrationsServiceTest {
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
                 Instant.now(), UUID.randomUUID(),
-                null, null
+                null, null,
+                null, null          // drop-in fields
         );
     }
 

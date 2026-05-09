@@ -559,7 +559,8 @@ class ListClassSessionRosterServiceTest {
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
                 Instant.now(), createdBy,
-                null, null
+                null, null,
+                null, null          // drop-in fields
         );
     }
 }
