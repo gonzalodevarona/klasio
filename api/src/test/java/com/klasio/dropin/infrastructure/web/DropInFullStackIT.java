@@ -156,26 +156,26 @@ class DropInFullStackIT {
         // Assert DB rows
         setTenantCtx(tenantId);
         Long attendeeCount = jdbc.queryForObject(
-                "SELECT count(*) FROM drop_in_attendees WHERE tenant_id = '" + tenantId + "'", Long.class);
+                "SELECT count(*) FROM drop_in_attendees WHERE tenant_id = ?", Long.class, tenantId);
         assertThat(attendeeCount).isEqualTo(1L);
 
         Long paymentCount = jdbc.queryForObject(
-                "SELECT count(*) FROM drop_in_payments WHERE tenant_id = '" + tenantId + "'", Long.class);
+                "SELECT count(*) FROM drop_in_payments WHERE tenant_id = ?", Long.class, tenantId);
         assertThat(paymentCount).isEqualTo(1L);
 
         Long regCount = jdbc.queryForObject(
-                "SELECT count(*) FROM attendance_registrations WHERE drop_in_attendee_id = '" + attendeeId + "'",
-                Long.class);
+                "SELECT count(*) FROM attendance_registrations WHERE drop_in_attendee_id = ?",
+                Long.class, attendeeId);
         assertThat(regCount).isEqualTo(1L);
 
         Integer totalVisits = jdbc.queryForObject(
-                "SELECT total_visits FROM drop_in_attendees WHERE id = '" + attendeeId + "'", Integer.class);
+                "SELECT total_visits FROM drop_in_attendees WHERE id = ?", Integer.class, attendeeId);
         assertThat(totalVisits).isEqualTo(1);
 
         Long auditCount = jdbc.queryForObject(
-                "SELECT count(*) FROM audit_log WHERE actor_id = '" + actorId + "'" +
+                "SELECT count(*) FROM audit_log WHERE actor_id = ?" +
                 " AND action_type IN ('DROP_IN_ATTENDEE_REGISTERED','DROP_IN_PAYMENT_RECORDED','DROP_IN_ATTENDANCE_MARKED')",
-                Long.class);
+                Long.class, actorId);
         assertThat(auditCount).isEqualTo(3L);
     }
 
@@ -219,11 +219,11 @@ class DropInFullStackIT {
         // Assert: no attendee row, no payment row (transaction rolled back)
         setTenantCtx(tenantId);
         Long attendeeCount = jdbc.queryForObject(
-                "SELECT count(*) FROM drop_in_attendees WHERE tenant_id = '" + tenantId + "'", Long.class);
+                "SELECT count(*) FROM drop_in_attendees WHERE tenant_id = ?", Long.class, tenantId);
         assertThat(attendeeCount).isEqualTo(0L);
 
         Long paymentCount = jdbc.queryForObject(
-                "SELECT count(*) FROM drop_in_payments WHERE tenant_id = '" + tenantId + "'", Long.class);
+                "SELECT count(*) FROM drop_in_payments WHERE tenant_id = ?", Long.class, tenantId);
         assertThat(paymentCount).isEqualTo(0L);
     }
 
@@ -271,13 +271,13 @@ class DropInFullStackIT {
         // Assert: exactly 1 payment row for this attendee
         setTenantCtx(tenantId);
         Long paymentCount = jdbc.queryForObject(
-                "SELECT count(*) FROM drop_in_payments WHERE drop_in_attendee_id = '" + attendeeId + "'",
-                Long.class);
+                "SELECT count(*) FROM drop_in_payments WHERE drop_in_attendee_id = ?",
+                Long.class, attendeeId);
         assertThat(paymentCount).isEqualTo(1L);
 
         // total_visits must still be 1 (idempotent path skips recordVisit)
         Integer totalVisits = jdbc.queryForObject(
-                "SELECT total_visits FROM drop_in_attendees WHERE id = '" + attendeeId + "'", Integer.class);
+                "SELECT total_visits FROM drop_in_attendees WHERE id = ?", Integer.class, attendeeId);
         assertThat(totalVisits).isEqualTo(1);
     }
 
@@ -336,7 +336,7 @@ class DropInFullStackIT {
         // Assert: total_visits = 2
         setTenantCtx(tenantId);
         Integer totalVisits = jdbc.queryForObject(
-                "SELECT total_visits FROM drop_in_attendees WHERE id = '" + attendeeId + "'", Integer.class);
+                "SELECT total_visits FROM drop_in_attendees WHERE id = ?", Integer.class, attendeeId);
         assertThat(totalVisits).isEqualTo(2);
     }
 
@@ -389,8 +389,8 @@ class DropInFullStackIT {
         // Assert: registration is now SESSION_CANCELLED (the status used by cancelBySession transition)
         setTenantCtx(tenantId);
         String regStatus = jdbc.queryForObject(
-                "SELECT status FROM attendance_registrations WHERE drop_in_attendee_id = '" + attendeeId + "'",
-                String.class);
+                "SELECT status FROM attendance_registrations WHERE drop_in_attendee_id = ?",
+                String.class, attendeeId);
         assertThat(regStatus).isEqualTo("SESSION_CANCELLED");
     }
 
