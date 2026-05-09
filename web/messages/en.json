@@ -1255,6 +1255,47 @@
         "sessionFull": "The session is full.",
         "alreadyMarked": "Student is already marked. Use the correction flow."
       }
+    },
+    "dropIn": {
+      "buttonLabel": "Register drop-in",
+      "modalTitle": "Register drop-in",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "300 123 4567",
+      "fullNameLabel": "Full name",
+      "amountLabel": "Amount (COP)",
+      "paymentMethodLabel": "Payment method",
+      "paymentMethod": {
+        "cash": "Cash",
+        "transfer": "Transfer"
+      },
+      "recurringVisitor": "Recurring visitor — {count, plural, one {# visit} other {# visits}}",
+      "submitButton": "Register & mark present",
+      "cancelButton": "Cancel",
+      "successBanner": "Registered. {fullName} marked PRESENT.",
+      "rosterTag": "DROP-IN",
+      "rosterAmountLabel": "Paid",
+      "errors": {
+        "phoneRequired": "Phone is required.",
+        "phoneInvalid": "Phone must be 7–20 digits.",
+        "nameRequired": "Full name is required.",
+        "amountRequired": "Amount is required.",
+        "amountInvalid": "Amount must be greater than zero.",
+        "lookupFailed": "Could not check phone. Try again.",
+        "DROP_IN_NOT_AVAILABLE": "This program does not allow drop-ins.",
+        "MARKING_WINDOW_VIOLATION": "Outside the registration window for this session.",
+        "SESSION_FULL": "This session is full.",
+        "SESSION_CANCELLED": "This session has been cancelled.",
+        "DROP_IN_ATTENDEE_NOT_FOUND": "Attendee not found.",
+        "FORBIDDEN": "You do not have permission to register drop-ins for this class.",
+        "UNKNOWN": "Something went wrong. Try again."
+      },
+      "phoneCollision": {
+        "title": "Phone already registered",
+        "body": "{phone} belongs to {fullName} ({count, plural, one {# previous visit} other {# previous visits}}).",
+        "question": "Same person?",
+        "yes": "Yes, use existing record",
+        "cancel": "Cancel"
+      }
     }
   },
   "studentClasses": {
