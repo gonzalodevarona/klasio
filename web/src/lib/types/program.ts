@@ -24,6 +24,7 @@ export interface ProgramDetail extends ProgramSummary {
   createdBy: string;
   updatedAt: string;
   updatedBy: string;
+  dropInPrice: string | null;
 }
 
 export interface ProgramListResponse {
