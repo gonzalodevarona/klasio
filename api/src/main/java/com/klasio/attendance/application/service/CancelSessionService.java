@@ -117,10 +117,15 @@ public class CancelSessionService implements CancelSessionUseCase {
             for (DomainEvent e : reg.getDomainEvents()) eventPublisher.publishEvent(e);
             reg.clearDomainEvents();
 
-            affectedStudentIds.add(reg.getStudentId());
+            if (reg.getStudentId() != null) {
+                affectedStudentIds.add(reg.getStudentId());
+            }
 
-            // Refund hours only when the student was already marked PRESENT (hours deducted).
-            if (priorStatus == AttendanceRegistrationStatus.PRESENT) {
+            // Refund hours only for student (non-drop-in) registrations already marked PRESENT.
+            // Drop-in registrations have no membership/hours to refund.
+            if (priorStatus == AttendanceRegistrationStatus.PRESENT
+                    && reg.getMembershipId() != null
+                    && reg.getIntendedHours() != null) {
                 refundHoursUseCase.execute(new RefundHoursCommand(
                         cmd.tenantId(),
                         reg.getMembershipId(),

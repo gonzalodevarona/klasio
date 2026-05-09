@@ -1270,7 +1270,7 @@ public class AuditEventListener {
         String details = toJson(Map.of(
                 "sessionId", e.sessionId().toString(),
                 "classId", e.classId().toString(),
-                "studentId", e.studentId().toString(),
+                "studentId", e.studentId() != null ? e.studentId().toString() : "drop-in",
                 "priorStatus", e.priorStatus().name()
         ));
 

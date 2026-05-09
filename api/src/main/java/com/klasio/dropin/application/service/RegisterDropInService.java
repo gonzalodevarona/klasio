@@ -151,19 +151,26 @@ public class RegisterDropInService {
                     false, attendee.getTotalVisits());
         }
 
-        // 9. Create payment
+        // 9. Persist new attendee before payment to satisfy the FK constraint.
+        //    For existing attendees this is a no-op at this point; the final save (step 12) handles
+        //    the visit counter update.
+        if (attendeeWasNew) {
+            attendeeRepository.save(attendee);
+        }
+
+        // 10. Create payment
         DropInPayment payment = DropInPayment.create(
                 cmd.tenantId(), attendee.getId().value(), session.getId().value(),
                 classView.programId(), cmd.amount(), cmd.paymentMethod(), dropInPrice,
                 cmd.actorUserId(), nowInstant);
 
-        // 10. Save payment and publish events
+        // 11. Save payment and publish events
         List<DomainEvent> paymentEvents = List.copyOf(payment.getDomainEvents());
         DropInPayment savedPayment = paymentRepository.save(payment);
         payment.clearDomainEvents();
         paymentEvents.forEach(eventPublisher::publishEvent);
 
-        // 11. Record attendance (capacity check inside port adapter)
+        // 12. Record attendance (capacity check inside port adapter)
         UUID registrationId = attendancePort.recordPresent(
                 new DropInAttendancePort.RecordDropInPresentCommand(
                         cmd.tenantId(), session.getId().value(), cmd.classId(),
@@ -171,7 +178,7 @@ public class RegisterDropInService {
                         classView.maxStudents(), attendee.getId().value(), savedPayment.getId().value(),
                         cmd.actorUserId(), nowInstant));
 
-        // 12. recordVisit + persist attendee (single save covers both new-attendee creation and visit update)
+        // 13. recordVisit + persist attendee (visit counters + events)
         attendee.recordVisit(cmd.actorUserId(), nowInstant);
         List<DomainEvent> attendeeEvents = List.copyOf(attendee.getDomainEvents());
         attendeeRepository.save(attendee);
