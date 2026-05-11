@@ -50,6 +50,7 @@ public class Program {
 
     public static Program create(UUID tenantId,
                                  String name,
+                                 BigDecimal dropInPrice,
                                  UUID createdBy) {
         Objects.requireNonNull(tenantId, "Tenant id must not be null");
         Objects.requireNonNull(createdBy, "Created by must not be null");
@@ -63,7 +64,7 @@ public class Program {
                 tenantId,
                 name,
                 ProgramStatus.ACTIVE,
-                null,
+                dropInPrice,
                 now,
                 createdBy,
                 null,
@@ -93,11 +94,12 @@ public class Program {
         return new Program(id, tenantId, name, status, dropInPrice, createdAt, createdBy, updatedAt, updatedBy);
     }
 
-    public void update(String name, UUID updatedBy) {
+    public void update(String name, BigDecimal dropInPrice, UUID updatedBy) {
         Objects.requireNonNull(updatedBy, "Updated by must not be null");
         validateNotBlank(name, "Name");
 
         this.name = name;
+        this.dropInPrice = dropInPrice;
         this.updatedAt = Instant.now();
         this.updatedBy = updatedBy;
 

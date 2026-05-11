@@ -47,14 +47,14 @@ class UpdateProgramServiceTest {
     @Test
     @DisplayName("should update program, save it, and publish domain events")
     void execute_withValidCommand_updatesAndSaves() {
-        Program program = Program.create(TENANT_ID, "Kids Program", UUID.randomUUID());
+        Program program = Program.create(TENANT_ID, "Kids Program", null, UUID.randomUUID());
         UUID programId = program.getId().value();
 
         when(programRepository.findById(TENANT_ID, programId)).thenReturn(Optional.of(program));
         when(programRepository.existsByNameInTenantExcluding(TENANT_ID, "Updated Name", programId)).thenReturn(false);
 
         UpdateProgramCommand command = new UpdateProgramCommand(
-                TENANT_ID, programId, "Updated Name", UPDATED_BY);
+                TENANT_ID, programId, "Updated Name", null, UPDATED_BY);
 
         Program result = service.execute(command);
 
@@ -75,7 +75,7 @@ class UpdateProgramServiceTest {
         when(programRepository.findById(TENANT_ID, programId)).thenReturn(Optional.empty());
 
         UpdateProgramCommand command = new UpdateProgramCommand(
-                TENANT_ID, programId, "Updated Name", UPDATED_BY);
+                TENANT_ID, programId, "Updated Name", null, UPDATED_BY);
 
         assertThatThrownBy(() -> service.execute(command))
                 .isInstanceOf(ProgramNotFoundException.class);
@@ -87,14 +87,14 @@ class UpdateProgramServiceTest {
     @Test
     @DisplayName("should throw ProgramNameAlreadyExistsException when name is duplicate")
     void execute_whenDuplicateName_throwsProgramNameAlreadyExistsException() {
-        Program program = Program.create(TENANT_ID, "Kids Program", UUID.randomUUID());
+        Program program = Program.create(TENANT_ID, "Kids Program", null, UUID.randomUUID());
         UUID programId = program.getId().value();
 
         when(programRepository.findById(TENANT_ID, programId)).thenReturn(Optional.of(program));
         when(programRepository.existsByNameInTenantExcluding(TENANT_ID, "Duplicate Name", programId)).thenReturn(true);
 
         UpdateProgramCommand command = new UpdateProgramCommand(
-                TENANT_ID, programId, "Duplicate Name", UPDATED_BY);
+                TENANT_ID, programId, "Duplicate Name", null, UPDATED_BY);
 
         assertThatThrownBy(() -> service.execute(command))
                 .isInstanceOf(ProgramNameAlreadyExistsException.class);

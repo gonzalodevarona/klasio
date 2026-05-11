@@ -35,6 +35,7 @@ public class CreateProgramService implements CreateProgramUseCase {
         Program program = Program.create(
                 command.tenantId(),
                 command.name(),
+                command.dropInPrice(),
                 command.createdBy()
         );
 

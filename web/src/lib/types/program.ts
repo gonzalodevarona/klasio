@@ -37,8 +37,10 @@ export interface ProgramListResponse {
 
 export interface CreateProgramRequest {
   name: string;
+  dropInPrice?: string | null;
 }
 
 export interface UpdateProgramRequest {
   name: string;
+  dropInPrice?: string | null;
 }
