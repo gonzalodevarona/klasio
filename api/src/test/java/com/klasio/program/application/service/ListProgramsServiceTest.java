@@ -41,7 +41,7 @@ class ListProgramsServiceTest {
     @DisplayName("should return paginated results mapped to ProgramSummary")
     void execute_returnsPaginatedResults() {
         Pageable pageable = PageRequest.of(0, 20);
-        Program program = Program.create(TENANT_ID, "Kids Program", UUID.randomUUID());
+        Program program = Program.create(TENANT_ID, "Kids Program", null, UUID.randomUUID());
         Page<Program> page = new PageImpl<>(List.of(program), pageable, 1);
 
         when(programRepository.findAllByTenant(TENANT_ID, pageable, null)).thenReturn(page);

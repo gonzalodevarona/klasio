@@ -47,7 +47,7 @@ class ReactivateProgramServiceTest {
     @Test
     @DisplayName("should reactivate program, save it, and publish domain events")
     void execute_reactivatesAndSaves() {
-        Program program = Program.create(TENANT_ID, "Kids Program", UUID.randomUUID());
+        Program program = Program.create(TENANT_ID, "Kids Program", null, UUID.randomUUID());
         program.deactivate(UUID.randomUUID());
         UUID programId = program.getId().value();
 
@@ -81,7 +81,7 @@ class ReactivateProgramServiceTest {
     @Test
     @DisplayName("should throw ProgramAlreadyActiveException when program is already active")
     void execute_whenAlreadyActive_throwsProgramAlreadyActiveException() {
-        Program program = Program.create(TENANT_ID, "Kids Program", UUID.randomUUID());
+        Program program = Program.create(TENANT_ID, "Kids Program", null, UUID.randomUUID());
         UUID programId = program.getId().value();
 
         when(programRepository.findById(TENANT_ID, programId)).thenReturn(Optional.of(program));

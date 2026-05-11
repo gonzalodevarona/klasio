@@ -168,7 +168,7 @@ class ProgramControllerIntegrationTest {
     }
 
     private Program buildActiveProgram() {
-        Program program = Program.create(TENANT_ID, "Kids Soccer", USER_ID);
+        Program program = Program.create(TENANT_ID, "Kids Soccer", null, USER_ID);
         program.clearDomainEvents();
         return program;
     }
