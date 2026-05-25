@@ -84,6 +84,7 @@ public class MeRegistrationController {
                 registration.getCreatedAt(),
                 registration.getCancellationReason(),
                 null,
+                null,
                 null
         ));
     }

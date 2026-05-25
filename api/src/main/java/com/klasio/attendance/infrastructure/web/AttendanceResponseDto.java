@@ -25,7 +25,8 @@ public class AttendanceResponseDto {
             Instant createdAt,
             String sessionCancellationReason,
             String sessionStatus,
-            String sessionAlertReason
+            String sessionAlertReason,
+            String location
     ) {
         public static RegistrationResponse from(AttendanceRegistrationView view) {
             return new RegistrationResponse(
@@ -42,7 +43,8 @@ public class AttendanceResponseDto {
                     view.createdAt(),
                     view.sessionCancellationReason(),
                     view.sessionStatus(),
-                    view.sessionAlertReason()
+                    view.sessionAlertReason(),
+                    view.location()
             );
         }
     }
