@@ -7,6 +7,8 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { ClassLevel, ClassStatus } from "@/lib/types/programClass";
 import { useAllClasses } from "@/hooks/useProgramClasses";
 import { useAuth } from "@/hooks/useAuth";
+import { api } from "@/lib/api";
+import { ProgramDetail } from "@/lib/types/program";
 import { primaryRole } from "@/lib/types/auth";
 import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import ClassTypeBadge from "@/components/classes/ClassTypeBadge";
@@ -24,6 +26,7 @@ export default function AllClassesPage() {
   const [programNameInput, setProgramNameInput] = useState("");
   const [programNameFilter, setProgramNameFilter] = useState<string | undefined>(undefined);
   const [expandedClassId, setExpandedClassId] = useState<string | null>(null);
+  const [expandedProgramDropInPrice, setExpandedProgramDropInPrice] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const SIZE = 20;
 
@@ -55,8 +58,18 @@ export default function AllClassesPage() {
     });
   }
 
-  function toggleExpand(classId: string) {
-    setExpandedClassId((prev) => (prev === classId ? null : classId));
+  function toggleExpand(classId: string, programId: string) {
+    setExpandedClassId((prev) => {
+      if (prev === classId) {
+        setExpandedProgramDropInPrice(null);
+        return null;
+      }
+      setExpandedProgramDropInPrice(null);
+      api.get<ProgramDetail>(`/programs/${programId}`)
+        .then((p) => setExpandedProgramDropInPrice(p.dropInPrice ?? null))
+        .catch(() => setExpandedProgramDropInPrice(null));
+      return classId;
+    });
   }
 
   return (
@@ -177,7 +190,7 @@ export default function AllClassesPage() {
                     <React.Fragment key={c.id}>
                       <tr
                         className={`hover:bg-k-bg cursor-pointer ${expandedClassId === c.id ? "bg-k-bg" : ""}`}
-                        onClick={() => toggleExpand(c.id)}
+                        onClick={() => toggleExpand(c.id, c.programId)}
                       >
                         <td className="px-3 py-4 text-center text-k-muted">
                           {expandedClassId === c.id ? (
@@ -227,7 +240,7 @@ export default function AllClassesPage() {
                       {expandedClassId === c.id && (
                         <tr>
                           <td colSpan={9} className="p-0">
-                            <ClassRosterPanel classId={c.id} classLevel={c.level} userRole={user ? primaryRole(user.roles) : undefined} />
+                            <ClassRosterPanel classId={c.id} classLevel={c.level} userRole={user ? primaryRole(user.roles) : undefined} programDropInPrice={expandedProgramDropInPrice} />
                           </td>
                         </tr>
                       )}
