@@ -176,6 +176,9 @@ export default function StudentAttendancePage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-k-dark">
                       {r.className}
+                      {r.location && (
+                        <div className="mt-0.5 text-xs text-k-muted">{r.location}</div>
+                      )}
                       {r.status === "SESSION_CANCELLED" && r.sessionCancellationReason && (
                         <div className="mt-0.5 text-xs italic text-k-danger-text">
                           {t("reason")} {r.sessionCancellationReason}
