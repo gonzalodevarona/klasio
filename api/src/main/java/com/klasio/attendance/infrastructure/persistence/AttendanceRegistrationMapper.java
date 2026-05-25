@@ -34,7 +34,9 @@ public class AttendanceRegistrationMapper {
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
                 entity.getUpdatedAt(),
-                entity.getUpdatedBy()
+                entity.getUpdatedBy(),
+                entity.getDropInAttendeeId(),
+                entity.getDropInPaymentId()
         );
     }
 
@@ -65,6 +67,8 @@ public class AttendanceRegistrationMapper {
         entity.setCreatedBy(registration.getCreatedBy());
         entity.setUpdatedAt(registration.getUpdatedAt());
         entity.setUpdatedBy(registration.getUpdatedBy());
+        entity.setDropInAttendeeId(registration.getDropInAttendeeId());
+        entity.setDropInPaymentId(registration.getDropInPaymentId());
         return entity;
     }
 }

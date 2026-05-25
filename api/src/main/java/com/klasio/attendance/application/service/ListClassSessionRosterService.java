@@ -12,6 +12,7 @@ import com.klasio.attendance.domain.port.ClassDetailsPort;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassRegistrationView;
 import com.klasio.attendance.domain.port.ClassDetailsPort.ClassSummaryView;
 import com.klasio.attendance.domain.port.ClassSessionRepository;
+import com.klasio.attendance.domain.port.DropInAttendeeLookupPort;
 import com.klasio.attendance.domain.port.ProfessorIdLookupPort;
 import com.klasio.membership.domain.port.StudentNamePort;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -43,17 +45,20 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
     private final ClassSessionRepository sessionRepository;
     private final StudentNamePort studentNamePort;
     private final ProfessorIdLookupPort professorIdLookupPort;
+    private final DropInAttendeeLookupPort dropInLookupPort;
 
     public ListClassSessionRosterService(ClassDetailsPort classDetailsPort,
                                           AttendanceRegistrationRepository registrationRepository,
                                           ClassSessionRepository sessionRepository,
                                           StudentNamePort studentNamePort,
-                                          ProfessorIdLookupPort professorIdLookupPort) {
+                                          ProfessorIdLookupPort professorIdLookupPort,
+                                          DropInAttendeeLookupPort dropInLookupPort) {
         this.classDetailsPort = classDetailsPort;
         this.registrationRepository = registrationRepository;
         this.sessionRepository = sessionRepository;
         this.studentNamePort = studentNamePort;
         this.professorIdLookupPort = professorIdLookupPort;
+        this.dropInLookupPort = dropInLookupPort;
     }
 
     @Override
@@ -93,29 +98,55 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
         // 7. Bucket registrations by (date, startTime, endTime)
         boolean exposeCreatedBy = "ADMIN".equals(role) || "SUPERADMIN".equals(role) || "MANAGER".equals(role);
 
+        // Only look up student names for non-drop-in registrations
+        Set<UUID> studentIds = registrations.stream()
+                .filter(r -> r.getStudentId() != null)
+                .map(AttendanceRegistration::getStudentId)
+                .collect(Collectors.toSet());
+
+        // Bulk-fetch drop-in attendee info
+        Set<UUID> dropInAttendeeIds = registrations.stream()
+                .filter(r -> r.getDropInAttendeeId() != null)
+                .map(AttendanceRegistration::getDropInAttendeeId)
+                .collect(Collectors.toSet());
+
+        Set<UUID> dropInPaymentIds = registrations.stream()
+                .filter(r -> r.getDropInPaymentId() != null)
+                .map(AttendanceRegistration::getDropInPaymentId)
+                .collect(Collectors.toSet());
+
         Map<UUID, String> nameCache = new HashMap<>();
-        if (!registrations.isEmpty()) {
-            Set<UUID> studentIds = registrations.stream()
-                    .map(AttendanceRegistration::getStudentId)
-                    .collect(Collectors.toSet());
-            for (UUID sid : studentIds) {
-                nameCache.put(sid, studentNamePort.findFullName(sid, tenantId).orElse("Unknown"));
-            }
+        for (UUID sid : studentIds) {
+            nameCache.put(sid, studentNamePort.findFullName(sid, tenantId).orElse("Unknown"));
         }
+
+        Map<UUID, DropInAttendeeLookupPort.DropInRosterEntry> dropInCache =
+                dropInLookupPort.findByAttendeeIds(tenantId, dropInAttendeeIds);
+        Map<UUID, BigDecimal> paymentCache =
+                dropInLookupPort.findAmountsByPaymentIds(tenantId, dropInPaymentIds);
 
         Map<String, List<RegistrantView>> registrantsByKey = new HashMap<>();
         for (AttendanceRegistration r : registrations) {
             String key = sessionKey(r.getSessionDate(), r.getSessionStartTime(), r.getSessionEndTime());
-            registrantsByKey.computeIfAbsent(key, k -> new ArrayList<>())
-                    .add(new RegistrantView(
-                            r.getId().value(),
-                            r.getStudentId(),
-                            nameCache.getOrDefault(r.getStudentId(), "Unknown"),
-                            r.getLevelAtRegistration(),
-                            r.getIntendedHours(),
-                            r.getStatus().name(),
-                            exposeCreatedBy ? r.getCreatedBy() : null
-                    ));
+
+            UUID dropInId = r.getDropInAttendeeId();
+            DropInAttendeeLookupPort.DropInRosterEntry dropInEntry = dropInId != null ? dropInCache.get(dropInId) : null;
+            BigDecimal paymentAmount = r.getDropInPaymentId() != null ? paymentCache.get(r.getDropInPaymentId()) : null;
+
+            RegistrantView view = new RegistrantView(
+                    r.getId().value(),
+                    r.getStudentId(),
+                    r.getStudentId() != null ? nameCache.getOrDefault(r.getStudentId(), "Unknown") : null,
+                    r.getLevelAtRegistration(),
+                    r.getIntendedHours(),
+                    r.getStatus().name(),
+                    exposeCreatedBy ? r.getCreatedBy() : null,
+                    dropInId,
+                    dropInEntry != null ? dropInEntry.fullName() : null,
+                    dropInEntry != null ? dropInEntry.phone() : null,
+                    paymentAmount
+            );
+            registrantsByKey.computeIfAbsent(key, k -> new ArrayList<>()).add(view);
         }
 
         // 8. Build one view per tuple, enriching with materialized session status

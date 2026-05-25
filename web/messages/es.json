@@ -608,6 +608,10 @@
     "formNameProgramRequired": "El nombre es obligatorio.",
     "formNameProgramMaxLength": "El nombre no puede tener más de 150 caracteres.",
     "formNameProgramPlaceholder": "ej. Fútbol infantil",
+    "formDropInPriceLabel": "Precio drop-in (COP)",
+    "formDropInPricePlaceholder": "ej. 25000",
+    "formDropInPriceHint": "Dejar vacío para deshabilitar registros drop-in en este programa.",
+    "formDropInPriceInvalid": "Debe ser un número positivo.",
     "formPlanCostError": "El costo debe ser un número positivo.",
     "formPlanHoursError": "Las horas deben ser un número entero positivo.",
     "formPlanScheduleError": "Se requiere al menos una entrada de horario.",
@@ -1254,6 +1258,47 @@
         "invalidHours": "El número de horas no es válido para esta clase.",
         "sessionFull": "La sesión está llena.",
         "alreadyMarked": "El estudiante ya está marcado. Usa el flujo de corrección."
+      }
+    },
+    "dropIn": {
+      "buttonLabel": "Registrar asistente externo",
+      "modalTitle": "Registrar asistente externo",
+      "phoneLabel": "Teléfono",
+      "phonePlaceholder": "300 123 4567",
+      "fullNameLabel": "Nombre completo",
+      "amountLabel": "Monto (COP)",
+      "paymentMethodLabel": "Método de pago",
+      "paymentMethod": {
+        "cash": "Efectivo",
+        "transfer": "Transferencia"
+      },
+      "recurringVisitor": "Visitante recurrente — {count, plural, one {# visita} other {# visitas}}",
+      "submitButton": "Registrar y marcar presente",
+      "cancelButton": "Cancelar",
+      "successBanner": "Registrado. {fullName} marcado PRESENTE.",
+      "rosterTag": "EXTERNO",
+      "rosterAmountLabel": "Pagó",
+      "errors": {
+        "phoneRequired": "El teléfono es obligatorio.",
+        "phoneInvalid": "El teléfono debe tener entre 7 y 20 dígitos.",
+        "nameRequired": "El nombre completo es obligatorio.",
+        "amountRequired": "El monto es obligatorio.",
+        "amountInvalid": "El monto debe ser mayor a cero.",
+        "lookupFailed": "No se pudo verificar el teléfono. Intente de nuevo.",
+        "DROP_IN_NOT_AVAILABLE": "Este programa no acepta asistentes externos.",
+        "MARKING_WINDOW_VIOLATION": "Fuera de la ventana de registro para esta sesión.",
+        "SESSION_FULL": "Esta sesión está llena.",
+        "SESSION_CANCELLED": "Esta sesión ha sido cancelada.",
+        "DROP_IN_ATTENDEE_NOT_FOUND": "Asistente no encontrado.",
+        "FORBIDDEN": "No tienes permiso para registrar asistentes externos en esta clase.",
+        "UNKNOWN": "Ocurrió un error. Intente de nuevo."
+      },
+      "phoneCollision": {
+        "title": "Teléfono ya registrado",
+        "body": "{phone} pertenece a {fullName} ({count, plural, one {# visita anterior} other {# visitas anteriores}}).",
+        "question": "¿Es la misma persona?",
+        "yes": "Sí, usar registro existente",
+        "cancel": "Cancelar"
       }
     }
   },

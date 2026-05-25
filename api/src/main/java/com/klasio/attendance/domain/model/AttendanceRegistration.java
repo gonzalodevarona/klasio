@@ -5,6 +5,7 @@ import com.klasio.attendance.domain.event.AttendanceMarkedAbsent;
 import com.klasio.attendance.domain.event.AttendanceMarkedPresent;
 import com.klasio.attendance.domain.event.AttendanceMarkedPresentNoHours;
 import com.klasio.attendance.domain.event.AttendanceRegistered;
+import com.klasio.attendance.domain.event.DropInAttendanceMarked;
 import com.klasio.attendance.domain.event.RegistrationCancelled;
 import com.klasio.attendance.domain.event.RegistrationCancelledByLevelChange;
 import com.klasio.attendance.domain.event.RegistrationCancelledBySession;
@@ -34,7 +35,7 @@ public class AttendanceRegistration {
     private final UUID enrollmentId;
     private final UUID membershipId;
     private final String levelAtRegistration;
-    private int intendedHours;
+    private Integer intendedHours;
     private AttendanceRegistrationStatus status;
 
     // Snapshot fields for session context (denormalized for queries)
@@ -59,19 +60,24 @@ public class AttendanceRegistration {
     private Instant updatedAt;
     private UUID updatedBy;
 
+    // Drop-in fields (null for regular student rows)
+    private UUID dropInAttendeeId;
+    private UUID dropInPaymentId;
+
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     private AttendanceRegistration(AttendanceRegistrationId id, UUID tenantId,
                                    UUID sessionId, UUID classId, UUID studentId,
                                    UUID enrollmentId, UUID membershipId,
-                                   String levelAtRegistration, int intendedHours,
+                                   String levelAtRegistration, Integer intendedHours,
                                    AttendanceRegistrationStatus status,
                                    LocalDate sessionDate, LocalTime sessionStartTime, LocalTime sessionEndTime,
                                    Instant cancelledAt, UUID cancelledBy, String cancellationReason,
                                    Instant markedAt, UUID markedBy,
                                    Instant correctedAt, UUID correctedBy, String correctionReason,
                                    Instant createdAt, UUID createdBy,
-                                   Instant updatedAt, UUID updatedBy) {
+                                   Instant updatedAt, UUID updatedBy,
+                                   UUID dropInAttendeeId, UUID dropInPaymentId) {
         this.id = id;
         this.tenantId = tenantId;
         this.sessionId = sessionId;
@@ -97,6 +103,8 @@ public class AttendanceRegistration {
         this.createdBy = createdBy;
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy;
+        this.dropInAttendeeId = dropInAttendeeId;
+        this.dropInPaymentId = dropInPaymentId;
     }
 
     /**
@@ -144,7 +152,8 @@ public class AttendanceRegistration {
                 sessionDate, sessionStartTime, sessionEndTime,
                 null, null, null, null, null,
                 null, null, null,
-                now, actorId, null, null
+                now, actorId, null, null,
+                null, null
         );
 
         reg.domainEvents.add(new AttendanceRegistered(
@@ -158,7 +167,7 @@ public class AttendanceRegistration {
     public static AttendanceRegistration reconstitute(AttendanceRegistrationId id, UUID tenantId,
                                                        UUID sessionId, UUID classId, UUID studentId,
                                                        UUID enrollmentId, UUID membershipId,
-                                                       String levelAtRegistration, int intendedHours,
+                                                       String levelAtRegistration, Integer intendedHours,
                                                        AttendanceRegistrationStatus status,
                                                        LocalDate sessionDate, LocalTime sessionStartTime,
                                                        LocalTime sessionEndTime,
@@ -168,14 +177,53 @@ public class AttendanceRegistration {
                                                        Instant correctedAt, UUID correctedBy,
                                                        String correctionReason,
                                                        Instant createdAt, UUID createdBy,
-                                                       Instant updatedAt, UUID updatedBy) {
+                                                       Instant updatedAt, UUID updatedBy,
+                                                       UUID dropInAttendeeId, UUID dropInPaymentId) {
         return new AttendanceRegistration(id, tenantId, sessionId, classId, studentId,
                 enrollmentId, membershipId, levelAtRegistration, intendedHours, status,
                 sessionDate, sessionStartTime, sessionEndTime,
                 cancelledAt, cancelledBy, cancellationReason,
                 markedAt, markedBy,
                 correctedAt, correctedBy, correctionReason,
-                createdAt, createdBy, updatedAt, updatedBy);
+                createdAt, createdBy, updatedAt, updatedBy,
+                dropInAttendeeId, dropInPaymentId);
+    }
+
+    /**
+     * Factory: records a drop-in attendee as immediately PRESENT.
+     * Student, enrollment, membership, level, and intendedHours are all null.
+     *
+     * @param attendeeId ID of the DropInAttendee record (must not be null)
+     * @param paymentId  ID of the DropInPayment record (must not be null)
+     */
+    public static AttendanceRegistration createDropIn(
+            UUID tenantId, UUID sessionId, UUID classId,
+            LocalDate sessionDate, LocalTime startTime, LocalTime endTime,
+            UUID attendeeId, UUID paymentId, UUID actorId, Instant now) {
+        if (attendeeId == null) throw new IllegalArgumentException("attendeeId must not be null");
+        if (paymentId == null)  throw new IllegalArgumentException("paymentId must not be null");
+        Objects.requireNonNull(tenantId, "tenantId must not be null");
+        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(classId, "classId must not be null");
+        Objects.requireNonNull(actorId, "actorId must not be null");
+
+        AttendanceRegistrationId regId = AttendanceRegistrationId.generate();
+        AttendanceRegistration reg = new AttendanceRegistration(
+                regId, tenantId, sessionId, classId,
+                null, null, null, null, null,  // student fields all null
+                AttendanceRegistrationStatus.PRESENT,
+                sessionDate, startTime, endTime,
+                null, null, null,              // cancel fields
+                now, actorId,                  // markedAt, markedBy
+                null, null, null,              // correction fields
+                now, actorId,                  // createdAt, createdBy
+                null, null,                    // updatedAt, updatedBy
+                attendeeId, paymentId          // drop-in fields
+        );
+        reg.domainEvents.add(new DropInAttendanceMarked(
+                regId.value(), sessionId, classId, tenantId,
+                attendeeId, paymentId, sessionDate, actorId, now));
+        return reg;
     }
 
     /**
@@ -465,7 +513,7 @@ public class AttendanceRegistration {
     public UUID getEnrollmentId() { return enrollmentId; }
     public UUID getMembershipId() { return membershipId; }
     public String getLevelAtRegistration() { return levelAtRegistration; }
-    public int getIntendedHours() { return intendedHours; }
+    public Integer getIntendedHours() { return intendedHours; }
     public AttendanceRegistrationStatus getStatus() { return status; }
     public LocalDate getSessionDate() { return sessionDate; }
     public LocalTime getSessionStartTime() { return sessionStartTime; }
@@ -482,4 +530,6 @@ public class AttendanceRegistration {
     public UUID getCreatedBy() { return createdBy; }
     public Instant getUpdatedAt() { return updatedAt; }
     public UUID getUpdatedBy() { return updatedBy; }
+    public UUID getDropInAttendeeId() { return dropInAttendeeId; }
+    public UUID getDropInPaymentId()  { return dropInPaymentId; }
 }

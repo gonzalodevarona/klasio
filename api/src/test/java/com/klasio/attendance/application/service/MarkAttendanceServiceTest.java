@@ -97,7 +97,8 @@ class MarkAttendanceServiceTest {
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
                 Instant.now(), ACTOR_ID,
-                null, null
+                null, null,
+                null, null          // drop-in fields
         );
     }
 
@@ -120,7 +121,8 @@ class MarkAttendanceServiceTest {
                 Instant.now(), ACTOR_ID,   // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
                 Instant.now(), ACTOR_ID,
-                null, null
+                null, null,
+                null, null          // drop-in fields
         );
     }
 
@@ -261,7 +263,8 @@ class MarkAttendanceServiceTest {
                 null, null, null,   // cancelledAt, cancelledBy, cancellationReason
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
-                Instant.now(), ACTOR_ID, null, null
+                Instant.now(), ACTOR_ID, null, null,
+                null, null          // drop-in fields
         );
 
         when(professorIdLookupPort.findProfessorIdByUserId(TENANT_ID, ACTOR_ID))

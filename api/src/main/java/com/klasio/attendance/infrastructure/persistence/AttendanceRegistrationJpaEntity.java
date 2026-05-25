@@ -31,20 +31,20 @@ public class AttendanceRegistrationJpaEntity implements Persistable<UUID> {
     @Column(name = "class_id", nullable = false)
     private UUID classId;
 
-    @Column(name = "student_id", nullable = false)
+    @Column(name = "student_id")
     private UUID studentId;
 
-    @Column(name = "enrollment_id", nullable = false)
+    @Column(name = "enrollment_id")
     private UUID enrollmentId;
 
-    @Column(name = "membership_id", nullable = false)
+    @Column(name = "membership_id")
     private UUID membershipId;
 
-    @Column(name = "level_at_registration", nullable = false, length = 15)
+    @Column(name = "level_at_registration", length = 15)
     private String levelAtRegistration;
 
-    @Column(name = "intended_hours", nullable = false)
-    private int intendedHours;
+    @Column(name = "intended_hours")
+    private Integer intendedHours;
 
     @Column(nullable = false, length = 25)
     private String status;
@@ -94,6 +94,12 @@ public class AttendanceRegistrationJpaEntity implements Persistable<UUID> {
     @Column(name = "updated_by")
     private UUID updatedBy;
 
+    @Column(name = "drop_in_attendee_id")
+    private UUID dropInAttendeeId;
+
+    @Column(name = "drop_in_payment_id")
+    private UUID dropInPaymentId;
+
     protected AttendanceRegistrationJpaEntity() {}
 
     @Override
@@ -119,8 +125,8 @@ public class AttendanceRegistrationJpaEntity implements Persistable<UUID> {
     public void setMembershipId(UUID membershipId) { this.membershipId = membershipId; }
     public String getLevelAtRegistration() { return levelAtRegistration; }
     public void setLevelAtRegistration(String levelAtRegistration) { this.levelAtRegistration = levelAtRegistration; }
-    public int getIntendedHours() { return intendedHours; }
-    public void setIntendedHours(int intendedHours) { this.intendedHours = intendedHours; }
+    public Integer getIntendedHours() { return intendedHours; }
+    public void setIntendedHours(Integer intendedHours) { this.intendedHours = intendedHours; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public LocalDate getSessionDate() { return sessionDate; }
@@ -153,4 +159,8 @@ public class AttendanceRegistrationJpaEntity implements Persistable<UUID> {
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
     public UUID getUpdatedBy() { return updatedBy; }
     public void setUpdatedBy(UUID updatedBy) { this.updatedBy = updatedBy; }
+    public UUID getDropInAttendeeId() { return dropInAttendeeId; }
+    public void setDropInAttendeeId(UUID dropInAttendeeId) { this.dropInAttendeeId = dropInAttendeeId; }
+    public UUID getDropInPaymentId() { return dropInPaymentId; }
+    public void setDropInPaymentId(UUID dropInPaymentId) { this.dropInPaymentId = dropInPaymentId; }
 }

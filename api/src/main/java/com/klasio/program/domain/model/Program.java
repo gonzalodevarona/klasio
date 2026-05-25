@@ -6,6 +6,7 @@ import com.klasio.program.domain.event.ProgramReactivated;
 import com.klasio.program.domain.event.ProgramUpdated;
 import com.klasio.shared.domain.DomainEvent;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +20,7 @@ public class Program {
     private final UUID tenantId;
     private String name;
     private ProgramStatus status;
+    private BigDecimal dropInPrice;
     private final Instant createdAt;
     private final UUID createdBy;
     private Instant updatedAt;
@@ -30,6 +32,7 @@ public class Program {
                     UUID tenantId,
                     String name,
                     ProgramStatus status,
+                    BigDecimal dropInPrice,
                     Instant createdAt,
                     UUID createdBy,
                     Instant updatedAt,
@@ -38,6 +41,7 @@ public class Program {
         this.tenantId = tenantId;
         this.name = name;
         this.status = status;
+        this.dropInPrice = dropInPrice;
         this.createdAt = createdAt;
         this.createdBy = createdBy;
         this.updatedAt = updatedAt;
@@ -46,6 +50,7 @@ public class Program {
 
     public static Program create(UUID tenantId,
                                  String name,
+                                 BigDecimal dropInPrice,
                                  UUID createdBy) {
         Objects.requireNonNull(tenantId, "Tenant id must not be null");
         Objects.requireNonNull(createdBy, "Created by must not be null");
@@ -59,6 +64,7 @@ public class Program {
                 tenantId,
                 name,
                 ProgramStatus.ACTIVE,
+                dropInPrice,
                 now,
                 createdBy,
                 null,
@@ -80,18 +86,20 @@ public class Program {
                                        UUID tenantId,
                                        String name,
                                        ProgramStatus status,
+                                       BigDecimal dropInPrice,
                                        Instant createdAt,
                                        UUID createdBy,
                                        Instant updatedAt,
                                        UUID updatedBy) {
-        return new Program(id, tenantId, name, status, createdAt, createdBy, updatedAt, updatedBy);
+        return new Program(id, tenantId, name, status, dropInPrice, createdAt, createdBy, updatedAt, updatedBy);
     }
 
-    public void update(String name, UUID updatedBy) {
+    public void update(String name, BigDecimal dropInPrice, UUID updatedBy) {
         Objects.requireNonNull(updatedBy, "Updated by must not be null");
         validateNotBlank(name, "Name");
 
         this.name = name;
+        this.dropInPrice = dropInPrice;
         this.updatedAt = Instant.now();
         this.updatedBy = updatedBy;
 
@@ -149,6 +157,14 @@ public class Program {
 
     public ProgramStatus getStatus() {
         return status;
+    }
+
+    public BigDecimal getDropInPrice() {
+        return dropInPrice;
+    }
+
+    public void setDropInPrice(BigDecimal dropInPrice) {
+        this.dropInPrice = dropInPrice;
     }
 
     public Instant getCreatedAt() {

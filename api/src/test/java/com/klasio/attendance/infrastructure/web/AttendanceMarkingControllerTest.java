@@ -279,7 +279,8 @@ class AttendanceMarkingControllerTest {
                 java.time.Instant.now(), USER_ID,
                 null, null, null,
                 java.time.Instant.now(), USER_ID,
-                null, null
+                null, null,
+                null, null // drop-in fields
         );
     }
 

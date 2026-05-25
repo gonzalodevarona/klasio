@@ -42,7 +42,7 @@ class GetProgramDetailServiceTest {
     @Test
     @DisplayName("should return ProgramDetail with resolved creator name")
     void execute_whenProgramExists_returnsProgramDetailWithCreatorName() {
-        Program program = Program.create(TENANT_ID, "Kids Program", UUID.randomUUID());
+        Program program = Program.create(TENANT_ID, "Kids Program", null, UUID.randomUUID());
         UUID actualProgramId = program.getId().value();
 
         when(programRepository.findById(TENANT_ID, actualProgramId)).thenReturn(Optional.of(program));
@@ -61,7 +61,7 @@ class GetProgramDetailServiceTest {
     @DisplayName("should fall back to UUID string when user not found")
     void execute_whenCreatorNotFound_fallsBackToUuidString() {
         UUID creatorId = UUID.randomUUID();
-        Program program = Program.create(TENANT_ID, "Kids Program", creatorId);
+        Program program = Program.create(TENANT_ID, "Kids Program", null, creatorId);
         UUID actualProgramId = program.getId().value();
 
         when(programRepository.findById(TENANT_ID, actualProgramId)).thenReturn(Optional.of(program));

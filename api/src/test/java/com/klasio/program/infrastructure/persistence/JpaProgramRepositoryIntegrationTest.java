@@ -182,7 +182,7 @@ class JpaProgramRepositoryIntegrationTest {
     }
 
     private Program createProgram(String name) {
-        Program program = Program.create(TENANT_ID, name, CREATED_BY);
+        Program program = Program.create(TENANT_ID, name, null, CREATED_BY);
         program.clearDomainEvents();
         return program;
     }

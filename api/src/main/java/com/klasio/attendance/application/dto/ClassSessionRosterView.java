@@ -1,5 +1,6 @@
 package com.klasio.attendance.application.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -23,8 +24,12 @@ public record ClassSessionRosterView(
             UUID studentId,
             String studentName,
             String level,
-            int intendedHours,
+            Integer intendedHours,
             String status,
-            UUID createdBy    // null when viewer is PROFESSOR; non-null for ADMIN/SUPERADMIN/MANAGER
+            UUID createdBy,           // null when viewer is PROFESSOR; non-null for ADMIN/SUPERADMIN/MANAGER
+            UUID dropInAttendeeId,    // null for regular student registrations
+            String dropInAttendeeName,
+            String dropInAttendeePhone,
+            BigDecimal dropInPaymentAmount
     ) {}
 }

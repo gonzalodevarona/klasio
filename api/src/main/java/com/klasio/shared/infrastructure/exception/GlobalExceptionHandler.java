@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RestControllerAdvice
@@ -496,6 +497,36 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotAlertAuthor(NotAlertAuthorException ex) {
         var error = new ErrorResponse.ErrorDetail("NOT_ALERT_AUTHOR", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
+    }
+
+    // -------------------------------------------------------------------------
+    // Drop-in exceptions
+    // -------------------------------------------------------------------------
+
+    private record PhoneConflictResponse(
+            ErrorResponse.ErrorDetail error,
+            UUID existingAttendeeId,
+            String fullName,
+            int totalVisits
+    ) {}
+
+    @ExceptionHandler(DropInNotAvailableException.class)
+    public ResponseEntity<ErrorResponse> handleDropInNotAvailable(DropInNotAvailableException ex) {
+        var error = new ErrorResponse.ErrorDetail("DROP_IN_NOT_AVAILABLE", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(DropInAttendeeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleDropInAttendeeNotFound(DropInAttendeeNotFoundException ex) {
+        var error = new ErrorResponse.ErrorDetail("DROP_IN_ATTENDEE_NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(PhoneAlreadyExistsException.class)
+    public ResponseEntity<PhoneConflictResponse> handlePhoneConflict(PhoneAlreadyExistsException ex) {
+        var errorDetail = new ErrorResponse.ErrorDetail("DROP_IN_PHONE_EXISTS", ex.getMessage());
+        var body = new PhoneConflictResponse(errorDetail, ex.existingAttendeeId(), ex.fullName(), ex.totalVisits());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

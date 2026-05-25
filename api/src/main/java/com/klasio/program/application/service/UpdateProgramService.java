@@ -37,7 +37,7 @@ public class UpdateProgramService implements UpdateProgramUseCase {
                     "A program with name '%s' already exists in this tenant".formatted(command.name()));
         }
 
-        program.update(command.name(), command.updatedBy());
+        program.update(command.name(), command.dropInPrice(), command.updatedBy());
 
         List<DomainEvent> events = List.copyOf(program.getDomainEvents());
 

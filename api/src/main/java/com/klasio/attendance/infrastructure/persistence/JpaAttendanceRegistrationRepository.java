@@ -172,6 +172,13 @@ public class JpaAttendanceRegistrationRepository extends TenantScopedRepository
                 .toList();
     }
 
+    @Override
+    public Optional<AttendanceRegistration> findByDropInPaymentId(UUID tenantId, UUID paymentId) {
+        applyTenantContext();
+        return springDataRepository.findByTenantIdAndDropInPaymentId(tenantId, paymentId)
+                .map(mapper::toDomain);
+    }
+
     private long toLong(Object val) {
         if (val == null) return 0L;
         if (val instanceof Number n) return n.longValue();

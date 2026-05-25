@@ -4,11 +4,12 @@ import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { useClassSessionRoster } from "@/hooks/useClassSessionRoster";
-import RegistrationStatusBadge from "./RegistrationStatusBadge";
+import RegistrationStatusBadge, { DropInTag } from "./RegistrationStatusBadge";
 import AttendanceMarkingPanel from "./AttendanceMarkingPanel";
 import SessionStatusBadge from "./SessionStatusBadge";
 import SessionActionsPanel from "./SessionActionsPanel";
 import { WalkInButton } from "./WalkInButton";
+import { DropInButton } from "./DropInButton";
 import { RegistrarBadge } from "./RegistrarBadge";
 import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import { ClassLevel } from "@/lib/types/programClass";
@@ -25,6 +26,8 @@ interface ClassRosterPanelProps {
   managedProgramIds?: string[];
   /** Class IDs assigned to the current user (PROFESSOR role). */
   professorClassIds?: string[];
+  /** Drop-in price for this class's program. When non-null, the DropInButton is shown. */
+  programDropInPrice?: string | null;
 }
 
 /** Returns the Monday of the week that contains `date`. */
@@ -78,6 +81,7 @@ export default function ClassRosterPanel({
   programId,
   managedProgramIds,
   professorClassIds,
+  programDropInPrice,
 }: ClassRosterPanelProps) {
   const t = useTranslations("classes");
   const locale = useLocale();
@@ -187,6 +191,15 @@ export default function ClassRosterPanel({
                     onRegistered={refetch}
                   />
                 )}
+                {canManage && sessionStatus !== "CANCELLED" && programDropInPrice != null && (
+                  <DropInButton
+                    classId={classId}
+                    sessionDate={session.sessionDate}
+                    startTime={session.startTime}
+                    programDropInPrice={programDropInPrice}
+                    onRegistered={refetch}
+                  />
+                )}
                 <span className="text-xs font-medium text-blue-600 ml-auto">
                   {t("rosterRegistrantCount", { count: session.registrantCount })}
                 </span>
@@ -215,23 +228,30 @@ export default function ClassRosterPanel({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {session.registrants.map((r) => (
-                      <tr key={r.registrationId} className="hover:bg-gray-50">
-                        <td className="px-4 py-2 text-gray-900 font-medium">
-                          {r.studentName}
-                          {r.createdBy && ["ADMIN", "SUPERADMIN", "MANAGER"].includes((userRole ?? "").toUpperCase()) && (
-                            <RegistrarBadge createdBy={r.createdBy} />
-                          )}
-                        </td>
-                        <td className="px-4 py-2">
-                          <ClassLevelBadge level={r.level as ClassLevel} />
-                        </td>
-                        <td className="px-4 py-2 text-gray-600">{r.intendedHours}h</td>
-                        <td className="px-4 py-2">
-                          <RegistrationStatusBadge status={r.status} />
-                        </td>
-                      </tr>
-                    ))}
+                    {session.registrants.map((r) => {
+                      const isDropIn = r.dropInAttendeeId != null;
+                      const displayName = isDropIn ? (r.dropInAttendeeName ?? "") : r.studentName;
+                      return (
+                        <tr key={r.registrationId} className="hover:bg-gray-50">
+                          <td className="px-4 py-2 text-gray-900 font-medium">
+                            {displayName}
+                            {isDropIn && <DropInTag />}
+                            {!isDropIn && r.createdBy && ["ADMIN", "SUPERADMIN", "MANAGER"].includes((userRole ?? "").toUpperCase()) && (
+                              <RegistrarBadge createdBy={r.createdBy} />
+                            )}
+                          </td>
+                          <td className="px-4 py-2">
+                            {!isDropIn && <ClassLevelBadge level={r.level as ClassLevel} />}
+                          </td>
+                          <td className="px-4 py-2 text-gray-600">
+                            {!isDropIn && `${r.intendedHours}h`}
+                          </td>
+                          <td className="px-4 py-2">
+                            <RegistrationStatusBadge status={r.status} />
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}

@@ -42,6 +42,7 @@ const existingProgram: ProgramDetail = {
   createdBy: "44444444-4444-4444-4444-444444444444",
   updatedAt: "2025-01-15T10:00:00Z",
   updatedBy: "44444444-4444-4444-4444-444444444444",
+  dropInPrice: null,
 };
 
 beforeEach(() => {

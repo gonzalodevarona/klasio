@@ -6,7 +6,8 @@ export type BadgeVariant =
   | "pending" | "approved" | "rejected"
   | "beginner" | "intermediate" | "advanced"
   | "open"
-  | "info";
+  | "info"
+  | "dropIn";
 
 export interface BadgeProps {
   variant: BadgeVariant;
@@ -29,6 +30,7 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   advanced:     "bg-k-volt text-k-volt-text",
   open:         "bg-slate-100 text-slate-700 ring-1 ring-slate-300",
   info:         "bg-k-info-bg text-k-info-text",
+  dropIn:       "bg-violet-100 text-violet-700",
 };
 
 export function Badge({ variant, label, small, className, icon, title }: BadgeProps) {

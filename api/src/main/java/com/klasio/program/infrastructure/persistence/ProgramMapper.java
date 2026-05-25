@@ -14,6 +14,7 @@ public class ProgramMapper {
                 entity.getTenantId(),
                 entity.getName(),
                 ProgramStatus.valueOf(entity.getStatus()),
+                entity.getDropInPrice(),
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
                 entity.getUpdatedAt(),
@@ -27,6 +28,7 @@ public class ProgramMapper {
         entity.setTenantId(program.getTenantId());
         entity.setName(program.getName());
         entity.setStatus(program.getStatus().name());
+        entity.setDropInPrice(program.getDropInPrice());
         entity.setCreatedAt(program.getCreatedAt());
         entity.setCreatedBy(program.getCreatedBy());
         entity.setUpdatedAt(program.getUpdatedAt());

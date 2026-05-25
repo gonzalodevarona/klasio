@@ -584,7 +584,8 @@ class RegisterWalkInServiceTest {
                 ENROLLMENT_ID, MEMBERSHIP_ID, "BEGINNER", 1, AttendanceRegistrationStatus.PRESENT,
                 TODAY, SESSION_START, SESSION_END,
                 null, null, null, Instant.now(), ACTOR_USER_ID,
-                null, null, null, Instant.now(), ACTOR_USER_ID, null, null);
+                null, null, null, Instant.now(), ACTOR_USER_ID, null, null,
+                null, null); // drop-in fields
 
         when(registrationRepository.findActiveBySessionAndStudent(any(), any(), any()))
                 .thenReturn(Optional.of(presentReg));
@@ -614,7 +615,8 @@ class RegisterWalkInServiceTest {
                 ENROLLMENT_ID, MEMBERSHIP_ID, "BEGINNER", 1, AttendanceRegistrationStatus.ABSENT,
                 TODAY, SESSION_START, SESSION_END,
                 null, null, null, Instant.now(), ACTOR_USER_ID,
-                null, null, null, Instant.now(), ACTOR_USER_ID, null, null);
+                null, null, null, Instant.now(), ACTOR_USER_ID, null, null,
+                null, null); // drop-in fields
 
         when(registrationRepository.findActiveBySessionAndStudent(any(), any(), any()))
                 .thenReturn(Optional.of(absentReg));
@@ -644,7 +646,8 @@ class RegisterWalkInServiceTest {
                 ENROLLMENT_ID, MEMBERSHIP_ID, "BEGINNER", 1, AttendanceRegistrationStatus.PRESENT_NO_HOURS,
                 TODAY, SESSION_START, SESSION_END,
                 null, null, null, Instant.now(), ACTOR_USER_ID,
-                null, null, null, Instant.now(), ACTOR_USER_ID, null, null);
+                null, null, null, Instant.now(), ACTOR_USER_ID, null, null,
+                null, null); // drop-in fields
 
         when(registrationRepository.findActiveBySessionAndStudent(any(), any(), any()))
                 .thenReturn(Optional.of(pnhReg));

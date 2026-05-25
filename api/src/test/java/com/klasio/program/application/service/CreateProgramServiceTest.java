@@ -51,6 +51,7 @@ class CreateProgramServiceTest {
         CreateProgramCommand command = new CreateProgramCommand(
                 TENANT_ID,
                 "Kids Program",
+                null,
                 CREATED_BY
         );
 
@@ -80,6 +81,7 @@ class CreateProgramServiceTest {
         CreateProgramCommand command = new CreateProgramCommand(
                 TENANT_ID,
                 "Kids Program",
+                null,
                 CREATED_BY
         );
 
@@ -98,6 +100,7 @@ class CreateProgramServiceTest {
         CreateProgramCommand command = new CreateProgramCommand(
                 TENANT_ID,
                 "Youth & Adults",
+                null,
                 CREATED_BY
         );
 

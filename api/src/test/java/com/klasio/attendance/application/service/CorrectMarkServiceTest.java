@@ -86,7 +86,8 @@ class CorrectMarkServiceTest {
                 markedAt, ACTOR_ID, // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
                 Instant.now(), ACTOR_ID,
-                null, null
+                null, null,
+                null, null          // drop-in fields
         );
     }
 
@@ -247,7 +248,8 @@ class CorrectMarkServiceTest {
                 null, null, null,   // cancelledAt, cancelledBy, cancellationReason
                 null, null,         // markedAt, markedBy
                 null, null, null,   // correctedAt, correctedBy, correctionReason
-                Instant.now(), ACTOR_ID, null, null
+                Instant.now(), ACTOR_ID, null, null,
+                null, null          // drop-in fields
         );
         when(registrationRepository.findById(TENANT_ID, REG_ID))
                 .thenReturn(Optional.of(unMarked));

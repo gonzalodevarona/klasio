@@ -13,7 +13,7 @@ public record AttendanceMarkedPresentNoHours(
         UUID classId,
         UUID studentId,
         UUID membershipId,
-        int intendedHours,
+        Integer intendedHours,
         LocalDate sessionDate,
         UUID actorId,
         Instant occurredAt

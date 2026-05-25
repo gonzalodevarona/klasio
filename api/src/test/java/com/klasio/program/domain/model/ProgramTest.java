@@ -30,7 +30,7 @@ class ProgramTest {
         @Test
         @DisplayName("should create program with ACTIVE status and all fields set correctly")
         void create_withValidInputs_returnsActiveProgram() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
 
             assertNotNull(program.getId());
             assertNotNull(program.getId().value());
@@ -44,7 +44,7 @@ class ProgramTest {
         @Test
         @DisplayName("should emit exactly one ProgramCreated domain event")
         void create_withValidInputs_emitsProgramCreatedEvent() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
 
             List<DomainEvent> events = program.getDomainEvents();
             assertEquals(1, events.size());
@@ -69,28 +69,28 @@ class ProgramTest {
         @DisplayName("should reject blank name")
         void create_withBlankName_throwsIllegalArgument() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Program.create(TENANT_ID, "  ", CREATED_BY));
+                    () -> Program.create(TENANT_ID, "  ", null, CREATED_BY));
         }
 
         @Test
         @DisplayName("should reject null name")
         void create_withNullName_throwsIllegalArgument() {
             assertThrows(IllegalArgumentException.class,
-                    () -> Program.create(TENANT_ID, null, CREATED_BY));
+                    () -> Program.create(TENANT_ID, null, null, CREATED_BY));
         }
 
         @Test
         @DisplayName("should reject null tenantId")
         void create_withNullTenantId_throwsNullPointerException() {
             assertThrows(NullPointerException.class,
-                    () -> Program.create(null, NAME, CREATED_BY));
+                    () -> Program.create(null, NAME, null, CREATED_BY));
         }
 
         @Test
         @DisplayName("should reject null createdBy")
         void create_withNullCreatedBy_throwsNullPointerException() {
             assertThrows(NullPointerException.class,
-                    () -> Program.create(TENANT_ID, NAME, null));
+                    () -> Program.create(TENANT_ID, NAME, null, null));
         }
     }
 
@@ -104,10 +104,10 @@ class ProgramTest {
         @Test
         @DisplayName("should update name, updatedAt, and updatedBy")
         void update_withValidInputs_updatesFields() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.clearDomainEvents();
 
-            program.update(NEW_NAME, UPDATED_BY);
+            program.update(NEW_NAME, null, UPDATED_BY);
 
             assertEquals(NEW_NAME, program.getName());
             assertNotNull(program.getUpdatedAt());
@@ -117,10 +117,10 @@ class ProgramTest {
         @Test
         @DisplayName("should emit ProgramUpdated event")
         void update_emitsProgramUpdatedEvent() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.clearDomainEvents();
 
-            program.update(NEW_NAME, UPDATED_BY);
+            program.update(NEW_NAME, null, UPDATED_BY);
 
             List<DomainEvent> events = program.getDomainEvents();
             assertEquals(1, events.size());
@@ -137,10 +137,10 @@ class ProgramTest {
         @Test
         @DisplayName("should reject blank name")
         void update_withBlankName_throwsIllegalArgument() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
 
             assertThrows(IllegalArgumentException.class,
-                    () -> program.update("  ", UPDATED_BY));
+                    () -> program.update("  ", null, UPDATED_BY));
         }
     }
 
@@ -153,7 +153,7 @@ class ProgramTest {
         @Test
         @DisplayName("should set status to INACTIVE when program is ACTIVE")
         void deactivate_whenActive_setsInactive() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.clearDomainEvents();
 
             program.deactivate(DEACTIVATED_BY);
@@ -164,7 +164,7 @@ class ProgramTest {
         @Test
         @DisplayName("should emit ProgramDeactivated event")
         void deactivate_whenActive_emitsEvent() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.clearDomainEvents();
 
             program.deactivate(DEACTIVATED_BY);
@@ -183,7 +183,7 @@ class ProgramTest {
         @Test
         @DisplayName("should set updatedAt and updatedBy")
         void deactivate_whenActive_setsUpdatedFields() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.clearDomainEvents();
 
             program.deactivate(DEACTIVATED_BY);
@@ -195,7 +195,7 @@ class ProgramTest {
         @Test
         @DisplayName("should throw IllegalStateException when already inactive")
         void deactivate_whenInactive_throwsIllegalStateException() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.deactivate(DEACTIVATED_BY);
 
             assertThrows(IllegalStateException.class,
@@ -213,7 +213,7 @@ class ProgramTest {
         @Test
         @DisplayName("should set status to ACTIVE when program is INACTIVE")
         void reactivate_whenInactive_setsActive() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.deactivate(DEACTIVATED_BY);
             program.clearDomainEvents();
 
@@ -225,7 +225,7 @@ class ProgramTest {
         @Test
         @DisplayName("should emit ProgramReactivated event")
         void reactivate_whenInactive_emitsEvent() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.deactivate(DEACTIVATED_BY);
             program.clearDomainEvents();
 
@@ -245,7 +245,7 @@ class ProgramTest {
         @Test
         @DisplayName("should set updatedAt and updatedBy")
         void reactivate_whenInactive_setsUpdatedFields() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
             program.deactivate(DEACTIVATED_BY);
             program.clearDomainEvents();
 
@@ -258,7 +258,7 @@ class ProgramTest {
         @Test
         @DisplayName("should throw IllegalStateException when already active")
         void reactivate_whenActive_throwsIllegalStateException() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
 
             assertThrows(IllegalStateException.class,
                     () -> program.reactivate(UUID.randomUUID()));
@@ -272,7 +272,7 @@ class ProgramTest {
         @Test
         @DisplayName("should return unmodifiable list from getDomainEvents")
         void shouldReturnUnmodifiableList() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
 
             List<DomainEvent> events = program.getDomainEvents();
             assertThrows(UnsupportedOperationException.class, () -> events.clear());
@@ -281,7 +281,7 @@ class ProgramTest {
         @Test
         @DisplayName("should clear all domain events when clearDomainEvents is called")
         void shouldClearDomainEvents() {
-            Program program = Program.create(TENANT_ID, NAME, CREATED_BY);
+            Program program = Program.create(TENANT_ID, NAME, null, CREATED_BY);
 
             program.clearDomainEvents();
 

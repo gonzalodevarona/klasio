@@ -27,6 +27,7 @@ export default function ProgramForm({ program }: ProgramFormProps) {
   const isEdit = !!program;
 
   const [name, setName] = useState(program?.name ?? "");
+  const [dropInPrice, setDropInPrice] = useState(program?.dropInPrice ?? "");
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
@@ -39,6 +40,13 @@ export default function ProgramForm({ program }: ProgramFormProps) {
       errors.name = t("formNameProgramRequired");
     } else if (name.trim().length > 150) {
       errors.name = t("formNameProgramMaxLength");
+    }
+
+    if (dropInPrice.trim() !== "") {
+      const val = parseFloat(dropInPrice);
+      if (isNaN(val) || val <= 0) {
+        errors.dropInPrice = t("formDropInPriceInvalid");
+      }
     }
 
     return errors;
@@ -58,15 +66,19 @@ export default function ProgramForm({ program }: ProgramFormProps) {
     setSubmitting(true);
 
     try {
+      const parsedDropInPrice = dropInPrice.trim() !== "" ? dropInPrice.trim() : null;
+
       if (isEdit) {
         const body: UpdateProgramRequest = {
           name: name.trim(),
+          dropInPrice: parsedDropInPrice,
         };
         await api.put<ProgramDetail>(`/programs/${program.id}`, body);
         router.push(`/programs/${program.id}`);
       } else {
         const body: CreateProgramRequest = {
           name: name.trim(),
+          dropInPrice: parsedDropInPrice,
         };
         const created = await api.post<ProgramDetail>("/programs", body);
         router.push(`/programs/${created.id}`);
@@ -110,6 +122,21 @@ export default function ProgramForm({ program }: ProgramFormProps) {
         placeholder={t("formNameProgramPlaceholder")}
         error={fieldErrors.name}
       />
+
+      {/* Drop-in price */}
+      <div>
+        <Input
+          label={t("formDropInPriceLabel")}
+          type="number"
+          min="0.01"
+          step="1"
+          value={dropInPrice}
+          onChange={(e) => setDropInPrice(e.target.value)}
+          placeholder={t("formDropInPricePlaceholder")}
+          error={fieldErrors.dropInPrice}
+        />
+        <p className="mt-1 text-xs text-gray-500">{t("formDropInPriceHint")}</p>
+      </div>
 
       {/* Submit */}
       <div className="pt-2">

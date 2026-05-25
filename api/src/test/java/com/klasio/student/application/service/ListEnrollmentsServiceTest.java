@@ -68,7 +68,7 @@ class ListEnrollmentsServiceTest {
 
     private Program createProgram(UUID programId, String name) {
         return Program.reconstitute(ProgramId.of(programId), TENANT_ID, name, ProgramStatus.ACTIVE,
-                Instant.now(), UUID.randomUUID(), null, null);
+                null, Instant.now(), UUID.randomUUID(), null, null);
     }
 
     private Student createStudent(UUID studentId, String firstName, String lastName) {

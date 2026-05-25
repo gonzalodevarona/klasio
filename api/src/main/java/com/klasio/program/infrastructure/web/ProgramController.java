@@ -70,6 +70,7 @@ public class ProgramController {
         CreateProgramCommand command = new CreateProgramCommand(
                 tenantId,
                 request.name(),
+                request.dropInPrice(),
                 userId
         );
 
@@ -125,7 +126,7 @@ public class ProgramController {
         UUID tenantId = extractTenantId();
 
         UpdateProgramCommand command = new UpdateProgramCommand(
-                tenantId, programId, request.name(), userId);
+                tenantId, programId, request.name(), request.dropInPrice(), userId);
 
         Program program = updateProgramUseCase.execute(command);
 

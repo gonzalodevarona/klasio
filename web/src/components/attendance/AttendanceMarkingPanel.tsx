@@ -10,7 +10,7 @@ import {
   MarkedRegistration,
 } from "@/lib/types/attendance";
 import { useMarkAttendance } from "@/hooks/useMarkAttendance";
-import RegistrationStatusBadge from "./RegistrationStatusBadge";
+import RegistrationStatusBadge, { DropInTag } from "./RegistrationStatusBadge";
 import ClassLevelBadge from "@/components/classes/ClassLevelBadge";
 import { ClassLevel } from "@/lib/types/programClass";
 import CorrectMarkModal from "./CorrectMarkModal";
@@ -180,14 +180,21 @@ export default function AttendanceMarkingPanel({
               r.status !== "REGISTERED" &&
               r.status !== "CANCELLED_BY_STUDENT" &&
               r.status !== "CANCELLED_BY_SYSTEM";
+            const isDropIn = r.dropInAttendeeId != null;
+            const displayName = isDropIn ? (r.dropInAttendeeName ?? "") : r.studentName;
 
             return (
               <tr key={r.registrationId} className="hover:bg-gray-50">
-                <td className="px-4 py-2 text-gray-900 font-medium">{r.studentName}</td>
-                <td className="px-4 py-2">
-                  <ClassLevelBadge level={r.level as ClassLevel} />
+                <td className="px-4 py-2 text-gray-900 font-medium">
+                  {displayName}
+                  {isDropIn && <DropInTag />}
                 </td>
-                <td className="px-4 py-2 text-gray-600">{r.intendedHours}h</td>
+                <td className="px-4 py-2">
+                  {!isDropIn && <ClassLevelBadge level={r.level as ClassLevel} />}
+                </td>
+                <td className="px-4 py-2 text-gray-600">
+                  {!isDropIn && `${r.intendedHours}h`}
+                </td>
                 <td className="px-4 py-2">
                   {apiResult ? (
                     <div className="flex items-center gap-1.5">
@@ -205,55 +212,58 @@ export default function AttendanceMarkingPanel({
                     <RegistrationStatusBadge status={r.status} />
                   )}
                 </td>
+                {/* Drop-in rows have no mark/correct actions */}
                 {canMark && (
                   <td className="px-4 py-2">
-                    {isAlreadyMarked ? (
-                      <span className="text-xs text-gray-400 italic">{t("markingAlreadyMarked")}</span>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setMark(
-                              r.registrationId,
-                              currentMark === "PRESENT" ? null : "PRESENT"
-                            )
-                          }
-                          disabled={loading}
-                          className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium border transition-colors ${
-                            currentMark === "PRESENT"
-                              ? "bg-blue-600 text-white border-blue-600"
-                              : "bg-white text-blue-600 border-blue-300 hover:bg-blue-50"
-                          }`}
-                        >
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          {t("markingPresent")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setMark(
-                              r.registrationId,
-                              currentMark === "ABSENT" ? null : "ABSENT"
-                            )
-                          }
-                          disabled={loading}
-                          className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium border transition-colors ${
-                            currentMark === "ABSENT"
-                              ? "bg-red-600 text-white border-red-600"
-                              : "bg-white text-red-600 border-red-300 hover:bg-red-50"
-                          }`}
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                          {t("markingAbsent")}
-                        </button>
-                      </div>
+                    {!isDropIn && (
+                      isAlreadyMarked ? (
+                        <span className="text-xs text-gray-400 italic">{t("markingAlreadyMarked")}</span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setMark(
+                                r.registrationId,
+                                currentMark === "PRESENT" ? null : "PRESENT"
+                              )
+                            }
+                            disabled={loading}
+                            className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium border transition-colors ${
+                              currentMark === "PRESENT"
+                                ? "bg-blue-600 text-white border-blue-600"
+                                : "bg-white text-blue-600 border-blue-300 hover:bg-blue-50"
+                            }`}
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            {t("markingPresent")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setMark(
+                                r.registrationId,
+                                currentMark === "ABSENT" ? null : "ABSENT"
+                              )
+                            }
+                            disabled={loading}
+                            className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium border transition-colors ${
+                              currentMark === "ABSENT"
+                                ? "bg-red-600 text-white border-red-600"
+                                : "bg-white text-red-600 border-red-300 hover:bg-red-50"
+                            }`}
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            {t("markingAbsent")}
+                          </button>
+                        </div>
+                      )
                     )}
                   </td>
                 )}
                 {canCorrect && (
                   <td className="px-4 py-2">
-                    {isAlreadyMarked && (
+                    {!isDropIn && isAlreadyMarked && (
                       <button
                         type="button"
                         onClick={() => setCorrectingReg(r)}

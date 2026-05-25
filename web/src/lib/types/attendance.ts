@@ -70,6 +70,10 @@ export interface RosterRegistrantView {
   status: RegistrationStatus;
   /** userId of the actor who created this registration (null when self-registered). */
   createdBy?: string | null;
+  dropInAttendeeId?: string | null;
+  dropInAttendeeName?: string | null;
+  dropInAttendeePhone?: string | null;
+  dropInPaymentAmount?: string | null;
 }
 
 export interface ClassSessionRoster {

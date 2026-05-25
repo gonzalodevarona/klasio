@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -64,21 +65,29 @@ public class ClassSessionRosterController {
                 String studentId,
                 String studentName,
                 String level,
-                int intendedHours,
+                Integer intendedHours,
                 String status,
-                String createdBy    // null for PROFESSOR viewers; UUID string for ADMIN/SUPERADMIN/MANAGER
+                String createdBy,           // null for PROFESSOR viewers; UUID string for ADMIN/SUPERADMIN/MANAGER
+                String dropInAttendeeId,    // null for regular student registrations
+                String dropInAttendeeName,
+                String dropInAttendeePhone,
+                BigDecimal dropInPaymentAmount
         ) {}
 
         static ClassSessionRosterResponse from(ClassSessionRosterView view) {
             List<RegistrantResponse> registrants = view.registrants().stream()
                     .map(r -> new RegistrantResponse(
                             r.registrationId().toString(),
-                            r.studentId().toString(),
+                            r.studentId() != null ? r.studentId().toString() : null,
                             r.studentName(),
                             r.level(),
                             r.intendedHours(),
                             r.status(),
-                            r.createdBy() != null ? r.createdBy().toString() : null
+                            r.createdBy() != null ? r.createdBy().toString() : null,
+                            r.dropInAttendeeId() != null ? r.dropInAttendeeId().toString() : null,
+                            r.dropInAttendeeName(),
+                            r.dropInAttendeePhone(),
+                            r.dropInPaymentAmount()
                     ))
                     .toList();
             return new ClassSessionRosterResponse(
