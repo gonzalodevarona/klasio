@@ -758,6 +758,8 @@
     "formScheduleDayRequired": "Las clases recurrentes requieren un día de la semana en cada entrada.",
     "formScheduleDateRequired": "Las clases únicas requieren una fecha específica.",
     "formScheduleOneTimeMax": "Las clases únicas solo pueden tener una entrada de horario.",
+    "formLocationLabel": "Lugar",
+    "formLocationPlaceholder": "ej. Salón 1",
     "dayMonday": "Lunes",
     "dayTuesday": "Martes",
     "dayWednesday": "Miércoles",
