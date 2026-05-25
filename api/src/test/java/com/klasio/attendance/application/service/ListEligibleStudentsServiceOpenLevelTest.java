@@ -95,7 +95,7 @@ class ListEligibleStudentsServiceOpenLevelTest {
                 "ACTIVE", "RECURRING",
                 10, "All Levels Open Session",
                 List.of(new ClassDetailsPort.ScheduleEntryView(
-                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
+                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END, null))
         );
 
         beginnerClassRegView = new ClassRegistrationView(
@@ -104,7 +104,7 @@ class ListEligibleStudentsServiceOpenLevelTest {
                 "ACTIVE", "RECURRING",
                 10, "Beginners Session",
                 List.of(new ClassDetailsPort.ScheduleEntryView(
-                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
+                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END, null))
         );
 
         existingSession = ClassSession.reconstitute(

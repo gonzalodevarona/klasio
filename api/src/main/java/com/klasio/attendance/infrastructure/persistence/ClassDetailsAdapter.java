@@ -59,7 +59,8 @@ public class ClassDetailsAdapter implements ClassDetailsPort {
                         e.getDayOfWeek() != null ? DayOfWeek.valueOf(e.getDayOfWeek()) : null,
                         e.getSpecificDate(),
                         e.getStartTime(),
-                        e.getEndTime()
+                        e.getEndTime(),
+                        e.getLocation()
                 ))
                 .toList();
 

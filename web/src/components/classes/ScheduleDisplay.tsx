@@ -28,23 +28,25 @@ function formatTimeRange(startTime: string, endTime: string): string {
 
 export default function ScheduleDisplay({ entries, type }: ScheduleDisplayProps) {
   if (type === "RECURRING") {
-    const grouped = new Map<string, string[]>();
+    const grouped = new Map<string, { days: string[]; location?: string | null }>();
 
     for (const entry of entries) {
       const timeRange = formatTimeRange(entry.startTime, entry.endTime);
       const day = entry.dayOfWeek ? formatDayOfWeek(entry.dayOfWeek) : "";
+      const key = `${timeRange}|${entry.location ?? ""}`;
 
-      if (!grouped.has(timeRange)) {
-        grouped.set(timeRange, []);
+      if (!grouped.has(key)) {
+        grouped.set(key, { days: [], location: entry.location });
       }
-      grouped.get(timeRange)!.push(day);
+      grouped.get(key)!.days.push(day);
     }
 
     return (
       <div>
-        {Array.from(grouped.entries()).map(([timeRange, days]) => (
-          <p key={timeRange} className="text-sm text-gray-700">
-            {days.join(", ")} {timeRange}
+        {Array.from(grouped.entries()).map(([key, { days, location }]) => (
+          <p key={key} className="text-sm text-gray-700">
+            {days.join(", ")} {key.split("|")[0]}
+            {location ? ` · ${location}` : ""}
           </p>
         ))}
       </div>
@@ -57,6 +59,7 @@ export default function ScheduleDisplay({ entries, type }: ScheduleDisplayProps)
         <p key={index} className="text-sm text-gray-700">
           {entry.specificDate ? formatSpecificDate(entry.specificDate) : ""}{" "}
           {formatTimeRange(entry.startTime, entry.endTime)}
+          {entry.location ? ` · ${entry.location}` : ""}
         </p>
       ))}
     </div>

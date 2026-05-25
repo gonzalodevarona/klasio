@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import ClassDetail from "@/components/classes/ClassDetail";
 import { useProgramClassDetail } from "@/hooks/useProgramClasses";
+import { useProgramDetail } from "@/hooks/usePrograms";
 import { Button } from "@/components/ui";
 
 interface ClassDetailPageProps {
@@ -16,6 +17,7 @@ export default function ClassDetailPage({ params }: ClassDetailPageProps) {
   const tCommon = useTranslations("common");
   const { id, classId } = use(params);
   const { programClass, loading, error, refetch } = useProgramClassDetail(id, classId);
+  const { program } = useProgramDetail(id);
 
   return (
     <div>
@@ -54,6 +56,7 @@ export default function ClassDetailPage({ params }: ClassDetailPageProps) {
           programId={id}
           programClass={programClass}
           onChanged={refetch}
+          programDropInPrice={program?.dropInPrice}
         />
       )}
     </div>

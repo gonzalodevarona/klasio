@@ -164,7 +164,8 @@ public class GetAvailableSessionsService implements GetAvailableSessionsUseCase 
                     registrationOpen,
                     alertReason,
                     registrationId,
-                    registrationStatus
+                    registrationStatus,
+                    tuple.location()
             ));
         }
 

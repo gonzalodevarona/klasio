@@ -106,7 +106,7 @@ class RegisterWalkInServiceTest {
                 CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
-                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
+                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END, null))
         );
         enrollment = new EnrollmentView(ENROLLMENT_ID, "BEGINNER");
         membership = new ActiveMembershipView(MEMBERSHIP_ID, 10, TODAY.plusMonths(1), false);
@@ -225,7 +225,7 @@ class RegisterWalkInServiceTest {
                 CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "INACTIVE", "RECURRING",
                 5, "Old Class",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
-                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END)));
+                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END, null)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(inactiveView));
 
         assertThatThrownBy(() -> service.execute(adminCommand()))
@@ -353,7 +353,7 @@ class RegisterWalkInServiceTest {
         ClassDetailsPort.ClassRegistrationView futureClassView = new ClassDetailsPort.ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING", 5, "Class",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
-                        sessionDate.getDayOfWeek(), sessionDate, futureStart, futureEnd)));
+                        sessionDate.getDayOfWeek(), sessionDate, futureStart, futureEnd, null)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(futureClassView));
 
         RegisterWalkInCommand cmd = new RegisterWalkInCommand(
@@ -382,7 +382,7 @@ class RegisterWalkInServiceTest {
         ClassDetailsPort.ClassRegistrationView pastClassView = new ClassDetailsPort.ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING", 5, "Class",
                 java.util.List.of(new ClassDetailsPort.ScheduleEntryView(
-                        sessionDate.getDayOfWeek(), sessionDate, pastStart, pastEnd)));
+                        sessionDate.getDayOfWeek(), sessionDate, pastStart, pastEnd, null)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(pastClassView));
 
         RegisterWalkInCommand cmd = new RegisterWalkInCommand(

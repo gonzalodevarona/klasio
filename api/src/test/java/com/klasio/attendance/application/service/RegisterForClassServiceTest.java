@@ -79,7 +79,7 @@ class RegisterForClassServiceTest {
         activeClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
-                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME))
+                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME, null))
         );
         enrollment = new EnrollmentView(ENROLLMENT_ID, "BEGINNER");
         membership = new ActiveMembershipView(MEMBERSHIP_ID, 10,
@@ -123,7 +123,7 @@ class RegisterForClassServiceTest {
     void classInactive_throws400() {
         ClassRegistrationView inactive = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "BEGINNER", "INACTIVE", "RECURRING",
-                5, "Old Class", List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME)));
+                5, "Old Class", List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME, null)));
         when(classDetailsPort.findForRegistration(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(inactive));
 
         assertThatThrownBy(() -> service.execute(command(FUTURE_MONDAY, 1)))

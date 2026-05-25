@@ -525,7 +525,7 @@ class ListClassSessionRosterServiceTest {
                 CLASS_ID, PROGRAM_ID, PROFESSOR_ID,
                 "BEGINNER", "ACTIVE", "ONE_TIME",
                 20, "Test Class",
-                List.of(new ScheduleEntryView(null, specificDate, START, END))
+                List.of(new ScheduleEntryView(null, specificDate, START, END, null))
         );
     }
 
@@ -534,7 +534,7 @@ class ListClassSessionRosterServiceTest {
     }
 
     private ScheduleEntryView scheduleEntry(DayOfWeek day, LocalTime start, LocalTime end) {
-        return new ScheduleEntryView(day, null, start, end);
+        return new ScheduleEntryView(day, null, start, end, null);
     }
 
     private AttendanceRegistration buildRegistration(UUID regId, UUID studentId,

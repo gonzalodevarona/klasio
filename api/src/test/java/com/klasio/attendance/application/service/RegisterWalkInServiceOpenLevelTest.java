@@ -99,7 +99,7 @@ class RegisterWalkInServiceOpenLevelTest {
         openClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "OPEN", "ACTIVE", "RECURRING",
                 5, "All Levels Open Session",
-                List.of(new ScheduleEntryView(TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
+                List.of(new ScheduleEntryView(TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END, null))
         );
         intermediateEnrollment = new EnrollmentView(ENROLLMENT_ID, "INTERMEDIATE");
         membership = new ActiveMembershipView(MEMBERSHIP_ID, 10, TODAY.plusMonths(1), false);

@@ -758,6 +758,8 @@
     "formScheduleDayRequired": "Las clases recurrentes requieren un día de la semana en cada entrada.",
     "formScheduleDateRequired": "Las clases únicas requieren una fecha específica.",
     "formScheduleOneTimeMax": "Las clases únicas solo pueden tener una entrada de horario.",
+    "formLocationLabel": "Lugar",
+    "formLocationPlaceholder": "ej. Salón 1",
     "dayMonday": "Lunes",
     "dayTuesday": "Martes",
     "dayWednesday": "Miércoles",
@@ -1291,7 +1293,8 @@
         "SESSION_CANCELLED": "Esta sesión ha sido cancelada.",
         "DROP_IN_ATTENDEE_NOT_FOUND": "Asistente no encontrado.",
         "FORBIDDEN": "No tienes permiso para registrar asistentes externos en esta clase.",
-        "UNKNOWN": "Ocurrió un error. Intente de nuevo."
+        "UNKNOWN": "Ocurrió un error. Intente de nuevo.",
+        "DROP_IN_ALREADY_REGISTERED": "Esta persona ya está registrada en esta sesión."
       },
       "phoneCollision": {
         "title": "Teléfono ya registrado",
@@ -1299,7 +1302,8 @@
         "question": "¿Es la misma persona?",
         "yes": "Sí, usar registro existente",
         "cancel": "Cancelar"
-      }
+      },
+      "outsideWindowTooltip": "Fuera de la ventana de registro para esta sesión."
     }
   },
   "studentClasses": {

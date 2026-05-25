@@ -109,14 +109,16 @@ public final class ClassResponseDto {
             String dayOfWeek,
             String specificDate,
             String startTime,
-            String endTime
+            String endTime,
+            String location
     ) {
         public static ScheduleEntryResponse fromDomain(ClassScheduleEntry entry) {
             return new ScheduleEntryResponse(
                     entry.dayOfWeek() != null ? entry.dayOfWeek().name() : null,
                     entry.specificDate() != null ? entry.specificDate().toString() : null,
                     entry.startTime().toString(),
-                    entry.endTime().toString()
+                    entry.endTime().toString(),
+                    entry.location()
             );
         }
     }

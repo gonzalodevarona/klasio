@@ -34,13 +34,13 @@ class ProgramClassTest {
     private static final int MAX_STUDENTS = 20;
 
     private static final ClassScheduleEntry MONDAY_SCHEDULE = new ClassScheduleEntry(
-            DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0));
+            DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null);
     private static final ClassScheduleEntry WEDNESDAY_SCHEDULE = new ClassScheduleEntry(
-            DayOfWeek.WEDNESDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0));
+            DayOfWeek.WEDNESDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null);
 
     private static ClassScheduleEntry oneTimeSchedule() {
         return new ClassScheduleEntry(
-                null, LocalDate.now().plusDays(7), LocalTime.of(10, 0), LocalTime.of(12, 0));
+                null, LocalDate.now().plusDays(7), LocalTime.of(10, 0), LocalTime.of(12, 0), null);
     }
 
     // ---- T018: create() for recurring class ----
@@ -163,7 +163,7 @@ class ProgramClassTest {
         void create_oneTimeWithMultipleEntries_throwsIllegalArgument() {
             ClassScheduleEntry entry1 = oneTimeSchedule();
             ClassScheduleEntry entry2 = new ClassScheduleEntry(
-                    null, LocalDate.now().plusDays(14), LocalTime.of(10, 0), LocalTime.of(12, 0));
+                    null, LocalDate.now().plusDays(14), LocalTime.of(10, 0), LocalTime.of(12, 0), null);
 
             assertThrows(IllegalArgumentException.class,
                     () -> ProgramClass.create(
@@ -175,7 +175,7 @@ class ProgramClassTest {
         @DisplayName("should reject one-time class with past specificDate")
         void create_oneTimeWithPastDate_throwsIllegalArgument() {
             ClassScheduleEntry pastEntry = new ClassScheduleEntry(
-                    null, LocalDate.now().minusDays(1), LocalTime.of(10, 0), LocalTime.of(12, 0));
+                    null, LocalDate.now().minusDays(1), LocalTime.of(10, 0), LocalTime.of(12, 0), null);
 
             assertThrows(IllegalArgumentException.class,
                     () -> ProgramClass.create(

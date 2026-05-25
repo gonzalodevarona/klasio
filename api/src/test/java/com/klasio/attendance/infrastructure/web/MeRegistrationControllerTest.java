@@ -179,6 +179,7 @@ class MeRegistrationControllerTest {
                 Instant.now(),
                 null,
                 null,
+                null,
                 null
         );
     }

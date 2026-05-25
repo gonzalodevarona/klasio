@@ -87,12 +87,12 @@ class RegisterForClassServiceOpenLevelTest {
         openClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "OPEN", "ACTIVE", "RECURRING",
                 5, "All Levels Open Session",
-                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME))
+                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME, null))
         );
         advancedClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "ADVANCED", "ACTIVE", "RECURRING",
                 5, "Advanced Yoga",
-                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME))
+                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START_TIME, END_TIME, null))
         );
         beginnerEnrollment = new EnrollmentView(ENROLLMENT_ID, "BEGINNER");
         membership = new ActiveMembershipView(MEMBERSHIP_ID, 10,

@@ -53,10 +53,10 @@ class UpdateClassServiceTest {
     private static final UUID UPDATED_BY = UUID.randomUUID();
 
     private static final ClassScheduleEntry MONDAY_SCHEDULE = new ClassScheduleEntry(
-            DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0));
+            DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null);
 
     private static final ClassScheduleEntry WEDNESDAY_SCHEDULE = new ClassScheduleEntry(
-            DayOfWeek.WEDNESDAY, null, LocalTime.of(16, 0), LocalTime.of(18, 0));
+            DayOfWeek.WEDNESDAY, null, LocalTime.of(16, 0), LocalTime.of(18, 0), null);
 
     @BeforeEach
     void setUp() {

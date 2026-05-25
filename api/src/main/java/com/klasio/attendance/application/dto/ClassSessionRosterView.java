@@ -14,6 +14,7 @@ public record ClassSessionRosterView(
         LocalDate sessionDate,
         LocalTime startTime,
         LocalTime endTime,
+        String location,
         String status,
         String alertReason,
         String cancellationReason,

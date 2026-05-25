@@ -180,7 +180,7 @@ class ClassScheduleExpanderTest {
 
     private static ClassRegistrationView oneTime(UUID classId, LocalDate specificDate,
                                                   LocalTime start, LocalTime end) {
-        ScheduleEntryView entry = new ScheduleEntryView(null, specificDate, start, end);
+        ScheduleEntryView entry = new ScheduleEntryView(null, specificDate, start, end, null);
         return recurringMulti(classId, List.of(entry), "ONE_TIME");
     }
 
@@ -201,6 +201,6 @@ class ClassScheduleExpanderTest {
     }
 
     private static ScheduleEntryView scheduleEntry(DayOfWeek day, LocalTime start, LocalTime end) {
-        return new ScheduleEntryView(day, null, start, end);
+        return new ScheduleEntryView(day, null, start, end, null);
     }
 }

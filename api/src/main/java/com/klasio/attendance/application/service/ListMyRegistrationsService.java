@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,15 +62,23 @@ public class ListMyRegistrationsService implements ListMyRegistrationsUseCase {
                 .stream()
                 .collect(Collectors.toMap(s -> s.getId().value(), s -> s));
 
+        // Batch-resolve class schedule (for live location lookup) per unique classId
+        Map<UUID, Optional<ClassDetailsPort.ClassRegistrationView>> classCache = new HashMap<>();
+        page.forEach(r -> classCache.computeIfAbsent(r.getClassId(),
+                id -> classDetailsPort.findForRegistration(tenantId, id)));
+
         return page.map(r -> toView(r,
                 nameCache.getOrDefault(r.getClassId(), "Unknown class"),
-                r.getSessionId() != null ? sessionCache.get(r.getSessionId()) : null));
+                r.getSessionId() != null ? sessionCache.get(r.getSessionId()) : null,
+                classCache.getOrDefault(r.getClassId(), Optional.empty()).orElse(null)));
     }
 
     private AttendanceRegistrationView toView(AttendanceRegistration r, String className,
-                                               ClassSession session) {
+                                               ClassSession session,
+                                               ClassDetailsPort.ClassRegistrationView classView) {
         String sessionStatus = session != null ? session.getStatus().name() : null;
         String sessionAlertReason = session != null ? session.getAlertReason() : null;
+        String location = resolveLocation(classView, r);
 
         return new AttendanceRegistrationView(
                 r.getId().value(),
@@ -86,7 +95,24 @@ public class ListMyRegistrationsService implements ListMyRegistrationsUseCase {
                 r.getCreatedAt(),
                 r.getCancellationReason(),
                 sessionStatus,
-                sessionAlertReason
+                sessionAlertReason,
+                location
         );
+    }
+
+    private String resolveLocation(ClassDetailsPort.ClassRegistrationView classView,
+                                    AttendanceRegistration r) {
+        if (classView == null) {
+            return null;
+        }
+        boolean oneTime = "ONE_TIME".equals(classView.type());
+        return classView.scheduleEntries().stream()
+                .filter(e -> oneTime
+                        ? r.getSessionDate().equals(e.specificDate())
+                        : r.getSessionDate().getDayOfWeek().equals(e.dayOfWeek())
+                          && r.getSessionStartTime().equals(e.startTime()))
+                .map(ClassDetailsPort.ScheduleEntryView::location)
+                .findFirst()
+                .orElse(null);
     }
 }

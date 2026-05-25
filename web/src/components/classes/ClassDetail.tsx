@@ -17,12 +17,14 @@ interface ClassDetailProps {
   programId: string;
   programClass: ProgramClassDetailType;
   onChanged?: () => void;
+  programDropInPrice?: string | null;
 }
 
 export default function ClassDetail({
   programId,
   programClass,
   onChanged,
+  programDropInPrice,
 }: ClassDetailProps) {
   const t = useTranslations("classes");
   const { user } = useAuth();
@@ -237,6 +239,7 @@ export default function ClassDetail({
             programId={programId}
             managedProgramIds={[]}
             professorClassIds={[]}
+            programDropInPrice={programDropInPrice}
           />
         </div>
 

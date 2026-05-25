@@ -165,6 +165,7 @@ public class ListClassSessionRosterService implements ListClassSessionRosterUseC
                     tuple.sessionDate(),
                     tuple.startTime(),
                     tuple.endTime(),
+                    tuple.location(),
                     sessionStatus,
                     alertReason,
                     cancellationReason,

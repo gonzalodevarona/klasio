@@ -194,6 +194,37 @@ class ProgramClassControllerIT {
                 .andExpect(jsonPath("$.level").value("OPEN"));
     }
 
+    @Test
+    @DisplayName("POST /programs/{programId}/classes with location normalizes to Title Case in response")
+    void createClassWithLocation_normalizesLocationToTitleCase() throws Exception {
+        String requestBody = """
+                {
+                  "name": "Location Test Class",
+                  "level": "OPEN",
+                  "type": "RECURRING",
+                  "scheduleEntries": [
+                    { "dayOfWeek": "TUESDAY", "startTime": "09:00", "endTime": "11:00",
+                      "location": "cancha norte" }
+                  ],
+                  "maxStudents": 10
+                }
+                """;
+
+        String response = mockMvc.perform(
+                        post("/api/v1/programs/{programId}/classes", PROGRAM_ID)
+                                .header("Authorization", "Bearer " + adminJwt())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.scheduleEntries[0].location").value("Cancha Norte"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode responseJson = objectMapper.readTree(response);
+        createdClassId = UUID.fromString(responseJson.get("id").asText());
+    }
+
     // ─── Fixture helpers ─────────────────────────────────────────────────────
 
     private void insertTenant() {

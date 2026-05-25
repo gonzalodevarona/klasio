@@ -68,7 +68,9 @@ public final class ClassRequestDto {
             @NotNull(message = "Start time is required")
             String startTime,
             @NotNull(message = "End time is required")
-            String endTime
+            String endTime,
+            @Size(max = 60, message = "Location must be at most 60 characters")
+            String location
     ) {
     }
 }

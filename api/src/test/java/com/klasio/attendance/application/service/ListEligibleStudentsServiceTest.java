@@ -79,7 +79,7 @@ class ListEligibleStudentsServiceTest {
                 CLASS_ID, PROGRAM_ID, PROFESSOR_ID, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
                 List.of(new ClassDetailsPort.ScheduleEntryView(
-                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END))
+                        TODAY.getDayOfWeek(), TODAY, SESSION_START, SESSION_END, null))
         );
 
         existingSession = ClassSession.reconstitute(

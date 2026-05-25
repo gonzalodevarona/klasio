@@ -53,6 +53,7 @@ public class GetMyRegistrationService implements GetMyRegistrationUseCase {
                 registration.getCreatedAt(),
                 registration.getCancellationReason(),
                 null,
+                null,
                 null
         );
     }

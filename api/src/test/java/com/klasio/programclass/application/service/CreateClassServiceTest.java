@@ -46,7 +46,7 @@ class CreateClassServiceTest {
     private static final UUID CREATED_BY = UUID.randomUUID();
 
     private static final ClassScheduleEntry MONDAY_SCHEDULE = new ClassScheduleEntry(
-            DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0));
+            DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null);
 
     @BeforeEach
     void setUp() {
@@ -154,7 +154,7 @@ class CreateClassServiceTest {
     @DisplayName("should create one-time class with specificDate and one schedule entry")
     void execute_withValidOneTimeCommand_createsOneTimeClass() {
         ClassScheduleEntry oneTimeEntry = new ClassScheduleEntry(
-                null, java.time.LocalDate.now().plusDays(7), LocalTime.of(10, 0), LocalTime.of(12, 0));
+                null, java.time.LocalDate.now().plusDays(7), LocalTime.of(10, 0), LocalTime.of(12, 0), null);
         when(programClassRepository.existsByNameInProgram(PROGRAM_ID, "Workshop")).thenReturn(false);
 
         CreateClassCommand command = new CreateClassCommand(
@@ -178,7 +178,7 @@ class CreateClassServiceTest {
     @DisplayName("should reject one-time class with past specificDate")
     void execute_oneTimeWithPastDate_throwsIllegalArgument() {
         ClassScheduleEntry pastEntry = new ClassScheduleEntry(
-                null, java.time.LocalDate.now().minusDays(1), LocalTime.of(10, 0), LocalTime.of(12, 0));
+                null, java.time.LocalDate.now().minusDays(1), LocalTime.of(10, 0), LocalTime.of(12, 0), null);
         when(programClassRepository.existsByNameInProgram(PROGRAM_ID, "Past Workshop")).thenReturn(false);
 
         CreateClassCommand command = new CreateClassCommand(

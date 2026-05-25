@@ -53,7 +53,7 @@ class RemoveProfessorServiceTest {
     private ProgramClass createClassWithProfessor() {
         ProgramClass pc = ProgramClass.create(
                 TENANT_ID, PROGRAM_ID, "Test Class", ClassLevel.BEGINNER, ClassType.RECURRING,
-                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0))),
+                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null)),
                 PROFESSOR_ID, 20, CREATED_BY);
         pc.clearDomainEvents();
         return pc;
@@ -90,7 +90,7 @@ class RemoveProfessorServiceTest {
     void execute_withNoProfessorAssigned_throwsIllegalStateException() {
         ProgramClass pc = ProgramClass.create(
                 TENANT_ID, PROGRAM_ID, "Test Class", ClassLevel.BEGINNER, ClassType.RECURRING,
-                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0))),
+                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null)),
                 null, 20, CREATED_BY);
         pc.clearDomainEvents();
         when(programClassRepository.findById(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(pc));

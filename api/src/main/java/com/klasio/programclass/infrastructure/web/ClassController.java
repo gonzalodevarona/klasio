@@ -242,7 +242,8 @@ public class ClassController {
                         r.dayOfWeek() != null ? DayOfWeek.valueOf(r.dayOfWeek()) : null,
                         r.specificDate() != null ? LocalDate.parse(r.specificDate()) : null,
                         LocalTime.parse(r.startTime()),
-                        LocalTime.parse(r.endTime())))
+                        LocalTime.parse(r.endTime()),
+                        r.location()))
                 .toList();
     }
 

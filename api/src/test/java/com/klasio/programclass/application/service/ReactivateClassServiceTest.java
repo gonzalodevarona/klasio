@@ -53,7 +53,7 @@ class ReactivateClassServiceTest {
     private ProgramClass createInactiveClass() {
         ProgramClass pc = ProgramClass.create(
                 TENANT_ID, PROGRAM_ID, "Test Class", ClassLevel.BEGINNER, ClassType.RECURRING,
-                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0))),
+                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null)),
                 null, 20, CREATED_BY);
         pc.deactivate(CREATED_BY);
         pc.clearDomainEvents();
@@ -90,7 +90,7 @@ class ReactivateClassServiceTest {
     void execute_withActiveClass_throwsIllegalStateException() {
         ProgramClass pc = ProgramClass.create(
                 TENANT_ID, PROGRAM_ID, "Test Class", ClassLevel.BEGINNER, ClassType.RECURRING,
-                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0))),
+                List.of(new ClassScheduleEntry(DayOfWeek.MONDAY, null, LocalTime.of(18, 0), LocalTime.of(20, 0), null)),
                 null, 20, CREATED_BY);
         pc.clearDomainEvents();
         when(programClassRepository.findById(TENANT_ID, CLASS_ID)).thenReturn(Optional.of(pc));

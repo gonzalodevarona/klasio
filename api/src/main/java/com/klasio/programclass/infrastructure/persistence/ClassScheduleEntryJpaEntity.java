@@ -34,6 +34,9 @@ public class ClassScheduleEntryJpaEntity {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
+    @Column(name = "location", length = 60)
+    private String location;
+
     protected ClassScheduleEntryJpaEntity() {
     }
 
@@ -51,4 +54,6 @@ public class ClassScheduleEntryJpaEntity {
     public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
     public LocalTime getEndTime() { return endTime; }
     public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
 }

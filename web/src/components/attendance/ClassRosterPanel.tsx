@@ -170,6 +170,9 @@ export default function ClassRosterPanel({
                 <span className="text-sm text-blue-700">
                   {formatTime(session.startTime, locale)} – {formatTime(session.endTime, locale)}
                 </span>
+                {session.location && (
+                  <span className="text-sm text-blue-700">· {session.location}</span>
+                )}
                 <SessionStatusBadge status={sessionStatus} reason={sessionReason} />
                 <SessionActionsPanel
                   classId={classId}
@@ -196,6 +199,7 @@ export default function ClassRosterPanel({
                     classId={classId}
                     sessionDate={session.sessionDate}
                     startTime={session.startTime}
+                    endTime={session.endTime}
                     programDropInPrice={programDropInPrice}
                     onRegistered={refetch}
                   />

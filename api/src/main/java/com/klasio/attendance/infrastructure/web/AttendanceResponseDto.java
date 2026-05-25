@@ -25,7 +25,8 @@ public class AttendanceResponseDto {
             Instant createdAt,
             String sessionCancellationReason,
             String sessionStatus,
-            String sessionAlertReason
+            String sessionAlertReason,
+            String location
     ) {
         public static RegistrationResponse from(AttendanceRegistrationView view) {
             return new RegistrationResponse(
@@ -42,7 +43,8 @@ public class AttendanceResponseDto {
                     view.createdAt(),
                     view.sessionCancellationReason(),
                     view.sessionStatus(),
-                    view.sessionAlertReason()
+                    view.sessionAlertReason(),
+                    view.location()
             );
         }
     }
@@ -82,7 +84,8 @@ public class AttendanceResponseDto {
             boolean registrationOpen,
             String alertReason,
             UUID registrationId,
-            String registrationStatus
+            String registrationStatus,
+            String location
     ) {
         public static AvailableSessionResponse from(AvailableSessionView view) {
             return new AvailableSessionResponse(
@@ -100,7 +103,8 @@ public class AttendanceResponseDto {
                     view.registrationOpen(),
                     view.alertReason(),
                     view.registrationId(),
-                    view.registrationStatus()
+                    view.registrationStatus(),
+                    view.location()
             );
         }
     }

@@ -53,7 +53,7 @@ class UpdateClassServiceLevelChangeCascadeTest {
     private static final UUID UPDATED_BY = UUID.randomUUID();
 
     private static final ClassScheduleEntry MONDAY_SCHEDULE = new ClassScheduleEntry(
-            DayOfWeek.MONDAY, null, LocalTime.of(10, 0), LocalTime.of(12, 0));
+            DayOfWeek.MONDAY, null, LocalTime.of(10, 0), LocalTime.of(12, 0), null);
 
     @BeforeEach
     void setUp() {
