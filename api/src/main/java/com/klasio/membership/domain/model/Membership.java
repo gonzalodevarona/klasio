@@ -5,6 +5,7 @@ import com.klasio.membership.domain.event.MembershipActivated;
 import com.klasio.membership.domain.event.MembershipCreated;
 import com.klasio.membership.domain.event.MembershipDepleted;
 import com.klasio.membership.domain.event.MembershipExpired;
+import com.klasio.membership.domain.event.MembershipLowHours;
 import com.klasio.membership.domain.event.MembershipPaymentValidated;
 import com.klasio.membership.domain.event.MembershipPendingManagerActivation;
 import com.klasio.membership.domain.event.MembershipProofUploaded;
@@ -25,6 +26,12 @@ import java.util.UUID;
  * Zero Spring imports — pure Java domain model.
  */
 public class Membership {
+
+    /**
+     * Remaining-hours threshold (inclusive) at or below which a low-hours warning
+     * is emitted. Fixed for v1 — per-tenant configurability is YAGNI.
+     */
+    public static final int LOW_HOURS_THRESHOLD = 2;
 
     private final MembershipId id;
     private final UUID tenantId;
@@ -48,6 +55,7 @@ public class Membership {
     private final UUID createdBy;
     private Instant updatedAt;
     private UUID updatedBy;
+    private boolean lowHoursWarningEmitted;
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
@@ -72,7 +80,8 @@ public class Membership {
                        Instant createdAt,
                        UUID createdBy,
                        Instant updatedAt,
-                       UUID updatedBy) {
+                       UUID updatedBy,
+                       boolean lowHoursWarningEmitted) {
         this.id = id;
         this.tenantId = tenantId;
         this.studentId = studentId;
@@ -95,6 +104,7 @@ public class Membership {
         this.createdBy = createdBy;
         this.updatedAt = updatedAt;
         this.updatedBy = updatedBy;
+        this.lowHoursWarningEmitted = lowHoursWarningEmitted;
     }
 
     // ---- Factory ----
@@ -138,7 +148,7 @@ public class Membership {
                 planId, planName, modality, purchasedHours, purchasedHours, startDate, expirationDate,
                 MembershipStatus.PENDING_PAYMENT,
                 false, null, null, null, null,
-                now, createdBy, null, null
+                now, createdBy, null, null, false
         );
 
         membership.domainEvents.add(new MembershipCreated(
@@ -146,6 +156,38 @@ public class Membership {
                 purchasedHours, modality.name(), startDate, expirationDate, createdBy, now));
 
         return membership;
+    }
+
+    /**
+     * Backward-compatible overload that defaults {@code lowHoursWarningEmitted} to false
+     * (the "may warn again" state). Used by fixtures that don't model the warning flag.
+     */
+    public static Membership reconstitute(MembershipId id,
+                                          UUID tenantId,
+                                          UUID studentId,
+                                          UUID enrollmentId,
+                                          UUID programId,
+                                          UUID planId,
+                                          String planName,
+                                          ProgramModality modality,
+                                          Integer purchasedHours,
+                                          Integer availableHours,
+                                          LocalDate startDate,
+                                          LocalDate expirationDate,
+                                          MembershipStatus status,
+                                          boolean paymentValidated,
+                                          UUID paymentValidatedBy,
+                                          Instant paymentValidatedAt,
+                                          UUID activatedBy,
+                                          Instant activatedAt,
+                                          Instant createdAt,
+                                          UUID createdBy,
+                                          Instant updatedAt,
+                                          UUID updatedBy) {
+        return reconstitute(id, tenantId, studentId, enrollmentId, programId,
+                planId, planName, modality, purchasedHours, availableHours, startDate, expirationDate, status,
+                paymentValidated, paymentValidatedBy, paymentValidatedAt,
+                activatedBy, activatedAt, createdAt, createdBy, updatedAt, updatedBy, false);
     }
 
     public static Membership reconstitute(MembershipId id,
@@ -169,11 +211,12 @@ public class Membership {
                                           Instant createdAt,
                                           UUID createdBy,
                                           Instant updatedAt,
-                                          UUID updatedBy) {
+                                          UUID updatedBy,
+                                          boolean lowHoursWarningEmitted) {
         return new Membership(id, tenantId, studentId, enrollmentId, programId,
                 planId, planName, modality, purchasedHours, availableHours, startDate, expirationDate, status,
                 paymentValidated, paymentValidatedBy, paymentValidatedAt,
-                activatedBy, activatedAt, createdAt, createdBy, updatedAt, updatedBy);
+                activatedBy, activatedAt, createdAt, createdBy, updatedAt, updatedBy, lowHoursWarningEmitted);
     }
 
     // ---- State transitions ----
@@ -235,6 +278,7 @@ public class Membership {
             this.status = MembershipStatus.ACTIVE;
             this.activatedBy = validatedBy;
             this.activatedAt = now;
+            this.lowHoursWarningEmitted = false; // re-arm low-hours warning for the new active cycle
             domainEvents.add(new MembershipActivated(
                     id.value(), tenantId, studentId, programId, validatedBy,
                     planName, purchasedHours, expirationDate, now));
@@ -258,6 +302,7 @@ public class Membership {
         this.activatedAt = now;
         this.updatedAt = now;
         this.updatedBy = activatedBy;
+        this.lowHoursWarningEmitted = false; // re-arm low-hours warning for the new active cycle
 
         domainEvents.add(new MembershipActivated(
                 id.value(), tenantId, studentId, programId, activatedBy,
@@ -291,6 +336,8 @@ public class Membership {
             this.status = MembershipStatus.INACTIVE;
             domainEvents.add(new MembershipDepleted(
                     id.value(), tenantId, studentId, programId, actorId, now));
+        } else {
+            evaluateLowHoursWarning(now);
         }
     }
 
@@ -328,6 +375,28 @@ public class Membership {
             this.status = MembershipStatus.INACTIVE;
             domainEvents.add(new MembershipDepleted(
                     id.value(), tenantId, studentId, programId, actorId, now));
+        } else {
+            evaluateLowHoursWarning(now);
+        }
+    }
+
+    /**
+     * Emits a one-per-cycle {@link MembershipLowHours} warning when the balance sits in
+     * the (0, LOW_HOURS_THRESHOLD] window, and re-arms it once the balance climbs back
+     * above the threshold (e.g. an admin tops the membership up). Called after any
+     * balance-changing transition that leaves the membership ACTIVE; a zero balance is
+     * handled by {@link MembershipDepleted} instead, so this is never reached at zero.
+     */
+    private void evaluateLowHoursWarning(Instant now) {
+        if (this.availableHours == null) {
+            return; // UNLIMITED memberships have no hour balance to warn on
+        }
+        if (this.availableHours > LOW_HOURS_THRESHOLD) {
+            this.lowHoursWarningEmitted = false; // re-arm for the next time the balance drops
+        } else if (this.availableHours > 0 && !this.lowHoursWarningEmitted) {
+            this.lowHoursWarningEmitted = true;
+            domainEvents.add(new MembershipLowHours(
+                    id.value(), tenantId, studentId, this.availableHours, now));
         }
     }
 
@@ -468,4 +537,5 @@ public class Membership {
     public UUID getCreatedBy() { return createdBy; }
     public Instant getUpdatedAt() { return updatedAt; }
     public UUID getUpdatedBy() { return updatedBy; }
+    public boolean isLowHoursWarningEmitted() { return lowHoursWarningEmitted; }
 }

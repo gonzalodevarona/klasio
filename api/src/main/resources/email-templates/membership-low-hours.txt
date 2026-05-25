@@ -1,0 +1,11 @@
+[(#{membershipLowHours.subject(${remainingHours})})]
+
+[(#{membershipLowHours.hi})] [(${studentName})],
+
+[(#{membershipLowHours.body(${remainingHours})})]
+
+[(#{label.remainingHours})]: [(${remainingHours})]
+
+[(${loginUrl})]
+
+Klasio

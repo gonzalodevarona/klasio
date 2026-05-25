@@ -19,6 +19,8 @@ public enum EmailType {
             Set.of("studentName", "programName", "expiresAt", "remainingHours")),
     MEMBERSHIP_DEPLETED("membership-depleted",
             Set.of("studentName", "programName")),
+    MEMBERSHIP_LOW_HOURS("membership-low-hours",
+            Set.of("studentName", "remainingHours")),
     CLASS_SESSION_CHANGE("class-session-change",
             Set.of("studentName", "className", "startsAt", "changeKind", "reason"));
 

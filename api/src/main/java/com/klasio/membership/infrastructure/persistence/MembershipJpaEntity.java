@@ -85,6 +85,9 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     @Column(name = "updated_by")
     private UUID updatedBy;
 
+    @Column(name = "low_hours_warning_emitted", nullable = false)
+    private boolean lowHoursWarningEmitted;
+
     protected MembershipJpaEntity() {}
 
     @Override
@@ -138,4 +141,6 @@ public class MembershipJpaEntity implements Persistable<UUID> {
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
     public UUID getUpdatedBy() { return updatedBy; }
     public void setUpdatedBy(UUID updatedBy) { this.updatedBy = updatedBy; }
+    public boolean isLowHoursWarningEmitted() { return lowHoursWarningEmitted; }
+    public void setLowHoursWarningEmitted(boolean lowHoursWarningEmitted) { this.lowHoursWarningEmitted = lowHoursWarningEmitted; }
 }
