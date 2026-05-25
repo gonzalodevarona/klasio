@@ -42,25 +42,36 @@ already handled.
 
 ### 2. Surface to attendance — `attendance` module
 
-Two read paths, because future and past sessions resolve location differently.
+**Location is resolved live everywhere from the schedule entry — never snapshotted.**
+This is consistent with how `className` is already handled: it is *not* stored on
+`AttendanceRegistration`; it is resolved per-class at read time via
+`ClassDetailsPort.findClassName(...)`. Time fields (`sessionStartTime`/`endTime`) are
+snapshotted only because they drive the session key, ordering, and time-window logic —
+location is pure display, so it follows `className`.
+
+Consequences: **no migration on `class_sessions` or `attendance_registrations`, no change
+to the `AttendanceRegistration` aggregate, entity, factories, or register services.**
+Only V070 (on `class_schedule_entries`) is needed.
 
 **Future sessions (reservation list + roster)** — built live by `ClassScheduleExpander`:
 - `ClassDetailsPort.ScheduleEntryView`: add `location`. The `ClassDetailsAdapter` (in `programclass`) populates it from the entry.
 - `ClassScheduleExpander.SessionTuple`: add `location`, carried from the entry during expansion.
-- `AvailableSessionView`: add `location` (student reservation list).
-- `ClassSessionRosterView`: add `location` per date/time slot (manager/professor roster).
-- **No column on `class_sessions`.** Location for live views is derived from the entry via the tuple; no snapshot on the session row.
+- `AvailableSessionView`: add `location`, set from the tuple (student reservation list).
+- `ClassSessionRosterView`: add `location` per date/time slot, set from the tuple (manager/professor roster).
 
-**Past attendance (history)** — `AttendanceRegistration` already snapshots
-`sessionDate` / `sessionStartTime` / `sessionEndTime` at register time:
-- `AttendanceRegistration`: add `sessionLocation` snapshot field. Set from the matching schedule entry when registering. Nullable.
-- Register paths that must pass it: `RegisterForClassService`, `RegisterWalkInService`, `RegisterDropInService`.
-- `AttendanceRegistrationJpaEntity` + mapper: `session_location` column.
+**Past attendance (history)** — `ListMyRegistrationsService`:
+- Already resolves `className` per unique `classId` from `ClassDetailsPort`. Extend it to
+  also fetch the class's schedule (via `findForRegistration`, cached per `classId`) and
+  match the registration's session by date/time to its entry, taking `entry.location()`.
+- A shared matcher resolves the entry: `ONE_TIME` → `specificDate == sessionDate`;
+  `RECURRING` → `dayOfWeek == sessionDate.getDayOfWeek()` **and** `startTime == sessionStartTime`.
+  No match (e.g. schedule edited after registration) → `null`.
 - `AttendanceRegistrationView`: add `location`.
-- **Migration V071**: `ALTER TABLE attendance_registrations ADD COLUMN session_location VARCHAR(60);`
 
-**Why snapshot on registration, not a live join:** mirrors the existing
-time-snapshot pattern; keeps history accurate if the class room is edited later.
+**Trade-off:** live-derive shows the class's *current* room for a past session. If a room
+is edited later, history reflects the new value. Accepted — rooms rarely change, the
+display is informational, and this keeps the change consistent with `className` and far
+smaller than threading a snapshot through the aggregate and all register paths.
 
 ### 3. Frontend (`web`)
 
@@ -80,15 +91,17 @@ time-snapshot pattern; keeps history accurate if the class room is edited later.
 - **Domain** `ClassScheduleEntryTest`: normalization (`"  cancha  norte "` → `"Cancha Norte"`,
   `"salon 1"` → `"Salon 1"`), blank → `null`, > 60 chars rejected, single-word + number.
 - **`ClassScheduleExpander`**: location carried into emitted tuples (recurring + one-time).
-- **Register services**: `sessionLocation` snapshotted onto the registration from the entry.
+- **`ListMyRegistrationsService`**: live-derives the matching entry's location for a past registration; no match → `null`.
 - **DTO mapping**: request → domain → response round-trips location, including `null`.
 - **`ProgramClass` create/update**: existing tests updated for the new entry field.
 
 ## Scope cuts (YAGNI)
 
-- No `location` column on `class_sessions` — derived live for future-session views.
+- No `location` column on `class_sessions` or `attendance_registrations` — derived live.
+- No change to the `AttendanceRegistration` aggregate / factories / register services.
 - No per-tenant room catalog or autocomplete — free text only.
-- No backfill of existing rows — column nullable; legacy entries/registrations stay `null`.
+- No backfill of existing rows — column nullable; legacy entries stay `null`.
+- Single migration: V070 on `class_schedule_entries`.
 
 ## Docs
 
