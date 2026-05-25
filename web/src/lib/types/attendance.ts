@@ -16,6 +16,7 @@ export interface AvailableSession {
   sessionDate: string;
   startTime: string;
   endTime: string;
+  location?: string | null;
   level: string;
   programId: string;
   currentCapacity: number;
@@ -44,6 +45,7 @@ export interface Registration {
   sessionDate: string;
   sessionStartTime: string;
   sessionEndTime: string;
+  location?: string | null;
   level: string;
   intendedHours: number;
   status: RegistrationStatus;
@@ -80,6 +82,7 @@ export interface ClassSessionRoster {
   sessionDate: string;
   startTime: string;
   endTime: string;
+  location?: string | null;
   registrantCount: number;
   registrants: RosterRegistrantView[];
   /** Session lifecycle status. Defaults to SCHEDULED when not returned by the API. */

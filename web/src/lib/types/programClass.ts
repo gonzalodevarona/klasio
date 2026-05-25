@@ -7,6 +7,7 @@ export interface ClassScheduleEntry {
   specificDate?: string;
   startTime: string;
   endTime: string;
+  location?: string | null;
 }
 
 export interface ProgramClassSummary {
