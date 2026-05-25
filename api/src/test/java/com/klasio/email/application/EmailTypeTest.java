@@ -27,7 +27,14 @@ class EmailTypeTest {
     }
 
     @Test
-    void allNineTypesAreDefined() {
-        assertThat(EmailType.values()).hasSize(9);
+    void membershipLowHoursHasCorrectTemplateRefAndRequiredKeys() {
+        assertThat(EmailType.MEMBERSHIP_LOW_HOURS.templateRef()).isEqualTo("membership-low-hours");
+        assertThat(EmailType.MEMBERSHIP_LOW_HOURS.requiredKeys())
+                .containsExactlyInAnyOrder("studentName", "remainingHours");
+    }
+
+    @Test
+    void allTenTypesAreDefined() {
+        assertThat(EmailType.values()).hasSize(10);
     }
 }

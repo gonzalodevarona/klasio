@@ -232,6 +232,24 @@ class ThymeleafTemplateRendererTest {
     }
 
     @Test
+    void membershipLowHours_rendersRemainingHoursWithoutUnresolvedVariables() {
+        RenderedTemplate result = renderer.render("membership-low-hours", Locale.ENGLISH, Map.of(
+                "studentName", "Mateo Gómez",
+                "remainingHours", 2,
+                "tenantName", "Test League",
+                "tenantSlug", "test-league",
+                "loginUrl", "http://localhost:3000"));
+
+        assertThat(result.subject()).contains("2");
+        assertThat(result.subject()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).doesNotContain("${").doesNotContain("#{");
+        assertThat(result.htmlBody()).contains("DM Sans");
+        assertThat(result.htmlBody()).contains("Mateo Gómez");
+        assertThat(result.htmlBody()).contains("http://localhost:3000");
+        assertThat(result.textBody()).doesNotContain("${").doesNotContain("#{");
+    }
+
+    @Test
     void classSessionChange_withReason_rendersBothPanelRows() {
         RenderedTemplate result = renderer.render("class-session-change", Locale.ENGLISH, Map.of(
                 "studentName", "Sebastián Vargas",

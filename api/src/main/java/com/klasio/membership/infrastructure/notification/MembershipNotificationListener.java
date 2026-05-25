@@ -6,6 +6,7 @@ import com.klasio.email.application.EmailType;
 import com.klasio.membership.domain.event.MembershipActivated;
 import com.klasio.membership.domain.event.MembershipDepleted;
 import com.klasio.membership.domain.event.MembershipExpiryWarning;
+import com.klasio.membership.domain.event.MembershipLowHours;
 import com.klasio.membership.domain.port.ProgramNamePort;
 import com.klasio.membership.domain.port.StudentEmailPort;
 import com.klasio.membership.domain.port.StudentNamePort;
@@ -99,5 +100,23 @@ public class MembershipNotificationListener {
                 new EmailRecipient(email, name),
                 event.tenantId(),
                 Map.of("studentName", name, "programName", program));
+    }
+
+    @Async("emailListenerExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onMembershipLowHours(MembershipLowHours event) {
+        String email = studentEmailPort.findEmail(event.studentId(), event.tenantId()).orElse(null);
+        if (email == null) {
+            log.warn("[membership] skipping email — no email on file for studentId={}", event.studentId());
+            return;
+        }
+        String name = studentNamePort.findFullName(event.studentId(), event.tenantId()).orElse(email);
+
+        emailService.send(
+                EmailType.MEMBERSHIP_LOW_HOURS,
+                new EmailRecipient(email, name),
+                event.tenantId(),
+                new HashMap<>(Map.of("studentName", name,
+                        "remainingHours", event.remainingHours())));
     }
 }

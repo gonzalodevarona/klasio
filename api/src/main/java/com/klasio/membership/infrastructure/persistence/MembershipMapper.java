@@ -36,7 +36,8 @@ public class MembershipMapper {
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
                 entity.getUpdatedAt(),
-                entity.getUpdatedBy()
+                entity.getUpdatedBy(),
+                entity.isLowHoursWarningEmitted()
         );
     }
 
@@ -64,6 +65,7 @@ public class MembershipMapper {
         entity.setCreatedBy(membership.getCreatedBy());
         entity.setUpdatedAt(membership.getUpdatedAt());
         entity.setUpdatedBy(membership.getUpdatedBy());
+        entity.setLowHoursWarningEmitted(membership.isLowHoursWarningEmitted());
         return entity;
     }
 }
