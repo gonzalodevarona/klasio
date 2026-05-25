@@ -336,10 +336,8 @@ public class Membership {
             this.status = MembershipStatus.INACTIVE;
             domainEvents.add(new MembershipDepleted(
                     id.value(), tenantId, studentId, programId, actorId, now));
-        } else if (this.availableHours <= LOW_HOURS_THRESHOLD && !this.lowHoursWarningEmitted) {
-            this.lowHoursWarningEmitted = true;
-            domainEvents.add(new MembershipLowHours(
-                    id.value(), tenantId, studentId, this.availableHours, now));
+        } else {
+            evaluateLowHoursWarning(now);
         }
     }
 
@@ -377,6 +375,28 @@ public class Membership {
             this.status = MembershipStatus.INACTIVE;
             domainEvents.add(new MembershipDepleted(
                     id.value(), tenantId, studentId, programId, actorId, now));
+        } else {
+            evaluateLowHoursWarning(now);
+        }
+    }
+
+    /**
+     * Emits a one-per-cycle {@link MembershipLowHours} warning when the balance sits in
+     * the (0, LOW_HOURS_THRESHOLD] window, and re-arms it once the balance climbs back
+     * above the threshold (e.g. an admin tops the membership up). Called after any
+     * balance-changing transition that leaves the membership ACTIVE; a zero balance is
+     * handled by {@link MembershipDepleted} instead, so this is never reached at zero.
+     */
+    private void evaluateLowHoursWarning(Instant now) {
+        if (this.availableHours == null) {
+            return; // UNLIMITED memberships have no hour balance to warn on
+        }
+        if (this.availableHours > LOW_HOURS_THRESHOLD) {
+            this.lowHoursWarningEmitted = false; // re-arm for the next time the balance drops
+        } else if (this.availableHours > 0 && !this.lowHoursWarningEmitted) {
+            this.lowHoursWarningEmitted = true;
+            domainEvents.add(new MembershipLowHours(
+                    id.value(), tenantId, studentId, this.availableHours, now));
         }
     }
 

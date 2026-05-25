@@ -107,6 +107,61 @@ class MembershipLowHoursTest {
     }
 
     @Test
+    @DisplayName("manual adjustment crossing the threshold emits MembershipLowHours")
+    void adjust_subtractIntoThreshold_emitsLowHours() {
+        Membership m = activeWithHours(5);
+
+        m.adjustHours(-3, "Correction", ACTOR_ID, "ADMIN"); // → 2 (== threshold)
+
+        MembershipLowHours low = m.getDomainEvents().stream()
+                .filter(e -> e instanceof MembershipLowHours)
+                .map(e -> (MembershipLowHours) e)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("expected MembershipLowHours event from adjustHours"));
+        assertEquals(Membership.LOW_HOURS_THRESHOLD, low.remainingHours());
+        assertTrue(m.isLowHoursWarningEmitted());
+    }
+
+    @Test
+    @DisplayName("manual adjustment already below threshold does not emit a second warning")
+    void adjust_alreadyBelowThreshold_doesNotEmitAgain() {
+        Membership m = activeWithHours(5);
+        m.adjustHours(-3, "Correction", ACTOR_ID, "ADMIN"); // → 2, fires once
+        m.clearDomainEvents();
+
+        m.adjustHours(-1, "Another correction", ACTOR_ID, "ADMIN"); // → 1
+
+        assertEquals(0, lowHoursCount(m));
+    }
+
+    @Test
+    @DisplayName("topping hours back above the threshold re-arms the warning")
+    void adjust_topUpAboveThreshold_reArmsWarning() {
+        Membership m = activeWithHours(Membership.LOW_HOURS_THRESHOLD + 1); // 3
+        m.deductHours(1, ACTOR_ID, "PROFESSOR"); // → 2, flag set
+        assertTrue(m.isLowHoursWarningEmitted());
+
+        m.adjustHours(5, "Top-up", ACTOR_ID, "ADMIN"); // → 7 (> threshold)
+        assertFalse(m.isLowHoursWarningEmitted(), "balance back above threshold must re-arm the warning");
+        m.clearDomainEvents();
+
+        m.deductHours(5, ACTOR_ID, "PROFESSOR"); // → 2 again
+
+        assertEquals(1, lowHoursCount(m), "warning must fire again after re-arming");
+    }
+
+    @Test
+    @DisplayName("manual adjustment straight to zero emits MembershipDepleted but NOT MembershipLowHours")
+    void adjust_straightToZero_emitsDepletedNotLowHours() {
+        Membership m = activeWithHours(5);
+
+        m.adjustHours(-5, "Full deduction", ACTOR_ID, "ADMIN"); // → 0
+
+        assertTrue(m.getDomainEvents().stream().anyMatch(e -> e instanceof MembershipDepleted));
+        assertEquals(0, lowHoursCount(m));
+    }
+
+    @Test
     @DisplayName("MembershipDepleted still fires normally when hours reach zero from threshold")
     void deduct_thresholdToZero_emitsDepleted() {
         Membership m = activeWithHours(Membership.LOW_HOURS_THRESHOLD + 1); // 3
