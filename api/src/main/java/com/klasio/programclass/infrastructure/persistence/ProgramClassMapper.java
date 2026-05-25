@@ -22,7 +22,8 @@ public class ProgramClassMapper {
                         se.getDayOfWeek() != null ? DayOfWeek.valueOf(se.getDayOfWeek()) : null,
                         se.getSpecificDate(),
                         se.getStartTime(),
-                        se.getEndTime()))
+                        se.getEndTime(),
+                        se.getLocation()))
                 .toList();
 
         return ProgramClass.reconstitute(
@@ -69,6 +70,7 @@ public class ProgramClassMapper {
                     seEntity.setSpecificDate(se.specificDate());
                     seEntity.setStartTime(se.startTime());
                     seEntity.setEndTime(se.endTime());
+                    seEntity.setLocation(se.location());
                     return seEntity;
                 })
                 .toList();
