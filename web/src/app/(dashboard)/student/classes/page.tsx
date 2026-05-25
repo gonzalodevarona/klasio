@@ -157,6 +157,11 @@ function ClassSessionsPanel({ programId, classId }: ClassSessionsPanelProps) {
                         </span>
                       )}
                     </div>
+                    {s.location && (
+                      <span className="block text-xs text-k-muted mt-0.5">
+                        {s.location}
+                      </span>
+                    )}
                     <div className="mt-1">
                       <SessionCapacityBar
                         current={s.currentCapacity}
