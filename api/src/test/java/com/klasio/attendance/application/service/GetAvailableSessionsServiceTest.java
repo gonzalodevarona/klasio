@@ -72,7 +72,7 @@ class GetAvailableSessionsServiceTest {
         activeClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "RECURRING",
                 5, "Yoga Beginners",
-                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START, END))
+                List.of(new ScheduleEntryView(DayOfWeek.MONDAY, null, START, END, null))
         );
     }
 
@@ -162,7 +162,7 @@ class GetAvailableSessionsServiceTest {
         ClassRegistrationView oneTimeClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Past Class",
-                List.of(new ScheduleEntryView(null, yesterday, LocalTime.of(9, 0), LocalTime.of(10, 0)))
+                List.of(new ScheduleEntryView(null, yesterday, LocalTime.of(9, 0), LocalTime.of(10, 0), null))
         );
 
         when(enrollmentLookupPort.findActiveEnrollmentInProgram(TENANT_ID, STUDENT_ID, PROGRAM_ID))
@@ -330,7 +330,7 @@ class GetAvailableSessionsServiceTest {
         ClassRegistrationView soonClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Soon Class",
-                List.of(new ScheduleEntryView(null, today, soonStart, soonEnd))
+                List.of(new ScheduleEntryView(null, today, soonStart, soonEnd, null))
         );
 
         LocalDate from = today;
@@ -363,7 +363,7 @@ class GetAvailableSessionsServiceTest {
         ClassRegistrationView pastClass = new ClassRegistrationView(
                 CLASS_ID, PROGRAM_ID, null, "BEGINNER", "ACTIVE", "ONE_TIME",
                 5, "Past Class",
-                List.of(new ScheduleEntryView(null, today, pastStart, pastEnd))
+                List.of(new ScheduleEntryView(null, today, pastStart, pastEnd, null))
         );
 
         LocalDate from = today;

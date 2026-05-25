@@ -77,7 +77,7 @@ class RegisterDropInServiceTest {
 
     @BeforeEach
     void setup() {
-        ScheduleEntryView entry = new ScheduleEntryView(date.getDayOfWeek(), null, start, end);
+        ScheduleEntryView entry = new ScheduleEntryView(date.getDayOfWeek(), null, start, end, null);
         classView = new ClassRegistrationView(
                 classId, programId, UUID.randomUUID(), "BEGINNER", "ACTIVE", "RECURRING", 20,
                 "Test Class", List.of(entry));

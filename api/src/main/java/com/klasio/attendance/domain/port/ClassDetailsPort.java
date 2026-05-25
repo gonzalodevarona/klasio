@@ -41,7 +41,8 @@ public interface ClassDetailsPort {
             DayOfWeek dayOfWeek,
             LocalDate specificDate,
             LocalTime startTime,
-            LocalTime endTime
+            LocalTime endTime,
+            String location
     ) {}
 
     record ClassSummaryView(UUID id, UUID programId, UUID professorId) {}
