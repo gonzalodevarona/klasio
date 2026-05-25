@@ -31,6 +31,7 @@ interface ScheduleEntryFormData {
   specificDate: string;
   startTime: string;
   endTime: string;
+  location: string;
 }
 
 interface ClassFormProps {
@@ -51,7 +52,7 @@ const DAYS_OF_WEEK = [
 const LEVELS: ClassLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "OPEN"];
 
 function emptyScheduleEntry(): ScheduleEntryFormData {
-  return { dayOfWeek: "", specificDate: "", startTime: "", endTime: "" };
+  return { dayOfWeek: "", specificDate: "", startTime: "", endTime: "", location: "" };
 }
 
 export default function ClassForm({ programId, programClass }: ClassFormProps) {
@@ -80,6 +81,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
       specificDate: e.specificDate ?? "",
       startTime: e.startTime ?? "",
       endTime: e.endTime ?? "",
+      location: e.location ?? "",
     })) ?? [emptyScheduleEntry()]
   );
 
@@ -169,6 +171,7 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
       specificDate: classType === "ONE_TIME" ? e.specificDate || undefined : undefined,
       startTime: e.startTime,
       endTime: e.endTime,
+      location: e.location.trim() || undefined,
     }));
   }
 
@@ -478,6 +481,22 @@ export default function ClassForm({ programId, programClass }: ClassFormProps) {
                   onChange={(e) =>
                     updateScheduleEntry(index, "endTime", e.target.value)
                   }
+                  className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 text-sm focus:border-k-volt focus:outline-none block w-full"
+                />
+              </div>
+
+              <div className="flex-1 min-w-[140px]">
+                <label className="block text-xs text-k-muted mb-1">
+                  {t("formLocationLabel")}
+                </label>
+                <input
+                  type="text"
+                  value={entry.location}
+                  onChange={(e) =>
+                    updateScheduleEntry(index, "location", e.target.value)
+                  }
+                  placeholder={t("formLocationPlaceholder")}
+                  maxLength={60}
                   className="bg-k-surface border border-k-border rounded-k-sm px-3 py-2 text-sm focus:border-k-volt focus:outline-none block w-full"
                 />
               </div>
