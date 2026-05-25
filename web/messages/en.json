@@ -1293,7 +1293,8 @@
         "SESSION_CANCELLED": "This session has been cancelled.",
         "DROP_IN_ATTENDEE_NOT_FOUND": "Attendee not found.",
         "FORBIDDEN": "You do not have permission to register drop-ins for this class.",
-        "UNKNOWN": "Something went wrong. Try again."
+        "UNKNOWN": "Something went wrong. Try again.",
+        "DROP_IN_ALREADY_REGISTERED": "This person is already registered for this session."
       },
       "phoneCollision": {
         "title": "Phone already registered",
@@ -1301,7 +1302,8 @@
         "question": "Same person?",
         "yes": "Yes, use existing record",
         "cancel": "Cancel"
-      }
+      },
+      "outsideWindowTooltip": "Outside the registration window for this session."
     }
   },
   "studentClasses": {

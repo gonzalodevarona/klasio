@@ -18,6 +18,7 @@ import com.klasio.dropin.domain.port.DropInPaymentRepository;
 import com.klasio.dropin.domain.port.DropInPriceLookupPort;
 import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.ClassNotFoundException;
+import com.klasio.shared.infrastructure.exception.DropInAlreadyRegisteredException;
 import com.klasio.shared.infrastructure.exception.DropInAttendeeNotFoundException;
 import com.klasio.shared.infrastructure.exception.DropInNotAvailableException;
 import com.klasio.shared.infrastructure.exception.MarkingWindowException;
@@ -139,16 +140,12 @@ public class RegisterDropInService {
             attendeeWasNew = true;
         }
 
-        // 8. Idempotency: check if payment already exists for this attendee+session
+        // 8. Duplicate check: attendee already registered for this session → reject
         var existingPayment = paymentRepository.findByAttendeeAndSession(
                 attendee.getId().value(), session.getId().value());
         if (existingPayment.isPresent()) {
-            var payment = existingPayment.get();
-            var reg = registrationRepository.findByDropInPaymentId(cmd.tenantId(), payment.getId().value())
-                    .orElseThrow(() -> new IllegalStateException("No registration for existing drop-in payment"));
-            return new RegisterDropInResult(
-                    reg.getId().value(), attendee.getId().value(), payment.getId().value(),
-                    false, attendee.getTotalVisits());
+            throw new DropInAlreadyRegisteredException(
+                    "This attendee is already registered for this session");
         }
 
         // 9. Persist new attendee before payment to satisfy the FK constraint.

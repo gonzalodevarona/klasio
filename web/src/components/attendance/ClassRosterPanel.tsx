@@ -199,6 +199,7 @@ export default function ClassRosterPanel({
                     classId={classId}
                     sessionDate={session.sessionDate}
                     startTime={session.startTime}
+                    endTime={session.endTime}
                     programDropInPrice={programDropInPrice}
                     onRegistered={refetch}
                   />

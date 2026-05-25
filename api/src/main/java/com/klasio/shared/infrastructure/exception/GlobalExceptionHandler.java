@@ -522,6 +522,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(error));
     }
 
+    @ExceptionHandler(DropInAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleDropInAlreadyRegistered(DropInAlreadyRegisteredException ex) {
+        var error = new ErrorResponse.ErrorDetail("DROP_IN_ALREADY_REGISTERED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
+    }
+
     @ExceptionHandler(PhoneAlreadyExistsException.class)
     public ResponseEntity<PhoneConflictResponse> handlePhoneConflict(PhoneAlreadyExistsException ex) {
         var errorDetail = new ErrorResponse.ErrorDetail("DROP_IN_PHONE_EXISTS", ex.getMessage());

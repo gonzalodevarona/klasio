@@ -155,30 +155,22 @@ class RegisterDropInServiceTest {
     }
 
     @Test
-    void execute_idempotent_returnsExistingPaymentWithoutCreatingNewRows() {
-        UUID existingPaymentId = UUID.randomUUID();
-        UUID existingRegId = UUID.randomUUID();
+    void execute_duplicateAttendee_throwsAlreadyRegistered() {
         UUID existingAttendeeId = UUID.randomUUID();
+        UUID existingPaymentId = UUID.randomUUID();
 
         DropInAttendee attendee = mock(DropInAttendee.class);
         when(attendee.getId()).thenReturn(new DropInAttendeeId(existingAttendeeId));
-        when(attendee.getTotalVisits()).thenReturn(2);
         when(attendeeRepo.findByIdAndTenant(existingAttendeeId, tenantId)).thenReturn(Optional.of(attendee));
 
         DropInPayment existingPayment = mock(DropInPayment.class);
         when(existingPayment.getId()).thenReturn(new DropInPaymentId(existingPaymentId));
-        when(existingPayment.getAttendeeId()).thenReturn(existingAttendeeId);
         when(paymentRepo.findByAttendeeAndSession(existingAttendeeId, sessionId)).thenReturn(Optional.of(existingPayment));
 
-        com.klasio.attendance.domain.model.AttendanceRegistration reg = mock(com.klasio.attendance.domain.model.AttendanceRegistration.class);
-        when(reg.getId()).thenReturn(new com.klasio.attendance.domain.model.AttendanceRegistrationId(existingRegId));
-        when(registrationRepository.findByDropInPaymentId(tenantId, existingPaymentId)).thenReturn(Optional.of(reg));
+        assertThatThrownBy(() -> service.execute(newCmd(existingAttendeeId, null, null)))
+                .isInstanceOf(com.klasio.shared.infrastructure.exception.DropInAlreadyRegisteredException.class)
+                .hasMessageContaining("already registered");
 
-        RegisterDropInResult result = service.execute(newCmd(existingAttendeeId, null, null));
-
-        assertThat(result.paymentId()).isEqualTo(existingPaymentId);
-        assertThat(result.registrationId()).isEqualTo(existingRegId);
-        verify(attendeeRepo, never()).save(any());
         verify(paymentRepo, never()).save(any());
         verify(attendancePort, never()).recordPresent(any());
     }
