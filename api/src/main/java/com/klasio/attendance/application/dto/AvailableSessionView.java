@@ -19,5 +19,6 @@ public record AvailableSessionView(
         boolean registrationOpen,
         String alertReason,
         UUID registrationId,
-        String registrationStatus
+        String registrationStatus,
+        String location
 ) {}

@@ -82,7 +82,7 @@ class GetMyAvailableSessionsServiceTest {
     private AvailableSessionView sample(UUID programId, LocalDate date, LocalTime startTime) {
         return new AvailableSessionView(
                 UUID.randomUUID(), "Class", null, date, startTime, startTime.plusHours(1),
-                "BEGINNER", programId, 0, 10, "SCHEDULED", true, null, null, null
+                "BEGINNER", programId, 0, 10, "SCHEDULED", true, null, null, null, null
         );
     }
 }
