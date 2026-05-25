@@ -93,6 +93,7 @@ class ClassSessionRosterControllerIT {
 
         ClassSessionRosterView emptySession = new ClassSessionRosterView(
                 sessionDate, start, end,
+                null,
                 "SCHEDULED", null, null,
                 List.of()
         );
@@ -121,8 +122,8 @@ class ClassSessionRosterControllerIT {
         when(rosterUseCase.execute(any(), eq(CLASS_ID), eq(FROM), eq(TO),
                 eq("ADMIN"), any(), any()))
                 .thenReturn(List.of(
-                        new ClassSessionRosterView(mon, start, end, "SCHEDULED", null, null, List.of()),
-                        new ClassSessionRosterView(wed, start, end, "SCHEDULED", null, null, List.of())
+                        new ClassSessionRosterView(mon, start, end, null, "SCHEDULED", null, null, List.of()),
+                        new ClassSessionRosterView(wed, start, end, null, "SCHEDULED", null, null, List.of())
                 ));
 
         mockMvc.perform(rosterRequest(FROM, TO))
