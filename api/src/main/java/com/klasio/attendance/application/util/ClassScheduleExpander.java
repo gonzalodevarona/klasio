@@ -29,13 +29,13 @@ public final class ClassScheduleExpander {
                     if (specificDate != null
                             && !specificDate.isBefore(from)
                             && !specificDate.isAfter(to)) {
-                        tuples.add(new SessionTuple(cls.id(), specificDate, entry.startTime(), entry.endTime()));
+                        tuples.add(new SessionTuple(cls.id(), specificDate, entry.startTime(), entry.endTime(), entry.location()));
                     }
                 } else {
                     LocalDate cursor = from;
                     while (!cursor.isAfter(to)) {
                         if (entry.dayOfWeek() != null && cursor.getDayOfWeek().equals(entry.dayOfWeek())) {
-                            tuples.add(new SessionTuple(cls.id(), cursor, entry.startTime(), entry.endTime()));
+                            tuples.add(new SessionTuple(cls.id(), cursor, entry.startTime(), entry.endTime(), entry.location()));
                         }
                         cursor = cursor.plusDays(1);
                     }
@@ -49,6 +49,7 @@ public final class ClassScheduleExpander {
             UUID classId,
             LocalDate sessionDate,
             LocalTime startTime,
-            LocalTime endTime
+            LocalTime endTime,
+            String location
     ) {}
 }
