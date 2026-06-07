@@ -28,6 +28,7 @@ import com.klasio.student.domain.event.StudentUnenrolled;
 import com.klasio.student.domain.event.StudentUpdated;
 import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
+import com.klasio.tenant.domain.event.TenantSelfRegistrationToggled;
 import com.klasio.membership.domain.event.MembershipCreated;
 import com.klasio.membership.domain.event.MembershipPaymentValidated;
 import com.klasio.membership.domain.event.MembershipActivated;
@@ -529,6 +530,28 @@ public class AuditEventListener {
                 UUID.randomUUID(),
                 "TENANT_DEACTIVATED",
                 event.deactivatedBy(),
+                "TENANT",
+                event.tenantId(),
+                event.occurredAt(),
+                details
+        );
+
+        auditLogRepository.save(entry);
+    }
+
+    @EventListener
+    public void onTenantSelfRegistrationToggled(TenantSelfRegistrationToggled event) {
+        log.info("Recording audit log for self-registration toggle: tenantId={}, enabled={}",
+                event.tenantId(), event.enabled());
+
+        String details = toJson(Map.of(
+                "enabled", String.valueOf(event.enabled())
+        ));
+
+        AuditLogEntry entry = new AuditLogEntry(
+                UUID.randomUUID(),
+                "TENANT_SELF_REGISTRATION_TOGGLED",
+                event.actorId(),
                 "TENANT",
                 event.tenantId(),
                 event.occurredAt(),
