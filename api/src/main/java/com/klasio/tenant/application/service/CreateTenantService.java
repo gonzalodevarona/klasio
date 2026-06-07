@@ -65,7 +65,8 @@ public class CreateTenantService implements CreateTenantUseCase {
                     slug,
                     contactInfo,
                     command.createdBy(),
-                    logoKey
+                    logoKey,
+                    command.selfRegistrationEnabled()
             );
 
             List<DomainEvent> events = List.copyOf(tenant.getDomainEvents());

@@ -70,6 +70,7 @@ class CreateTenantServiceTest {
                 null,
                 null,
                 0,
+                true,
                 UUID.randomUUID()
         );
 
@@ -114,6 +115,7 @@ class CreateTenantServiceTest {
                 null,
                 null,
                 0,
+                true,
                 UUID.randomUUID()
         );
 
@@ -152,6 +154,7 @@ class CreateTenantServiceTest {
                 logoData,
                 "image/png",
                 3,
+                true,
                 UUID.randomUUID()
         );
 
@@ -188,6 +191,7 @@ class CreateTenantServiceTest {
                 logoData,
                 "image/png",
                 3,
+                true,
                 UUID.randomUUID()
         );
 
@@ -196,5 +200,36 @@ class CreateTenantServiceTest {
                 .hasMessage("Database error");
 
         verify(logoStorage).delete(eq(uploadedKey));
+    }
+
+    @Test
+    @DisplayName("should pass selfRegistrationEnabled flag to created Tenant")
+    void execute_passesSelfRegistrationFlagToTenant() {
+        when(tenantRepository.existsBySlug(anyString())).thenReturn(false);
+
+        CreateTenantCommand command = new CreateTenantCommand(
+                "Liga Bogota",
+                "Football",
+                "es",
+                "America/Bogota",
+                null,
+                "contact@liga.com",
+                "3001234567",
+                "57",
+                "Calle 50 #45-12",
+                "Bogotá",
+                "Cundinamarca",
+                "Colombia",
+                null,
+                null,
+                0,
+                false,
+                UUID.randomUUID()
+        );
+
+        ArgumentCaptor<Tenant> captor = ArgumentCaptor.forClass(Tenant.class);
+        service.execute(command);
+        verify(tenantRepository).save(captor.capture());
+        assertThat(captor.getValue().isSelfRegistrationEnabled()).isFalse();
     }
 }

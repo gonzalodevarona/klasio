@@ -19,6 +19,7 @@ public record CreateTenantCommand(
         InputStream logoData,
         String logoContentType,
         long logoSize,
+        boolean selfRegistrationEnabled,
         UUID createdBy
 ) {
 }

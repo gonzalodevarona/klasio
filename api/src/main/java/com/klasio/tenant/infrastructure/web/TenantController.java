@@ -92,7 +92,8 @@ public class TenantController {
             @RequestParam("contactState") String contactState,
             @RequestParam("contactCountry") String contactCountry,
             @RequestParam(value = "logo", required = false) MultipartFile logo,
-            @RequestParam(value = "slug", required = false) String slug) {
+            @RequestParam(value = "slug", required = false) String slug,
+            @RequestParam(value = "selfRegistrationEnabled", required = false) Boolean selfRegistrationEnabled) {
 
         UUID userId = extractUserId();
 
@@ -125,6 +126,7 @@ public class TenantController {
                 logoStream,
                 logoContentType,
                 logoSize,
+                selfRegistrationEnabled == null ? true : selfRegistrationEnabled,
                 userId
         );
 
