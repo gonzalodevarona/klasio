@@ -8,4 +8,6 @@ public interface TenantResolverPort {
     Optional<UUID> resolveTenantIdBySlug(String slug);
 
     Optional<String> resolveSlugByTenantId(UUID tenantId);
+
+    boolean isSelfRegistrationEnabled(UUID tenantId);
 }

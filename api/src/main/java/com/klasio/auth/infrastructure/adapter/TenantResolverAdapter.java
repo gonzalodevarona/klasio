@@ -2,6 +2,7 @@ package com.klasio.auth.infrastructure.adapter;
 
 import com.klasio.auth.application.port.TenantResolverPort;
 import com.klasio.tenant.infrastructure.persistence.SpringDataTenantRepository;
+import com.klasio.tenant.infrastructure.persistence.TenantJpaEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -26,5 +27,13 @@ public class TenantResolverAdapter implements TenantResolverPort {
     public Optional<String> resolveSlugByTenantId(UUID tenantId) {
         return tenantRepository.findById(tenantId)
                 .map(entity -> entity.getSlug());
+    }
+
+    @Override
+    public boolean isSelfRegistrationEnabled(UUID tenantId) {
+        return tenantRepository.findById(tenantId)
+                .filter(e -> "ACTIVE".equals(e.getStatus()))
+                .map(TenantJpaEntity::isSelfRegistrationEnabled)
+                .orElse(false);
     }
 }
