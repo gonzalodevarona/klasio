@@ -32,7 +32,8 @@ public class TenantMapper {
                 entity.getCreatedAt(),
                 entity.getCreatedBy(),
                 entity.getDeactivatedAt(),
-                entity.getDeactivatedBy()
+                entity.getDeactivatedBy(),
+                entity.isSelfRegistrationEnabled()
         );
     }
 
@@ -57,6 +58,7 @@ public class TenantMapper {
         entity.setCreatedBy(tenant.getCreatedBy());
         entity.setDeactivatedAt(tenant.getDeactivatedAt());
         entity.setDeactivatedBy(tenant.getDeactivatedBy());
+        entity.setSelfRegistrationEnabled(tenant.isSelfRegistrationEnabled());
         return entity;
     }
 }

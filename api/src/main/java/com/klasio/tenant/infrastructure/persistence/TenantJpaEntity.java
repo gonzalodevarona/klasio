@@ -70,6 +70,9 @@ public class TenantJpaEntity implements Persistable<UUID> {
     @Column(name = "deactivated_by")
     private UUID deactivatedBy;
 
+    @Column(name = "self_registration_enabled", nullable = false)
+    private boolean selfRegistrationEnabled = true;
+
     protected TenantJpaEntity() {}
 
     public UUID getId() { return id; }
@@ -110,6 +113,8 @@ public class TenantJpaEntity implements Persistable<UUID> {
     public void setDeactivatedAt(Instant deactivatedAt) { this.deactivatedAt = deactivatedAt; }
     public UUID getDeactivatedBy() { return deactivatedBy; }
     public void setDeactivatedBy(UUID deactivatedBy) { this.deactivatedBy = deactivatedBy; }
+    public boolean isSelfRegistrationEnabled() { return selfRegistrationEnabled; }
+    public void setSelfRegistrationEnabled(boolean selfRegistrationEnabled) { this.selfRegistrationEnabled = selfRegistrationEnabled; }
 
     @Override
     public boolean isNew() { return isNew; }
