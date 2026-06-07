@@ -198,7 +198,7 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | File storage | AWS S3 (payment proofs, tenant logos) | AWS SDK v2 |
 | Auth | JWT + refresh tokens | — |
 
-## Implemented Features (as of 2026-04-23)
+## Implemented Features (as of 2026-06-07)
 
 | Feature branch | RFs | Status |
 |---|---|---|
@@ -208,20 +208,26 @@ When a feature branch is finished and ready to ship, always follow these steps i
 | `merged/004-class-management` | RF-09 | ✅ |
 | `merged/005-student-level-assignment` | RF-07, RF-11, RF-12, RF-13 | RF-07 ✅, RF-11 ✅, RF-12 ✅, RF-13 ✅ |
 | `merged/007-auth-rbac` | RF-01, RF-02, RF-03, RF-04 | RF-01 ✅, RF-02 ✅, RF-03 ✅, RF-04 ✅ |
-| `006-membership-lifecycle` (active, not merged) | RF-14, RF-15, RF-16, RF-17, RF-18 | RF-14 ✅, RF-15 ✅, RF-16 ✅, RF-17 ✅, RF-18 ✅ |
+| `006-membership-lifecycle` (in `main`, branch not renamed) | RF-14, RF-15, RF-16, RF-17, RF-18 | RF-14 ✅, RF-15 ✅, RF-16 ✅, RF-17 ✅, RF-18 ✅ |
 | `merged/008-payment-proof-validation` | RF-19, RF-20, RF-21 | RF-19 ✅, RF-20 ✅, RF-21 ✅ |
+| `merged/009-attendance` | RF-23, RF-24, RF-25, RF-26 | RF-23 ✅, RF-24 ✅, RF-25 ✅, RF-26 ✅ |
 | `merged/010-class-alert-cancellation` | RF-27, RF-28 | RF-27 ✅, RF-28 ✅ (in-app only) |
 | `merged/013-tenant-i18n` | RF-32 | RF-32 ✅ (+ i18n via next-intl, unified account setup flow, tenant form overhaul with structured address + language) |
-| `feature/full-redesign` (active) | RF-23, RF-24, RF-25, RF-26, RF-29, RF-33, RF-34 | RF-23 ✅, RF-24 ✅, RF-25 ✅, RF-26 ✅, RF-29 ✅, RF-33 ✅, RF-34 ✅ |
+| `merged/full-redesign` | RF-29, RF-33, RF-34 | RF-29 ✅, RF-33 ✅, RF-34 ✅ (staff walk-in registration) |
+| `merged/014-drop-in-students` | RF-37 | RF-37 ✅ (drop-in visitor registration + one-time payment) |
+| `merged/015-class-location` | RF-09 (location ext) | ✅ (per-schedule-entry `location`, V070) |
+| `merged/016-low-hours-warning` | RF-16 (low-hours), RF-32 | ✅ (`MembershipLowHours` event + `MEMBERSHIP_LOW_HOURS` email, V071) |
+| `feature/unlimited-plan-modality` (in `main`) | RF-35 | RF-35 ✅ (UNLIMITED modality, V065/V066) |
+| `feature/open-level-class` (in `main`) | RF-36 | RF-36 ✅ (`OPEN` class level, V067) |
 
-### Remaining v1.0 work (P0 features not yet implemented)
+### Remaining work (P1–P2; all P0 requirements complete)
 
-| RF | Feature | Blocker |
-|---|---|---|
-| RF-10 | Program – Cost Modification History | No `cost_history` table; cost edit works but history missing |
-| RF-22 | Payment – Payment History | Not started |
-| RF-30 | Manager Dashboard | 🔄 Partial — only delegated memberships panel |
-| RF-31 | Admin Dashboard | Not started — blocked on RF-22 |
+| RF | Pri | Feature | State |
+|---|---|---|---|
+| RF-10 | P1 | Program – Cost Modification History | ❌ No `cost_history` table; cost edit works but change-history missing. Deferred v1.1 |
+| RF-22 | P1 | Payment – Payment History | ❌ Not started (cross-student aggregated history). Deferred v1.1 |
+| RF-30 | P1 | Manager Dashboard | 🔄 Partial — delegated-memberships panel live; 4 KPI cards hardcoded `"—"`, no backend module. Un-blocked (RF-23/RF-25 done), just not built |
+| RF-31 | P2 | Admin Dashboard | 🔄 Partial — `com.klasio.admin.dashboard` backend + live UI (student count, hours consumed, pending proofs, active programs, per-student table). Missing: monthly revenue, payment history (blocked on RF-22), hour breakdown by program/level |
 
 ## Flyway Migration Ownership Rule
 
