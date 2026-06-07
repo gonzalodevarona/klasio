@@ -65,7 +65,7 @@ class AssignRoleServiceTest {
     void admin_assignsManager_sameTenant_succeeds() {
         UUID targetUserId = UUID.randomUUID();
         User targetUser = User.createActive(TENANT_ID, "target@example.com", "hash", Role.STUDENT,
-                IdentityDocumentType.CC, "12345678", null, null, null);
+                IdentityDocumentType.CC, "12345678", "Target", "User", null);
 
         when(userRepository.findById(targetUserId)).thenReturn(Optional.of(targetUser));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
