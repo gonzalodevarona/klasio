@@ -11,7 +11,11 @@ public record RegisterStudentCommand(
         String identityNumber,
         String eps,
         String email,
-        String tutorFullName,
+        String bloodType,
+        String phone,
+        String tutorFirstName,
+        String tutorLastName,
         String tutorRelationship,
-        String tutorContact
+        String tutorPhone,
+        String tutorEmail
 ) {}

@@ -9,7 +9,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -32,9 +36,13 @@ public class RegistrationController {
             @NotBlank @Size(max = 30) String identityNumber,
             @NotBlank String eps,
             @NotBlank @Email String email,
-            String tutorFullName,
+            String bloodType,
+            String phone,
+            String tutorFirstName,
+            String tutorLastName,
             String tutorRelationship,
-            String tutorContact
+            String tutorPhone,
+            String tutorEmail
     ) {}
 
     @PostMapping("/{tenantSlug}/register")
@@ -51,9 +59,13 @@ public class RegistrationController {
                 request.identityNumber(),
                 request.eps(),
                 request.email(),
-                request.tutorFullName(),
+                request.bloodType(),
+                request.phone(),
+                request.tutorFirstName(),
+                request.tutorLastName(),
                 request.tutorRelationship(),
-                request.tutorContact()
+                request.tutorPhone(),
+                request.tutorEmail()
         );
 
         registerStudentService.register(command);

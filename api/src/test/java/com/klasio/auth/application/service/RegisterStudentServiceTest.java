@@ -1,18 +1,17 @@
 package com.klasio.auth.application.service;
 
 import com.klasio.auth.application.dto.RegisterStudentCommand;
-import com.klasio.auth.application.port.AccountSetupTokenRepository;
-import com.klasio.auth.application.port.StudentProfilePort;
 import com.klasio.auth.application.port.TenantResolverPort;
-import com.klasio.auth.application.port.TokenGenerator;
-import com.klasio.auth.application.port.UserRepository;
-import com.klasio.auth.domain.event.AccountSetupInitiated;
-import com.klasio.auth.domain.exception.EmailAlreadyRegisteredException;
-import com.klasio.auth.domain.exception.IdentityNumberAlreadyRegisteredException;
-import com.klasio.auth.domain.model.AccountSetupToken;
-import com.klasio.auth.domain.model.Role;
-import com.klasio.auth.domain.model.User;
-import com.klasio.auth.domain.model.UserStatus;
+import com.klasio.auth.domain.exception.SelfRegistrationConflictException;
+import com.klasio.auth.domain.exception.SelfRegistrationDisabledException;
+import com.klasio.shared.domain.model.IdentityDocumentType;
+import com.klasio.shared.infrastructure.exception.StudentEmailAlreadyExistsException;
+import com.klasio.shared.infrastructure.exception.StudentIdentityNumberAlreadyExistsException;
+import com.klasio.shared.infrastructure.exception.TenantNotFoundException;
+import com.klasio.student.application.dto.CreateStudentCommand;
+import com.klasio.student.application.port.input.CreateStudentUseCase;
+import com.klasio.student.domain.model.BloodType;
+import com.klasio.student.domain.model.Student;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,232 +19,125 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RegisterStudentServiceTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private StudentProfilePort studentProfilePort;
-    @Mock private TenantResolverPort tenantResolverPort;
-    @Mock private TokenGenerator tokenGenerator;
-    @Mock private AccountSetupTokenRepository accountSetupTokenRepository;
-    @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private TenantResolverPort tenantResolverPort;
+
+    @Mock
+    private CreateStudentUseCase createStudentUseCase;
 
     private RegisterStudentService service;
 
     private static final UUID TENANT_ID = UUID.randomUUID();
-    private static final UUID STUDENT_ID = UUID.randomUUID();
-    private static final UUID USER_ID = UUID.randomUUID();
+    private static final UUID SYSTEM_ACTOR = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @BeforeEach
     void setUp() {
-        service = new RegisterStudentService(
-                userRepository, studentProfilePort, tenantResolverPort,
-                tokenGenerator, accountSetupTokenRepository, eventPublisher);
+        service = new RegisterStudentService(tenantResolverPort, createStudentUseCase);
     }
 
-    private RegisterStudentCommand buildCommand() {
+    private RegisterStudentCommand fullCommand() {
         return new RegisterStudentCommand(
-                "test-league",
-                "Maria",
-                "Lopez",
-                LocalDate.of(1995, 6, 15),
-                "CC",
-                "9876543210",
+                "liga-test",
+                "Ana", "Martinez",
+                LocalDate.of(1998, 3, 20),
+                "CC", "12345678",
                 "Sanitas",
-                "maria.lopez@example.com",
-                null, null, null
+                "ana@example.com",
+                "O+", "3001234567",
+                "Pedro", "Martinez",
+                "Father", "3009999999", "pedro@example.com"
         );
     }
 
     @Test
-    @DisplayName("happy path: creates user via createPendingSetup, saves AccountSetupToken, publishes AccountSetupInitiated")
-    void register_happyPath_savesTokenAndPublishesEvent() {
-        String rawToken = "raw-token-abc";
-        String hashedToken = "hashed-token-abc";
+    @DisplayName("delegates to CreateStudentUseCase with all fields mapped correctly")
+    void delegatesToCreateStudentWithFullFields() {
+        when(tenantResolverPort.resolveTenantIdBySlug("liga-test")).thenReturn(Optional.of(TENANT_ID));
+        when(tenantResolverPort.isSelfRegistrationEnabled(TENANT_ID)).thenReturn(true);
+        when(createStudentUseCase.execute(any())).thenReturn(mock(Student.class));
 
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId("maria.lopez@example.com", TENANT_ID)).thenReturn(false);
-        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, "9876543210")).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, "9876543210")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(studentProfilePort.createStudentProfile(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(STUDENT_ID);
-        when(tokenGenerator.generateRawToken()).thenReturn(rawToken);
-        when(tokenGenerator.hashToken(rawToken)).thenReturn(hashedToken);
+        service.register(fullCommand());
 
-        service.register(buildCommand());
+        ArgumentCaptor<CreateStudentCommand> captor = ArgumentCaptor.forClass(CreateStudentCommand.class);
+        verify(createStudentUseCase).execute(captor.capture());
 
-        // Verify user saved with null password and INVITED status
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
-        User savedUser = userCaptor.getValue();
-        assertThat(savedUser.getPasswordHash()).isNull();
-        assertThat(savedUser.getStatus()).isEqualTo(UserStatus.INVITED);
-        assertThat(savedUser.getFirstName()).isEqualTo("Maria");
-        assertThat(savedUser.getLastName()).isEqualTo("Lopez");
-
-        // Verify AccountSetupToken saved with ~15-min expiry
-        ArgumentCaptor<AccountSetupToken> tokenCaptor = ArgumentCaptor.forClass(AccountSetupToken.class);
-        verify(accountSetupTokenRepository).save(tokenCaptor.capture());
-        AccountSetupToken savedToken = tokenCaptor.getValue();
-        assertThat(savedToken.getTokenHash()).isEqualTo(hashedToken);
-        assertThat(savedToken.getUserId()).isEqualTo(savedUser.getId());
-        Instant expectedExpiry = Instant.now().plus(15, ChronoUnit.MINUTES);
-        assertThat(savedToken.getExpiresAt()).isBetween(
-                expectedExpiry.minusSeconds(5), expectedExpiry.plusSeconds(5));
-
-        // Verify AccountSetupInitiated published (not StudentRegisteredEvent)
-        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publishEvent(eventCaptor.capture());
-        assertThat(eventCaptor.getValue()).isInstanceOf(AccountSetupInitiated.class);
-        AccountSetupInitiated event = (AccountSetupInitiated) eventCaptor.getValue();
-        assertThat(event.email()).isEqualTo("maria.lopez@example.com");
-        assertThat(event.rawToken()).isEqualTo(rawToken);
-        assertThat(event.role()).isEqualTo("student");
-        assertThat(event.recipientName()).isEqualTo("Maria Lopez");
+        CreateStudentCommand cmd = captor.getValue();
+        assertThat(cmd.tenantId()).isEqualTo(TENANT_ID);
+        assertThat(cmd.firstName()).isEqualTo("Ana");
+        assertThat(cmd.lastName()).isEqualTo("Martinez");
+        assertThat(cmd.email()).isEqualTo("ana@example.com");
+        assertThat(cmd.phone()).isEqualTo("3001234567");
+        assertThat(cmd.bloodType()).isEqualTo(BloodType.O_POSITIVE);
+        assertThat(cmd.identityDocumentType()).isEqualTo(IdentityDocumentType.CC);
+        assertThat(cmd.identityNumber()).isEqualTo("12345678");
+        assertThat(cmd.createdBy()).isEqualTo(SYSTEM_ACTOR);
+        assertThat(cmd.tutorFirstName()).isEqualTo("Pedro");
+        assertThat(cmd.tutorLastName()).isEqualTo("Martinez");
+        assertThat(cmd.tutorRelationship()).isEqualTo("Father");
+        assertThat(cmd.tutorPhone()).isEqualTo("3009999999");
+        assertThat(cmd.tutorEmail()).isEqualTo("pedro@example.com");
     }
 
     @Test
-    @DisplayName("throws EmailAlreadyRegisteredException when email is already taken in the tenant")
-    void register_duplicateEmail_throwsEmailAlreadyRegisteredException() {
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId("maria.lopez@example.com", TENANT_ID)).thenReturn(true);
+    @DisplayName("throws TenantNotFoundException when slug is unknown")
+    void throwsTenantNotFound_whenSlugUnknown() {
+        when(tenantResolverPort.resolveTenantIdBySlug("liga-test")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.register(buildCommand()))
-                .isInstanceOf(EmailAlreadyRegisteredException.class);
+        assertThatThrownBy(() -> service.register(fullCommand()))
+                .isInstanceOf(TenantNotFoundException.class);
 
-        verify(userRepository, never()).save(any());
-        verify(accountSetupTokenRepository, never()).save(any());
-        verify(eventPublisher, never()).publishEvent(any());
+        verify(createStudentUseCase, never()).execute(any());
     }
 
     @Test
-    @DisplayName("throws IdentityNumberAlreadyRegisteredException when identity number is already taken in the tenant")
-    void register_duplicateIdentityNumber_throwsIdentityNumberAlreadyRegisteredException() {
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId("maria.lopez@example.com", TENANT_ID)).thenReturn(false);
-        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, "9876543210")).thenReturn(true);
+    @DisplayName("throws SelfRegistrationDisabledException when flag is off")
+    void throwsDisabled_whenFlagOff() {
+        when(tenantResolverPort.resolveTenantIdBySlug("liga-test")).thenReturn(Optional.of(TENANT_ID));
+        when(tenantResolverPort.isSelfRegistrationEnabled(TENANT_ID)).thenReturn(false);
 
-        assertThatThrownBy(() -> service.register(buildCommand()))
-                .isInstanceOf(IdentityNumberAlreadyRegisteredException.class);
+        assertThatThrownBy(() -> service.register(fullCommand()))
+                .isInstanceOf(SelfRegistrationDisabledException.class);
 
-        verify(userRepository, never()).save(any());
-        verify(accountSetupTokenRepository, never()).save(any());
-        verify(eventPublisher, never()).publishEvent(any());
+        verify(createStudentUseCase, never()).execute(any());
     }
 
     @Test
-    @DisplayName("throws IdentityNumberAlreadyRegisteredException when identity number exists in student profiles")
-    void register_identityNumberInStudentProfile_throwsIdentityNumberAlreadyRegisteredException() {
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId("maria.lopez@example.com", TENANT_ID)).thenReturn(false);
-        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, "9876543210")).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, "9876543210")).thenReturn(true);
+    @DisplayName("maps email conflict from CreateStudentUseCase to non-enumerating SelfRegistrationConflictException")
+    void mapsEmailConflictToGenericNonEnumeratingError() {
+        when(tenantResolverPort.resolveTenantIdBySlug("liga-test")).thenReturn(Optional.of(TENANT_ID));
+        when(tenantResolverPort.isSelfRegistrationEnabled(TENANT_ID)).thenReturn(true);
+        when(createStudentUseCase.execute(any()))
+                .thenThrow(new StudentEmailAlreadyExistsException("already exists"));
 
-        assertThatThrownBy(() -> service.register(buildCommand()))
-                .isInstanceOf(IdentityNumberAlreadyRegisteredException.class);
-
-        verify(userRepository, never()).save(any());
-        verify(accountSetupTokenRepository, never()).save(any());
-        verify(eventPublisher, never()).publishEvent(any());
+        assertThatThrownBy(() -> service.register(fullCommand()))
+                .isInstanceOf(SelfRegistrationConflictException.class);
     }
 
     @Test
-    @DisplayName("throws IllegalArgumentException when tenant slug is not found")
-    void register_unknownTenantSlug_throwsIllegalArgumentException() {
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.empty());
+    @DisplayName("maps identity number conflict from CreateStudentUseCase to non-enumerating SelfRegistrationConflictException")
+    void mapsIdentityConflictToGenericNonEnumeratingError() {
+        when(tenantResolverPort.resolveTenantIdBySlug("liga-test")).thenReturn(Optional.of(TENANT_ID));
+        when(tenantResolverPort.isSelfRegistrationEnabled(TENANT_ID)).thenReturn(true);
+        when(createStudentUseCase.execute(any()))
+                .thenThrow(new StudentIdentityNumberAlreadyExistsException("already exists"));
 
-        assertThatThrownBy(() -> service.register(buildCommand()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("test-league");
-
-        verify(userRepository, never()).save(any());
-        verify(accountSetupTokenRepository, never()).save(any());
-        verify(eventPublisher, never()).publishEvent(any());
-    }
-
-    @Test
-    @DisplayName("minor student: tutor fields are passed to student profile creation")
-    void register_minorStudent_createWithTutorFields() {
-        RegisterStudentCommand command = new RegisterStudentCommand(
-                "test-league", "Carlos", "Ramirez", LocalDate.now().minusYears(14),
-                "TI", "987654321", "Sanitas", "carlos@example.com",
-                "Maria Garcia", "Mother", "3001234567");
-
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId("carlos@example.com", TENANT_ID)).thenReturn(false);
-        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, "987654321")).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, "987654321")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(studentProfilePort.createStudentProfile(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(STUDENT_ID);
-        when(tokenGenerator.generateRawToken()).thenReturn("raw-token");
-        when(tokenGenerator.hashToken("raw-token")).thenReturn("hashed-token");
-
-        service.register(command);
-
-        verify(studentProfilePort).createStudentProfile(eq(TENANT_ID), eq("Carlos"), eq("Ramirez"),
-                eq("carlos@example.com"), any(), eq("TI"), eq("987654321"), eq("Sanitas"),
-                eq("Maria Garcia"), eq("Mother"), eq("3001234567"), any(UUID.class));
-    }
-
-    @Test
-    @DisplayName("adult student with optional tutor fields populated: tutor fields passed through")
-    void register_adultWithOptionalTutorFields_succeeds() {
-        RegisterStudentCommand command = new RegisterStudentCommand(
-                "test-league", "John", "Doe", LocalDate.of(2000, 1, 1),
-                "CC", "123456789", "Sura", "john@example.com",
-                "Optional Tutor", "Uncle", "3009999999");
-
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId("john@example.com", TENANT_ID)).thenReturn(false);
-        when(userRepository.existsByIdentityNumberAndTenantId(TENANT_ID, "123456789")).thenReturn(false);
-        when(studentProfilePort.existsByIdentityNumberInTenant(TENANT_ID, "123456789")).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(studentProfilePort.createStudentProfile(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(STUDENT_ID);
-        when(tokenGenerator.generateRawToken()).thenReturn("raw-token");
-        when(tokenGenerator.hashToken("raw-token")).thenReturn("hashed-token");
-
-        service.register(command);
-
-        verify(studentProfilePort).createStudentProfile(eq(TENANT_ID), any(), any(), any(), any(), any(), any(), any(),
-                eq("Optional Tutor"), eq("Uncle"), eq("3009999999"), any(UUID.class));
-    }
-
-    @Test
-    @DisplayName("throws IllegalArgumentException when identity document type is invalid")
-    void register_invalidDocumentType_throwsIllegalArgumentException() {
-        when(tenantResolverPort.resolveTenantIdBySlug("test-league")).thenReturn(Optional.of(TENANT_ID));
-        when(userRepository.existsByEmailAndTenantId("maria.lopez@example.com", TENANT_ID)).thenReturn(false);
-
-        RegisterStudentCommand command = new RegisterStudentCommand(
-                "test-league", "Maria", "Lopez",
-                LocalDate.of(1995, 6, 15),
-                "INVALID_DOC_TYPE",
-                "9876543210", "Sanitas", "maria.lopez@example.com",
-                null, null, null);
-
-        assertThatThrownBy(() -> service.register(command))
-                .isInstanceOf(IllegalArgumentException.class);
-
-        verify(userRepository, never()).save(any());
+        assertThatThrownBy(() -> service.register(fullCommand()))
+                .isInstanceOf(SelfRegistrationConflictException.class);
     }
 }

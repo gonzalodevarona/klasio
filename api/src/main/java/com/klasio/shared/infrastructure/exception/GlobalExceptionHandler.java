@@ -1,6 +1,8 @@
 package com.klasio.shared.infrastructure.exception;
 
 import com.klasio.auth.domain.exception.*;
+import com.klasio.auth.domain.exception.SelfRegistrationConflictException;
+import com.klasio.auth.domain.exception.SelfRegistrationDisabledException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -456,6 +458,18 @@ public class GlobalExceptionHandler {
                         "message", ex.getMessage()
                 )
         ));
+    }
+
+    @ExceptionHandler(SelfRegistrationDisabledException.class)
+    public ResponseEntity<ErrorResponse> handleSelfRegDisabled(SelfRegistrationDisabledException ex) {
+        var error = new ErrorResponse.ErrorDetail("SELF_REGISTRATION_DISABLED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(SelfRegistrationConflictException.class)
+    public ResponseEntity<ErrorResponse> handleSelfRegConflict(SelfRegistrationConflictException ex) {
+        var error = new ErrorResponse.ErrorDetail("REGISTRATION_FAILED", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(RoleElevationForbiddenException.class)
