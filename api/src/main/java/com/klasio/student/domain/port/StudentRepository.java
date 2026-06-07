@@ -18,5 +18,7 @@ public interface StudentRepository {
 
     boolean existsByEmailInTenantExcluding(UUID tenantId, String email, UUID excludeId);
 
+    boolean existsByIdentityNumberInTenant(UUID tenantId, String identityNumber);
+
     Page<Student> findAll(UUID tenantId, int page, int size, String status, String search);
 }

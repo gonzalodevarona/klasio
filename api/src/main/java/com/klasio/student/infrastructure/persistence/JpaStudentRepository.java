@@ -60,6 +60,12 @@ public class JpaStudentRepository extends TenantScopedRepository implements Stud
     }
 
     @Override
+    public boolean existsByIdentityNumberInTenant(UUID tenantId, String identityNumber) {
+        applyTenantContext();
+        return springDataRepository.existsByTenantIdAndIdentityNumber(tenantId, identityNumber);
+    }
+
+    @Override
     public Page<Student> findAll(UUID tenantId, int page, int size, String status, String search) {
         applyTenantContext();
         Pageable pageable = PageRequest.of(page, size);
