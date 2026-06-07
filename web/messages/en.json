@@ -368,7 +368,10 @@
     "detailViewMembershipsLink": "View Memberships",
     "detailSuccessFeedback": "Student has been {action} successfully.",
     "detailErrorFeedback": "Failed to {action} student. Please try again.",
-    "detailEnrollSuccessFeedback": "Student enrolled successfully."
+    "detailEnrollSuccessFeedback": "Student enrolled successfully.",
+    "selfSuccessTitle": "Registration Successful!",
+    "selfSuccessMessage": "Check your email to set up your account password.",
+    "goToLogin": "Go to Login"
   },
   "professors": {
     "pageTitle": "Professors",

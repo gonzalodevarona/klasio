@@ -7,7 +7,6 @@ import { api, ApiError } from "@/lib/api";
 import {
   StudentDetail,
   CreateStudentRequest,
-  UpdateStudentRequest,
   BLOOD_TYPES,
 } from "@/lib/types/student";
 import type { IdentityDocumentType } from "@/lib/types/identity";
@@ -20,6 +19,9 @@ interface FieldErrors {
 
 interface StudentFormProps {
   student?: StudentDetail;
+  mode?: "admin" | "self";
+  onSubmit?: (payload: CreateStudentRequest) => Promise<void>;
+  submitLabel?: string;
 }
 
 const EMAIL_REGEX = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -35,7 +37,7 @@ function calculateAge(dateOfBirth: string): number {
   return age;
 }
 
-export default function StudentForm({ student }: StudentFormProps) {
+export default function StudentForm({ student, mode = "admin", onSubmit, submitLabel }: StudentFormProps) {
   const router = useRouter();
   const t = useTranslations("students");
   const tValidation = useTranslations("validation");
@@ -62,6 +64,7 @@ export default function StudentForm({ student }: StudentFormProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [selfSuccess, setSelfSuccess] = useState(false);
 
   const isMinor = useMemo(() => {
     if (!dateOfBirth) return false;
@@ -119,7 +122,7 @@ export default function StudentForm({ student }: StudentFormProps) {
     setSubmitting(true);
 
     try {
-      const body: CreateStudentRequest | UpdateStudentRequest = {
+      const body: CreateStudentRequest = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
@@ -129,16 +132,23 @@ export default function StudentForm({ student }: StudentFormProps) {
         identityDocumentType,
         bloodType: bloodType || null,
         phone: phone.trim(),
-        tutorFirstName: tutorFirstName.trim() || null,
-        tutorLastName: tutorLastName.trim() || null,
-        tutorRelationship: tutorRelationship.trim() || null,
-        tutorPhone: tutorPhone.trim() || null,
-        tutorEmail: tutorEmail.trim() || null,
+        tutorFirstName: tutorFirstName?.trim() || null,
+        tutorLastName: tutorLastName?.trim() || null,
+        tutorRelationship: tutorRelationship?.trim() || null,
+        tutorPhone: tutorPhone?.trim() || null,
+        tutorEmail: tutorEmail?.trim() || null,
       };
 
+      if (mode === "self") {
+        await onSubmit!(body);
+        setSelfSuccess(true);
+        return;
+      }
+
+      // admin path: isEdit → put, else → post + redirect
       if (isEdit) {
-        await api.put<StudentDetail>(`/students/${student.id}`, body);
-        router.push(`/students/${student.id}`);
+        await api.put<StudentDetail>(`/students/${student!.id}`, body);
+        router.push(`/students/${student!.id}`);
       } else {
         const created = await api.post<StudentDetail>("/students", body);
         router.push(`/students/${created.id}`);
@@ -154,11 +164,21 @@ export default function StudentForm({ student }: StudentFormProps) {
         }
         setApiError(err.message);
       } else {
-        setApiError(tCommon("unexpectedError"));
+        setApiError(err instanceof Error ? err.message : tCommon("unexpectedError"));
       }
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (mode === "self" && selfSuccess) {
+    return (
+      <div className="rounded-md bg-green-50 border border-green-200 p-6 text-center" role="status">
+        <h2 className="text-lg font-semibold text-green-800 mb-2">{t("selfSuccessTitle")}</h2>
+        <p className="text-sm text-green-700">{t("selfSuccessMessage")}</p>
+        <a href="/login" className="mt-4 inline-block text-sm text-k-volt">{t("goToLogin")}</a>
+      </div>
+    );
   }
 
   return (
@@ -331,7 +351,7 @@ export default function StudentForm({ student }: StudentFormProps) {
         <Button variant="volt" type="submit" disabled={submitting}>
           {submitting
             ? (isEdit ? tCommon("saving") : tCommon("creating"))
-            : (isEdit ? t("formSaveButton") : t("formCreateButton"))}
+            : (submitLabel ?? (isEdit ? t("formSaveButton") : t("formCreateButton")))}
         </Button>
       </div>
     </form>

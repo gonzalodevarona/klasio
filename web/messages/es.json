@@ -368,7 +368,10 @@
     "detailViewMembershipsLink": "Ver membresías",
     "detailSuccessFeedback": "El estudiante ha sido {action} correctamente.",
     "detailErrorFeedback": "No se pudo {action} al estudiante. Por favor intenta de nuevo.",
-    "detailEnrollSuccessFeedback": "Estudiante inscrito correctamente."
+    "detailEnrollSuccessFeedback": "Estudiante inscrito correctamente.",
+    "selfSuccessTitle": "¡Registro exitoso!",
+    "selfSuccessMessage": "Revisa tu correo para configurar la contraseña de tu cuenta.",
+    "goToLogin": "Ir al inicio de sesión"
   },
   "professors": {
     "pageTitle": "Profesores",
