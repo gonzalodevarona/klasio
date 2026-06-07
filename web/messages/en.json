@@ -1043,7 +1043,10 @@
       "errorCityRequired": "City is required.",
       "errorStateRequired": "State is required.",
       "errorLogoRequired": "Logo is required.",
-      "errorUnexpected": "An unexpected error occurred. Please try again."
+      "errorUnexpected": "An unexpected error occurred. Please try again.",
+      "selfRegistrationEnabled": "Allow self-registration",
+      "inviteLink": "Invite link",
+      "copyLink": "Copy"
     }
   },
   "loginPage": {

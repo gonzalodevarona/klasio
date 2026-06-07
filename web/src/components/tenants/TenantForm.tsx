@@ -9,6 +9,10 @@ import { Country } from "@/lib/countries";
 import LogoUpload from "./LogoUpload";
 import CountrySelect from "./CountrySelect";
 
+interface TenantFormProps {
+  tenant?: TenantDetail;
+}
+
 interface FieldErrors {
   name?: string;
   discipline?: string;
@@ -41,22 +45,27 @@ function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export default function TenantForm() {
+export default function TenantForm({ tenant }: TenantFormProps = {}) {
   const t = useTranslations("tenants.form");
   const router = useRouter();
 
-  const [name, setName] = useState("");
-  const [discipline, setDiscipline] = useState("");
-  const [language, setLanguage] = useState("");
-  const [timezone, setTimezone] = useState("America/Bogota");
-  const [slug, setSlug] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactStreet, setContactStreet] = useState("");
-  const [contactCity, setContactCity] = useState("");
-  const [contactState, setContactState] = useState("");
+  const isEditMode = Boolean(tenant);
+
+  const [name, setName] = useState(tenant?.name ?? "");
+  const [discipline, setDiscipline] = useState(tenant?.discipline ?? "");
+  const [language, setLanguage] = useState(tenant?.language ?? "");
+  const [timezone, setTimezone] = useState(tenant?.timezone ?? "America/Bogota");
+  const [slug, setSlug] = useState(tenant?.slug ?? "");
+  const [contactEmail, setContactEmail] = useState(tenant?.contactEmail ?? "");
+  const [contactPhone, setContactPhone] = useState(tenant?.contactPhone ?? "");
+  const [contactStreet, setContactStreet] = useState(tenant?.contactStreet ?? "");
+  const [contactCity, setContactCity] = useState(tenant?.contactCity ?? "");
+  const [contactState, setContactState] = useState(tenant?.contactState ?? "");
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
+  const [selfRegistrationEnabled, setSelfRegistrationEnabled] = useState(
+    tenant?.selfRegistrationEnabled ?? true
+  );
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [apiError, setApiError] = useState<string | null>(null);
@@ -124,6 +133,7 @@ export default function TenantForm() {
       formData.append("contactState", contactState.trim());
       formData.append("contactCountry", selectedCountry!.name);
       formData.append("logo", logo!);
+      formData.append("selfRegistrationEnabled", String(selfRegistrationEnabled));
 
       const created = await api.postForm<TenantDetail>("/tenants", formData);
       router.push(`/tenants/${created.slug}`);
@@ -354,6 +364,44 @@ export default function TenantForm() {
       </div>
 
       <LogoUpload onFileSelect={setLogo} error={fieldErrors.logo} required />
+
+      <div className="flex items-center gap-3">
+        <input
+          type="checkbox"
+          id="selfRegistrationEnabled"
+          checked={selfRegistrationEnabled}
+          onChange={(e) => setSelfRegistrationEnabled(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <label htmlFor="selfRegistrationEnabled" className="text-sm text-gray-700">
+          {t("selfRegistrationEnabled")}
+        </label>
+      </div>
+
+      {isEditMode && tenant?.slug && (
+        <div>
+          <label className="text-xs text-gray-500 block mb-1">{t("inviteLink")}</label>
+          <div className="flex gap-2 items-center">
+            <input
+              readOnly
+              data-testid="invite-link-input"
+              value={`https://${tenant.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost"}/register`}
+              className="flex-1 text-sm bg-gray-50 border border-gray-300 rounded px-3 py-2 text-gray-700"
+            />
+            <button
+              type="button"
+              onClick={() =>
+                navigator.clipboard.writeText(
+                  `https://${tenant.slug}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost"}/register`
+                )
+              }
+              className="text-xs px-3 py-2 rounded bg-blue-600 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              {t("copyLink")}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="pt-2">
         <button

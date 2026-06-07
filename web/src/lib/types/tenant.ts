@@ -23,6 +23,7 @@ export interface TenantDetail extends TenantSummary {
   createdBy: string;
   deactivatedAt: string | null;
   deactivatedBy: string | null;
+  selfRegistrationEnabled: boolean;
 }
 
 export interface TenantListResponse {
@@ -47,4 +48,5 @@ export interface CreateTenantRequest {
   contactState: string;
   contactCountry: string;
   logo: File;
+  selfRegistrationEnabled?: boolean;
 }
