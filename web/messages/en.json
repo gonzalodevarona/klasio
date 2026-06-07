@@ -1074,7 +1074,9 @@
   },
   "registerPage": {
     "title": "Create your account",
-    "subtitle": "Register as a student for {tenantSlug}"
+    "subtitle": "Register for {tenantSlug}",
+    "noTenantTitle": "No league found",
+    "noTenantBody": "Please open your league's registration link to register."
   },
   "studentDashboard": {
     "title": "Dashboard",

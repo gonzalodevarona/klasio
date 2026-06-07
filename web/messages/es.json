@@ -1074,7 +1074,9 @@
   },
   "registerPage": {
     "title": "Crea tu cuenta",
-    "subtitle": "Regístrate como estudiante en {tenantSlug}"
+    "subtitle": "Regístrate en {tenantSlug}",
+    "noTenantTitle": "Liga no encontrada",
+    "noTenantBody": "Por favor abre el enlace de registro de tu liga para registrarte."
   },
   "studentDashboard": {
     "title": "Panel",
