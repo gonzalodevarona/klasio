@@ -62,7 +62,8 @@ class JpaTenantRepositoryIntegrationTest {
                 TenantSlug.fromName("Liga Bogota"),
                 contact("contact@liga.com"),
                 UUID.randomUUID(),
-                null
+                null,
+                true
         );
         tenant.clearDomainEvents();
 
@@ -87,7 +88,8 @@ class JpaTenantRepositoryIntegrationTest {
                 TenantSlug.fromName("Liga Cali"),
                 contact("cali@liga.com"),
                 UUID.randomUUID(),
-                null
+                null,
+                true
         );
         tenant.clearDomainEvents();
 
@@ -113,7 +115,8 @@ class JpaTenantRepositoryIntegrationTest {
                 TenantSlug.fromName("Liga Medellin"),
                 contact("medellin@liga.com"),
                 UUID.randomUUID(),
-                null
+                null,
+                true
         );
         first.clearDomainEvents();
         repository.save(first);
@@ -126,7 +129,8 @@ class JpaTenantRepositoryIntegrationTest {
                 new TenantSlug("liga-medellin"),
                 contact("dup@liga.com"),
                 UUID.randomUUID(),
-                null
+                null,
+                true
         );
         duplicate.clearDomainEvents();
 

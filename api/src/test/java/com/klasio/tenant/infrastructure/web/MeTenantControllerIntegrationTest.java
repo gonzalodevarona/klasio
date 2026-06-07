@@ -130,7 +130,8 @@ class MeTenantControllerIntegrationTest {
                 TenantStatus.ACTIVE,
                 Instant.now(),
                 USER_ID,
-                null, null
+                null, null,
+                true
         );
     }
 

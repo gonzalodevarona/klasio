@@ -139,7 +139,8 @@ class TenantControllerIntegrationTest {
                 TenantSlug.fromName("Liga Bogota"),
                 CONTACT,
                 USER_ID,
-                null
+                null,
+                true
         );
         tenant.clearDomainEvents();
 
@@ -234,7 +235,8 @@ class TenantControllerIntegrationTest {
                 TenantSlug.fromName("Liga Bogota"),
                 CONTACT,
                 USER_ID,
-                null
+                null,
+                true
         );
         tenant.clearDomainEvents();
         tenant.deactivate(USER_ID);

@@ -3,6 +3,7 @@ package com.klasio.tenant.domain.model;
 import com.klasio.shared.domain.DomainEvent;
 import com.klasio.tenant.domain.event.TenantCreated;
 import com.klasio.tenant.domain.event.TenantDeactivated;
+import com.klasio.tenant.domain.event.TenantSelfRegistrationToggled;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -27,13 +28,14 @@ public class Tenant {
     private final UUID createdBy;
     private Instant deactivatedAt;
     private UUID deactivatedBy;
+    private boolean selfRegistrationEnabled;
 
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
     private Tenant(TenantId id, TenantSlug slug, String name, String discipline,
                    String language, String timezone, String logoKey, ContactInfo contactInfo,
                    TenantStatus status, Instant createdAt, UUID createdBy,
-                   Instant deactivatedAt, UUID deactivatedBy) {
+                   Instant deactivatedAt, UUID deactivatedBy, boolean selfRegistrationEnabled) {
         this.id = id;
         this.slug = slug;
         this.name = name;
@@ -47,11 +49,12 @@ public class Tenant {
         this.createdBy = createdBy;
         this.deactivatedAt = deactivatedAt;
         this.deactivatedBy = deactivatedBy;
+        this.selfRegistrationEnabled = selfRegistrationEnabled;
     }
 
     public static Tenant create(String name, String discipline, String language,
                                 String timezone, TenantSlug slug, ContactInfo contactInfo,
-                                UUID createdBy, String logoKey) {
+                                UUID createdBy, String logoKey, boolean selfRegistrationEnabled) {
         Objects.requireNonNull(contactInfo, "Contact info must not be null");
         validateNotBlank(name, "Name");
         validateNotBlank(discipline, "Discipline");
@@ -66,7 +69,7 @@ public class Tenant {
         TenantId id = TenantId.generate();
 
         Tenant tenant = new Tenant(id, slug, name, discipline, language, timezone, logoKey,
-                contactInfo, TenantStatus.ACTIVE, now, createdBy, null, null);
+                contactInfo, TenantStatus.ACTIVE, now, createdBy, null, null, selfRegistrationEnabled);
 
         tenant.domainEvents.add(new TenantCreated(id.value(), slug.value(), name, createdBy, now));
         return tenant;
@@ -76,9 +79,19 @@ public class Tenant {
                                       String discipline, String language, String timezone,
                                       String logoKey, ContactInfo contactInfo,
                                       TenantStatus status, Instant createdAt, UUID createdBy,
-                                      Instant deactivatedAt, UUID deactivatedBy) {
+                                      Instant deactivatedAt, UUID deactivatedBy,
+                                      boolean selfRegistrationEnabled) {
         return new Tenant(id, slug, name, discipline, language, timezone, logoKey, contactInfo,
-                status, createdAt, createdBy, deactivatedAt, deactivatedBy);
+                status, createdAt, createdBy, deactivatedAt, deactivatedBy, selfRegistrationEnabled);
+    }
+
+    public boolean isSelfRegistrationEnabled() { return selfRegistrationEnabled; }
+
+    public void setSelfRegistration(boolean enabled, UUID actorId) {
+        if (this.selfRegistrationEnabled == enabled) return;
+        this.selfRegistrationEnabled = enabled;
+        domainEvents.add(new TenantSelfRegistrationToggled(
+                id.value(), slug.value(), enabled, actorId, Instant.now()));
     }
 
     public void deactivate(UUID deactivatedBy) {

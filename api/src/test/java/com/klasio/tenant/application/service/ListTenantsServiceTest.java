@@ -55,7 +55,8 @@ class ListTenantsServiceTest {
                 TenantSlug.fromName("Liga Bogota"),
                 new ContactInfo("contact@liga.com", "3001234567", "57", "Calle 1", "Bogotá", "Cundinamarca", "Colombia"),
                 UUID.randomUUID(),
-                null
+                null,
+                true
         );
         tenant.clearDomainEvents();
 
@@ -84,7 +85,8 @@ class ListTenantsServiceTest {
                 TenantSlug.fromName("Liga Bogota"),
                 new ContactInfo("contact@liga.com", "3001234567", "57", "Calle 1", "Bogotá", "Cundinamarca", "Colombia"),
                 UUID.randomUUID(),
-                null
+                null,
+                true
         );
         tenant.clearDomainEvents();
 

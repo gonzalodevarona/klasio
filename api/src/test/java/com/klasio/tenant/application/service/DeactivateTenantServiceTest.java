@@ -63,7 +63,8 @@ class DeactivateTenantServiceTest {
                 new TenantSlug(SLUG),
                 new ContactInfo("admin@liga.com", "3001234567", "57", "Calle 1", "Bogotá", "Cundinamarca", "Colombia"),
                 UUID.randomUUID(),
-                null
+                null,
+                true
         );
         tenant.clearDomainEvents();
         return tenant;
