@@ -2,6 +2,7 @@ package com.klasio.student.application.service;
 
 import com.klasio.shared.domain.DomainEvent;
 import com.klasio.shared.infrastructure.exception.StudentEmailAlreadyExistsException;
+import com.klasio.shared.infrastructure.exception.StudentIdentityNumberAlreadyExistsException;
 import com.klasio.student.application.dto.CreateStudentCommand;
 import com.klasio.student.application.port.input.CreateStudentUseCase;
 import com.klasio.student.domain.model.Student;
@@ -36,6 +37,11 @@ public class CreateStudentService implements CreateStudentUseCase {
         if (studentRepository.existsByEmailInTenant(command.tenantId(), command.email())) {
             throw new StudentEmailAlreadyExistsException(
                     "A student with email '%s' already exists in this tenant".formatted(command.email()));
+        }
+
+        if (studentRepository.existsByIdentityNumberInTenant(command.tenantId(), command.identityNumber())) {
+            throw new StudentIdentityNumberAlreadyExistsException(
+                    "A student with identity number '%s' already exists in this tenant".formatted(command.identityNumber()));
         }
 
         Student student = Student.create(

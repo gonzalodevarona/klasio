@@ -1,6 +1,7 @@
 package com.klasio.student.application.service;
 
 import com.klasio.shared.infrastructure.exception.StudentEmailAlreadyExistsException;
+import com.klasio.shared.infrastructure.exception.StudentIdentityNumberAlreadyExistsException;
 import com.klasio.student.application.dto.CreateStudentCommand;
 import com.klasio.student.domain.event.StudentCreated;
 import com.klasio.student.domain.model.BloodType;
@@ -61,6 +62,16 @@ class CreateStudentServiceTest {
         );
     }
 
+    private CreateStudentCommand sampleCommand(UUID tenantId, String email, String identityNumber) {
+        return new CreateStudentCommand(
+                tenantId, "Ana", "Lopez", email,
+                LocalDate.of(1995, 1, 1), "Sanitas", identityNumber, IdentityDocumentType.CC,
+                BloodType.O_POSITIVE, "3000000000",
+                null, null, null, null, null,
+                UUID.randomUUID()
+        );
+    }
+
     @Test
     @DisplayName("should create student, save it, publish domain events, and trigger account setup")
     void happyPath_createsStudentAndPublishesEventsAndDispatchesSetup() {
@@ -112,6 +123,20 @@ class CreateStudentServiceTest {
                 eq("1234567890"),
                 eq("3001234567")
         );
+    }
+
+    @Test
+    @DisplayName("should throw StudentIdentityNumberAlreadyExistsException when identity number is duplicate in tenant")
+    void execute_rejectsDuplicateIdentityNumberInTenant() {
+        UUID tenantId = UUID.randomUUID();
+        when(studentRepository.existsByEmailInTenant(eq(tenantId), anyString())).thenReturn(false);
+        when(studentRepository.existsByIdentityNumberInTenant(eq(tenantId), eq("CC-100"))).thenReturn(true);
+
+        CreateStudentCommand cmd = sampleCommand(tenantId, "new@x.com", "CC-100");
+
+        assertThatThrownBy(() -> service.execute(cmd))
+                .isInstanceOf(StudentIdentityNumberAlreadyExistsException.class);
+        verify(accountSetupCreationPort, never()).createAndDispatchSetup(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
