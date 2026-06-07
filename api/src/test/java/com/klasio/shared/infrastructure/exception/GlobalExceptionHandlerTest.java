@@ -14,5 +14,6 @@ class GlobalExceptionHandlerTest {
                 new StudentIdentityNumberAlreadyExistsException("dup"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody().error().code()).isEqualTo("STUDENT_IDENTITY_NUMBER_EXISTS");
+        assertThat(response.getBody().error().message()).isEqualTo("dup");
     }
 }
