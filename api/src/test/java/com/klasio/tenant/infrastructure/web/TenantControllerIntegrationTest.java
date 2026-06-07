@@ -11,6 +11,7 @@ import com.klasio.tenant.application.port.input.CreateTenantUseCase;
 import com.klasio.tenant.application.port.input.DeactivateTenantUseCase;
 import com.klasio.tenant.application.port.input.GetTenantDetailUseCase;
 import com.klasio.tenant.application.port.input.ListTenantsUseCase;
+import com.klasio.tenant.application.port.input.ToggleSelfRegistrationUseCase;
 import com.klasio.tenant.domain.model.ContactInfo;
 import com.klasio.tenant.domain.model.Tenant;
 import com.klasio.tenant.domain.model.TenantSlug;
@@ -97,6 +98,9 @@ class TenantControllerIntegrationTest {
 
     @MockitoBean
     private LogoStorage logoStorage;
+
+    @MockitoBean
+    private ToggleSelfRegistrationUseCase toggleSelfRegistrationUseCase;
 
     private static final UUID USER_ID = UUID.randomUUID();
     private static final ContactInfo CONTACT = new ContactInfo(
