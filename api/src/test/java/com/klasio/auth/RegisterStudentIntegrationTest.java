@@ -117,6 +117,7 @@ class RegisterStudentIntegrationTest {
         Student saved = captor.getAllValues().get(0);
         assertThat(saved.getPhone()).isEqualTo("3001234567");
         assertThat(saved.getBloodType()).isEqualTo(BloodType.O_POSITIVE);
+        assertThat(captor.getAllValues().get(0).getCreatedBy()).isEqualTo(SYSTEM_ACTOR);
 
         // Assert – account-setup port was called (this triggers the email dispatch via the
         // AccountSetupCreationSupport adapter, which publishes AccountSetupInitiated)
